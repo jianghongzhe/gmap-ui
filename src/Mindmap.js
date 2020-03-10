@@ -45,6 +45,12 @@ class Mindmap extends Component {
                 "\t\t\t- B*树",
                 "\t\t\t- 红黑树",
                 "\t\t- 图",
+                "\t\t\t- 遍历",
+                "\t\t\t\t- 深度",
+                "\t\t\t\t- 广度",
+                "\t\t\t- 有向",
+                "\t\t\t- 无向",
+                "\t\t\t- 带树",
             ],
             cells:[]
         };
@@ -245,32 +251,15 @@ class Mindmap extends Component {
 
     parseBordStyle=(item)=>{
         let targetStyle=[];
-        if(bordType.l === (bordType.l & item.cls)){
-            targetStyle.push(getBordL(item.lineColor));
+        for(let type in bordType){
+            
+            if(this.hasBord(item,bordType[type])){
+                console.log("type", type);
+
+
+                targetStyle.push(getBorderStyle(bordType[type],item.lineColor));
+            }
         }
-        if(bordType.r === (bordType.r & item.cls)){
-            targetStyle.push(getBordR(item.lineColor));
-        }
-        if(bordType.t === (bordType.t & item.cls)){
-            targetStyle.push(getBordT(item.lineColor));
-        }
-        if(bordType.b === (bordType.b & item.cls)){
-            targetStyle.push(getBordB(item.lineColor));
-        }
-        if(bordType.rbRad === (bordType.rbRad & item.cls)){
-            targetStyle.push(getBordCorner(item.lineColor));
-        }
-        if(bordType.lbRad === (bordType.lbRad & item.cls)){
-            targetStyle.push(getLBBordCorner(item.lineColor));
-        }
-        if(bordType.rtRad === (bordType.rtRad & item.cls)){
-            targetStyle.push(getRTBordCorner(item.lineColor));
-        }
-        if(bordType.ltRad === (bordType.ltRad & item.cls)){
-            targetStyle.push(getLTBordCorner(item.lineColor));
-        }
-        
-        
         return targetStyle;
     }
 
@@ -483,6 +472,20 @@ class Mindmap extends Component {
             </table>
         );
     }
+
+    hasBord=(item,type)=>{
+        return type === (type & item.cls);
+    }
+
+    addBord=(item,type)=>{
+        item.cls|=type;
+    }
+
+    removeBord=(item,type)=>{
+        item.cls &= (~type);
+    }
+
+    
 }
 
 const bordType={
@@ -495,6 +498,38 @@ const bordType={
     rtRad: 64,
     ltRad: 128,
 };
+
+const getBorderStyle=(type,color='lightgrey')=>{
+    if(bordType.l===type){
+        return css`border-left:2px solid ${color};`;
+    }
+    if(bordType.r===type){
+        return css`border-right:2px solid ${color};`;
+    }
+    if(bordType.t===type){
+        return css`border-top:2px solid ${color};`;
+    }
+    if(bordType.b===type){
+        return css`border-bottom:2px solid ${color};`;
+    }
+
+    if(bordType.rbRad===type){
+        return css`border-bottom-right-radius:14px;`;
+    }
+    if(bordType.lbRad===type){
+        return css`border-bottom-left-radius:14px;`;
+    }
+    if(bordType.rtRad===type){
+        return css`border-top-right-radius:14px;`;
+    }
+    if(bordType.ltRad===type){
+        return css`border-top-left-radius:14px;`;
+    }
+
+    
+};
+
+
 
 const centerThemeStyle=css`
     background-color:lightblue;
@@ -510,37 +545,7 @@ const mindTabStyle=css`
     }
 `;
 
-const getBordCorner=()=>css`
-    border-bottom-right-radius:14px;
-`;
-
-const getLBBordCorner=()=>css`
-    border-bottom-left-radius:14px;
-`;
-const getRTBordCorner=()=>css`
-    border-top-right-radius:14px;
-`;
-const getLTBordCorner=()=>css`
-    border-top-left-radius:14px;
-`;
-
-//border-bottom-left-radius:25px;
-const getBordL=(color='lightgrey')=>css`
-    border-left:2px solid ${color};
-    
-`;
 
 
-
-//border-bottom-right-radius:25px;
-const getBordR=(color='lightgrey')=>css`
-    border-right:2px solid ${color};
-`;
-const getBordT=(color='lightgrey')=>css`
-    border-top:2px solid ${color};
-`;
-const getBordB=(color='lightgrey')=>css`
-    border-bottom:2px solid ${color};
-`;
 
 export default Mindmap;
