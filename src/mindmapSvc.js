@@ -538,12 +538,23 @@ class MindmapSvc{
 
     /**
      * 根据指定文本，加载节点信息（树型结构）
-     * @param {strs} 文本数组
+     * @param {arrayOrTxt} 文本数组或由包含换行符的字符串
      * @returns {nd} 包含各层节点信息的根节点
      */
-    load=(strs)=>{
+    load=(arrayOrTxt)=>{
         let lastNd=null;
         let root=null;
+
+        let strs=null;
+        if(Array.isArray(arrayOrTxt)){
+            strs=arrayOrTxt;
+        }else{
+            arrayOrTxt=arrayOrTxt.trim();
+            while(0<=arrayOrTxt.indexOf('\r\n')){
+                arrayOrTxt=arrayOrTxt.replace('\r\n','\n');
+            }
+            strs=arrayOrTxt.split('\n');
+        }
 
         strs.forEach(str => {
             let lev=str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
