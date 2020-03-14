@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
-import { Layout, Menu, Breadcrumb, Tabs, Modal, Input, message, Button, Divider, Row, Col,List,Avatar } from 'antd';
-import {  PlusOutlined, FolderOpenOutlined, EditOutlined,MacCommandOutlined,FileMarkdownOutlined } from '@ant-design/icons';
+import { Layout, Menu, Breadcrumb, Tabs, Modal, Input, message, Button, Divider, Row, Col, List, Avatar } from 'antd';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined } from '@ant-design/icons';
 
 
 
@@ -10,6 +10,7 @@ import Mindmap from './Mindmap';
 import Welcome from './Welcome';
 
 import mindmapSvc from './mindmapSvc';
+import * as tabIndentUtil from './tabIndentUtil';
 import api from './api';
 
 const { SubMenu } = Menu;
@@ -45,19 +46,19 @@ class MapsViewer extends Component {
 
         this.state = {
             //样式相关
-            clientH:    document.documentElement.clientHeight,
-            clientW:    document.documentElement.clientWidth,
+            clientH: document.documentElement.clientHeight,
+            clientW: document.documentElement.clientWidth,
 
             mapTxtarea: null,
             editTmpTxt: '',
             editMapDlgVisible: false,
             newMapDlgVisible: false,
-            selMapDlgVisible:false,
+            selMapDlgVisible: false,
             newMapName: '',
             activeKey: null,// panes[0].key,
             panes: [],
             filelist: [],
-            currMapName:'',
+            currMapName: '',
         };
     }
 
@@ -66,10 +67,10 @@ class MapsViewer extends Component {
         this.setState({
             filelist: api.list()
         });
-        window.onresize=()=>{
+        window.onresize = () => {
             this.setState({
-                clientH:    document.documentElement.clientHeight,
-                clientW:    document.documentElement.clientWidth
+                clientH: document.documentElement.clientHeight,
+                clientW: document.documentElement.clientWidth
             });
         };
     }
@@ -81,7 +82,7 @@ class MapsViewer extends Component {
     };
 
     onEditTab = (targetKey, action) => {
-        if("remove"===action){
+        if ("remove" === action) {
             this.removeTab(targetKey);
         }
     };
@@ -90,7 +91,7 @@ class MapsViewer extends Component {
         let { activeKey } = this.state;
 
         //计算要删除的选项卡前一位置
-        let lastIndex=-1;
+        let lastIndex = -1;
         this.state.panes.forEach((pane, i) => {
             if (pane.key === targetKey) {
                 lastIndex = i - 1;
@@ -101,15 +102,15 @@ class MapsViewer extends Component {
         const panes = this.state.panes.filter(pane => pane.key !== targetKey);
 
         //要删除的是唯一一个选项卡
-        if(0===panes.length){
-            activeKey=null;
+        if (0 === panes.length) {
+            activeKey = null;
         }
         //要删除的项之外还有别的选项卡，并且要删除的是当前活动的选项卡
-        else if(activeKey === targetKey){
-            activeKey=panes[lastIndex >= 0 ? lastIndex : 0].key;
+        else if (activeKey === targetKey) {
+            activeKey = panes[lastIndex >= 0 ? lastIndex : 0].key;
         }
         //要删除的项之外还有别的选项卡，并且要删除的不是当前活动的选项卡，则不影响activeKey（即不需要改变）
-        else{
+        else {
             //activeKey不变
         }
 
@@ -145,15 +146,15 @@ class MapsViewer extends Component {
             message.warning('请输入图表名称');
             return;
         }
-        let fnAndFullpath=api.exists(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
-        if(true===fnAndFullpath){
+        let fnAndFullpath = api.exists(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
+        if (true === fnAndFullpath) {
             message.warning('该图表名称已存在，请更换另一名称');
             return;
         }
-        let [fn,fullpath]=fnAndFullpath;
+        let [fn, fullpath] = fnAndFullpath;
 
         //保存文件
-        api.save(fullpath,defMapTxt);
+        api.save(fullpath, defMapTxt);
 
         //计算导图表格信息并加入新tab      
         let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, centerThemeStyle, bordType, getBorderStyle);
@@ -167,10 +168,10 @@ class MapsViewer extends Component {
 
         //保存状态
         this.setState({
-            panes:              [...tabdata],
-            activeKey:          fullpath,
-            newMapDlgVisible:   false,
-            filelist:           api.list()  //新建后应该重新加载文件列表
+            panes: [...tabdata],
+            activeKey: fullpath,
+            newMapDlgVisible: false,
+            filelist: api.list()  //新建后应该重新加载文件列表
         });
     }
 
@@ -182,9 +183,9 @@ class MapsViewer extends Component {
             return;
         }
         this.setState({
-            editMapDlgVisible:  true,
-            editTmpTxt:         item[0].mapTxts,
-            currMapName:        item[0].title
+            editMapDlgVisible: true,
+            editTmpTxt: item[0].mapTxts,
+            currMapName: item[0].title
         });
     }
 
@@ -208,28 +209,40 @@ class MapsViewer extends Component {
      * 处理编辑框中tab键
      */
     editTmpTxtKeyDown = (e) => {
-        if (9 === e.keyCode) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            //在当票处加入制表符
-            let val = e.target.value;
-            let ind = e.target.selectionStart;
-            let left = (0 === ind ? "" : val.substring(0, ind));
-            let right = (ind === val.length - 1 ? "" : val.substring(ind));
-            let newVal = left + "\t" + right;
-
-            //触发状态改变
-            this.setState({
-                editTmpTxt: newVal
-            });
-
-            //延迟设置光标位置为原来位置后一个位置
-            setTimeout(() => {
-                this.mapTxtarea.selectionStart = ind + 1;
-                this.mapTxtarea.selectionEnd = ind + 1;
-            }, 50);
+        let result = tabIndentUtil.onEvent(e, e.target.value, e.target.selectionStart, e.target.selectionEnd);
+        if (false === result) {
+            return;
         }
+
+        //设置状态并更新光标位置。由于setState为异步执行，设置光标位置时应该延迟一会。否则设置光标会先执行，setState会后执行，执行完光标会移到末尾位置。
+        let [newVal, newStart, newEnd] = result;
+        this.setState({
+            editTmpTxt: newVal
+        });
+        setTimeout(() => {
+            this.mapTxtarea.selectionStart = newStart;
+            this.mapTxtarea.selectionEnd = newEnd;
+        }, 80);
+
+
+        // if (9 === e.keyCode) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+
+        //     //在当票处加入制表符
+        //     let val = e.target.value;
+        //     let ind = e.target.selectionStart;
+        //     let left = (0 === ind ? "" : val.substring(0, ind));
+        //     let right = (ind === val.length - 1 ? "" : val.substring(ind));
+        //     let newVal = left + "\t" + right;
+
+        //     //触发状态改变
+        //     this.setState({
+        //         editTmpTxt: newVal
+        //     });
+
+            
+        // }
     }
 
     onEditMapDlgOK = () => {
@@ -245,14 +258,14 @@ class MapsViewer extends Component {
         }
 
         //保存并修改状态
-        api.save(this.state.activeKey,txt);
+        api.save(this.state.activeKey, txt);
         item = item[0]
         let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, centerThemeStyle, bordType, getBorderStyle);
         item.mapTxts = txt;
         item.mapCells = cells;
         this.setState({
-            panes:              [...this.state.panes],
-            editMapDlgVisible:  false
+            panes: [...this.state.panes],
+            editMapDlgVisible: false
         });
     }
 
@@ -262,42 +275,42 @@ class MapsViewer extends Component {
     //------------选择文件功能----------------------------------------------------------------------
     onSelectMapItem = (item) => {
         //如果选项卡中已经有该项，则激活该tab
-        if(this.state.panes.some(pane=>pane.key===item.fullpath)){
+        if (this.state.panes.some(pane => pane.key === item.fullpath)) {
             this.setState({
-                activeKey:          item.fullpath,
-                selMapDlgVisible:   false
+                activeKey: item.fullpath,
+                selMapDlgVisible: false
             });
             return;
         }
-        
+
         //加载文件内容并计算导图表格的数据
-        let origintxts=api.load(item.fullpath);
+        let origintxts = api.load(item.fullpath);
         let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, centerThemeStyle, bordType, getBorderStyle);
 
         //增加新选项卡并设置状态
-        let tabdata=this.state.panes;
+        let tabdata = this.state.panes;
         tabdata.push({
-            title:      item.showname,
-            key:        item.fullpath,
-            mapTxts:    origintxts,
-            mapCells:   cells
+            title: item.showname,
+            key: item.fullpath,
+            mapTxts: origintxts,
+            mapCells: cells
         });
         this.setState({
             panes: [...tabdata],
             activeKey: item.fullpath,
-            selMapDlgVisible:false
+            selMapDlgVisible: false
         });
     }
 
-    showSelMapDlg=()=>{
+    showSelMapDlg = () => {
         this.setState({
-            selMapDlgVisible:true
+            selMapDlgVisible: true
         });
     }
 
-    onSelMapDlgCancel=()=>{
+    onSelMapDlgCancel = () => {
         this.setState({
-            selMapDlgVisible:false
+            selMapDlgVisible: false
         });
     }
 
@@ -317,7 +330,7 @@ class MapsViewer extends Component {
             panes: [...this.state.panes]
         });
     }
-    
+
 
 
     render() {
@@ -337,21 +350,21 @@ class MapsViewer extends Component {
                                     hideAdd={true}
                                     type="editable-card"
                                     activeKey={this.state.activeKey}
-                                    style={{ height: (this.state.clientH-64) + 'px', 'backgroundColor': 'white' }}
+                                    style={{ height: (this.state.clientH - 64) + 'px', 'backgroundColor': 'white' }}
                                     onChange={this.onChangeTab}
                                     onEdit={this.onEditTab}>
-                                        {
-                                            this.state.panes.map(pane => (
-                                                <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                                    <div style={{ height: (this.state.clientH-64-55) + 'px', ...tabContainerStyle }}>
-                                                        <Mindmap cells={pane.mapCells} onToggleExpand={this.toggleExpand.bind(this, pane.key)} />
-                                                    </div>
-                                                </TabPane>
-                                            ))
-                                        }
+                                    {
+                                        this.state.panes.map(pane => (
+                                            <TabPane tab={pane.title} key={pane.key} closable={true}>
+                                                <div style={{ height: (this.state.clientH - 64 - 55) + 'px', ...tabContainerStyle }}>
+                                                    <Mindmap cells={pane.mapCells} onToggleExpand={this.toggleExpand.bind(this, pane.key)} />
+                                                </div>
+                                            </TabPane>
+                                        ))
+                                    }
                                 </Tabs>
-                            </> 
-                            
+                            </>
+
                             :
 
                             <Content>
@@ -368,10 +381,10 @@ class MapsViewer extends Component {
                     <Input placeholder="请输入图表名称" value={this.state.newMapName} onChange={this.onChangeNewMapName} />
                 </Modal>
                 <Modal
-                    title={"编辑图表 - "+this.state.currMapName}
+                    title={"编辑图表 - " + this.state.currMapName}
                     style={{
-                        width:      (this.state.clientW-400)+"px",
-                        minWidth:   (this.state.clientW-400)+"px"
+                        width: (this.state.clientW - 400) + "px",
+                        minWidth: (this.state.clientW - 400) + "px"
                     }}
                     maskClosable={false}
                     visible={this.state.editMapDlgVisible}
@@ -389,10 +402,10 @@ class MapsViewer extends Component {
                         dataSource={this.state.filelist}
                         renderItem={item => (
                             <List.Item>
-                                <List.Item.Meta onClick={this.onSelectMapItem.bind(this,item)}
-                                avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
-                                title={item.showname}
-                                description={item.size}/>
+                                <List.Item.Meta onClick={this.onSelectMapItem.bind(this, item)}
+                                    avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
+                                    title={item.showname}
+                                    description={item.size} />
                             </List.Item>
                         )}
                     />
@@ -402,7 +415,7 @@ class MapsViewer extends Component {
     }
 }
 
-const defMapTxt =""+
+const defMapTxt = "" +
     "- 中心主题\n" +
     "\t- 分主题\n" +
     "\t- 带说明的分主题|m:balabala";
@@ -422,7 +435,7 @@ const headerStyle = css`
     }
 `;
 
-const tabContainerStyle={
+const tabContainerStyle = {
     'overflowY': 'auto',
     'overflowX': 'auto',
     'paddingBottom': '40px',
