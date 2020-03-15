@@ -171,7 +171,7 @@ const handleShiftTabInline=(val,selectionStart,selectionEnd)=>{
         val = val.substr(0, selectionStart - 1) + val.substr(selectionStart);
         selectionStart = selectionStart - 1;
         selectionEnd = selectionEnd - 1;
-    } else if (val.substr(selectionStart - 1, 1) == "\n" && val.substr(selectionStart, 1) === '\t') {
+    } else if (val.substr(selectionStart - 1, 1) === "\n" && val.substr(selectionStart, 1) === '\t') {
         // However, if the selection is at the start of the line, and the first character is a tab, remove it
         val = val.substring(0, selectionStart) + val.substr(selectionStart + 1);
         selectionStart = ""+selectionStart;

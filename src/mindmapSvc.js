@@ -58,12 +58,12 @@ class MindmapSvc {
      * @param {bordTypesMap} 边框类型的枚举
      * @param {getBorderStyleCallback} 根据边框类型解析为边框样式的回调
      */
-    parseMindMapData = (txts, defLineColor, mainThemeStyle, bordTypesMap, getBorderStyleCallback) => {
+    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback) => {
         //设置共享的变量
         defaultLineColor = defLineColor;
         bordType = bordTypesMap;
         getBorderStyle = getBorderStyleCallback;
-        centerThemeStyle = mainThemeStyle;
+        themeStyles = theThemeStyles;
 
         //表格行列相关计算
         let nd = this.load(txts);//根节点
@@ -289,8 +289,19 @@ class MindmapSvc {
             }
         }
 
-        //根节点加入中心主题样式
-        cells[rootLoc[0]][rootLoc[1]].cls.push(centerThemeStyle);
+        //加入中心主题和其他各层主题的样式
+        //当前只支持三种样式，即根主题、二级主题、其他任何层主题
+        for (let r = 0; r < rows; ++r) {
+            for (let c = 0; c < cols; ++c) {
+                if (cells[r][c].nd) {
+                    let themeInd = cells[r][c].nd.lev;
+                    themeInd = (themeInd > 2 ? 2 : themeInd);
+                    cells[r][c].cls.push(themeStyles[themeInd]);
+                }
+            }
+        }
+
+        // cells[rootLoc[0]][rootLoc[1]].cls.push(centerThemeStyle);
         return cells;
     }
 
@@ -643,6 +654,6 @@ class MindmapSvc {
 let defaultLineColor = null;
 let bordType = null;
 let getBorderStyle = null;
-let centerThemeStyle = null;
+let themeStyles = [null, null, null];
 
 export default new MindmapSvc();

@@ -73,36 +73,43 @@ class Mindmap extends Component {
 
 
     render() {
-        //style={{'width':'800px','marginTop':'20px'}}
+        //style={{'width':'800px','marginTop':'20px' }}
         return (
             <table border='0' cellSpacing='0' cellPadding='0'  align='center' css={mindTabStyle}>
                 <tbody>
                 {
                     this.props.cells.map((line,rowInd)=>
                         <tr key={rowInd}>
+                        <td className='paddingcell'></td>
                         {
                             line.map((item,colInd)=>
                                 <td key={colInd} css={item.cls}>
-                                    <span className='themetxt'>{item.txt}
-                                    {
-                                        (item.nd && item.nd.memo && 0!==item.nd.memo.length) && 
-                                        <Tooltip title={
-                                            <div>
-                                                {
-                                                    item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
-                                                }
-                                            </div>
-                                        }><FormOutlined className='memo'/></Tooltip>
-                                    }
-                                    </span>
+                                    {/* {
+                                        (item.nd && false===item.nd.leaf && (null!=item.nd.par && true===item.nd.left)) && 
+                                        <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  onClick={this.props.onToggleExpand.bind(this,item)}/>
+                                    } */}
 
+                                    <span className='themetxt'>
+                                        {item.txt}
+                                        {
+                                            (item.nd && item.nd.memo && 0!==item.nd.memo.length) && 
+                                            <Tooltip title={
+                                                <div>
+                                                    {
+                                                        item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
+                                                    }
+                                                </div>
+                                            }><FormOutlined className='memoicon'/></Tooltip>
+                                        }
+                                    </span>
                                     {
-                                        (item.nd && false===item.nd.leaf) && 
-                                        <Button type="link" icon={item.nd.expand ?<MinusCircleOutlined />:<PlusCircleOutlined />}  onClick={this.props.onToggleExpand.bind(this,item)}/>
+                                        (item.nd && false===item.nd.leaf ) && 
+                                        <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  onClick={this.props.onToggleExpand.bind(this,item)}/>
                                     }
                                 </td>    
                             )
                         }
+                        <td className='paddingcell'></td>
                         </tr>
                     )
                 }
@@ -118,22 +125,81 @@ class Mindmap extends Component {
 
 const mindTabStyle=css`
     border-collapse: separate;
+    max-width:999999999px;
+    margin-left:auto;
+    margin-right:auto;
 
     & td{
-        font-size:14px;
-        padding-left:20px;
-        padding-right:20px;
-        padding-top:15px;
-        padding-bottom:0px;
-        vertical-align:bottom;
+        padding-left:14px;
+        padding-right:14px;
+        white-space:nowrap;
+        text-align:left;
     }
 
-    & td .memo{
-        font-size:20px;
+    & td.paddingcell{
+        padding-left:16px;
+        padding-right:16px;
+    }
+
+    & td .memoicon{
+        font-size:16px;
+        line-height:16px;
         margin-left:5px;
         color:#fa8c16;
     }
-`;
+`; 
+// css`
+//     border-collapse: separate;
+//     max-width:999999999px;
+
+
+//     & td{
+//         font-size:14px;
+//         padding-left:20px;
+//         padding-right:20px;
+//         padding-top:12px;
+//         padding-bottom:0px;
+//         vertical-align:bottom;
+//         white-space:nowrap;
+//     }
+
+//     & td .memoicon{
+//         font-size:16px;
+//         line-height:16px;
+//         margin-left:5px;
+//         color:#fa8c16;
+//     }
+
+//     & td .themetxt{
+//         font-size:14px;
+//         line-height:16px;
+//         vertical-align:bottom;
+//         white-space:nowrap;
+//         display:inline-block;
+//         margin-bottom:0px;
+//         padding-bottom:0px;
+//     }
+
+//     & td .btn{
+//         width:18px;
+//         height:18px;
+//         font-size:14px;
+//         line-height:16px;
+//         margin:0px;
+        
+//         margin-left:5px;
+//         margin-right:5px;
+//         padding:0px;
+//         vertical-align:bottom;
+//     }
+
+//     & td .btn .icon{
+//         font-size:14px;
+//         line-height:18px;
+//         margin:0px;
+//         padding:0px;
+//     }
+// `;
 
 
 

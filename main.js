@@ -1,18 +1,16 @@
-// Modules to control application life and create native browser window
 const { app, BrowserWindow,Menu } = require('electron');
 const fs=require('fs');
 const path = require('path');
-// const childproc=require('child_process');
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let mainWindow = null;
 
 
-app.listFiles=()=>{
-    //return [__dirname,process.execPath];
-    
 
+//===============暴露的接口==================================================================
+/**
+ * 列出所有匹配的文件： .md 并且不是readme.md
+ */
+app.listFiles=()=>{
     return fs.readdirSync(getMapsPath()).filter(fn=>{
         let handledFN=fn.toLowerCase().trim();
         return handledFN!=='readme.md' && handledFN.endsWith(".md");
@@ -26,6 +24,11 @@ app.listFiles=()=>{
     });
 };
 
+/**
+ * 判断指定文件名是否存在，以getMapsPath()表示的目录为基础
+ * @param {*} fn 文件名
+ * @returns 如果存在，返回true，否则返回[文件名，全路径]
+ */
 app.exists=(fn)=>{
     let handledFN=fn.toLowerCase().trim();
     if(!handledFN.endsWith(".md")){
@@ -38,10 +41,20 @@ app.exists=(fn)=>{
     return [fn,fullpath];
 }
 
+/**
+ * 读取文件内容，以utf-8编码读取
+ * @param {*} fullpath 全路径
+ * @returns 文件内容
+ */
 app.readFile=(fullpath)=>{
     return fs.readFileSync(fullpath,'utf-8');
 }
 
+/**
+ * 写入文件内容，以utf-8编码写入
+ * @param {*} fullpath 全路径
+ * @param {*} content 内容
+ */
 app.saveFile=(fullpath,content)=>{
     fs.writeFileSync(fullpath,content,'utf-8');
 }
@@ -58,22 +71,29 @@ app.saveFile=(fullpath,content)=>{
 //     //childproc.execFile(cmdPath);
 // }
 
-const getMapsPath=(fn=null)=>{
-    let basedir="";
-    if(process.env.DEV_SERVER_URL){
-        basedir=__dirname;
-    }else{
-        basedir=__dirname;
-    }
-    basedir+='\\gmaps';
-    return basedir+(fn?"\\"+fn:"");
-}
+
+/**
+ * 获取图形文件所在目录或文件全路径
+ * __dirname在开发模式下为工程目录，在部署后表示 %electron_home%/resources/app 目录
+ * 在开发模式下为
+ * @param {*} fn 如果未提供此参数表示取所在目录，否则表示该文件的全路径
+ */
+const getMapsPath=(fn=null)=>(__dirname+'\\gmaps'+(fn ? "\\"+fn : ""));
+
+/**
+ * 通过环境变量判断当前是否为开发模式
+ */
+const isDevMode=()=>(process && process.env && process.env.DEV_SERVER_URL);
 
 
+//===============生命周期管理==================================================================
 function createWindow() {
-    Menu.setApplicationMenu(null);
+    //在非开发模式禁用系统菜单；开发模式则显示默认菜单，方面调试
+    if(!isDevMode()){
+        Menu.setApplicationMenu(null);
+    }
 
-    // Create the browser window.
+    //创建主窗口
     mainWindow = new BrowserWindow({
         //width: 1920,
         //height: 1080,
@@ -86,47 +106,29 @@ function createWindow() {
     mainWindow.maximize();
     mainWindow.show();
 
-    // and load the index.html of the app.
-
-    if(process.env.DEV_SERVER_URL){
+    //在开发模式显示环境变量表示的开发服务器的地址，部署模式加载实际的静态资源位置
+    if(isDevMode()){
         mainWindow.loadURL(process.env.DEV_SERVER_URL);
     }else{
         mainWindow.loadFile(__dirname+'\\build\\index.html');
     }
-    //
-    // mainWindow.loadURL("http://localhost:3001");
-
-    // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
-
-    // Emitted when the window is closed.
+    
     mainWindow.on('closed', function () {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         mainWindow = null;
     })
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+
+
+
 app.on('ready', createWindow);
 
-// Quit when all windows are closed.
 app.on('window-all-closed', function () {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') app.quit()
 });
 
 app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
         createWindow();
     }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

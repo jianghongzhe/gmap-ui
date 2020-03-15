@@ -12,6 +12,7 @@ import Welcome from './Welcome';
 import mindmapSvc from './mindmapSvc';
 import * as tabIndentUtil from './tabIndentUtil';
 import api from './api';
+import {debounce} from './debounce-throttle';
 
 const { SubMenu } = Menu;
 const { Header, Content, Footer, Sider } = Layout;
@@ -64,16 +65,28 @@ class MapsViewer extends Component {
 
 
     componentDidMount() {
+        window.addEventListener("resize",this.handleResize);
         this.setState({
             filelist: api.list()
         });
-        window.onresize = () => {
-            this.setState({
-                clientH: document.documentElement.clientHeight,
-                clientW: document.documentElement.clientWidth
-            });
-        };
     }
+
+    componentWillUnmount(){
+        window.removeEventListener("resize",this.handleResize)
+    }
+
+    handleResize=()=>{
+        // debounce(200,this.handleResizeInner).then();
+        this.handleResizeInner();
+    }
+
+    handleResizeInner=()=>{
+        this.setState({
+            clientH: document.documentElement.clientHeight,
+            clientW: document.documentElement.clientWidth
+        });
+    }
+
 
 
     //------------选项卡操作----------------------------------------------------------------------
@@ -157,7 +170,7 @@ class MapsViewer extends Component {
         api.save(fullpath, defMapTxt);
 
         //计算导图表格信息并加入新tab      
-        let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, centerThemeStyle, bordType, getBorderStyle);
+        let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle);
         let tabdata = this.state.panes;
         tabdata.push({
             title: fn,
@@ -260,7 +273,7 @@ class MapsViewer extends Component {
         //保存并修改状态
         api.save(this.state.activeKey, txt);
         item = item[0]
-        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, centerThemeStyle, bordType, getBorderStyle);
+        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle);
         item.mapTxts = txt;
         item.mapCells = cells;
         this.setState({
@@ -285,7 +298,7 @@ class MapsViewer extends Component {
 
         //加载文件内容并计算导图表格的数据
         let origintxts = api.load(item.fullpath);
-        let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, centerThemeStyle, bordType, getBorderStyle);
+        let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle);
 
         //增加新选项卡并设置状态
         let tabdata = this.state.panes;
@@ -356,7 +369,7 @@ class MapsViewer extends Component {
                                     {
                                         this.state.panes.map(pane => (
                                             <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                                <div style={{ height: (this.state.clientH - 64 - 55) + 'px', ...tabContainerStyle }}>
+                                                <div style={{ height: (this.state.clientH - 64 - 55) + 'px',maxHeight: (this.state.clientH - 64 - 55) + 'px', ...tabContainerStyle }}>
                                                     <Mindmap cells={pane.mapCells} onToggleExpand={this.toggleExpand.bind(this, pane.key)} />
                                                 </div>
                                             </TabPane>
@@ -368,7 +381,7 @@ class MapsViewer extends Component {
                             :
 
                             <Content>
-                                <Welcome filelist={this.state.filelist} onAddMap={this.onShowNewMapDlg} onSelectMapItem={this.onSelectMapItem} />
+                                <Welcome maxH={this.state.clientH} filelist={this.state.filelist} onAddMap={this.onShowNewMapDlg} onSelectMapItem={this.onSelectMapItem} />
                             </Content>
                     }
                 </Layout>
@@ -380,6 +393,7 @@ class MapsViewer extends Component {
                     onCancel={this.onNewMapDlgCancel}>
                     <Input placeholder="请输入图表名称" value={this.state.newMapName} onChange={this.onChangeNewMapName} />
                 </Modal>
+
                 <Modal
                     title={"编辑图表 - " + this.state.currMapName}
                     style={{
@@ -390,25 +404,48 @@ class MapsViewer extends Component {
                     visible={this.state.editMapDlgVisible}
                     onOk={this.onEditMapDlgOK}
                     onCancel={this.onEditMapDlgCancel}>
-                    <TextArea ref={this.setMapTxtareaControl} rows={25} value={this.state.editTmpTxt} onChange={this.onChangeEditTmpTxt} onKeyDown={this.editTmpTxtKeyDown} />
+                    <div>
+                        <div style={{'marginBottom':"10px"}}>
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#cf1322'}}></div>        
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#389e0d'}}></div>        
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#0050b3'}}></div>   
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#fa8c16'}}></div> 
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#13c2c2'}}></div> 
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#ad6800'}}></div> 
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#1890ff'}}></div>   
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#722ed1'}}></div>   
+                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#c41d7f'}}></div>   
+                            
+                            
+                                
+                        </div>
+                        <TextArea ref={this.setMapTxtareaControl} 
+                            style={{'height':(this.state.clientH - 400-50)+'px','maxHeight':(this.state.clientH - 400-50)+'px'}} 
+                            value={this.state.editTmpTxt} 
+                            onChange={this.onChangeEditTmpTxt} 
+                            onKeyDown={this.editTmpTxtKeyDown} />
+                    </div>
                 </Modal>
+
                 <Modal
                     title="打开图表"
                     visible={this.state.selMapDlgVisible}
                     footer={null}
                     onCancel={this.onSelMapDlgCancel}>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={this.state.filelist}
-                        renderItem={item => (
-                            <List.Item>
-                                <List.Item.Meta onClick={this.onSelectMapItem.bind(this, item)}
-                                    avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
-                                    title={item.showname}
-                                    description={item.size} />
-                            </List.Item>
-                        )}
-                    />
+                    <div  style={{ maxHeight: (this.state.clientH - 64-200) + 'px', ...selFileDlgBodyStyle }}>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={this.state.filelist}
+                            renderItem={item => (
+                                <List.Item>
+                                    <List.Item.Meta onClick={this.onSelectMapItem.bind(this, item)}
+                                        avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
+                                        title={item.showname}
+                                        description={item.size} />
+                                </List.Item>
+                            )}
+                        />
+                    </div>
                 </Modal>
             </>
         );
@@ -435,10 +472,24 @@ const headerStyle = css`
     }
 `;
 
+const selFileDlgBodyStyle={
+    'overflowY': 'auto',
+    'overflowX': 'auto',
+    'width':'100%',
+}
+
+//'width':'100%',
+// 'paddingBottom': '50px',
+//     'paddingRight':'50px !important',
+//     'paddingLeft':'50px',
+// 'boxSizing':'border-box'
+// 'borderLeft':'50px solid white',
+//     'borderRight':'50px solid white',
 const tabContainerStyle = {
     'overflowY': 'auto',
     'overflowX': 'auto',
-    'paddingBottom': '40px',
+    'width':'100%',
+    'paddingBottom':'30px',
 };
 
 //background-color:white;  
@@ -495,19 +546,154 @@ const getBorderStyle = (type, color = 'lightgrey') => {
 const centerThemeStyle = css`
     padding-top:0px;
     padding-bottom:0px;
-    vertical-align:center !important;
+    vertical-align:bottom;
     
     & span.themetxt{
+        white-space:nowrap;
         display:inline-block;
-        padding:6px 20px 6px 20px;
+        padding:4px 16px 4px 16px;
         background-color:#108ee9;
         border-radius:5px;
         color:white;
-        font-size:18px !important;
+        font-size:18px;
+        line-height:30px;
+    }
+
+    
+`;
+
+const secendThemeStyle = css`
+    padding-top:12px;
+    padding-bottom:0px;
+    vertical-align:bottom;
+    
+    & span.themetxt{
+        white-space:nowrap;
+        display:inline-block;
+        margin-bottom:0px;
+        padding-bottom:0px;
+        font-size:16px;
+        line-height:20px;
+        vertical-align:bottom;
+
+        
+    }
+
+    & .btn{
+        width:18px;
+        height:18px;
+        font-size:14px;
+        line-height:16px;
+        margin:0px;       
+        margin-left:5px;
+        margin-right:5px;
+        padding:0px;
+        vertical-align:bottom;
+        margin-bottom:1px;
+    }
+
+    & .btn .icon{
+        font-size:14px;
+        line-height:18px;
+        margin:0px;
+        padding:0px;
     }
 `;
 
+const otherThemeStyle = css`
+    padding-top:12px;
+    padding-bottom:0px;
+    vertical-align:bottom;
+    
+    & span.themetxt{
+        white-space:nowrap;
+        display:inline-block;
+        margin-bottom:0px;
+        padding-bottom:0px;
+        
+        
+        
+        font-size:14px;
+        line-height:18px;
+        vertical-align:bottom;
+    }
 
+    & .btn{
+        width:18px;
+        height:18px;
+        font-size:14px;
+        line-height:16px;
+        margin:0px;
+        
+        margin-left:5px;
+        margin-right:5px;
+        padding:0px;
+        vertical-align:bottom;
+    }
+
+    & .btn .icon{
+        font-size:14px;
+        line-height:18px;
+        margin:0px;
+        padding:0px;
+    }
+`;
+
+const themeStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
+
+
+const test= css`
+    border-collapse: separate;
+    max-width:999999999px;
+
+
+    & td{
+        font-size:14px;
+        padding-left:20px;
+        padding-right:20px;
+        padding-top:12px;
+        padding-bottom:0px;
+        vertical-align:bottom;
+        white-space:nowrap;
+    }
+
+    & td .memoicon{
+        font-size:16px;
+        line-height:16px;
+        margin-left:5px;
+        color:#fa8c16;
+    }
+
+    & td .themetxt{
+        font-size:14px;
+        line-height:16px;
+        vertical-align:bottom;
+        white-space:nowrap;
+        display:inline-block;
+        margin-bottom:0px;
+        padding-bottom:0px;
+    }
+
+    & td .btn{
+        width:18px;
+        height:18px;
+        font-size:14px;
+        line-height:16px;
+        margin:0px;
+        
+        margin-left:5px;
+        margin-right:5px;
+        padding:0px;
+        vertical-align:bottom;
+    }
+
+    & td .btn .icon{
+        font-size:14px;
+        line-height:18px;
+        margin:0px;
+        padding:0px;
+    }
+`;
 
 
 

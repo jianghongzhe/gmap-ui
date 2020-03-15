@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
-import { Layout, Menu, Breadcrumb,Tabs,Button,Tooltip,Row, Col,List, Avatar } from 'antd';
-import { PlusOutlined,FileMarkdownOutlined,ReloadOutlined } from '@ant-design/icons';
+import { Layout, Menu, Breadcrumb,Tabs,Button,Tooltip,Row, Col,List, Avatar,Divider   } from 'antd';
+import { PlusOutlined,FileMarkdownOutlined,ReloadOutlined,HomeOutlined } from '@ant-design/icons';
 import logourl from './assets/logo.jpg';
 
 class Welcome extends Component {
@@ -18,28 +18,46 @@ class Welcome extends Component {
             <Row>
                 <Col span={16} offset={4}>
                     <Row css={container}>
-                        <Col span={12} >
-                        
-                            <List
-                                itemLayout="horizontal"
-                                dataSource={this.props.filelist}
-                                renderItem={item => (
-                                <List.Item>
-                                    <List.Item.Meta onClick={this.props.onSelectMapItem.bind(this,item)}
-                                    avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
-                                    title={item.showname}
-                                    description={item.size}
-                                    />
-                                </List.Item>
-                                )}
-                            />
+                        <Col span={14} >
+                            <Row>
+                                <Col span={22}>
+                                    <Breadcrumb> 
+                                        {/*href=""*/}
+                                        <Breadcrumb.Item href=''>
+                                            <HomeOutlined />
+                                        </Breadcrumb.Item>
+                                        <Breadcrumb.Item href=''>第一层</Breadcrumb.Item>
+                                        <Breadcrumb.Item >第二层</Breadcrumb.Item>
+                                        {/* <Breadcrumb.Item>Application</Breadcrumb.Item> */}
+                                    </Breadcrumb>
+                                </Col>
+                                <Col span={2} style={{textAlign:'right'}}>
+                                    <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} />
+                                </Col>
+                            </Row>                          
+                            <Divider style={{marginTop:'10px',marginBottom:'0px'}}/>
+                            <div style={{'maxHeight':this.props.maxH-160,'overflowY':'auto','overflowX':'hidden'}}>
+                                <List
+                                    itemLayout="horizontal"
+                                    dataSource={this.props.filelist}
+                                    renderItem={item => (
+                                    <List.Item>
+                                        <List.Item.Meta onClick={this.props.onSelectMapItem.bind(this,item)}
+                                        avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
+                                        title={item.showname}
+                                        description={item.size}
+                                        />
+                                    </List.Item>
+                                    )}
+                                />
+                                </div>
                         </Col>
-                        <Col span={12}>                   
+                        <Col span={10}>                   
                             <div css={logoWrapper}>
                                 <p><Avatar size={256} src={logourl}/></p>
                                 <p className='appname'>GMap - 思维导图<span className='ver'>v0.1</span></p>
                                 <div className='btns'>
-                                    <Button type="default"  icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
+                                    <Button type="default" className='btn' icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
                                 </div>                               
                             </div>
                         </Col>
@@ -66,12 +84,13 @@ const logoWrapper=css`
     & .btns{
         margin-top:20px;
     }
+    
 `;
 
 
 const container=css`
     margin-top:50px;
-    padding:20px;
+    padding:10px;
     background-color:white;
 `;
 
