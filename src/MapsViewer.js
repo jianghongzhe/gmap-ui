@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
 import { Layout, Menu, Breadcrumb, Tabs, Modal, Input, message, Button, Divider, Row, Col, List, Avatar } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined,FolderOutlined } from '@ant-design/icons';
 
 
 
@@ -357,7 +357,10 @@ class MapsViewer extends Component {
                                     <Button shape='circle' icon={<PlusOutlined />} className='toolbtn' type='primary' size='large' onClick={this.onShowNewMapDlg} title='新建' />
                                     <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='primary' size='large' onClick={this.showSelMapDlg} title='打开' />
                                     <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='primary' size='large' onClick={this.onShowEditMapDlg} title='编辑' />
-                                    {/* <Button shape='circle' icon={<MacCommandOutlined />} className='toolbtn' type='primary' size='large'   title='命令行' /> */}
+
+                                    <Divider type="vertical" />
+                                    <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openMapsDir}  title='打开目录' />                                   
+                                    <Button shape='circle' icon={<MacCommandOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openBash}  title='打开命令行' />
                                 </Header>
                                 <Tabs
                                     hideAdd={true}
@@ -406,15 +409,15 @@ class MapsViewer extends Component {
                     onCancel={this.onEditMapDlgCancel}>
                     <div>
                         <div style={{'marginBottom':"10px"}}>
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#cf1322'}}></div>        
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#389e0d'}}></div>        
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#0050b3'}}></div>   
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#fa8c16'}}></div> 
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#13c2c2'}}></div> 
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#ad6800'}}></div> 
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#1890ff'}}></div>   
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#722ed1'}}></div>   
-                            <div style={{'width':'16px','height':'16px','display':'inline-block','cursor':'pointer','marginRight':'10px','backgroundColor':'#c41d7f'}}></div>   
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#cf1322'}}></div>        
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#389e0d'}}></div>        
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#0050b3'}}></div>   
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#fa8c16'}}></div> 
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#13c2c2'}}></div> 
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#ad6800'}}></div> 
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#1890ff'}}></div>   
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#722ed1'}}></div>   
+                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#c41d7f'}}></div>   
                             
                             
                                 
@@ -451,6 +454,14 @@ class MapsViewer extends Component {
         );
     }
 }
+
+const editDlgColorBoxStyle={
+    'width':'16px',
+    'height':'16px',
+    'display':'inline-block',
+    'cursor':'pointer',
+    'marginRight':'10px',
+};
 
 const defMapTxt = "" +
     "- 中心主题\n" +

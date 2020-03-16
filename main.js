@@ -1,5 +1,6 @@
-const { app, BrowserWindow,Menu } = require('electron');
+const { app, BrowserWindow,Menu,shell } = require('electron');
 const fs=require('fs');
+const {exec,spawn} = require('child_process');
 const path = require('path');
 
 let mainWindow = null;
@@ -59,17 +60,31 @@ app.saveFile=(fullpath,content)=>{
     fs.writeFileSync(fullpath,content,'utf-8');
 }
 
-// app.openGitBash=()=>{
-//     let basedir="";
-//     if(process.env.DEV_SERVER_URL){
-//         basedir=__dirname;
-//     }else{
-//         basedir=__dirname;
-//     }
-//     let cmdPath=basedir+"\\opengitbash_"+new Date().getTime()+".cmd";
-//     fs.writeFileSync(cmdPath,'cd /d "'+getMapsPath()+'" && bash','utf-8');
-//     //childproc.execFile(cmdPath);
-// }
+/**
+ * 打开图表目录
+ */
+app.openMapsDir=()=>{
+    let mapsPath=getMapsPath();
+    let url="file:///"+mapsPath.replace(/\\/g,"/"); //转换为file协议的url
+    shell.openExternal(url,{
+        workingDirectory:mapsPath
+    })
+}
+
+/**
+ * 在图表目录打开bash，以方便git提交
+ */
+app.openGitBash=()=>{
+    let time=new Date().getTime();
+    spawn(
+        'cmd.exe', 
+        ['/c', `start "GMap_${time}" bash`],
+        {
+            shell:  true,           //使用shell运行
+            cwd:    getMapsPath()   //当前目录为图表文件目录
+        }
+    );
+}
 
 
 /**

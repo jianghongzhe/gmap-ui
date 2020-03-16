@@ -2,10 +2,14 @@ const app = window.require('electron').remote.app;
 
 class Api{
 
-    // openBash=()=>{
-    //     app.openGitBash();
-    //     console.log("bash调用了");
-    // }
+    openBash=()=>{
+        app.openGitBash();
+        console.log("bash调用了");
+    }
+
+    openMapsDir=()=>{
+        app.openMapsDir();
+    }
 
     exists=(fn)=>{
         return app.exists(fn);
