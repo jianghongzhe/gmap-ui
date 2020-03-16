@@ -7,51 +7,101 @@
  * @param {*} originSelectionEnd    元素的结束选中位置
  * @returns 如果改变了值，返回[newVal,newStart,newEnd]，否则返回false
  */
-export const onEvent = (event,originVal, originSelectionStart, originSelectionEnd) => {
+export const onEvent = (event, originVal, originSelectionStart, originSelectionEnd) => {
     //ESC
-    if(27===event.keyCode){
+    if (27 === event.keyCode) {
         event.preventDefault();
         event.stopPropagation();
-        return handleEsc(originVal,originSelectionStart,originSelectionEnd);
+        return handleEsc(originVal, originSelectionStart, originSelectionEnd);
     }
 
     //回车
-    if (13===event.keyCode && false===event.shiftKey){
-        return handleEnter(originVal,originSelectionStart,originSelectionEnd,()=>{
+    if (13 === event.keyCode && false === event.shiftKey) {
+        return handleEnter(originVal, originSelectionStart, originSelectionEnd, () => {
             event.preventDefault();
             event.stopPropagation();
         });
     }
-    
+
     //tab
     if (9 === event.keyCode) {
         event.preventDefault();
         event.stopPropagation();
-        let flagMultiLine= isMultiLine(originVal,originSelectionStart,originSelectionEnd);
+        let flagMultiLine = isMultiLine(originVal, originSelectionStart, originSelectionEnd);
 
         //未按shift
-        if(false===event.shiftKey){
+        if (false === event.shiftKey) {
             //tab键，选中内容未跨行
-            if(false===flagMultiLine){
-                return handleTabInline(originVal,originSelectionStart,originSelectionEnd);
+            if (false === flagMultiLine) {
+                return handleTabInline(originVal, originSelectionStart, originSelectionEnd);
             }
             //tab键，选中内容已跨行
-            else{
-                return handleTabMultiline(originVal,originSelectionStart,originSelectionEnd);
+            else {
+                return handleTabMultiline(originVal, originSelectionStart, originSelectionEnd);
             }
         }
         //按了shift
-        else{
+        else {
             //shift+tab键，选中内容未跨行
-            if(false===flagMultiLine){
-                return handleShiftTabInline(originVal,originSelectionStart,originSelectionEnd);
+            if (false === flagMultiLine) {
+                return handleShiftTabInline(originVal, originSelectionStart, originSelectionEnd);
             }
             //shift+tab键，选中内容已跨行
-            else{
-                return handleShiftTabMultiline(originVal,originSelectionStart,originSelectionEnd);
+            else {
+                return handleShiftTabMultiline(originVal, originSelectionStart, originSelectionEnd);
             }
         }
     }
+
+    return false;
+}
+
+/**
+ * 增加颜色标志
+ * @param {*} color 
+ * @param {*} originVal 
+ * @param {*} originSelectionStart 
+ * @param {*} originSelectionEnd 
+ */
+export const addColor = (color, originVal, originSelectionStart, originSelectionEnd) => {
+    //当前行的行号
+    let lineStartInds = findStartIndices(originVal);
+    let len = lineStartInds.length;
+    let ind = len - 1;
+    while (0 <= ind) {
+        if (originSelectionStart >= lineStartInds[ind]) {
+            break;
+        }
+        --ind;
+    }
+    if (ind < 0) {
+        return false;
+    }
+
+    //当前行内容
+    let currLine = "";
+    if (ind + 1 < len) {
+        currLine = originVal.substring(lineStartInds[ind], lineStartInds[ind + 1]);
+    } else {
+        currLine = originVal.substring(lineStartInds[ind]);
+    }
+
+    //当前行包含 "- " 或 "-" 则在其后加入颜色标记，否则不处理
+    let pos = currLine.indexOf("- ");
+    let pos2 = currLine.indexOf("-");
+    let addStr = null;
+
+    if (pos >= 0 || pos2 >= 0) {
+        addStr = (pos >= 0 ? "" : " ") + "c:" + color + "|";
+        let itemLetter = (pos >= 0 ? "- " : "-");
+        pos = (pos >= 0 ? pos : pos2);
+        let splitPos = lineStartInds[ind] + pos + itemLetter.length;
+        originVal=originVal.substring(0, splitPos) + addStr + originVal.substring(splitPos);
+        let newSelPos = splitPos + addStr.length;
+        return [originVal, newSelPos, newSelPos];
+    }
+
+
 
     return false;
 }
@@ -62,8 +112,8 @@ export const onEvent = (event,originVal, originSelectionStart, originSelectionEn
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const handleEsc=(val,selectionStart,selectionEnd)=>{
-    return [val,selectionEnd,selectionEnd];
+const handleEsc = (val, selectionStart, selectionEnd) => {
+    return [val, selectionEnd, selectionEnd];
 }
 
 /**
@@ -72,7 +122,7 @@ const handleEsc=(val,selectionStart,selectionEnd)=>{
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const handleEnter=(val,selectionStart,selectionEnd,cbPreventDefault)=>{
+const handleEnter = (val, selectionStart, selectionEnd, cbPreventDefault) => {
     let cursorPos = selectionStart;
     let startIndices = findStartIndices(val);
     let numStartIndices = startIndices.length;
@@ -82,13 +132,13 @@ const handleEnter=(val,selectionStart,selectionEnd,cbPreventDefault)=>{
     let lineText = '';
     let tabs = null;
 
-    for(var x=0;x<numStartIndices;x++) {
-        if (startIndices[x+1] && (cursorPos >= startIndices[x]) && (cursorPos < startIndices[x+1])) {
+    for (var x = 0; x < numStartIndices; x++) {
+        if (startIndices[x + 1] && (cursorPos >= startIndices[x]) && (cursorPos < startIndices[x + 1])) {
             startIndex = startIndices[x];
-            endIndex = startIndices[x+1] - 1;
+            endIndex = startIndices[x + 1] - 1;
             break;
         } else {
-            startIndex = startIndices[numStartIndices-1];
+            startIndex = startIndices[numStartIndices - 1];
             endIndex = val.length;
         }
     }
@@ -104,11 +154,11 @@ const handleEnter=(val,selectionStart,selectionEnd,cbPreventDefault)=>{
             indentWidth = inLinePos;
             indentText = indentText.slice(0, inLinePos);
         }
-        
+
         let newVal = val.slice(0, cursorPos) + "\n" + indentText + val.slice(cursorPos);
-        let newStart= cursorPos + indentWidth + 1;
+        let newStart = cursorPos + indentWidth + 1;
         let newEnd = newStart;
-        return [newVal,newStart,newEnd];
+        return [newVal, newStart, newEnd];
     }
 
     return false;
@@ -120,7 +170,7 @@ const handleEnter=(val,selectionStart,selectionEnd,cbPreventDefault)=>{
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const handleTabInline=(val,selectionStart,selectionEnd)=>{
+const handleTabInline = (val, selectionStart, selectionEnd) => {
     val = val.slice(0, selectionStart) + '\t' + val.slice(selectionEnd);
     selectionStart = selectionStart + 1;
     selectionEnd = selectionEnd + 1;
@@ -133,30 +183,30 @@ const handleTabInline=(val,selectionStart,selectionEnd)=>{
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const handleTabMultiline=(val,selectionStart,selectionEnd)=>{
+const handleTabMultiline = (val, selectionStart, selectionEnd) => {
     // Iterating through the startIndices, if the index falls within selectionStart and selectionEnd, indent it there.
-    let	startIndices = findStartIndices(val);
+    let startIndices = findStartIndices(val);
     let l = startIndices.length;
     let newStart = undefined;
     let newEnd = undefined;
     let affectedRows = 0;
 
-    while(l--) {
+    while (l--) {
         var lowerBound = startIndices[l];
-        if (startIndices[l+1] && selectionStart !== startIndices[l+1]) lowerBound = startIndices[l+1];
+        if (startIndices[l + 1] && selectionStart !== startIndices[l + 1]) lowerBound = startIndices[l + 1];
 
         if (lowerBound >= selectionStart && startIndices[l] < selectionEnd) {
             val = val.slice(0, startIndices[l]) + '\t' + val.slice(startIndices[l]);
 
             newStart = startIndices[l];
-            if (!newEnd) newEnd = (startIndices[l+1] ? startIndices[l+1] - 1 : 'end');
+            if (!newEnd) newEnd = (startIndices[l + 1] ? startIndices[l + 1] - 1 : 'end');
             affectedRows++;
         }
     }
 
     selectionStart = newStart;
     selectionEnd = (newEnd !== 'end' ? newEnd + (1 * affectedRows) : val.length);
-    return [val,selectionStart,selectionEnd];
+    return [val, selectionStart, selectionEnd];
 }
 
 /**
@@ -165,7 +215,7 @@ const handleTabMultiline=(val,selectionStart,selectionEnd)=>{
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const handleShiftTabInline=(val,selectionStart,selectionEnd)=>{
+const handleShiftTabInline = (val, selectionStart, selectionEnd) => {
     if (val.substr(selectionStart - 1, 1) === '\t') {
         // If there's a tab before the selectionStart, remove it
         val = val.substr(0, selectionStart - 1) + val.substr(selectionStart);
@@ -174,7 +224,7 @@ const handleShiftTabInline=(val,selectionStart,selectionEnd)=>{
     } else if (val.substr(selectionStart - 1, 1) === "\n" && val.substr(selectionStart, 1) === '\t') {
         // However, if the selection is at the start of the line, and the first character is a tab, remove it
         val = val.substring(0, selectionStart) + val.substr(selectionStart + 1);
-        selectionStart = ""+selectionStart;
+        selectionStart = "" + selectionStart;
         selectionEnd = selectionEnd - 1;
     }
     return [val, selectionStart, selectionEnd];
@@ -186,7 +236,7 @@ const handleShiftTabInline=(val,selectionStart,selectionEnd)=>{
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const handleShiftTabMultiline=(val,selectionStart,selectionEnd)=>{
+const handleShiftTabMultiline = (val, selectionStart, selectionEnd) => {
     // Iterating through the startIndices, if the index falls within selectionStart and selectionEnd, remove an indent from that row
     let startIndices = findStartIndices(val);
     let l = startIndices.length;
@@ -194,25 +244,25 @@ const handleShiftTabMultiline=(val,selectionStart,selectionEnd)=>{
     let newEnd = undefined;
     let affectedRows = 0;
 
-    while(l--) {
+    while (l--) {
         var lowerBound = startIndices[l];
-        if (startIndices[l+1] && selectionStart !== startIndices[l+1]) lowerBound = startIndices[l+1];
+        if (startIndices[l + 1] && selectionStart !== startIndices[l + 1]) lowerBound = startIndices[l + 1];
 
         if (lowerBound >= selectionStart && startIndices[l] < selectionEnd) {
             if (val.substr(startIndices[l], 1) === '\t') {
                 // Remove a tab
                 val = val.slice(0, startIndices[l]) + val.slice(startIndices[l] + 1);
                 affectedRows++;
-            } else {}	// Do nothing
+            } else { }	// Do nothing
 
             newStart = startIndices[l];
-            if (!newEnd) newEnd = (startIndices[l+1] ? startIndices[l+1] - 1 : 'end');
+            if (!newEnd) newEnd = (startIndices[l + 1] ? startIndices[l + 1] - 1 : 'end');
         }
     }
 
     selectionStart = newStart;
     selectionEnd = (newEnd !== 'end' ? newEnd - (affectedRows * 1) : val.length);
-    return [val,selectionStart,selectionEnd];
+    return [val, selectionStart, selectionEnd];
 }
 
 /**
@@ -221,8 +271,8 @@ const handleShiftTabMultiline=(val,selectionStart,selectionEnd)=>{
  * @param {*} selectionStart 
  * @param {*} selectionEnd 
  */
-const isMultiLine=(txt,selectionStart,selectionEnd)=>{
-    let	snippet = txt.slice(selectionStart, selectionEnd);
+const isMultiLine = (txt, selectionStart, selectionEnd) => {
+    let snippet = txt.slice(selectionStart, selectionEnd);
     let nlRegex = new RegExp(/\n/);
     return nlRegex.test(snippet) ? true : false;
 }
@@ -231,11 +281,11 @@ const isMultiLine=(txt,selectionStart,selectionEnd)=>{
  * 获得每行首个字符的索引
  * @param {*} txt 
  */
-const findStartIndices=(txt)=>{
-    let	startIndices = [];
+const findStartIndices = (txt) => {
+    let startIndices = [];
     let offset = 0;
 
-    while(txt.match(/\n/) && txt.match(/\n/).length > 0) {
+    while (txt.match(/\n/) && txt.match(/\n/).length > 0) {
         offset = (startIndices.length > 0 ? startIndices[startIndices.length - 1] : 0);
         let lineEnd = txt.search("\n");
         startIndices.push(lineEnd + offset + 1);

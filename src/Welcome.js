@@ -2,7 +2,9 @@
 import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
 import { Layout, Menu, Breadcrumb,Tabs,Button,Tooltip,Row, Col,List, Avatar,Divider   } from 'antd';
-import { PlusOutlined,FileMarkdownOutlined,ReloadOutlined,HomeOutlined } from '@ant-design/icons';
+import { PlusOutlined,FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
+
+import PathSelect from './PathSelect';
 import logourl from './assets/logo.jpg';
 
 class Welcome extends Component {
@@ -19,38 +21,13 @@ class Welcome extends Component {
                 <Col span={16} offset={4}>
                     <Row css={container}>
                         <Col span={14} >
-                            <Row>
-                                <Col span={22}>
-                                    <Breadcrumb> 
-                                        {/*href=""*/}
-                                        <Breadcrumb.Item href=''>
-                                            <HomeOutlined />
-                                        </Breadcrumb.Item>
-                                        <Breadcrumb.Item href=''>第一层</Breadcrumb.Item>
-                                        <Breadcrumb.Item >第二层</Breadcrumb.Item>
-                                        {/* <Breadcrumb.Item>Application</Breadcrumb.Item> */}
-                                    </Breadcrumb>
-                                </Col>
-                                <Col span={2} style={{textAlign:'right'}}>
-                                    <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} />
-                                </Col>
-                            </Row>                          
-                            <Divider style={{marginTop:'10px',marginBottom:'0px'}}/>
-                            <div style={{'maxHeight':this.props.maxH-160,'overflowY':'auto','overflowX':'hidden'}}>
-                                <List
-                                    itemLayout="horizontal"
-                                    dataSource={this.props.filelist}
-                                    renderItem={item => (
-                                    <List.Item>
-                                        <List.Item.Meta onClick={this.props.onSelectMapItem.bind(this,item)}
-                                        avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
-                                        title={item.showname}
-                                        description={item.size}
-                                        />
-                                    </List.Item>
-                                    )}
-                                />
-                                </div>
+                            <PathSelect 
+                                maxH={this.props.maxH-160}
+                                dirs={this.props.dirs} 
+                                filelist={this.props.filelist}
+                                onloadDir={this.props.onloadDir}
+                                onReloadCurrDir={this.props.onReloadCurrDir}
+                                onSelectMapItem={this.props.onSelectMapItem}/>
                         </Col>
                         <Col span={10}>                   
                             <div css={logoWrapper}>

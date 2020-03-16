@@ -467,7 +467,12 @@ class MindmapSvc {
         dist = rightLeafCnt;
 
         //再依次计算如果把某个节点放到左侧，侧左右侧叶节点数差值是否比当前小，如果小，就移到左侧
+        let loopFin=false;
         root.childs.forEach(child => {
+            if(loopFin){
+                return;
+            }
+
             let currNodeLeftCnt = this.getLeafCnt(child);
             let assumeDist = parseInt(Math.abs((leftLeafCnt + currNodeLeftCnt) - (rightLeafCnt - currNodeLeftCnt)));
             if (assumeDist < dist) {
@@ -475,7 +480,9 @@ class MindmapSvc {
                 leftLeafCnt += currNodeLeftCnt;
                 rightLeafCnt -= currNodeLeftCnt;
                 this.setDirectionRecursively(child, true);
+                return;
             }
+            loopFin=true;
         });
         return [leftLeafCnt, rightLeafCnt];
     }

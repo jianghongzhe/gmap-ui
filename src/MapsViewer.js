@@ -3,11 +3,12 @@ import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
 import { Layout, Menu, Breadcrumb, Tabs, Modal, Input, message, Button, Divider, Row, Col, List, Avatar } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined,FolderOutlined } from '@ant-design/icons';
-
+import {createSelector} from 'reselect';
 
 
 import Mindmap from './Mindmap';
 import Welcome from './Welcome';
+import PathSelect from './PathSelect';
 
 import mindmapSvc from './mindmapSvc';
 import * as tabIndentUtil from './tabIndentUtil';
@@ -60,6 +61,9 @@ class MapsViewer extends Component {
             panes: [],
             filelist: [],
             currMapName: '',
+
+            dirs:[
+            ]
         };
     }
 
@@ -67,7 +71,8 @@ class MapsViewer extends Component {
     componentDidMount() {
         window.addEventListener("resize",this.handleResize);
         this.setState({
-            filelist: api.list()
+            filelist: api.list(),
+            dirs:   api.getPathItems(),
         });
     }
 
@@ -84,6 +89,14 @@ class MapsViewer extends Component {
         this.setState({
             clientH: document.documentElement.clientHeight,
             clientW: document.documentElement.clientWidth
+        });
+    }
+
+    loadDir=(dir)=>{
+        console.log("loaddir",dir);
+        this.setState({
+            filelist: api.list(dir),
+            dirs:   api.getPathItems(dir),
         });
     }
 
@@ -178,13 +191,14 @@ class MapsViewer extends Component {
             mapTxts: defMapTxt,
             mapCells: cells
         });
+        console.log("新的key",fullpath);
 
         //保存状态
         this.setState({
             panes: [...tabdata],
             activeKey: fullpath,
             newMapDlgVisible: false,
-            filelist: api.list()  //新建后应该重新加载文件列表
+            filelist: api.list(selectCurrDir(this.state))  //新建后应该重新加载文件列表
         });
     }
 
@@ -258,6 +272,48 @@ class MapsViewer extends Component {
         // }
     }
 
+    onAddColor=(color)=>{
+        let result=tabIndentUtil.addColor(color, this.mapTxtarea.value, this.mapTxtarea.selectionStart, this.mapTxtarea.selectionEnd);
+        console.log("添加颜色结果",result);
+        if (false === result) {
+            return;
+        }
+
+        let [newVal, newStart, newEnd] = result;
+        this.setState({
+            editTmpTxt: newVal
+        });
+        setTimeout(() => {
+            this.mapTxtarea.selectionStart = newStart;
+            this.mapTxtarea.selectionEnd = newEnd;
+        }, 80);
+
+        // let [val,st,end]=[this.state.editTmpTxt, this.mapTxtarea.selectionStart, this.mapTxtarea.selectionEnd];
+        // let left=val.slice(0,st);
+        // let right=val.slice(st);
+        // let leftLast=(""===left ? "" : left.substring(left.length-1));
+        // let mid="";
+
+        // if("-"===leftLast){
+        //     mid+=" ";
+        // }else if(""!==leftLast){
+        //     mid+="|";
+        // }
+        // mid+="c:"+color;
+        // if(""!==right){
+        //     mid+="|";
+        // }
+
+
+        // this.setState({
+        //     editTmpTxt: left+mid+right
+        // });
+        // setTimeout(() => {
+        //     this.mapTxtarea.selectionStart = st+mid.length;
+        //     this.mapTxtarea.selectionEnd = end+mid.length;
+        // }, 80);
+    }
+
     onEditMapDlgOK = () => {
         let txt = this.state.editTmpTxt.trim();
         if ('' === txt) {
@@ -287,6 +343,14 @@ class MapsViewer extends Component {
 
     //------------选择文件功能----------------------------------------------------------------------
     onSelectMapItem = (item) => {
+        if(!item.isfile){
+            this.setState({
+                filelist: api.list(item.fullpath),
+                dirs:   api.getPathItems(item.fullpath),
+            });
+            return;
+        }
+
         //如果选项卡中已经有该项，则激活该tab
         if (this.state.panes.some(pane => pane.key === item.fullpath)) {
             this.setState({
@@ -303,7 +367,7 @@ class MapsViewer extends Component {
         //增加新选项卡并设置状态
         let tabdata = this.state.panes;
         tabdata.push({
-            title: item.showname,
+            title: item.itemsName,// item.showname,
             key: item.fullpath,
             mapTxts: origintxts,
             mapCells: cells
@@ -313,6 +377,7 @@ class MapsViewer extends Component {
             activeKey: item.fullpath,
             selMapDlgVisible: false
         });
+        console.log("选择的key",item.fullpath);
     }
 
     showSelMapDlg = () => {
@@ -384,7 +449,13 @@ class MapsViewer extends Component {
                             :
 
                             <Content>
-                                <Welcome maxH={this.state.clientH} filelist={this.state.filelist} onAddMap={this.onShowNewMapDlg} onSelectMapItem={this.onSelectMapItem} />
+                                <Welcome maxH={this.state.clientH} 
+                                    dirs={this.state.dirs}
+                                    filelist={this.state.filelist} 
+                                    onAddMap={this.onShowNewMapDlg} 
+                                    onSelectMapItem={this.onSelectMapItem}
+                                    onloadDir={this.loadDir}
+                                    onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))} />
                             </Content>
                     }
                 </Layout>
@@ -409,18 +480,11 @@ class MapsViewer extends Component {
                     onCancel={this.onEditMapDlgCancel}>
                     <div>
                         <div style={{'marginBottom':"10px"}}>
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#cf1322'}}></div>        
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#389e0d'}}></div>        
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#0050b3'}}></div>   
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#fa8c16'}}></div> 
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#13c2c2'}}></div> 
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#ad6800'}}></div> 
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#1890ff'}}></div>   
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#722ed1'}}></div>   
-                            <div style={{...editDlgColorBoxStyle,'backgroundColor':'#c41d7f'}}></div>   
-                            
-                            
-                                
+                            {
+                                ['#cf1322','#389e0d','#0050b3','#fa8c16','#13c2c2','#ad6800','#1890ff','#722ed1','#c41d7f'].map((eachcolor,colorInd)=>(
+                                    <div key={colorInd} style={{...editDlgColorBoxStyle,'backgroundColor':eachcolor}} onClick={this.onAddColor.bind(this,eachcolor)}></div>
+                                ))
+                            }                                
                         </div>
                         <TextArea ref={this.setMapTxtareaControl} 
                             style={{'height':(this.state.clientH - 400-50)+'px','maxHeight':(this.state.clientH - 400-50)+'px'}} 
@@ -435,25 +499,45 @@ class MapsViewer extends Component {
                     visible={this.state.selMapDlgVisible}
                     footer={null}
                     onCancel={this.onSelMapDlgCancel}>
-                    <div  style={{ maxHeight: (this.state.clientH - 64-200) + 'px', ...selFileDlgBodyStyle }}>
+                    {/* <div  style={{ maxHeight: (this.state.clientH - 64-200) + 'px', ...selFileDlgBodyStyle }}>
                         <List
                             itemLayout="horizontal"
                             dataSource={this.state.filelist}
                             renderItem={item => (
                                 <List.Item>
                                     <List.Item.Meta onClick={this.onSelectMapItem.bind(this, item)}
-                                        avatar={<Avatar icon={<FileMarkdownOutlined />} style={{ backgroundColor: '#40a9ff' }} />}
+                                        avatar={<Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} style={{ backgroundColor: (item.isfile?'#40a9ff':'orange') }} />}
                                         title={item.showname}
                                         description={item.size} />
                                 </List.Item>
                             )}
                         />
-                    </div>
+                    </div> */}
+
+
+                    <PathSelect 
+                                maxH={(this.state.clientH - 64-250)}
+                                forceMaxH={true}
+                                dirs={this.state.dirs} 
+                                filelist={this.state.filelist}
+                                onloadDir={this.loadDir}
+                                onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
+                                onSelectMapItem={this.onSelectMapItem}/>
                 </Modal>
             </>
         );
     }
 }
+
+const selectCurrDir=createSelector(
+    state=>state.dirs,
+    dirs=>{
+        if(null==dirs || 0===dirs.length){
+            return null;
+        }
+        return dirs.filter(dir=>dir.iscurr)[0].fullpath;
+    }
+);
 
 const editDlgColorBoxStyle={
     'width':'16px',

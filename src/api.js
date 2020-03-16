@@ -15,11 +15,17 @@ class Api{
         return app.exists(fn);
     }
 
+
+    getPathItems=(basedir=null)=>{
+        return app.getPathItems(basedir);
+    }
+
     /**
      * 列出所有文件
      */
-    list=()=>{
-        
+    list=(basedir=null)=>{
+        console.log("列目录",basedir);
+
         // const fs = window.require('fs');
 
         // const root = fs.readdirSync('/');
@@ -32,10 +38,12 @@ class Api{
             fullpath:   fullpath,
             size
         */
-        return app.listFiles().map(item=>({
+        return app.listFiles(basedir).map(item=>({
             showname: item.name,
+            itemsName:item.itemsName,
             fullpath: item.fullpath,
-            size:     getSizeStr(item.size)
+            isfile:   item.isfile,
+            size:     item.isfile ? getSizeStr(item.size) :"<目录>"
         }));
         
 
