@@ -4,7 +4,6 @@ class Api{
 
     openBash=()=>{
         app.openGitBash();
-        console.log("bash调用了");
     }
 
     openMapsDir=()=>{

@@ -1,8 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Mindmap from './Mindmap';
-import MapsViewer from './MapsViewer';
+import {view as MapsViewer} from './ui/home';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
 import 'antd/dist/antd.css';

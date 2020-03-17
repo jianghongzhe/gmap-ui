@@ -1,19 +1,17 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React, { Component } from 'react';
-import { Layout, Menu, Breadcrumb,Tabs,Button,Tooltip,Row, Col,List, Avatar,Divider   } from 'antd';
-import { PlusOutlined,FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
+import React from 'react';
+import { Button,Row, Col, Avatar   } from 'antd';
+import { PlusOutlined,FolderOutlined,CodeOutlined } from '@ant-design/icons';
 
 import PathSelect from './PathSelect';
-import logourl from './assets/logo.jpg';
+import logourl from '../../../assets/logo.jpg';
 
-class Welcome extends Component {
+class Welcome extends React.Component {
     constructor(props) {
         super(props);
         this.state = {  };
     }
-
-
 
     render() {
         return (
@@ -34,23 +32,22 @@ class Welcome extends Component {
                                 <p><Avatar size={256} src={logourl}/></p>
                                 <p className='appname'>GMap - 思维导图<span className='ver'>v0.1</span></p>
                                 <div className='btns'>
-                                    <Button type="default" className='btn' icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
+                                    <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
+                                    <Button type="default" className='rbtn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={this.props.onOpenMapsDir}></Button>
+                                    <Button type="default" className='rbtn' title='打开命令行' shape='circle' icon={<CodeOutlined/>} size='large' onClick={this.props.onOpenBash}></Button>
                                 </div>                               
                             </div>
                         </Col>
                     </Row>
                 </Col>
             </Row>
-
-            
-            
-            
         );
     }
 }
 
 const logoWrapper=css`
     text-align:center;
+    margin-bottom:50px;
     & .appname{
         font-size:18px;
     }
@@ -61,7 +58,9 @@ const logoWrapper=css`
     & .btns{
         margin-top:20px;
     }
-    
+    & .btns .rbtn{
+        margin-left:20px;
+    }
 `;
 
 
@@ -70,21 +69,6 @@ const container=css`
     padding:10px;
     background-color:white;
 `;
-
-const data = [
-    {
-      title: 'Ant Design Title 1',
-    },
-    {
-      title: 'Ant Design Title 2',
-    },
-    {
-      title: 'Ant Design Title 3',
-    },
-    {
-      title: 'Ant Design Title 4',
-    },
-  ];
   
 
 export default Welcome;

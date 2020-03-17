@@ -2,18 +2,19 @@
 import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
 import { Layout, Menu, Breadcrumb, Tabs, Modal, Input, message, Button, Divider, Row, Col, List, Avatar } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined,FolderOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined,FolderOutlined,CodeOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 
 
-import Mindmap from './Mindmap';
-import Welcome from './Welcome';
-import PathSelect from './PathSelect';
+import Mindmap from './views/Mindmap';
+import Welcome from './views/Welcome';
+import PathSelect from './views/PathSelect';
 
 import mindmapSvc from './mindmapSvc';
 import * as tabIndentUtil from './tabIndentUtil';
-import api from './api';
-import {debounce} from './debounce-throttle';
+import mindMapValidateSvc from './mindMapValidateSvc';
+
+import api from '../api';
 
 const { SubMenu } = Menu;
 const { Header, Content, Footer, Sider } = Layout;
@@ -177,9 +178,10 @@ class MapsViewer extends Component {
             message.warning('该图表名称已存在，请更换另一名称');
             return;
         }
-        let [fn, fullpath] = fnAndFullpath;
+        let [fn,themeName, fullpath] = fnAndFullpath;
 
         //保存文件
+        let defMapTxt=getDefMapTxt(themeName);
         api.save(fullpath, defMapTxt);
 
         //计算导图表格信息并加入新tab      
@@ -315,12 +317,15 @@ class MapsViewer extends Component {
     }
 
     onEditMapDlgOK = () => {
+        //校验
         let txt = this.state.editTmpTxt.trim();
-        if ('' === txt) {
-            message.warning('请输入图表内容');
+        let valiResult=mindMapValidateSvc.validate(txt);
+        if(true!==valiResult){
+            message.warning(valiResult);
             return;
         }
 
+        //
         let item = this.state.panes.filter(pane => pane.key === this.state.activeKey);
         if (null == item || 0 === item.length) {
             return;
@@ -425,7 +430,7 @@ class MapsViewer extends Component {
 
                                     <Divider type="vertical" />
                                     <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openMapsDir}  title='打开目录' />                                   
-                                    <Button shape='circle' icon={<MacCommandOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openBash}  title='打开命令行' />
+                                    <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openBash}  title='打开命令行' />
                                 </Header>
                                 <Tabs
                                     hideAdd={true}
@@ -452,6 +457,8 @@ class MapsViewer extends Component {
                                 <Welcome maxH={this.state.clientH} 
                                     dirs={this.state.dirs}
                                     filelist={this.state.filelist} 
+                                    onOpenMapsDir={api.openMapsDir}
+                                    onOpenBash={api.openBash}
                                     onAddMap={this.onShowNewMapDlg} 
                                     onSelectMapItem={this.onSelectMapItem}
                                     onloadDir={this.loadDir}
@@ -499,30 +506,14 @@ class MapsViewer extends Component {
                     visible={this.state.selMapDlgVisible}
                     footer={null}
                     onCancel={this.onSelMapDlgCancel}>
-                    {/* <div  style={{ maxHeight: (this.state.clientH - 64-200) + 'px', ...selFileDlgBodyStyle }}>
-                        <List
-                            itemLayout="horizontal"
-                            dataSource={this.state.filelist}
-                            renderItem={item => (
-                                <List.Item>
-                                    <List.Item.Meta onClick={this.onSelectMapItem.bind(this, item)}
-                                        avatar={<Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} style={{ backgroundColor: (item.isfile?'#40a9ff':'orange') }} />}
-                                        title={item.showname}
-                                        description={item.size} />
-                                </List.Item>
-                            )}
-                        />
-                    </div> */}
-
-
-                    <PathSelect 
-                                maxH={(this.state.clientH - 64-250)}
-                                forceMaxH={true}
-                                dirs={this.state.dirs} 
-                                filelist={this.state.filelist}
-                                onloadDir={this.loadDir}
-                                onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
-                                onSelectMapItem={this.onSelectMapItem}/>
+                        <PathSelect 
+                            maxH={(this.state.clientH - 64-250)}
+                            forceMaxH={true}
+                            dirs={this.state.dirs} 
+                            filelist={this.state.filelist}
+                            onloadDir={this.loadDir}
+                            onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
+                            onSelectMapItem={this.onSelectMapItem}/>
                 </Modal>
             </>
         );
@@ -547,10 +538,12 @@ const editDlgColorBoxStyle={
     'marginRight':'10px',
 };
 
-const defMapTxt = "" +
-    "- 中心主题\n" +
-    "\t- 分主题\n" +
-    "\t- 带说明的分主题|m:balabala";
+const getDefMapTxt=(theleName="中心主题") =>(
+`- ${theleName}
+\t- 分主题
+\t- c:#1890ff|带颜色的分主题
+\t- 带说明的分主题|m:balabala`
+);
 
 
 //background-color:#f0f2f5;

@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React, { Component } from 'react';
-import mindmapSvc from './mindmapSvc';
 import { Layout, Menu, Breadcrumb,Tabs,Button,Tooltip } from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,EditOutlined,FormOutlined } from '@ant-design/icons';
 
