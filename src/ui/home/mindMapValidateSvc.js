@@ -48,12 +48,12 @@ class MindMapValidateSvc{
         for(let line of lines){
             let isTopLev=(0===line.indexOf("- "));
             if(0===lineInd && !isTopLev){
-                return "第一行必须为顶级主题";
+                return "第 1 行必须为顶级主题";
             }
             if(isTopLev){
                 ++topLevThemeCnt;
                 if(1<topLevThemeCnt){
-                    return "只能有一个顶级主题且只能在第一行（第 "+(lineInd+1)+" 行）";
+                    return "第 "+(lineInd+1)+" 行不能为顶级主题";
                 }
             }          
             ++lineInd;
@@ -64,11 +64,8 @@ class MindMapValidateSvc{
         let lastLev=-1;
         for(let line of lines){
             let lev=line.indexOf("- ");
-            if(0<lineInd){
-                console.log("上一行",lastLev);
-                if(lev>lastLev+1){
-                    return "第 "+(lineInd+1)+" 行的层级最多只能比上一行多一级";
-                }
+            if(0<lineInd && lev>lastLev+1){
+                return "第 "+(lineInd+1)+" 行的层级有误";
             }
             lastLev=lev;
             ++lineInd;

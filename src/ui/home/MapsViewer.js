@@ -1,8 +1,15 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React, { Component } from 'react';
-import { Layout, Menu, Breadcrumb, Tabs, Modal, Input, message, Button, Divider, Row, Col, List, Avatar } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, MacCommandOutlined, FileMarkdownOutlined,FolderOutlined,CodeOutlined } from '@ant-design/icons';
+import React from 'react';
+import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,CodeOutlined } from '@ant-design/icons';
+import {Controlled as CodeMirror} from 'react-codemirror2'
+
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/markdown/markdown';
+import 'codemirror/addon/selection/active-line';  
+import 'codemirror/keymap/sublime';
+
 import {createSelector} from 'reselect';
 
 
@@ -11,15 +18,12 @@ import Welcome from './views/Welcome';
 import PathSelect from './views/PathSelect';
 
 import mindmapSvc from './mindmapSvc';
-import * as tabIndentUtil from './tabIndentUtil';
 import mindMapValidateSvc from './mindMapValidateSvc';
 
 import api from '../api';
 
-const { SubMenu } = Menu;
-const { Header, Content, Footer, Sider } = Layout;
-const { TextArea } = Input;
 
+const { Header, Content } = Layout;
 const { TabPane } = Tabs;
 
 
@@ -43,30 +47,37 @@ const { TabPane } = Tabs;
  *      }
  * ]
  */
-class MapsViewer extends Component {
+class MapsViewer extends React.Component {
     constructor(props) {
         super(props);
+        this.codeMirrorInst=null;
 
         this.state = {
             //样式相关
             clientH: document.documentElement.clientHeight,
             clientW: document.documentElement.clientWidth,
 
-            mapTxtarea: null,
-            editTmpTxt: '',
-            editMapDlgVisible: false,
-            newMapDlgVisible: false,
-            selMapDlgVisible: false,
-            newMapName: '',
+            //选项卡
             activeKey: null,// panes[0].key,
             panes: [],
-            filelist: [],
-            currMapName: '',
 
-            dirs:[
-            ]
+            //编辑图表相关
+            currMapName: '',
+            editTmpTxt: '',
+            editMapDlgVisible: false,
+
+            //新建图表相关
+            newMapDlgVisible: false,
+            newMapName: '',
+
+            //文件选项相关
+            selMapDlgVisible: false,
+            filelist: [],
+            dirs:[],            
         };
     }
+
+    
 
 
     componentDidMount() {
@@ -82,24 +93,15 @@ class MapsViewer extends Component {
     }
 
     handleResize=()=>{
-        // debounce(200,this.handleResizeInner).then();
-        this.handleResizeInner();
-    }
-
-    handleResizeInner=()=>{
         this.setState({
             clientH: document.documentElement.clientHeight,
             clientW: document.documentElement.clientWidth
         });
     }
 
-    loadDir=(dir)=>{
-        console.log("loaddir",dir);
-        this.setState({
-            filelist: api.list(dir),
-            dirs:   api.getPathItems(dir),
-        });
-    }
+    
+
+    
 
 
 
@@ -224,96 +226,62 @@ class MapsViewer extends Component {
         });
     }
 
-    onChangeEditTmpTxt = (e) => {
-        this.setState({
-            editTmpTxt: e.target.value
-        });
-    }
-
-    setMapTxtareaControl = (control) => {
-        this.mapTxtarea = control.resizableTextArea.textArea;//找到实际的html textarea元素，不稳定
+    onChangeEditTmpTxt = (editor, data, value) => {
+        this.setState({editTmpTxt:value});
     }
 
     /**
-     * 处理编辑框中tab键
+     * 绑定codemirror实例，用于处理插入颜色等功能，以后还会有其他相关功能
      */
-    editTmpTxtKeyDown = (e) => {
-        let result = tabIndentUtil.onEvent(e, e.target.value, e.target.selectionStart, e.target.selectionEnd);
-        if (false === result) {
-            return;
-        }
-
-        //设置状态并更新光标位置。由于setState为异步执行，设置光标位置时应该延迟一会。否则设置光标会先执行，setState会后执行，执行完光标会移到末尾位置。
-        let [newVal, newStart, newEnd] = result;
-        this.setState({
-            editTmpTxt: newVal
-        });
-        setTimeout(() => {
-            this.mapTxtarea.selectionStart = newStart;
-            this.mapTxtarea.selectionEnd = newEnd;
-        }, 80);
-
-
-        // if (9 === e.keyCode) {
-        //     e.preventDefault();
-        //     e.stopPropagation();
-
-        //     //在当票处加入制表符
-        //     let val = e.target.value;
-        //     let ind = e.target.selectionStart;
-        //     let left = (0 === ind ? "" : val.substring(0, ind));
-        //     let right = (ind === val.length - 1 ? "" : val.substring(ind));
-        //     let newVal = left + "\t" + right;
-
-        //     //触发状态改变
-        //     this.setState({
-        //         editTmpTxt: newVal
-        //     });
-
-            
-        // }
+    bindCodeMirrorInst=(editor)=>{
+        this.codeMirrorInst = editor;
     }
 
     onAddColor=(color)=>{
-        let result=tabIndentUtil.addColor(color, this.mapTxtarea.value, this.mapTxtarea.selectionStart, this.mapTxtarea.selectionEnd);
-        console.log("添加颜色结果",result);
-        if (false === result) {
-            return;
+        //获取当前光标位置与当前行内容
+        let {line,ch}=this.codeMirrorInst.getCursor();
+        let lineTxt=this.codeMirrorInst.getLine(line);
+        
+        //最终加入内容的行内位置和加入的内容
+        let pos=-1;    
+        let addStr="";
+
+        //该行包含减号
+        let ind=lineTxt.indexOf("-");
+        let reg=/^\t*[-].*$/;
+        if(0<=ind && reg.test(lineTxt)){
+            //先假设插入位置是减号后面的位置
+            pos=ind+1;
+            addStr=" c:"+color+"|";//插入内容包含空格
+
+            //如果减号后面有字符并且是空格，则插入位置往后移一位
+            if(ind+1<lineTxt.length && ' '===lineTxt[ind+1]){
+                ++pos;
+                addStr=addStr.trim();//插入内容不包含空格
+            }
+        }
+        //该行不包含减号
+        else{
+            //找到第一个非tab的字符作为插入位置
+            pos=0;
+            addStr="- c:"+color+"|";
+            for(let i=0;i<lineTxt.length;++i){
+                if('\t'!==lineTxt[i]){
+                    break;
+                }
+                ++pos;
+            }
         }
 
-        let [newVal, newStart, newEnd] = result;
-        this.setState({
-            editTmpTxt: newVal
-        });
-        setTimeout(() => {
-            this.mapTxtarea.selectionStart = newStart;
-            this.mapTxtarea.selectionEnd = newEnd;
-        }, 80);
+        //插入内容并设置光标位置
+        this.codeMirrorInst.setCursor({line,ch:pos});
+        this.codeMirrorInst.setSelection({line,ch:pos})
+        this.codeMirrorInst.replaceSelection(addStr);
+        this.codeMirrorInst.focus();
+    }
 
-        // let [val,st,end]=[this.state.editTmpTxt, this.mapTxtarea.selectionStart, this.mapTxtarea.selectionEnd];
-        // let left=val.slice(0,st);
-        // let right=val.slice(st);
-        // let leftLast=(""===left ? "" : left.substring(left.length-1));
-        // let mid="";
-
-        // if("-"===leftLast){
-        //     mid+=" ";
-        // }else if(""!==leftLast){
-        //     mid+="|";
-        // }
-        // mid+="c:"+color;
-        // if(""!==right){
-        //     mid+="|";
-        // }
-
-
-        // this.setState({
-        //     editTmpTxt: left+mid+right
-        // });
-        // setTimeout(() => {
-        //     this.mapTxtarea.selectionStart = st+mid.length;
-        //     this.mapTxtarea.selectionEnd = end+mid.length;
-        // }, 80);
+    onEditMapDlgEscKey=(cm)=>{
+        window.event.stopPropagation();
     }
 
     onEditMapDlgOK = () => {
@@ -382,7 +350,13 @@ class MapsViewer extends Component {
             activeKey: item.fullpath,
             selMapDlgVisible: false
         });
-        console.log("选择的key",item.fullpath);
+    }
+
+    loadDir=(dir)=>{
+        this.setState({
+            filelist: api.list(dir),
+            dirs:   api.getPathItems(dir),
+        });
     }
 
     showSelMapDlg = () => {
@@ -493,11 +467,24 @@ class MapsViewer extends Component {
                                 ))
                             }                                
                         </div>
-                        <TextArea ref={this.setMapTxtareaControl} 
-                            style={{'height':(this.state.clientH - 400-50)+'px','maxHeight':(this.state.clientH - 400-50)+'px'}} 
-                            value={this.state.editTmpTxt} 
-                            onChange={this.onChangeEditTmpTxt} 
-                            onKeyDown={this.editTmpTxtKeyDown} />
+                        <CodeMirror
+                            css={getCodeEditorStyle(this.state.clientH - 400-50)}
+                            editorDidMount={this.bindCodeMirrorInst}
+                            value={this.state.editTmpTxt}
+                            options={{
+                                lineNumbers: true,
+                                theme: 'default',
+                                mode:   'markdown',
+                                styleActiveLine: true,
+                                indentWithTabs:true,
+                                indentUnit:4,
+                                keyMap: "sublime",
+                                extraKeys:{
+                                    "Ctrl-S":   this.onEditMapDlgOK,
+                                    "Esc":      this.onEditMapDlgEscKey
+                                }
+                            }}
+                            onBeforeChange={this.onChangeEditTmpTxt}/>
                     </div>
                 </Modal>
 
@@ -530,6 +517,16 @@ const selectCurrDir=createSelector(
     }
 );
 
+const getCodeEditorStyle=(height)=>css`
+    & .CodeMirror{
+        border: 1px solid lightgrey; 
+        font-size:16px;
+        height:${height}px;
+        max-height:${height}px;
+        min-height:${height}px;
+    }
+`;
+
 const editDlgColorBoxStyle={
     'width':'16px',
     'height':'16px',
@@ -560,19 +557,9 @@ const headerStyle = css`
     }
 `;
 
-const selFileDlgBodyStyle={
-    'overflowY': 'auto',
-    'overflowX': 'auto',
-    'width':'100%',
-}
 
-//'width':'100%',
-// 'paddingBottom': '50px',
-//     'paddingRight':'50px !important',
-//     'paddingLeft':'50px',
-// 'boxSizing':'border-box'
-// 'borderLeft':'50px solid white',
-//     'borderRight':'50px solid white',
+
+
 const tabContainerStyle = {
     'overflowY': 'auto',
     'overflowX': 'auto',
@@ -730,58 +717,6 @@ const otherThemeStyle = css`
 const themeStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
 
 
-const test= css`
-    border-collapse: separate;
-    max-width:999999999px;
-
-
-    & td{
-        font-size:14px;
-        padding-left:20px;
-        padding-right:20px;
-        padding-top:12px;
-        padding-bottom:0px;
-        vertical-align:bottom;
-        white-space:nowrap;
-    }
-
-    & td .memoicon{
-        font-size:16px;
-        line-height:16px;
-        margin-left:5px;
-        color:#fa8c16;
-    }
-
-    & td .themetxt{
-        font-size:14px;
-        line-height:16px;
-        vertical-align:bottom;
-        white-space:nowrap;
-        display:inline-block;
-        margin-bottom:0px;
-        padding-bottom:0px;
-    }
-
-    & td .btn{
-        width:18px;
-        height:18px;
-        font-size:14px;
-        line-height:16px;
-        margin:0px;
-        
-        margin-left:5px;
-        margin-right:5px;
-        padding:0px;
-        vertical-align:bottom;
-    }
-
-    & td .btn .icon{
-        font-size:14px;
-        line-height:18px;
-        margin:0px;
-        padding:0px;
-    }
-`;
 
 
 

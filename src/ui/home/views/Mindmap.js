@@ -147,58 +147,6 @@ const mindTabStyle=css`
         color:#fa8c16;
     }
 `; 
-// css`
-//     border-collapse: separate;
-//     max-width:999999999px;
-
-
-//     & td{
-//         font-size:14px;
-//         padding-left:20px;
-//         padding-right:20px;
-//         padding-top:12px;
-//         padding-bottom:0px;
-//         vertical-align:bottom;
-//         white-space:nowrap;
-//     }
-
-//     & td .memoicon{
-//         font-size:16px;
-//         line-height:16px;
-//         margin-left:5px;
-//         color:#fa8c16;
-//     }
-
-//     & td .themetxt{
-//         font-size:14px;
-//         line-height:16px;
-//         vertical-align:bottom;
-//         white-space:nowrap;
-//         display:inline-block;
-//         margin-bottom:0px;
-//         padding-bottom:0px;
-//     }
-
-//     & td .btn{
-//         width:18px;
-//         height:18px;
-//         font-size:14px;
-//         line-height:16px;
-//         margin:0px;
-        
-//         margin-left:5px;
-//         margin-right:5px;
-//         padding:0px;
-//         vertical-align:bottom;
-//     }
-
-//     & td .btn .icon{
-//         font-size:14px;
-//         line-height:18px;
-//         margin:0px;
-//         padding:0px;
-//     }
-// `;
 
 
 

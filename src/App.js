@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { css, jsx } from '@emotion/core';
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -7,14 +9,13 @@ import zhCN from 'antd/es/locale/zh_CN';
 import 'antd/dist/antd.css';
 import './global.css';
 
-//<Mindmap/>
 function App() {
   return (
     <ConfigProvider locale={zhCN}>
-    <MapsViewer/>
-     {/* <Mindmap/> */}
+      <MapsViewer/>
     </ConfigProvider>
   );
 }
+
 
 export default App;
