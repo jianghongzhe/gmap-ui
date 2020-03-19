@@ -16,6 +16,11 @@ import {createSelector} from 'reselect';
 import Mindmap from './views/Mindmap';
 import Welcome from './views/Welcome';
 import PathSelect from './views/PathSelect';
+import OpenGraphDlg from './views/OpenGraphDlg';
+import NewGraphDlg from './views/NewGraphDlg';
+import EditGraphDlg from './views/EditGraphDlg';
+import Toolbar from './views/Toolbar';
+import GraphTabs from './views/GraphTabs';
 
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
@@ -50,7 +55,6 @@ const { TabPane } = Tabs;
 class MapsViewer extends React.Component {
     constructor(props) {
         super(props);
-        this.codeMirrorInst=null;
 
         this.state = {
             //样式相关
@@ -195,7 +199,6 @@ class MapsViewer extends React.Component {
             mapTxts: defMapTxt,
             mapCells: cells
         });
-        console.log("新的key",fullpath);
 
         //保存状态
         this.setState({
@@ -230,59 +233,6 @@ class MapsViewer extends React.Component {
         this.setState({editTmpTxt:value});
     }
 
-    /**
-     * 绑定codemirror实例，用于处理插入颜色等功能，以后还会有其他相关功能
-     */
-    bindCodeMirrorInst=(editor)=>{
-        this.codeMirrorInst = editor;
-    }
-
-    onAddColor=(color)=>{
-        //获取当前光标位置与当前行内容
-        let {line,ch}=this.codeMirrorInst.getCursor();
-        let lineTxt=this.codeMirrorInst.getLine(line);
-        
-        //最终加入内容的行内位置和加入的内容
-        let pos=-1;    
-        let addStr="";
-
-        //该行包含减号
-        let ind=lineTxt.indexOf("-");
-        let reg=/^\t*[-].*$/;
-        if(0<=ind && reg.test(lineTxt)){
-            //先假设插入位置是减号后面的位置
-            pos=ind+1;
-            addStr=" c:"+color+"|";//插入内容包含空格
-
-            //如果减号后面有字符并且是空格，则插入位置往后移一位
-            if(ind+1<lineTxt.length && ' '===lineTxt[ind+1]){
-                ++pos;
-                addStr=addStr.trim();//插入内容不包含空格
-            }
-        }
-        //该行不包含减号
-        else{
-            //找到第一个非tab的字符作为插入位置
-            pos=0;
-            addStr="- c:"+color+"|";
-            for(let i=0;i<lineTxt.length;++i){
-                if('\t'!==lineTxt[i]){
-                    break;
-                }
-                ++pos;
-            }
-        }
-
-        //插入内容并设置光标位置
-        this.codeMirrorInst.setCursor({line,ch:pos});
-        this.codeMirrorInst.setSelection({line,ch:pos})
-        this.codeMirrorInst.replaceSelection(addStr);
-        this.codeMirrorInst.focus();
-    }
-
-    onEditMapDlgEscKey=(cm)=>{
-        window.event.stopPropagation();
-    }
 
     onEditMapDlgOK = () => {
         //校验
@@ -397,38 +347,28 @@ class MapsViewer extends React.Component {
                     {
                         (null != this.state.panes && 0 < this.state.panes.length) ?
                             <>
-                                <Header css={headerStyle}>
-                                    <Button shape='circle' icon={<PlusOutlined />} className='toolbtn' type='primary' size='large' onClick={this.onShowNewMapDlg} title='新建' />
-                                    <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='primary' size='large' onClick={this.showSelMapDlg} title='打开' />
-                                    <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='primary' size='large' onClick={this.onShowEditMapDlg} title='编辑' />
-
-                                    <Divider type="vertical" />
-                                    <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openMapsDir}  title='打开目录' />                                   
-                                    <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='primary' size='large' onClick={api.openBash}  title='打开命令行' />
-                                </Header>
-                                <Tabs
-                                    hideAdd={true}
-                                    type="editable-card"
+                                <Toolbar
+                                    onShowNewMapDlg={this.onShowNewMapDlg}
+                                    onShowSelMapDlg={this.showSelMapDlg}
+                                    onShowEditMapDlg={this.onShowEditMapDlg}
+                                    onShowDir={api.openMapsDir}
+                                    onShowCmd={api.openBash}
+                                />
+                                <GraphTabs
                                     activeKey={this.state.activeKey}
-                                    css={{ height: (this.state.clientH - 64) + 'px', 'backgroundColor': 'white' }}
-                                    onChange={this.onChangeTab}
-                                    onEdit={this.onEditTab}>
-                                    {
-                                        this.state.panes.map(pane => (
-                                            <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                                <div css={getTabItemContainerStyle(this.state.clientH - 64 - 55)}>
-                                                    <Mindmap cells={pane.mapCells} onToggleExpand={this.toggleExpand.bind(this, pane.key)} />
-                                                </div>
-                                            </TabPane>
-                                        ))
-                                    }
-                                </Tabs>
+                                    containerH={this.state.clientH - 64}
+                                    contentH={this.state.clientH - 64 - 55}
+                                    panes={this.state.panes}
+                                    onChangeTab={this.onChangeTab}
+                                    onEditTab={this.onEditTab}
+                                    onToggleExpand={this.toggleExpand}
+                                />
                             </>
 
                             :
 
                             <Content>
-                                <Welcome maxH={this.state.clientH} 
+                                <Welcome maxH={this.state.clientH-160} 
                                     dirs={this.state.dirs}
                                     filelist={this.state.filelist} 
                                     onOpenMapsDir={api.openMapsDir}
@@ -441,67 +381,36 @@ class MapsViewer extends React.Component {
                     }
                 </Layout>
 
-                <Modal
-                    title="新建图表"
+                <NewGraphDlg
                     visible={this.state.newMapDlgVisible}
+                    newMapName={this.state.newMapName}
                     onOk={this.onNewMapDlgOK}
-                    onCancel={this.onNewMapDlgCancel}>
-                    <Input placeholder="请输入图表名称" value={this.state.newMapName} onChange={this.onChangeNewMapName} />
-                </Modal>
+                    onCancel={this.onNewMapDlgCancel}
+                    onChangeNewMapName={this.onChangeNewMapName}
+                />
 
-                <Modal
-                    title={"编辑图表 - " + this.state.currMapName}
-                    css={{
-                        width: (this.state.clientW - 400) ,
-                        minWidth: (this.state.clientW - 400) 
-                    }}
-                    maskClosable={false}
+                <EditGraphDlg
                     visible={this.state.editMapDlgVisible}
+                    currMapName={this.state.currMapName}
+                    dlgW={this.state.clientW - 200}
+                    editorH={this.state.clientH - 350-50}
+                    editTmpTxt={this.state.editTmpTxt}
                     onOk={this.onEditMapDlgOK}
-                    onCancel={this.onEditMapDlgCancel}>
-                    <div>
-                        <div css={{'marginBottom':"10px"}}>
-                            {
-                                ['#cf1322','#389e0d','#0050b3','#fa8c16','#13c2c2','#ad6800','#1890ff','#722ed1','#c41d7f'].map((eachcolor,colorInd)=>(
-                                    <div key={colorInd} css={getEditDlgColorBoxStyle(eachcolor)} onClick={this.onAddColor.bind(this,eachcolor)}></div>
-                                ))
-                            }                                
-                        </div>
-                        <CodeMirror
-                            css={getCodeEditorStyle(this.state.clientH - 400-50)}
-                            editorDidMount={this.bindCodeMirrorInst}
-                            value={this.state.editTmpTxt}
-                            options={{
-                                lineNumbers: true,
-                                theme: 'default',
-                                mode:   'markdown',
-                                styleActiveLine: true,
-                                indentWithTabs:true,
-                                indentUnit:4,
-                                keyMap: "sublime",
-                                extraKeys:{
-                                    "Ctrl-S":   this.onEditMapDlgOK,
-                                    "Esc":      this.onEditMapDlgEscKey
-                                }
-                            }}
-                            onBeforeChange={this.onChangeEditTmpTxt}/>
-                    </div>
-                </Modal>
+                    onCancel={this.onEditMapDlgCancel}
+                    onChangeEditTmpTxt={this.onChangeEditTmpTxt}
+                />
 
-                <Modal
-                    title="打开图表"
+                <OpenGraphDlg
                     visible={this.state.selMapDlgVisible}
-                    footer={null}
-                    onCancel={this.onSelMapDlgCancel}>
-                        <PathSelect 
-                            maxH={(this.state.clientH - 64-250)}
-                            forceMaxH={true}
-                            dirs={this.state.dirs} 
-                            filelist={this.state.filelist}
-                            onloadDir={this.loadDir}
-                            onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
-                            onSelectMapItem={this.onSelectMapItem}/>
-                </Modal>
+                    itemsH={(this.state.clientH - 64-250)}
+                    winW={this.state.clientW}
+                    dirs={this.state.dirs} 
+                    filelist={this.state.filelist}
+                    onCancel={this.onSelMapDlgCancel}
+                    onloadDir={this.loadDir}
+                    onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
+                    onSelectMapItem={this.onSelectMapItem}
+                />
             </>
         );
     }
@@ -523,50 +432,6 @@ const selectCurrDir=createSelector(
         return dirs.filter(dir=>dir.iscurr)[0].fullpath;
     }
 );
-
-const getCodeEditorStyle=(height)=>({
-    '& .CodeMirror':{
-        border:     '1px solid lightgrey',
-        fontSize:   16,
-        height:     height,
-        maxHeight:  height,
-        minHeight:  height,
-    }
-});
-
-const getEditDlgColorBoxStyle=(color)=>({
-    backgroundColor:color,
-    width:          16,
-    height:         16,
-    display:        'inline-block',
-    cursor:         'pointer',
-    marginRight:    10,
-});
-
-
-
-
-//background-color:#f0f2f5;
-//background-color:#EEE;
-const headerStyle = {
-    backgroundColor:    '#f0f2f5',
-    paddingLeft:        0,
-    '& .toolbtn':       {
-        marginLeft:     20
-    }
-};
-
-
-const getTabItemContainerStyle=(h)=>({
-    height: h,
-    maxHeight: h,
-    overflowY: 'auto',
-    overflowX: 'auto',
-    width:'100%',
-    paddingBottom:'30px'
-});
-
-
 
 
 

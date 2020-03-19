@@ -79,7 +79,7 @@ class MindmapSvc {
         let cols = leftAndRightCols[0] + 1 + leftAndRightCols[1];//列数
         let rootLoc = [parseInt((rows - 1) / 2), leftAndRightCols[0]];//根节点位置
 
-        console.log("行列数：", rows, cols);
+        
 
         //从根节点向下递归设置各节点的颜色
         this.setNodeLineColor(nd, defaultLineColor);

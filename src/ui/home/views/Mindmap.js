@@ -38,7 +38,9 @@ class Mindmap extends React.Component {
                                     </span>
                                     {
                                         (item.nd && false===item.nd.leaf ) && 
-                                        <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  onClick={this.props.onToggleExpand.bind(this,item)}/>
+                                        <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' 
+                                            icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  
+                                            onClick={this.props.onToggleExpand.bind(this,item)}/>
                                     }
                                 </td>    
                             )

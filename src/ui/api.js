@@ -23,7 +23,7 @@ class Api{
      * 列出所有文件
      */
     list=(basedir=null)=>{
-        console.log("列目录",basedir);
+        
 
         // const fs = window.require('fs');
 

@@ -24,7 +24,7 @@ class Welcome extends React.Component {
                     }}>
                         <Col span={14} >
                             <PathSelect 
-                                maxH={this.props.maxH-160}
+                                maxH={this.props.maxH}
                                 dirs={this.props.dirs} 
                                 filelist={this.props.filelist}
                                 onloadDir={this.props.onloadDir}
