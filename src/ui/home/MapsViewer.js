@@ -393,7 +393,7 @@ class MapsViewer extends React.Component {
     render() {
         return (
             <>
-                <Layout css={container}>
+                <Layout>
                     {
                         (null != this.state.panes && 0 < this.state.panes.length) ?
                             <>
@@ -410,13 +410,13 @@ class MapsViewer extends React.Component {
                                     hideAdd={true}
                                     type="editable-card"
                                     activeKey={this.state.activeKey}
-                                    style={{ height: (this.state.clientH - 64) + 'px', 'backgroundColor': 'white' }}
+                                    css={{ height: (this.state.clientH - 64) + 'px', 'backgroundColor': 'white' }}
                                     onChange={this.onChangeTab}
                                     onEdit={this.onEditTab}>
                                     {
                                         this.state.panes.map(pane => (
                                             <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                                <div style={{ height: (this.state.clientH - 64 - 55) + 'px',maxHeight: (this.state.clientH - 64 - 55) + 'px', ...tabContainerStyle }}>
+                                                <div css={getTabItemContainerStyle(this.state.clientH - 64 - 55)}>
                                                     <Mindmap cells={pane.mapCells} onToggleExpand={this.toggleExpand.bind(this, pane.key)} />
                                                 </div>
                                             </TabPane>
@@ -451,19 +451,19 @@ class MapsViewer extends React.Component {
 
                 <Modal
                     title={"编辑图表 - " + this.state.currMapName}
-                    style={{
-                        width: (this.state.clientW - 400) + "px",
-                        minWidth: (this.state.clientW - 400) + "px"
+                    css={{
+                        width: (this.state.clientW - 400) ,
+                        minWidth: (this.state.clientW - 400) 
                     }}
                     maskClosable={false}
                     visible={this.state.editMapDlgVisible}
                     onOk={this.onEditMapDlgOK}
                     onCancel={this.onEditMapDlgCancel}>
                     <div>
-                        <div style={{'marginBottom':"10px"}}>
+                        <div css={{'marginBottom':"10px"}}>
                             {
                                 ['#cf1322','#389e0d','#0050b3','#fa8c16','#13c2c2','#ad6800','#1890ff','#722ed1','#c41d7f'].map((eachcolor,colorInd)=>(
-                                    <div key={colorInd} style={{...editDlgColorBoxStyle,'backgroundColor':eachcolor}} onClick={this.onAddColor.bind(this,eachcolor)}></div>
+                                    <div key={colorInd} css={getEditDlgColorBoxStyle(eachcolor)} onClick={this.onAddColor.bind(this,eachcolor)}></div>
                                 ))
                             }                                
                         </div>
@@ -507,6 +507,13 @@ class MapsViewer extends React.Component {
     }
 }
 
+const getDefMapTxt=(theleName="中心主题") =>(
+`- ${theleName}
+\t- 分主题
+\t- c:#1890ff|带颜色的分主题
+\t- 带说明的分主题|m:balabala`
+);
+
 const selectCurrDir=createSelector(
     state=>state.dirs,
     dirs=>{
@@ -517,60 +524,51 @@ const selectCurrDir=createSelector(
     }
 );
 
-const getCodeEditorStyle=(height)=>css`
-    & .CodeMirror{
-        border: 1px solid lightgrey; 
-        font-size:16px;
-        height:${height}px;
-        max-height:${height}px;
-        min-height:${height}px;
+const getCodeEditorStyle=(height)=>({
+    '& .CodeMirror':{
+        border:     '1px solid lightgrey',
+        fontSize:   16,
+        height:     height,
+        maxHeight:  height,
+        minHeight:  height,
     }
-`;
+});
 
-const editDlgColorBoxStyle={
-    'width':'16px',
-    'height':'16px',
-    'display':'inline-block',
-    'cursor':'pointer',
-    'marginRight':'10px',
-};
+const getEditDlgColorBoxStyle=(color)=>({
+    backgroundColor:color,
+    width:          16,
+    height:         16,
+    display:        'inline-block',
+    cursor:         'pointer',
+    marginRight:    10,
+});
 
-const getDefMapTxt=(theleName="中心主题") =>(
-`- ${theleName}
-\t- 分主题
-\t- c:#1890ff|带颜色的分主题
-\t- 带说明的分主题|m:balabala`
-);
+
 
 
 //background-color:#f0f2f5;
 //background-color:#EEE;
-const headerStyle = css`
-    background-color:#f0f2f5;
-    padding-left:0px;
-    & .toolbtn{
-      margin-left:20px;
+const headerStyle = {
+    backgroundColor:    '#f0f2f5',
+    paddingLeft:        0,
+    '& .toolbtn':       {
+        marginLeft:     20
     }
-    & .divider{
-      margin:0px;
-      padding:0px;
-    }
-`;
-
-
-
-
-const tabContainerStyle = {
-    'overflowY': 'auto',
-    'overflowX': 'auto',
-    'width':'100%',
-    'paddingBottom':'30px',
 };
 
-//background-color:white;  
-const container = css`
-    
-`;
+
+const getTabItemContainerStyle=(h)=>({
+    height: h,
+    maxHeight: h,
+    overflowY: 'auto',
+    overflowX: 'auto',
+    width:'100%',
+    paddingBottom:'30px'
+});
+
+
+
+
 
 const defaultLineColor = 'lightgrey';
 
@@ -588,136 +586,112 @@ const bordType = {
 
 //根据边框类型动态生成对应的样式
 const getBorderStyle = (type, color = 'lightgrey') => {
-    if (bordType.l === type) {
-        return css`border-left:2px solid ${color};`;
-    }
-    if (bordType.r === type) {
-        return css`border-right:2px solid ${color};`;
-    }
-    if (bordType.t === type) {
-        return css`border-top:2px solid ${color};`;
-    }
-    if (bordType.b === type) {
-        return css`border-bottom:2px solid ${color};`;
-    }
+    let radius=14;
 
-    if (bordType.rbRad === type) {
+    //边框样式
+    if (bordType.l === type) {return {borderLeft:`2px solid ${color}`};}
+    if (bordType.r === type) {return {borderRight:`2px solid ${color}`};}
+    if (bordType.t === type) {return {borderTop:`2px solid ${color}`};}
+    if (bordType.b === type) {return {borderBottom:`2px solid ${color}`};}
 
-        return css`border-bottom-right-radius:14px;`;
-    }
-    if (bordType.lbRad === type) {
-        return css`border-bottom-left-radius:14px;`;
-    }
-    if (bordType.rtRad === type) {
-        return css`border-top-right-radius:14px !important;`;
-    }
-    if (bordType.ltRad === type) {
-        return css`border-top-left-radius:14px;`;
-    }
+    //圆角样式
+    if (bordType.rbRad === type) {return {borderBottomRightRadius:radius};}
+    if (bordType.lbRad === type) {return {borderBottomLeftRadius:radius};}
+    if (bordType.rtRad === type) {return {borderTopRightRadius:radius};}
+    if (bordType.ltRad === type) {return {borderTopLeftRadius:radius};}
 };
 
 
 //#2db7f5
-const centerThemeStyle = css`
-    padding-top:0px;
-    padding-bottom:0px;
-    vertical-align:bottom;
+const centerThemeStyle = {
+    paddingTop:0,
+    paddingBottom:0,
+    verticalAlign:'bottom',
     
-    & span.themetxt{
-        white-space:nowrap;
-        display:inline-block;
-        padding:4px 16px 4px 16px;
-        background-color:#108ee9;
-        border-radius:5px;
-        color:white;
-        font-size:18px;
-        line-height:30px;
+    '& span.themetxt':{
+        whiteSpace:'nowrap',
+        display:'inline-block',
+        padding:'4px 16px',
+        backgroundColor:'#108ee9',
+        borderRadius:5,
+        color:'white',
+        fontSize:18,
+        lineHeight:'30px'
     }
+};
 
+const secendThemeStyle = {
+    paddingTop:12,
+    paddingBottom:0,
+    verticalAlign:'bottom',
+
+    '& span.themetxt':{
+        whiteSpace:'nowrap',
+        display:'inline-block',
+        marginBottom:0,
+        paddingBottom:0,
+        fontSize:16,
+        lineHeight:'20px',
+        verticalAlign:'bottom',
+    },
+
+    '& .btn':{
+        width:18,
+        height:18,
+        fontSize:14,
+        lineHeight:'16px',
+        margin:0,
+        marginLeft:5,
+        marginRight:5,
+        padding:0,
+        verticalAlign:'bottom',
+        marginBottom:1,
+    },
+
+    '& .btn .icon':{
+        fontSize:14,
+        lineHeight:'18px',
+        margin:0,
+        padding:0,
+    }
+};
+
+const otherThemeStyle = {
+    paddingTop:12,
+    paddingBottom:0,
+    verticalAlign:'bottom',
     
-`;
+    '& span.themetxt':{
+        whiteSpace:'nowrap',
+        display:'inline-block',
+        marginBottom:0,
+        paddingBottom:0,
+        fontSize:14,
+        lineHeight:'18px',
+        verticalAlign:'bottom',
+    },
 
-const secendThemeStyle = css`
-    padding-top:12px;
-    padding-bottom:0px;
-    vertical-align:bottom;
-    
-    & span.themetxt{
-        white-space:nowrap;
-        display:inline-block;
-        margin-bottom:0px;
-        padding-bottom:0px;
-        font-size:16px;
-        line-height:20px;
-        vertical-align:bottom;
+    '& .btn':{
+        width:18,
+        height:18,
+        fontSize:14,
+        lineHeight:'16px',
+        margin:0,
+        marginLeft:5,
+        marginRight:5,
+        padding:0,
+        verticalAlign:'bottom',
+    },
 
-        
+    '& .btn .icon':{
+        fontSize:14,
+        lineHeight:'18px',
+        margin:0,
+        padding:0,
     }
-
-    & .btn{
-        width:18px;
-        height:18px;
-        font-size:14px;
-        line-height:16px;
-        margin:0px;       
-        margin-left:5px;
-        margin-right:5px;
-        padding:0px;
-        vertical-align:bottom;
-        margin-bottom:1px;
-    }
-
-    & .btn .icon{
-        font-size:14px;
-        line-height:18px;
-        margin:0px;
-        padding:0px;
-    }
-`;
-
-const otherThemeStyle = css`
-    padding-top:12px;
-    padding-bottom:0px;
-    vertical-align:bottom;
-    
-    & span.themetxt{
-        white-space:nowrap;
-        display:inline-block;
-        margin-bottom:0px;
-        padding-bottom:0px;
-        
-        
-        
-        font-size:14px;
-        line-height:18px;
-        vertical-align:bottom;
-    }
-
-    & .btn{
-        width:18px;
-        height:18px;
-        font-size:14px;
-        line-height:16px;
-        margin:0px;
-        
-        margin-left:5px;
-        margin-right:5px;
-        padding:0px;
-        vertical-align:bottom;
-    }
-
-    & .btn .icon{
-        font-size:14px;
-        line-height:18px;
-        margin:0px;
-        padding:0px;
-    }
-`;
+};
 
 const themeStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
-
-
-
 
 
 

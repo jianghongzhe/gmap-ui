@@ -10,9 +10,10 @@ class PathSelect extends React.Component {
         this.state = {  };
     }
     render() {
+        //列表样式，如果指定的forceMaxH，则保持高度和最大高度一致
         let listWrapperStyle={'maxHeight':this.props.maxH,'overflowY':'auto','overflowX':'hidden'};
         if(this.props.forceMaxH){
-            listWrapperStyle={'height':this.props.maxH, ...listWrapperStyle};
+            listWrapperStyle={'height':this.props.maxH,'minHeight':this.props.maxH, ...listWrapperStyle};
         }
 
         return (
@@ -29,12 +30,12 @@ class PathSelect extends React.Component {
                             }    
                         </Breadcrumb>
                     </Col>
-                    <Col span={2} style={{textAlign:'right'}}>
+                    <Col span={2} css={{textAlign:'right'}}>
                         <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} onClick={this.props.onReloadCurrDir} />
                     </Col>
                 </Row>                          
-                <Divider style={{marginTop:'10px',marginBottom:'0px'}}/>
-                <div style={listWrapperStyle}>
+                <Divider css={{marginTop:'10px',marginBottom:'0px'}}/>
+                <div css={listWrapperStyle}>
                     <List
                         itemLayout="horizontal"
                         dataSource={this.props.filelist}
@@ -43,7 +44,7 @@ class PathSelect extends React.Component {
                                 <List.Item.Meta onClick={this.props.onSelectMapItem.bind(this,item)}
                                     avatar={
                                         <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} 
-                                            style={{ "backgroundColor": (item.isfile?'#40a9ff':'orange') }} />
+                                            css={{ "backgroundColor": (item.isfile?'#40a9ff':'orange') }} />
                                     }
                                     title={item.showname}
                                     description={item.size}/>

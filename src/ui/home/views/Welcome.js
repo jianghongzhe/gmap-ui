@@ -17,7 +17,11 @@ class Welcome extends React.Component {
         return (
             <Row>
                 <Col span={16} offset={4}>
-                    <Row css={container}>
+                    <Row css={{
+                        marginTop:50,
+                        padding:10,
+                        backgroundColor:'white'
+                    }}>
                         <Col span={14} >
                             <PathSelect 
                                 maxH={this.props.maxH-160}
@@ -28,7 +32,7 @@ class Welcome extends React.Component {
                                 onSelectMapItem={this.props.onSelectMapItem}/>
                         </Col>
                         <Col span={10}>                   
-                            <div css={logoWrapper}>
+                            <div css={logoWrapperStyle}>
                                 <p><Avatar size={256} src={logourl}/></p>
                                 <p className='appname'>GMap - 思维导图<span className='ver'>v0.1</span></p>
                                 <div className='btns'>
@@ -45,30 +49,25 @@ class Welcome extends React.Component {
     }
 }
 
-const logoWrapper=css`
-    text-align:center;
-    margin-bottom:50px;
-    & .appname{
-        font-size:18px;
+const logoWrapperStyle={
+    'textAlign':'center',
+    'marginBottom':50,
+
+    '& .appname':{
+        'fontSize':18
+    },
+    '& .ver':{
+        'display':'inline-block',
+        'marginLeft':30
+    },
+    '& .btns':{
+        'marginTop':20
+    },
+    '& .btns .rbtn':{
+        'marginLeft':20
     }
-    & .ver{
-        display:inline-block;
-        margin-left:30px;
-    }
-    & .btns{
-        margin-top:20px;
-    }
-    & .btns .rbtn{
-        margin-left:20px;
-    }
-`;
+};
 
 
-const container=css`
-    margin-top:50px;
-    padding:10px;
-    background-color:white;
-`;
-  
 
 export default Welcome;
