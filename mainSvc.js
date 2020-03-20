@@ -128,7 +128,20 @@ const exists = (fn) => {
  * @returns 文件内容
  */
 const readFile = (fullpath) => {
-    return fs.readFileSync(fullpath, 'utf-8');
+    try{
+        if(!fs.existsSync(fullpath)){
+            return {
+                succ: false,
+                msg: "文件不存在，无法打开"
+            };
+        }
+        return fs.readFileSync(fullpath, 'utf-8');
+    }catch(e){
+        return {
+            succ: false,
+            msg: "读取文件失败，请确认文件存在"
+        };
+    }
 }
 
 /**
@@ -137,12 +150,20 @@ const readFile = (fullpath) => {
  * @param {*} content 内容
  */
 const saveFile = (fullpath, content) => {
-    let ind=fullpath.lastIndexOf("\\");
-    let dir=fullpath.substring(0,ind);
-    if(!fs.existsSync(dir)){
-        fs.mkdirSync(dir,{recursive:true});
+    try{
+        let ind=fullpath.lastIndexOf("\\");
+        let dir=fullpath.substring(0,ind);
+        if(!fs.existsSync(dir)){
+            fs.mkdirSync(dir,{recursive:true});
+        }
+        fs.writeFileSync(fullpath, content, 'utf-8');
+        return true;
+    }catch(e){
+        return {
+            succ: false,
+            msg: "写入文件失败，请稍后重试"
+        };
     }
-    fs.writeFileSync(fullpath, content, 'utf-8');
 }
 
 

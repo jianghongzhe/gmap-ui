@@ -59,22 +59,24 @@ class MindmapSvc {
      * @param {bordTypesMap} 边框类型的枚举
      * @param {getBorderStyleCallback} 根据边框类型解析为边框样式的回调
      */
-    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback) => {
-        //校验
+    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,shouldValidate=true) => {
         txts=txts.trim();
-        if(''===txts){
-            return {
-                succ :  false,
-                msg:    '内容解析失败',
-                desc:   '图表内容不能为空 ~~~'
+        //校验
+        if(shouldValidate){
+            if(''===txts){
+                return {
+                    succ :  false,
+                    msg:    '内容解析失败',
+                    desc:   '图表内容不能为空 ~~~'
+                }
             }
-        }
-        let valiResult=mindMapValidateSvc.validate(txts);
-        if(true!==valiResult){
-            return {
-                succ :  false,
-                msg:    '内容解析失败',
-                desc:   valiResult+" ~~~"
+            let valiResult=mindMapValidateSvc.validate(txts);
+            if(true!==valiResult){
+                return {
+                    succ :  false,
+                    msg:    '内容解析失败',
+                    desc:   valiResult+" ~~~"
+                }
             }
         }
 

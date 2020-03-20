@@ -179,6 +179,11 @@ class MapsViewer extends React.Component {
             message.warning('请输入图表名称');
             return;
         }
+        let reg=/^[^ 　\\/\t\b\r\n]+([/][^ 　\\/\t\b\r\n]+)*$/;
+        if(!reg.test(name)){
+            message.warning('图表名称格式有误，请更换另一名称');
+            return;
+        }
         let fnAndFullpath = api.exists(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
         if (true === fnAndFullpath) {
             message.warning('该图表名称已存在，请更换另一名称');
@@ -188,7 +193,11 @@ class MapsViewer extends React.Component {
 
         //保存文件
         let defMapTxt=getDefMapTxt(themeName);
-        api.save(fullpath, defMapTxt);
+        let ret=api.save(fullpath, defMapTxt);
+        if(ret && false===ret.succ){
+            message.error(ret.msg);
+            return;
+        }
 
         //计算导图表格信息并加入新tab      
         let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle);
@@ -250,9 +259,14 @@ class MapsViewer extends React.Component {
         }
 
         //保存并修改状态
-        api.save(this.state.activeKey, txt);
+        let ret=api.save(this.state.activeKey, txt);
+        if(ret && false===ret.succ){
+            message.error(ret.msg);
+            return;
+        }
+
         item = item[0]
-        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle);
+        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle,false);
         item.mapTxts = txt;
         item.mapCells = cells;
         this.setState({
@@ -266,6 +280,7 @@ class MapsViewer extends React.Component {
 
     //------------选择文件功能----------------------------------------------------------------------
     onSelectMapItem = (item) => {
+        //如果点击了目录，则显示目录下的内容
         if(!item.isfile){
             this.setState({
                 filelist: api.list(item.fullpath),
@@ -285,6 +300,11 @@ class MapsViewer extends React.Component {
 
         //加载文件内容并计算导图表格的数据
         let origintxts = api.load(item.fullpath);
+        if(origintxts && false===origintxts.succ){
+            message.error(origintxts.msg);
+            return;
+        }
+
         let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle);
 
         //增加新选项卡并设置状态

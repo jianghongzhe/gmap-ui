@@ -43,7 +43,11 @@ class Api{
      * 读取文件内容
      */
     load=(fullpath)=>{
-        return app.readFile(fullpath).replace(/\r/g,'');//\r\n全部换为\n
+        let ret=app.readFile(fullpath);
+        if('string'===typeof(ret)){
+            return ret.replace(/\r/g,'');//\r\n全部换为\n
+        }
+        return ret;
     }
 }
 
