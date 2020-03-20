@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Button,Tooltip } from 'antd';
+import { Button,Tooltip,Alert,Row, Col,  } from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined } from '@ant-design/icons';
 
 class Mindmap extends React.Component {
@@ -13,44 +13,69 @@ class Mindmap extends React.Component {
 
 
     render() {
+        if(!this.props.cells){
+            return (<Row>
+                <Col span={8} offset={8}>
+                    <Alert
+                        css={{marginTop:50}}
+                        message='状态异常'
+                        description='读取图表文件时出现错误'
+                        type="error"/>
+                </Col>
+            </Row>);
+        }
+
         return (
-            <table border='0' cellSpacing='0' cellPadding='0'  align='center' css={mindTabStyle}>
-                <tbody>
-                {
-                    this.props.cells.map((line,rowInd)=>
-                        <tr key={rowInd}>
-                        <td className='paddingcell'></td>
-                        {
-                            line.map((item,colInd)=>
-                                <td key={colInd} css={item.cls}>
-                                    <span className='themetxt'>
-                                        {item.txt}
+            <>
+            {
+                false===this.props.cells.succ ?
+                <Row>
+                    <Col span={8} offset={8}>
+                        <Alert
+                            css={{marginTop:50}}
+                            message={this.props.cells.msg}
+                            description={this.props.cells.desc}
+                            type="error"/>
+                    </Col>
+                </Row>
+                
+                :
+                
+                <table border='0' cellSpacing='0' cellPadding='0'  align='center' css={mindTabStyle}>
+                    <tbody>
+                    {
+                        this.props.cells.map((line,rowInd)=>
+                            <tr key={rowInd}>
+                            <td className='paddingcell'></td>
+                            {
+                                line.map((item,colInd)=>
+                                    <td key={colInd} css={item.cls}>
+                                        <span className='themetxt'>
+                                            {item.txt}
+                                            {
+                                                (item.nd && item.nd.memo && 0!==item.nd.memo.length) && 
+                                                <Tooltip title={
+                                                    <div>{item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)}</div>
+                                                }><FormOutlined className='memoicon'/></Tooltip>
+                                            }
+                                        </span>
                                         {
-                                            (item.nd && item.nd.memo && 0!==item.nd.memo.length) && 
-                                            <Tooltip title={
-                                                <div>
-                                                    {
-                                                        item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
-                                                    }
-                                                </div>
-                                            }><FormOutlined className='memoicon'/></Tooltip>
+                                            (item.nd && false===item.nd.leaf ) && 
+                                            <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' 
+                                                icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  
+                                                onClick={this.props.onToggleExpand.bind(this,item)}/>
                                         }
-                                    </span>
-                                    {
-                                        (item.nd && false===item.nd.leaf ) && 
-                                        <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' 
-                                            icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  
-                                            onClick={this.props.onToggleExpand.bind(this,item)}/>
-                                    }
-                                </td>    
-                            )
-                        }
-                        <td className='paddingcell'></td>
-                        </tr>
-                    )
-                }
-                </tbody>
-            </table>
+                                    </td>    
+                                )
+                            }
+                            <td className='paddingcell'></td>
+                            </tr>
+                        )
+                    }
+                    </tbody>
+                </table>
+            }
+            </>
         );
     }
 

@@ -1,3 +1,4 @@
+import mindMapValidateSvc from './mindMapValidateSvc';
 /**
  * 根据指定文本格式，解析为table方式显示的思维导数的数据格式
  * 
@@ -59,6 +60,24 @@ class MindmapSvc {
      * @param {getBorderStyleCallback} 根据边框类型解析为边框样式的回调
      */
     parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback) => {
+        //校验
+        txts=txts.trim();
+        if(''===txts){
+            return {
+                succ :  false,
+                msg:    '内容解析失败',
+                desc:   '图表内容不能为空 ~~~'
+            }
+        }
+        let valiResult=mindMapValidateSvc.validate(txts);
+        if(true!==valiResult){
+            return {
+                succ :  false,
+                msg:    '内容解析失败',
+                desc:   valiResult+" ~~~"
+            }
+        }
+
         //设置共享的变量
         defaultLineColor = defLineColor;
         bordType = bordTypesMap;

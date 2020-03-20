@@ -73,11 +73,16 @@ const listFiles = (assignedDir = null) => {
     }).map(ent => {
         let fullpath = (assignedDir?assignedDir+"\\"+ent.name : getMapsPath(ent.name));
         let isfile = ent.isFile();
+        let isEmptyDir=false;
+        if(!isfile){
+            isEmptyDir=(0===fs.readdirSync(fullpath, { withFileTypes: true }).length);//如果是目录则看是否为空目录
+        }
         return {
             name:       ent.name,
             itemsName:  getRelaPath(fullpath,basepath),
             fullpath:   fullpath,
             isfile:     isfile,
+            emptyDir:   isEmptyDir,
             size:       (isfile ? fs.statSync(fullpath).size : 0)
         };
     });
