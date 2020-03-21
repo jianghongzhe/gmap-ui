@@ -345,7 +345,7 @@ class MindmapSvc {
                         }
 
                         //当前行取消下边框
-                        removeBord(cells[j][k].cls,bordType.b);
+                        removeBord(cells[j][k],bordType.b);
 
                         //下一行增加上边框
                         if (k !== i) {
