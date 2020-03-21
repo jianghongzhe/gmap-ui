@@ -413,6 +413,7 @@ class MapsViewer extends React.Component {
                     visible={this.state.editMapDlgVisible}
                     currMapName={this.state.currMapName}
                     dlgW={this.state.clientW - 200}
+                    winW={this.state.clientW}
                     editorH={this.state.clientH - 350-50}
                     editTmpTxt={this.state.editTmpTxt}
                     onOk={this.onEditMapDlgOK}
