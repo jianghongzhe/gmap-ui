@@ -343,7 +343,7 @@ class MapsViewer extends React.Component {
 
 
 
-    //------------导图上切换展开状态----------------------------------------------------------------------
+    //------------导图的操作----------------------------------------------------------------------
     /**
      * 导图上切换展开状态
      * @param {key}  当前激活的选项卡的key，也即为文件全路径
@@ -356,6 +356,10 @@ class MapsViewer extends React.Component {
         this.setState({
             panes: [...this.state.panes]
         });
+    }
+
+    openLink=(url)=>{
+        api.openLink(url);
     }
 
 
@@ -382,6 +386,7 @@ class MapsViewer extends React.Component {
                                     onChangeTab={this.onChangeTab}
                                     onEditTab={this.onEditTab}
                                     onToggleExpand={this.toggleExpand}
+                                    onOpenLink={this.openLink}
                                 />
                             </>
 

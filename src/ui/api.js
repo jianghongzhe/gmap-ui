@@ -14,6 +14,10 @@ class Api{
         return app.exists(fn);
     }
 
+    openLink=(url)=>{
+        app.openLink(url);
+    }
+
 
     getPathItems=(dir=null)=>{
         return app.getPathItems(dir);

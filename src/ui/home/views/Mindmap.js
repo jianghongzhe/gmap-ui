@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Button,Tooltip,Alert,Row, Col,  } from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined } from '@ant-design/icons';
 
 class Mindmap extends React.Component {
     constructor(props) {
@@ -53,10 +53,25 @@ class Mindmap extends React.Component {
                                         <span className='themetxt'>
                                             {item.txt}
                                             {
-                                                (item.nd && item.nd.memo && 0!==item.nd.memo.length) && 
+                                                (item.nd && item.nd.memo && 0<item.nd.memo.length) && 
                                                 <Tooltip title={
                                                     <div>{item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)}</div>
                                                 }><FormOutlined className='memoicon'/></Tooltip>
+                                            }
+                                            {
+                                                (item.nd && item.nd.links && 0<item.nd.links.length) &&
+                                                    <>{
+                                                        item.nd.links.map((link,linkInd)=>(
+                                                            // <LinkOutlined className='linkicon'
+                                                            //     title={link.name?link.name+" "+link.addr:link.addr}
+                                                            //     onClick={this.props.onOpenLink.bind(this,link.addr)}/>
+
+                                                            <Button key={linkInd} type="link" size='small' 
+                                                                title={link.name?link.name+"  "+link.addr:link.addr} className='linkbtn' 
+                                                                icon={<LinkOutlined className='linkicon'/>}  
+                                                                onClick={this.props.onOpenLink.bind(this,link.addr)}/>
+                                                        ))
+                                                    }</>
                                             }
                                         </span>
                                         {
@@ -107,6 +122,24 @@ const mindTabStyle={
         lineHeight:'16px',
         marginLeft:5,
         color:'#fa8c16'
+    },
+
+    '& td .linkbtn':{
+        width:16,
+        height:16,
+        lineHeight:'16px',
+        fontSize:16,
+        padding:0,
+        marginLeft:3,
+        // backgroundColor:'lightblue',
+    },
+
+    '& td .linkicon':{
+        fontSize:16,
+        lineHeight:'16px',
+        marginLeft:0,
+        color:'#009688',
+        cursor:'pointer'
     }
 }; 
 

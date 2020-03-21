@@ -4,6 +4,7 @@ const { exec, spawn } = require('child_process');
 const path = require('path');
 
 
+
 //===========暴露的接口================================================
 
 /**
@@ -122,6 +123,10 @@ const exists = (fn) => {
     return [fn,themeName, fullpath];
 }
 
+const openLink=(url)=>{
+    shell.openExternal(url);
+}
+
 /**
  * 读取文件内容，以utf-8编码读取
  * @param {*} fullpath 全路径
@@ -214,4 +219,4 @@ const getMapsPath = (fn = null) => (__dirname + '\\gmaps' + (fn ? "\\" + fn : ""
 
 
 
-module.exports={getPathItems, listFiles, exists, readFile, saveFile, openMapsDir, openGitBash};
+module.exports={getPathItems, listFiles, exists, readFile, saveFile, openMapsDir, openGitBash, openLink};

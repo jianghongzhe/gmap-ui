@@ -10,6 +10,12 @@ import mindMapValidateSvc from './mindMapValidateSvc';
         par:    null,       //父节点，如果是根节点则为null
         color:  lineColor,  //节点颜色
         memo:   memo,       //备注信息
+        links:  [
+            {
+                name:'',    //null或文字
+                addr:''     //非空，url
+            }
+        ]
         childs: []          //子节点数组
         leaf:false,         //是否为叶节点
         expand:true         //是否展开
@@ -600,6 +606,11 @@ class MindmapSvc {
             let txt = str.substring(lev + 1).trim();
             let lineColor = null;
             let memo = [];
+            let links=[];
+            // {
+            //     name:'',    //null或文字
+            //     addr:''     //非空，url
+            // }
 
             //内容是复合类型，则分别计算每一部分
             if (0 <= txt.indexOf("|")) {
@@ -608,16 +619,38 @@ class MindmapSvc {
                     if (null == item || "" === item) { return; }
 
                     //是颜色标记
-                    if (0 === item.indexOf("c:")) {
+                    if (0 === item.indexOf("c:") && item.length<=20) {
                         lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
                         return;
                     }
+
                     //是备注标记
                     if (0 === item.indexOf("m:")) {
                         memo.push(item.substring("m:".length).trim());//如果出现多个，则加入数组中
                         // console.log("utqc "+memo);
                         return;
                     }
+
+                    //是markdown链接 [文字](地址)
+                    if (/^\[.+\]\(.+\)$/.test(item)) {
+                        let txt=item.substring(1,item.lastIndexOf("]"));
+                        let url=item.substring(item.indexOf("(")+1,item.length-1);
+                        links.push({
+                            name:txt,
+                            addr:url
+                        });
+                        return;
+                    }
+                    //是普通链接
+                    let urlPattern=this.isUrlPattern(item);
+                    if(false!==urlPattern){
+                        links.push({
+                            name:null,
+                            addr:urlPattern
+                        });
+                        return;
+                    }
+
                     //都不是，即为文本内容
                     txt = item;//如出现多次，只保留最后一次
                 });
@@ -630,6 +663,7 @@ class MindmapSvc {
                 par: null,
                 color: lineColor,
                 memo: memo,
+                links:links,
                 childs: [],
                 leaf: false,         //是否为叶节点
                 expand: true         //默认全部展开
@@ -676,6 +710,21 @@ class MindmapSvc {
 
     removeBord = (item, type) => {
         item.cls &= (~type);
+    }
+
+    /**
+     * 判断是否为url类型
+     * @param {*} url 
+     * @returns 如果是url类型，返回处理过的地址，否则抬false
+     */
+    isUrlPattern=(url)=>{
+        if(url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || url.startsWith("ftps://")){
+            return url.trim();
+        }
+        if(url.startsWith("www.")){
+            return "http://"+url.trim();
+        }
+        return false;
     }
 }
 
