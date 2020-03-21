@@ -54,6 +54,29 @@ class MindmapSvc {
         return this.parseMindMapDataInner(root);
     }
 
+    /**
+     * 展开所有节点
+     * @param {*} cells 
+     */
+    expandAllNds(cells){
+        let root=this.getRootNodeByCells(cells);
+        this.expandNode(root);
+        //重新解析表格结构
+        return this.parseMindMapDataInner(root);
+    }
+
+    
+
+
+    /**
+     * 判断是否所有节点都已展开
+     */
+    isAllNodeExpand=(cells)=>{
+        let root=this.getRootNodeByCells(cells);
+        return this.isNodeExpand(root);
+    }
+
+    
 
 
 
@@ -97,6 +120,67 @@ class MindmapSvc {
         return this.parseMindMapDataInner(nd);
 
     }
+
+
+    //----------------如下为非暴露的方法-------------------------------------------------
+
+
+    expandNode=(nd)=>{
+        nd.expand=true;
+        if(!nd.leaf){
+            nd.childs.forEach(child=>{
+                this.expandNode(child);
+            });
+        }
+    }
+
+    getRootNodeByCells=(cells)=>{
+        //找到第一个有节点的单元格的节点对象
+        let root = null;
+        let isFin=false;
+        for(let i in cells){
+            let line=cells[i];
+            for(let j in line){
+                let tmpCell=line[j];
+                if(tmpCell.nd){
+                    root=tmpCell.nd;
+                    isFin=true;
+                    break;
+                }
+            }
+            if(isFin){
+                break;
+            }
+        }
+
+        //向上找到根节点
+        while (null != root.par) {
+            root = root.par;
+        }
+        return root;
+    }
+
+    isNodeExpand=(nd)=>{
+        console.log("abhk",nd);
+
+        //叶节点认为是展开状态
+        if(nd.leaf){
+            return true;
+        }
+
+        //从自己向子节点递归，遇到未展开，就返回false，直到最后返回true
+        if(!nd.expand){
+            return false;
+        }
+        for(let i in nd.childs){
+            if(!this.isNodeExpand(nd.childs[i])){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     parseMindMapDataInner = (nd) => {
 
         let leftAndRightLeafCnt = this.setDirection(nd);//左右子树叶子节点数量
@@ -181,124 +265,91 @@ class MindmapSvc {
 
 
 
-
+        //左边部分圆角设置
         for (let i = 0; i < leftAndRightCols[0]; ++i) {
             for (let j = 0; j < rows; ++j) {
                 let item = cells[j][i];
 
                 //有右下边框，且下面格无右边框，且右边无下边框，则设置右下圆角
                 if (
-                    bordType.r === (bordType.r & item.cls) &&
-                    bordType.b === (bordType.b & item.cls) &&
-                    (
-                        j === rows - 1 || bordType.r !== (bordType.r & cells[j + 1][i].cls)
-                    )
-                    &&
-                    (
-                        i === cols - 1 || bordType.b !== (bordType.b & cells[j][i + 1].cls)
-                    )
+                    hasBord(item,bordType.r) &&
+                    hasBord(item,bordType.b) &&
+                    (j === rows - 1 || !hasBord(cells[j + 1][i],bordType.r)) &&
+                    (i === cols - 1 || !hasBord(cells[j][i + 1],bordType.b))
                 ) {
-                    // console.log("右下",item.txt);
-                    item.cls |= bordType.rbRad;
+                    addBord(item,bordType.rbRad)
                 }
 
-                //有下边框无右边框，且下面格有右边框，且右边无下边框
-                //console.log("超了",cells[j+1][i],cells[j][i+1]);
-
+                //有下边框无右边框，且下面格有右边框，且右边无下边框，则把下格设右上圆角和上边框，同时把当前格下边框去掉，依次向左直到无下边框
                 if (
-                    bordType.r !== (bordType.r & item.cls) &&
-                    bordType.b === (bordType.b & item.cls) &&
-                    (
-                        j < rows - 1 && bordType.r === (bordType.r & cells[j + 1][i].cls)
-                    ) &&
-                    (
-                        i < cols - 1 && bordType.b !== (bordType.b & cells[j][i + 1].cls)
-                    )
+                    !hasBord(item,bordType.r) &&
+                    hasBord(item,bordType.b) &&
+                    (j < rows - 1 && hasBord(cells[j + 1][i],bordType.r)) &&
+                    (i < cols - 1 && !hasBord(cells[j][i + 1],bordType.b))
                 ) {
-                    //下面格设置圆角右上边框
-                    cells[j + 1][i].cls |= bordType.rtRad;
-                    cells[j + 1][i].cls |= bordType.t;
+                    //下面格设置右上圆角和上边框
+                    addBord(cells[j + 1][i],bordType.rtRad);
+                    addBord(cells[j + 1][i],bordType.t);
                     cells[j + 1][i].tlineColor = cells[j][i].blineColor;
 
                     //本格到左边所有有下边框的都去掉，同时在下边格加上边框
                     for (let k = i; k >= 0; --k) {
-                        if (bordType.b !== (bordType.b & cells[j][k].cls)) {
+                        if (!hasBord(cells[j][k],bordType.b)) {
                             break;
                         }
 
                         //当前行取消下边框
-                        cells[j][k].cls &= (~bordType.b);
-
-                        //console.log("改边框",cells[j][k].txt,cells[j][k].lineColor,cells[j+1][k].plineColor);
+                        removeBord(cells[j][k],bordType.b);
 
                         //下一行增加上边框
                         if (k !== i) {
-                            cells[j + 1][k].cls |= bordType.t;
+                            addBord(cells[j + 1][k],bordType.t);
                             cells[j + 1][k].tlineColor = cells[j][k].blineColor;
-                            //console.log(cells[j][k].lineColor);
                         }
                     }
-
-
-                    //console.log("dddd "+cells[j][i].txt+"下面", cells[j+1][i].lineColor);
-
                 }
             }
         }
 
+        //右边部分圆角设置
         for (let i = leftAndRightCols[0] + 1; i < cols; ++i) {
             for (let j = 0; j < rows; ++j) {
                 let item = cells[j][i];
 
-                //有右下边框，且下面格无右边框，则设置右下圆角
+                //有左下边框，且下面格无左边框，，且右边无下边框，则设置左下圆角
                 if (
-                    bordType.l === (bordType.l & item.cls) &&
-                    bordType.b === (bordType.b & item.cls) &&
-                    (
-                        j === rows - 1 || bordType.l !== (bordType.l & cells[j + 1][i].cls)
-                    ) &&
-                    (
-                        i === 0 || bordType.b !== (bordType.b & cells[j][i - 1].cls)
-                    )
+                    hasBord(item,bordType.l) &&
+                    hasBord(item,bordType.b) &&
+                    (j === rows - 1 || !hasBord(cells[j + 1][i],bordType.l)) &&
+                    (i === 0 || !hasBord(cells[j][i - 1],bordType.b))
                 ) {
-                    item.cls |= bordType.lbRad;
+                    addBord(item,bordType.lbRad);
                 }
 
-                //有下边框无左边框，且下面格有左边框，且左边无下边框
-
-                //console.log(cells[j][i].txt);
-                //console.log(cells[j+1][i].cls);
-
+                //有下边框无左边框，且下面格有左边框，且左边无下边框，则把下格设左上圆角和上边框，同时把当前格下边框去掉，依次向右直到无下边框
                 if (
-                    bordType.l !== (bordType.l & item.cls) &&
-                    bordType.b === (bordType.b & item.cls) &&
-                    (
-                        j < rows - 1 && bordType.l === (bordType.l & cells[j + 1][i].cls)
-                    ) &&
-                    (
-                        i > 0 && bordType.b !== (bordType.b & cells[j][i - 1].cls)
-                    )
+                    !hasBord(item,bordType.l) &&
+                    hasBord(item,bordType.b) &&
+                    (j < rows - 1 && hasBord(cells[j + 1][i],bordType.l)) &&
+                    (i > 0 && !hasBord(cells[j][i - 1],bordType.b))
                 ) {
-                    //console.log("这了");
-
-
-                    //下面格设置圆角右上边框
-                    cells[j + 1][i].cls |= bordType.ltRad;
-                    cells[j + 1][i].cls |= bordType.t;
+                    //下面格设置左上圆角和上边框
+                    addBord(cells[j + 1][i],bordType.ltRad);
+                    addBord(cells[j + 1][i],bordType.t);
                     cells[j + 1][i].tlineColor = cells[j][i].blineColor;
 
-                    //本格到左边所有有下边框的都去掉，同时在下边格加上边框
+                    //本格到右边所有有下边框的都去掉，同时在下边格加上边框
                     for (let k = i; k < cols; ++k) {
-                        if (bordType.b !== (bordType.b & cells[j][k].cls)) {
+                        if (!hasBord(cells[j][k],bordType.b)) {
                             break;
                         }
 
                         //当前行取消下边框
-                        cells[j][k].cls &= (~bordType.b);
+                        removeBord(cells[j][k].cls,bordType.b);
 
                         //下一行增加上边框
                         if (k !== i) {
-                            cells[j + 1][k].cls |= bordType.t;
+                            addBord(cells[j + 1][k],bordType.t);
                             cells[j + 1][k].tlineColor = cells[j][k].blineColor;
                         }
                     }
@@ -353,7 +404,7 @@ class MindmapSvc {
     parseBordStyle = (item) => {
         let targetStyle = [];
         for (let type in bordType) {
-            if (this.hasBord(item, bordType[type])) {
+            if (hasBord(item, bordType[type])) {
                 let tmpColor = item.lineColor;
 
                 //如果是上下左右边框，则使用各自的颜色
@@ -425,8 +476,8 @@ class MindmapSvc {
      */
     setLine = (cells, par, child, parColor, currColor) => {
         //父子节点都设置下划线和颜色
-        this.addBord(cells[par[0]][par[1]], bordType.b);
-        this.addBord(cells[child[0]][child[1]], bordType.b);
+        addBord(cells[par[0]][par[1]], bordType.b);
+        addBord(cells[child[0]][child[1]], bordType.b);
         cells[par[0]][par[1]].blineColor = parColor;
         cells[child[0]][child[1]].blineColor = currColor;
 
@@ -441,7 +492,7 @@ class MindmapSvc {
         //子节点在父节点下面，设置连线到父节点的左或右边框线
         if (child[0] > par[0]) {
             for (let i = child[0]; i > par[0]; --i) {
-                cells[i][child[1]].cls |= (isLeft ? bordType.r : bordType.l);
+                addBord(cells[i][child[1]], (isLeft ? bordType.r : bordType.l));
                 if (isLeft) {
                     cells[i][child[1]].rlineColor = parColor;
                 } else {
@@ -453,7 +504,7 @@ class MindmapSvc {
 
         //子节点在父节点上面，设置连线到父节点的左或右边框线
         for (let i = child[0] + 1; i <= par[0]; ++i) {
-            cells[i][child[1]].cls |= (isLeft ? bordType.r : bordType.l);
+            addBord(cells[i][child[1]],(isLeft ? bordType.r : bordType.l));
             if (isLeft) {
                 cells[i][child[1]].rlineColor = parColor;
             } else {
@@ -607,6 +658,8 @@ class MindmapSvc {
             let lineColor = null;
             let memo = [];
             let links=[];
+            let expand=true;
+
             // {
             //     name:'',    //null或文字
             //     addr:''     //非空，url
@@ -617,6 +670,12 @@ class MindmapSvc {
                 txt.split('|').forEach(tmp => {
                     let item = tmp.trim();
                     if (null == item || "" === item) { return; }
+
+                    //节点默认是折叠状态
+                    if ('zip:' === item) {
+                        expand=false;
+                        return 
+                    }
 
                     //是颜色标记
                     if (0 === item.indexOf("c:") && item.length<=20) {
@@ -666,7 +725,7 @@ class MindmapSvc {
                 links:links,
                 childs: [],
                 leaf: false,         //是否为叶节点
-                expand: true         //默认全部展开
+                expand: expand         //默认全部展开
             };
 
 
@@ -700,17 +759,7 @@ class MindmapSvc {
         });
     }
 
-    hasBord = (item, type) => {
-        return type === (type & item.cls);
-    }
-
-    addBord = (item, type) => {
-        item.cls |= type;
-    }
-
-    removeBord = (item, type) => {
-        item.cls &= (~type);
-    }
+    
 
     /**
      * 判断是否为url类型
@@ -727,6 +776,22 @@ class MindmapSvc {
         return false;
     }
 }
+
+
+
+const hasBord = (item, type) => {
+    return type === (type & item.cls);
+}
+
+const addBord = (item, type) => {
+    item.cls |= type;
+}
+
+const removeBord = (item, type) => {
+    item.cls &= (~type);
+}
+
+
 
 let defaultLineColor = null;
 let bordType = null;

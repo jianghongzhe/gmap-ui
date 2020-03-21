@@ -34,7 +34,7 @@ class Welcome extends React.Component {
                         <Col span={10}>                   
                             <div css={logoWrapperStyle}>
                                 <p><Avatar size={256} src={logourl}/></p>
-                                <p className='appname'>GMap - 思维导图<span className='ver'>v0.1</span></p>
+                                <p className='appname'>GMap - 思维导图<span className='ver'>v0.8</span></p>
                                 <div className='btns'>
                                     <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
                                     <Button type="default" className='rbtn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={this.props.onOpenMapsDir}></Button>

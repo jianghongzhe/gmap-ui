@@ -362,6 +362,15 @@ class MapsViewer extends React.Component {
         api.openLink(url);
     }
 
+    expandAll=()=>{
+        this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key).forEach(eachPane => {
+            eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells);
+        });
+        this.setState({
+            panes: [...this.state.panes]
+        });
+    }
+
 
 
     render() {
@@ -372,11 +381,13 @@ class MapsViewer extends React.Component {
                         (null != this.state.panes && 0 < this.state.panes.length) ?
                             <>
                                 <Toolbar
+                                    showExpandAll={ifShowExpandAll(this.state)}
                                     onShowNewMapDlg={this.onShowNewMapDlg}
                                     onShowSelMapDlg={this.showSelMapDlg}
                                     onShowEditMapDlg={this.onShowEditMapDlg}
                                     onShowDir={api.openMapsDir}
                                     onShowCmd={api.openBash}
+                                    onExpandAll={this.expandAll}
                                 />
                                 <GraphTabs
                                     activeKey={this.state.activeKey}
@@ -447,6 +458,26 @@ const getDefMapTxt=(theleName="中心主题") =>(
 \t- 分主题
 \t- c:#1890ff|带颜色的分主题
 \t- 带说明的分主题|m:balabala`
+);
+
+const ifShowExpandAll=createSelector(
+    state=>state.activeKey,
+    state=>state.panes,
+    (key,panes)=>{
+        //不存选项卡或不存在活动选项卡，认为不显示【展开全部】按钮
+        if(null==panes || 0===panes.length){
+            return false;
+        }
+        let currPane=panes.filter(pane=>pane.key===key);
+        if(null==currPane || 0===currPane.length){
+            return false;
+        }
+        currPane=currPane[0];
+
+        //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
+        let allExpand=mindmapSvc.isAllNodeExpand(currPane.mapCells);
+        return !allExpand;
+    }
 );
 
 const selectCurrDir=createSelector(
