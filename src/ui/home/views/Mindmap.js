@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Button,Tooltip,Alert,Row, Col,  } from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined } from '@ant-design/icons';
 
 class Mindmap extends React.Component {
     constructor(props) {
@@ -25,7 +25,13 @@ class Mindmap extends React.Component {
             </Row>);
         }
 
+        if(false===this.props.cells.succ){
+            console.log("未通过...");
+        }
+
         return (
+            
+
             <>
             {
                 false===this.props.cells.succ ?
@@ -59,6 +65,12 @@ class Mindmap extends React.Component {
                                                 }><FormOutlined className='memoicon'/></Tooltip>
                                             }
                                             {
+                                                (item.nd && item.nd.ref) && <Button type="link" size='small' 
+                                                    title={'查看引用 - '+item.nd.ref.showname} className='linkbtn' 
+                                                    icon={<ReadOutlined className='reficon'/>}  
+                                                    onClick={this.props.onOpenRef.bind(this,item.nd.ref)}/>
+                                            }
+                                            {
                                                 (item.nd && item.nd.links && 0<item.nd.links.length) &&
                                                     <>{
                                                         item.nd.links.map((link,linkInd)=>(
@@ -73,6 +85,7 @@ class Mindmap extends React.Component {
                                                         ))
                                                     }</>
                                             }
+                                            
                                         </span>
                                         {
                                             (item.nd && false===item.nd.leaf ) && 
@@ -132,6 +145,14 @@ const mindTabStyle={
         padding:0,
         marginLeft:3,
         // backgroundColor:'lightblue',
+    },
+
+    '& td .reficon':{
+        fontSize:16,
+        lineHeight:'16px',
+        marginLeft:0,
+        color:'#fa8c16',
+        cursor:'pointer'
     },
 
     '& td .linkicon':{

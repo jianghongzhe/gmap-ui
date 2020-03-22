@@ -18,7 +18,11 @@ import mindMapValidateSvc from './mindMapValidateSvc';
         ]
         childs: []          //子节点数组
         leaf:false,         //是否为叶节点
-        expand:true         //是否展开
+        expand:true,        //是否展开
+        ref: {
+            txt:'',
+            parsedTxt:''
+        }
     }
  * 
  * 
@@ -89,7 +93,6 @@ class MindmapSvc {
      * @param {getBorderStyleCallback} 根据边框类型解析为边框样式的回调
      */
     parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,shouldValidate=true) => {
-        txts=txts.trim();
         //校验
         if(shouldValidate){
             if(''===txts){
@@ -100,7 +103,9 @@ class MindmapSvc {
                 }
             }
             let valiResult=mindMapValidateSvc.validate(txts);
+            
             if(true!==valiResult){
+                console.log("验证结果",valiResult);
                 return {
                     succ :  false,
                     msg:    '内容解析失败',
@@ -109,15 +114,24 @@ class MindmapSvc {
             }
         }
 
-        //设置共享的变量
-        defaultLineColor = defLineColor;
-        bordType = bordTypesMap;
-        getBorderStyle = getBorderStyleCallback;
-        themeStyles = theThemeStyles;
+        try{
+            //设置共享的变量
+            defaultLineColor = defLineColor;
+            bordType = bordTypesMap;
+            getBorderStyle = getBorderStyleCallback;
+            themeStyles = theThemeStyles;
 
-        //表格行列相关计算
-        let nd = this.load(txts);//根节点
-        return this.parseMindMapDataInner(nd);
+            //表格行列相关计算
+            let nd = this.load(txts);//根节点
+            return this.parseMindMapDataInner(nd);
+        }catch(e){
+            console.error(e);
+            return {
+                succ :  false,
+                msg:    '内容解析失败',
+                desc:   "图表内容解析过程中发生错误 ~~~"
+            }
+        }
 
     }
 
@@ -161,7 +175,7 @@ class MindmapSvc {
     }
 
     isNodeExpand=(nd)=>{
-        console.log("abhk",nd);
+        
 
         //叶节点认为是展开状态
         if(nd.leaf){
@@ -641,24 +655,19 @@ class MindmapSvc {
         let lastNd = null;
         let root = null;
 
-        let strs = null;
-        if (Array.isArray(arrayOrTxt)) {
-            strs = arrayOrTxt;
-        } else {
-            arrayOrTxt = arrayOrTxt.trim();
-            while (0 <= arrayOrTxt.indexOf('\r\n')) {
-                arrayOrTxt = arrayOrTxt.replace('\r\n', '\n');
-            }
-            strs = arrayOrTxt.split('\n');
-        }
+        // console.log("测试新解析");
+        // console.log(this.loadParts(arrayOrTxt));
 
-        strs.forEach(str => {
+        let {ndLines,refs}=this.loadParts(arrayOrTxt);
+
+        ndLines.forEach(str => {
             let lev = str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
             let txt = str.substring(lev + 1).trim();
             let lineColor = null;
             let memo = [];
             let links=[];
             let expand=true;
+            let ref=null;
 
             // {
             //     name:'',    //null或文字
@@ -677,14 +686,28 @@ class MindmapSvc {
                         return 
                     }
 
+                    //是引用
+                    let refPrefixLen='ref:'.length;
+                    if(item.startsWith("ref:") && item.length>refPrefixLen){
+                        if('undefined'!==typeof(refs[item])){
+                            ref={
+                                name:item,
+                                showname:item.substring(refPrefixLen).trim(),
+                                txt:refs[item],
+                                parsedTxt:null,
+                            }
+                        }
+                        return;
+                    }
+
                     //是颜色标记
-                    if (0 === item.indexOf("c:") && item.length<=20) {
+                    if (item.startsWith("c:") && item.length<=20) {
                         lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
                         return;
                     }
 
                     //是备注标记
-                    if (0 === item.indexOf("m:")) {
+                    if (item.startsWith("m:")) {
                         memo.push(item.substring("m:".length).trim());//如果出现多个，则加入数组中
                         // console.log("utqc "+memo);
                         return;
@@ -692,14 +715,18 @@ class MindmapSvc {
 
                     //是markdown链接 [文字](地址)
                     if (/^\[.+\]\(.+\)$/.test(item)) {
-                        let txt=item.substring(1,item.lastIndexOf("]"));
-                        let url=item.substring(item.indexOf("(")+1,item.length-1);
+                        let txt=item.substring(1,item.lastIndexOf("]")).trim();
+                        let url=item.substring(item.indexOf("(")+1,item.length-1).trim();
+                        if(!this.hasUrlPrefix(url)){
+                            url="http://"+url;
+                        }
                         links.push({
                             name:txt,
                             addr:url
                         });
                         return;
                     }
+
                     //是普通链接
                     let urlPattern=this.isUrlPattern(item);
                     if(false!==urlPattern){
@@ -725,8 +752,11 @@ class MindmapSvc {
                 links:links,
                 childs: [],
                 leaf: false,         //是否为叶节点
-                expand: expand         //默认全部展开
+                expand: expand,      //默认全部展开
+                ref:ref
             };
+
+            
 
 
             //还没有第一个节点，以第一个节点为根节点
@@ -752,6 +782,55 @@ class MindmapSvc {
         return root;
     }
 
+    /**
+     * 把内容拆分为
+     */
+    loadParts=(alltxts)=>{
+        let refs={};
+        let ndLines=[];
+        let currRefName=null;
+        let alreadyHandleRefs=false;
+
+        alltxts.trim().replace(/\r/g,'').split("\n").forEach(line=>{
+            if("***"===line.trim() && !alreadyHandleRefs){
+                alreadyHandleRefs=true;
+            }
+
+            //还没到引用部分
+            if(!alreadyHandleRefs){
+                if(''===line.trim()){
+                    return;
+                }
+                ndLines.push(line);//此处不要trim，因为节点有层级关系，前面有制表符
+                return;
+            }
+
+            //已经到引用部分
+            //是引用标识符
+            let trimLine=line.trim();
+            if(trimLine.startsWith("# ref:") && trimLine.length>"# ref:".length){
+                currRefName=trimLine.substring("# ".length);
+                return;
+            }
+            //还没有当前标识符
+            if(null==currRefName){
+                return;
+            }
+            //是已记录过的引用
+            if("undefined"!==typeof(refs[currRefName])){
+                // console.log("添加内容 "+currRefName,'\n['+line+']');
+                refs[currRefName]+='\n'+line;
+                return;
+            }
+            //是新引用
+            // console.log("添加新内容 "+currRefName,'['+line+']');
+            refs[currRefName]=line;
+            return;
+        });
+
+        return {ndLines,refs};
+    }
+
     setLeaf = (nd) => {
         nd.leaf = (0 === nd.childs.length);
         nd.childs.forEach(child => {
@@ -759,7 +838,9 @@ class MindmapSvc {
         });
     }
 
-    
+    hasUrlPrefix=(url)=>{
+        return (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || url.startsWith("ftps://"));
+    }
 
     /**
      * 判断是否为url类型
@@ -767,10 +848,10 @@ class MindmapSvc {
      * @returns 如果是url类型，返回处理过的地址，否则抬false
      */
     isUrlPattern=(url)=>{
-        if(url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || url.startsWith("ftps://")){
+        if(this.hasUrlPrefix(url)){
             return url.trim();
         }
-        if(url.startsWith("www.")){
+        if(url.startsWith("www.") && url.length>"www.".length){
             return "http://"+url.trim();
         }
         return false;

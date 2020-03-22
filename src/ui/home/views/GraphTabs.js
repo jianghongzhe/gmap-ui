@@ -24,7 +24,10 @@ class GraphTabs extends React.Component {
                     this.props.panes.map(pane => (
                         <TabPane tab={pane.title} key={pane.key} closable={true}>
                             <div css={getTabItemContainerStyle(this.props.contentH)}>
-                                <Mindmap cells={pane.mapCells} onOpenLink={this.props.onOpenLink} onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} />
+                                <Mindmap cells={pane.mapCells} 
+                                    onOpenLink={this.props.onOpenLink} 
+                                    onOpenRef={this.props.onOpenRef}
+                                    onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} />
                             </div>
                         </TabPane>
                     ))

@@ -2,13 +2,8 @@
  * 
  */
 class MindMapValidateSvc{
-
-
-
-
-
-
     /**
+     * 格式校验，只验证节点部分，不验证引用部分
      * 1、内容不能为空
      * 2、每行开头必须是0或多个tab符和一个减号和一个空格，且空格后还有内容
      * 3、不能多个顶级主题，且顶级主题只能在第一行
@@ -17,8 +12,16 @@ class MindMapValidateSvc{
      * @returns {*} 验证通过返回true，失败返回文本消息
      */
     validate=(txt="")=>{
-        txt=txt.trim();
+        try{
+            return this.validateInner(txt);
+        }catch(e){
+            console.error(e);
+            return "格式校验过程中发生错误";
+        }
+    }
 
+
+    validateInner=(txt="")=>{
         //内容不能为空
         if(''===txt){
             return "请输入图表的文本内容";
@@ -29,9 +32,14 @@ class MindMapValidateSvc{
         let ret=/^\t*- .+$/;
         let lineInd=0;
         for(let line of lines){
-            if(''===line.trim()){
-                return "第 "+(lineInd+1)+" 行不能为空";
+            if("***"===line.trim()){
+                break;
             }
+            if(''===line.trim()){
+                ++lineInd;
+                continue;
+            }
+
             if(!ret.test(line)){
                 return "第 "+(lineInd+1)+" 行的格式有误";
             }
@@ -42,19 +50,32 @@ class MindMapValidateSvc{
             ++lineInd;
         }
 
-        //不能多个顶级主题，且顶级主题只能在第一行
-        let topLevThemeCnt=0;
+        //不能多个顶级主题，且顶级主题只能在第一个位置
         lineInd=0;
+        let meetFirstNd=false;
         for(let line of lines){
-            let isTopLev=(0===line.indexOf("- "));
-            if(0===lineInd && !isTopLev){
-                return "第 1 行必须为顶级主题";
+            if("***"===line.trim()){
+                break;
             }
-            if(isTopLev){
-                ++topLevThemeCnt;
-                if(1<topLevThemeCnt){
-                    return "第 "+(lineInd+1)+" 行不能为顶级主题";
+            if(''===line.trim()){
+                ++lineInd;
+                continue;
+            }
+
+            //第一个出现的主题：如果不是根主题，则不通过，否则置状态
+            let isTopLev=(0===line.indexOf("- "));
+            if(!meetFirstNd){
+                if(!isTopLev){
+                    return "第 "+(lineInd+1)+" 行必须为顶级主题";
                 }
+                meetFirstNd=true;
+                ++lineInd;
+                continue;
+            }
+
+            //非第一个主题：如果为根主题，则不通过
+            if(isTopLev){
+                return "第 "+(lineInd+1)+" 行不能为顶级主题";
             }          
             ++lineInd;
         }
@@ -62,17 +83,32 @@ class MindMapValidateSvc{
         //下一行的层级 <= 上一行+1
         lineInd=0;
         let lastLev=-1;
+        let hasLast=false;
         for(let line of lines){
+            if("***"===line.trim()){
+                break;
+            }
+            if(''===line.trim()){
+                ++lineInd;
+                continue;
+            }
+
+            //第一个节点
             let lev=line.indexOf("- ");
-            if(0<lineInd && lev>lastLev+1){
+            if(!hasLast){
+                lastLev=lev;
+                ++lineInd;
+                hasLast=true;
+                continue;
+            }
+
+            //非第一个节点
+            if(hasLast && lev>lastLev+1){
                 return "第 "+(lineInd+1)+" 行的层级有误";
             }
             lastLev=lev;
             ++lineInd;
         }
-        
-
-
         return true;
     }
 }

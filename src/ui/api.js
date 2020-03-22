@@ -40,7 +40,7 @@ class Api{
      * 保存文件
      */
     save=(fullpath,content)=>{
-        app.saveFile(fullpath,content.replace(/\r/g,''));//\r\n全部换为\n
+        app.saveFile(fullpath,content.replace(/\r/g,'').trim());//\r\n全部换为\n
     }
 
     /**
@@ -49,7 +49,7 @@ class Api{
     load=(fullpath)=>{
         let ret=app.readFile(fullpath);
         if('string'===typeof(ret)){
-            return ret.replace(/\r/g,'');//\r\n全部换为\n
+            return ret.replace(/\r/g,'').trim();//\r\n全部换为\n
         }
         return ret;
     }

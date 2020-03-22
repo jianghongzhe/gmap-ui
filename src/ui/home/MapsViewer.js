@@ -10,6 +10,13 @@ import 'codemirror/mode/markdown/markdown';
 import 'codemirror/addon/selection/active-line';  
 import 'codemirror/keymap/sublime';
 
+
+import marked from 'marked';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/default.css';
+import 'github-markdown-css/github-markdown.css';
+
+
 import {createSelector} from 'reselect';
 
 
@@ -21,6 +28,7 @@ import NewGraphDlg from './views/NewGraphDlg';
 import EditGraphDlg from './views/EditGraphDlg';
 import Toolbar from './views/Toolbar';
 import GraphTabs from './views/GraphTabs';
+import RefViewer from './views/RefViewer';
 
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
@@ -69,6 +77,8 @@ class MapsViewer extends React.Component {
             currMapName: '',
             editTmpTxt: '',
             editMapDlgVisible: false,
+            refViewerDlgVisible:false,
+            currRefObj:{},
 
             //新建图表相关
             newMapDlgVisible: false,
@@ -79,6 +89,22 @@ class MapsViewer extends React.Component {
             filelist: [],
             dirs:[],            
         };
+
+        marked.setOptions({
+            renderer: new marked.Renderer(),
+            highlight: function(code, language) {
+                let tmp=hljs.getLanguage(language);
+                const validLanguage = tmp ? language : 'plaintext';
+                return hljs.highlight(validLanguage, code).value;
+            },
+            pedantic: false,
+            gfm: true,
+            breaks: false,
+            sanitize: false,
+            smartLists: true,
+            smartypants: false,
+            xhtml: false
+        });
     }
 
     
@@ -245,7 +271,7 @@ class MapsViewer extends React.Component {
 
     onEditMapDlgOK = () => {
         //校验
-        let txt = this.state.editTmpTxt.trim();
+        let txt = this.state.editTmpTxt;
         let valiResult=mindMapValidateSvc.validate(txt);
         if(true!==valiResult){
             message.warning(valiResult);
@@ -371,6 +397,44 @@ class MapsViewer extends React.Component {
         });
     }
 
+    openRef=(refObj)=>{
+        //迟延到第一次查看时才解析
+        if(null==refObj.parsedTxt){
+            refObj.parsedTxt=marked(refObj.txt);
+        }
+
+        this.setState({
+            currRefObj:refObj,
+            refViewerDlgVisible:true,
+        });
+        setTimeout(this.bindLinkEvent, 800);
+    }
+
+    /**
+     * markdown中的a标签禁用默认效果，而使用默认浏览器打开
+     */
+    bindLinkEvent=()=>{
+        document.querySelectorAll(".markdown-body a").forEach(ele=>{
+            let addr=ele.getAttribute('href');
+            if(addr.startsWith("javascript:")){
+                return;
+            }
+            if(!mindmapSvc.hasUrlPrefix(addr)){
+                addr="http://"+addr.trim();
+            }
+            ele.href="javascript:void(0);";
+            ele.addEventListener("click",()=>{
+                this.openLink(addr);
+            });
+        });
+    }
+
+    onRefViewerDlgCancel=()=>{
+        this.setState({
+            refViewerDlgVisible:false
+        });
+    }
+
 
 
     render() {
@@ -398,6 +462,7 @@ class MapsViewer extends React.Component {
                                     onEditTab={this.onEditTab}
                                     onToggleExpand={this.toggleExpand}
                                     onOpenLink={this.openLink}
+                                    onOpenRef={this.openRef}
                                 />
                             </>
 
@@ -448,6 +513,15 @@ class MapsViewer extends React.Component {
                     onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
                     onSelectMapItem={this.onSelectMapItem}
                 />
+
+                <RefViewer
+                    refname={this.state.currRefObj.showname}
+                    refCont={this.state.currRefObj.parsedTxt}
+                    dlgW={this.state.clientW - 200}
+                    bodyH={this.state.clientH - 300}
+                    visible={this.state.refViewerDlgVisible}
+                    onCancel={this.onRefViewerDlgCancel}
+                />
             </>
         );
     }
@@ -457,7 +531,15 @@ const getDefMapTxt=(theleName="中心主题") =>(
 `- ${theleName}
 \t- 分主题
 \t- c:#1890ff|带颜色的分主题
-\t- 带说明的分主题|m:balabala`
+\t- 带说明的分主题|m:balabala
+\t- 带链接的分主题|www.sina.com
+\t- 带链接的另一分主题|[新浪网](www.sina.com)
+\t- 带引用的分主题|ref:长段文字
+
+***
+# ref:长段文字
+这里可以放长段内容，支持markdown格式
+`
 );
 
 const ifShowExpandAll=createSelector(
@@ -473,6 +555,10 @@ const ifShowExpandAll=createSelector(
             return false;
         }
         currPane=currPane[0];
+
+        if(currPane.mapCells && false===currPane.mapCells.succ){
+            return false;
+        }
 
         //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
         let allExpand=mindmapSvc.isAllNodeExpand(currPane.mapCells);
