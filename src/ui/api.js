@@ -1,4 +1,4 @@
-const app = window.require('electron').remote.app;
+const {app,dialog} = window.require('electron').remote;
 
 class Api{
 
@@ -12,6 +12,28 @@ class Api{
 
     exists=(fn)=>{
         return app.exists(fn);
+    }
+
+    copyPicToImgsDir=(picFullpath,showName,currGraphFullpath)=>{
+        return app.copyPicToImgsDir(picFullpath,showName,currGraphFullpath);
+    }
+
+    selPicFile=()=>{
+        let rs=app.selPicFile();
+        // // console.log("选择目录结果",rs);
+        return rs;
+
+        // dialog.showOpenDialog({properties: ['openFile']}, (files)=>{
+        //     if (files){
+        //         console.log("选",files);
+        //         return;
+        //     }
+        //     console.log("未选");
+        // });
+    }
+
+    calcPicUrl=(graphFileFullpath,picRelaPath)=>{
+        return app.calcPicUrl(graphFileFullpath,picRelaPath);
     }
 
     openLink=(url)=>{

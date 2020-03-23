@@ -1,5 +1,5 @@
 
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell,dialog } = require('electron');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
 const path = require('path');
@@ -15,10 +15,14 @@ for(let key in mainSvc){
     app[key]=mainSvc[key];
 }
 
+app.selPicFile=()=>{
+    return dialog.showOpenDialogSync(mainWindow,{properties:['openFile']});
+}
+
 
 function createWindow() {
     //在非开发模式禁用系统菜单；开发模式则显示默认菜单，方面调试
-    if (!isDevMode()) {
+    if (!app.isDevMode()) {
         Menu.setApplicationMenu(null);
     }
 
@@ -36,8 +40,8 @@ function createWindow() {
     mainWindow.show();
 
     //在开发模式显示环境变量表示的开发服务器的地址，部署模式加载实际的静态资源位置
-    if (isDevMode()) {
-        mainWindow.loadURL(process.env.DEV_SERVER_URL);
+    if (app.isDevMode()) {
+        mainWindow.loadURL(app.getDevServerUrl());
     } else {
         mainWindow.loadFile(__dirname + '\\build\\index.html');
     }
@@ -61,7 +65,3 @@ app.on('activate', function () {
 
 
 
-/**
- * 通过环境变量判断当前是否为开发模式
- */
-const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL);

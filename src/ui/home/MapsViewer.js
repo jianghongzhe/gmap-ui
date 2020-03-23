@@ -427,6 +427,17 @@ class MapsViewer extends React.Component {
                 this.openLink(addr);
             });
         });
+        document.querySelectorAll(".markdown-body img").forEach(ele=>{
+            console.log("图片了。。。");
+            let addr=ele.getAttribute('src');
+            if(!(addr.startsWith("./") || addr.startsWith("../"))){
+                return;
+            }
+            console.log(this.state.activeKey,addr);
+            let picurl=api.calcPicUrl(this.state.activeKey,addr);
+            ele.src=picurl;
+            console.log(picurl);
+        });
     }
 
     onRefViewerDlgCancel=()=>{
@@ -493,6 +504,7 @@ class MapsViewer extends React.Component {
                 <EditGraphDlg
                     visible={this.state.editMapDlgVisible}
                     currMapName={this.state.currMapName}
+                    activeKey={this.state.activeKey}
                     dlgW={this.state.clientW - 200}
                     winW={this.state.clientW}
                     editorH={this.state.clientH - 350-50}

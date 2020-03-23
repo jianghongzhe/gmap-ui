@@ -1,7 +1,11 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover } from 'antd';
+import { Layout, Input,  Tabs, Modal,Form,  message, Button, Divider,Popover } from 'antd';
+import { PictureOutlined, FolderOpenOutlined } from '@ant-design/icons';
+
+
+
 import { CirclePicker  } from 'react-color'
 import {Controlled as CodeMirror} from 'react-codemirror2'
 
@@ -11,6 +15,7 @@ import 'codemirror/addon/selection/active-line';
 import 'codemirror/keymap/sublime';
 
 import editorSvc from '../editorSvc';
+import api from '../../api';
 
 class EditGraphDlg extends React.Component {
     constructor(props) {
@@ -18,6 +23,9 @@ class EditGraphDlg extends React.Component {
         this.codeMirrorInst=null;
         this.state = { 
             colorPickerVisible:false,
+            insertPicDlgVisible:false,
+            insertPicPath:'',
+            insertPicName:'',
         };
     }
 
@@ -63,12 +71,76 @@ class EditGraphDlg extends React.Component {
     hideColorPicker=()=>{
         this.setState({colorPickerVisible:false});
     }
+
+
+    showInsertPicDlg=()=>{
+        this.setState({
+            insertPicDlgVisible:true,
+            insertPicPath:'',
+            insertPicName:'',
+
+        });
+    }
+    hideInsertPicDlg=()=>{
+        this.setState({insertPicDlgVisible:false});
+    }
+
     test=()=>{
         console.log("out out");
     }
 
+    onInsertPicPathChanged=(e)=>{
+        this.setState({
+            insertPicPath:e.target.value
+        });
+    }
+
+    onInsertPicNameChanged=(e)=>{
+        this.setState({
+            insertPicName:e.target.value
+        });
+    }
+
+    selPic=()=>{
+        let selFilePaths=api.selPicFile();
+        if(selFilePaths && selFilePaths[0]){
+            this.setState({
+                insertPicPath:selFilePaths[0]
+            });
+        }
+    }
+
+    onAddPicCommit=()=>{
+        console.log(1111);
+        try{
+            console.log("选择文件");
+            console.log(this.state.insertPicPath);
+            console.log(this.state.insertPicName);
+            console.log(this.props.activeKey);
+
+            let rs=null;
+            //是文件路径
+            if(true){
+                rs=api.copyPicToImgsDir(this.state.insertPicPath,this.state.insertPicName,this.props.activeKey);
+            }
+            //是网络url
+            else{
+                //。。。。下载并复制到指定目录
+            }
+
+            
+            console.log("选择文件结果",rs);
+        }catch(e){
+            console.error(e);
+        }
+    }
+
+
+
     render() {
         console.log("位置",(this.props.winW-this.props.dlgW)/2+200,);
+
+        let insertPicDlgW= (this.props.winW<800?this.props.winW-20:800);
 
         return (
             <>
@@ -89,9 +161,23 @@ class EditGraphDlg extends React.Component {
                                 ['#cf1322','#389e0d','#0050b3','#fa8c16','#13c2c2','#ad6800','#1890ff','#722ed1','#c41d7f'].map((eachcolor,colorInd)=>(
                                     <div key={colorInd} title={eachcolor} css={getEditDlgColorBoxStyle(eachcolor)} onClick={this.onAddColor.bind(this,eachcolor)}></div>
                                 ))
-                            }    
+                            }                          
                             <div css={selColorStyle} title='选择颜色' onClick={this.showColorPicker}></div>  
-                            <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>                  
+                            <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>
+
+                            {/* <Divider type="vertical" /> */}
+                            <PictureOutlined title='插入图片' css={{
+                                fontSize:19,
+                                marginLeft:10,
+                                cursor:'pointer',
+                                transition:'all 0.2s 0.1s',
+                                '&:hover':{
+                                    opacity:0.6,
+                                    transform:'skew(-15deg)'
+                                }
+
+                            }} onClick={this.showInsertPicDlg}/>
+                            {/* <Button type="circle" css={{marginBottom:20}} size='small' title='插入图片' shape="circle" icon={<PictureOutlined />} onClick={this.showInsertPicDlg}/> */}
                         </div>
                         <CodeMirror
                             css={getCodeEditorStyle(this.props.editorH)}
@@ -113,6 +199,59 @@ class EditGraphDlg extends React.Component {
                             onBeforeChange={this.props.onChangeEditTmpTxt}/>
                     </div>
                 </Modal>
+
+                <Modal
+                    title="插入图片"
+                    closable={true}
+                    css={{
+                        width: insertPicDlgW ,
+                        minWidth: insertPicDlgW,
+                        maxWidth:insertPicDlgW
+                    }}
+                    visible={this.state.insertPicDlgVisible}
+                    onCancel={this.hideInsertPicDlg}
+                    onOk={this.onAddPicCommit}>
+
+                    <div css={{
+                        width:'100%',
+                        display:'table',
+                        '& .row':{
+                            display: 'table-row'
+                        },
+                        '& .cell.space':{
+                            // paddingTop:10,
+                        },
+                        '& .cell':{
+                            display: 'table-cell',
+                            verticalAlign:'center',
+                            paddingTop:5,
+                            paddingBottom:5,
+                        },
+                        '& .cell.lab':{
+                            width:80,
+                        },
+                    }}>
+                        <div className='row'>
+                            <div className='cell lab'>
+                                图片位置：
+                            </div>
+                            <div className='cell'>
+                                <Input value={this.state.insertPicPath} onChange={this.onInsertPicPathChanged} addonAfter={
+                                    <FolderOpenOutlined onClick={this.selPic} css={{cursor:'pointer'}}/>
+                                } placeholder='请输入图片本地路径或url' />
+                            </div>
+                        </div>
+                        <div className='row space'>
+                            <div className='cell lab space'>
+                                显示名称：
+                            </div>
+                            <div className='cell space'>
+                                <Input value={this.state.insertPicName} onChange={this.onInsertPicNameChanged} placeholder='请输入图片显示名称'/>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>            
+
                 <Modal
                     title={null}
                     footer={null}
@@ -136,6 +275,11 @@ class EditGraphDlg extends React.Component {
 
 
 const hoverStyle={
+    width:          16,
+    height:         16,
+    display:        'inline-block',
+    cursor:         'pointer',
+    marginRight:    10,
     transition:     'all 0.2s 0.1s',
     '&:hover':{
         opacity:0.6,
@@ -155,32 +299,17 @@ const getCodeEditorStyle=(height)=>({
 
 const selColorStyle={
     backgroundImage:'linear-gradient(135deg,orange 20%,green 100%)',
-    width:          16,
-    height:         16,
-    display:        'inline-block',
-    cursor:         'pointer',
-    marginRight:    10,
     ...hoverStyle
 };
 
 const clearColorStyle={
     backgroundColor:'white',
-    width:          16,
-    height:         16,
-    display:        'inline-block',
-    cursor:         'pointer',
     border:         '1px solid gray',
-    marginRight:    10,
     ...hoverStyle
 };
 
 const getEditDlgColorBoxStyle=(color)=>({
     backgroundColor:color,
-    width:          16,
-    height:         16,
-    display:        'inline-block',
-    cursor:         'pointer',
-    marginRight:    10,
     ...hoverStyle
 });
 

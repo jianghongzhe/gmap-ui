@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell,dialog } = require('electron');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
 const path = require('path');
@@ -6,6 +6,51 @@ const path = require('path');
 
 
 //===========暴露的接口================================================
+
+/**
+ * 复制选择的图片文件到图片目录，并返回相对于当前图表文件的相对路径
+ * @param {*} picFullpath 
+ * @param {*} showName 
+ * @param {*} currGraphFullpath
+ * @returns 
+ */
+const copyPicToImgsDir=(picFullpath,showName,currGraphFullpath)=>{
+    let destPath=getMapsPath("imgs\\"+showName);
+    let basePath=getMapsPath();
+    fs.copyFileSync(picFullpath,destPath);
+
+    let ind=currGraphFullpath.lastIndexOf("\\");
+    let tmpDir=currGraphFullpath.substring(0,ind);
+    let toBaseRelaPath="";
+    while(true){
+        if(tmpDir===basePath){
+            break;
+        }
+        toBaseRelaPath+="../";
+        ind=tmpDir.lastIndexOf("\\");
+        tmpDir=currGraphFullpath.substring(0,ind);
+    }
+    if(""===toBaseRelaPath){
+        toBaseRelaPath="./";
+    }
+    return toBaseRelaPath+"/imgs/"+showName;
+}
+
+
+const calcPicUrl=(graphFileFullpath,picRelaPath)=>{
+    //开发模式返回favicon图标
+    if(isDevMode()){
+        return getDevServerUrl().trim()+"/favicon.ico";
+    }
+
+    //部署模式计算真实本地url
+    let ind1=graphFileFullpath.lastIndexOf("/");
+    let ind2=graphFileFullpath.lastIndexOf("\\");
+    let ind=(ind1>=0?ind1:ind2);
+    let currGraphDir=graphFileFullpath.substring(0,ind);//当前图表文件的目录
+    let picFullpath=path.resolve(currGraphDir,picRelaPath);
+    return "file:///"+picFullpath.replace(/\\/g,'/');
+}
 
 /**
  * 获得当前路径每项的数组，基于图表文件根目录
@@ -217,6 +262,17 @@ const getRelaPath=(fullpath,basepath)=>(fullpath.substring(basepath.length+1).re
  */
 const getMapsPath = (fn = null) => (__dirname + '\\gmaps' + (fn ? "\\" + fn : ""));
 
+/**
+ * 通过环境变量判断当前是否为开发模式
+ */
+const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL);
+
+const getDevServerUrl=()=>{
+    if(isDevMode()){
+        return process.env.DEV_SERVER_URL;
+    }
+    return '';
+}
 
 
-module.exports={getPathItems, listFiles, exists, readFile, saveFile, openMapsDir, openGitBash, openLink};
+module.exports={getPathItems, listFiles, exists, readFile, saveFile, openMapsDir, openGitBash, openLink, calcPicUrl,isDevMode,getDevServerUrl,copyPicToImgsDir};
