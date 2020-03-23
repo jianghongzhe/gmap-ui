@@ -134,6 +134,15 @@ class EditGraphDlg extends React.Component {
     }
 }
 
+
+const hoverStyle={
+    transition:     'all 0.2s 0.1s',
+    '&:hover':{
+        opacity:0.6,
+        transform:'skew(-15deg)',
+    }
+}
+
 const getCodeEditorStyle=(height)=>({
     '& .CodeMirror':{
         border:     '1px solid lightgrey',
@@ -151,6 +160,7 @@ const selColorStyle={
     display:        'inline-block',
     cursor:         'pointer',
     marginRight:    10,
+    ...hoverStyle
 };
 
 const clearColorStyle={
@@ -161,6 +171,7 @@ const clearColorStyle={
     cursor:         'pointer',
     border:         '1px solid gray',
     marginRight:    10,
+    ...hoverStyle
 };
 
 const getEditDlgColorBoxStyle=(color)=>({
@@ -170,6 +181,9 @@ const getEditDlgColorBoxStyle=(color)=>({
     display:        'inline-block',
     cursor:         'pointer',
     marginRight:    10,
+    ...hoverStyle
 });
+
+
 
 export default EditGraphDlg;

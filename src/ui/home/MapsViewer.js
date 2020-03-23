@@ -625,7 +625,30 @@ const centerThemeStyle = {
         color:'white',
         fontSize:18,
         lineHeight:'30px'
-    }
+    },
+
+    '& .reficon':{
+        fontSize:16,
+        lineHeight:'16px',
+        marginLeft:0,
+        color:'hotpink !important',
+        cursor:'pointer'
+    },
+
+    '& .linkicon':{
+        fontSize:16,
+        lineHeight:'16px',
+        marginLeft:0,
+        color:'hotpink !important',
+        cursor:'pointer'
+    },
+
+    '& .memoicon':{
+        fontSize:16,
+        lineHeight:'16px',
+        marginLeft:5,
+        color:'hotpink !important'
+    },
 };
 
 const secendThemeStyle = {
