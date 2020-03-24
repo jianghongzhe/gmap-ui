@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Button,Row, Col, Avatar   } from 'antd';
-import { PlusOutlined,FolderOutlined,CodeOutlined } from '@ant-design/icons';
+import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined } from '@ant-design/icons';
 
 import PathSelect from './PathSelect';
 import logourl from '../../../assets/logo.jpg';
@@ -38,7 +38,8 @@ class Welcome extends React.Component {
                                 <div className='btns'>
                                     <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
                                     <Button type="default" className='rbtn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={this.props.onOpenMapsDir}></Button>
-                                    <Button type="default" className='rbtn' title='打开命令行' shape='circle' icon={<CodeOutlined/>} size='large' onClick={this.props.onOpenBash}></Button>
+                                    <Button type="default" className='rbtn' title='打开git' shape='circle' icon={<CodeOutlined/>} size='large' onClick={this.props.onOpenBash}></Button>
+                                    <Button type="default" className='rbtn' title='开发者工具' shape='circle' icon={<ControlOutlined/>} size='large' onClick={this.props.onShowDevTool}></Button>
                                 </div>                               
                             </div>
                         </Col>

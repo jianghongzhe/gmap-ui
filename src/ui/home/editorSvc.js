@@ -23,7 +23,24 @@ class EditorSvc{
         //把项目符号、颜色（可能有）、后面部分重新拼接
         resultLine=left+(color?"c:"+color+"|":"")+right;
         return resultLine;
-    }    
+    }   
+    
+    addPic=(originLine,pos,picRelaPath)=>{
+        let resultLine=originLine;
+
+        let before=resultLine.substring(0,pos);
+        before=(''===before?'':before+" ");
+        let after=resultLine.substring(pos);
+        after=(''===after?'':" "+after);
+
+        let addCont="![]("+picRelaPath.trim()+")";
+
+        resultLine=before+addCont+after;
+        return {
+            newLinetxt: resultLine,
+            cusorPos:before.length+addCont.length
+        };
+    }
 }
 
 export default new EditorSvc();

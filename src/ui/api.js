@@ -1,4 +1,4 @@
-const {app,dialog} = window.require('electron').remote;
+const {app} = window.require('electron').remote;
 
 class Api{
 
@@ -10,8 +10,21 @@ class Api{
         app.openMapsDir();
     }
 
-    exists=(fn)=>{
-        return app.exists(fn);
+    existsFullpath=(fullpath)=>{
+        return app.existsFullpath(fullpath);
+    }
+
+    existsPic=(picName)=>{
+        return app.existsPic(picName);
+    }
+
+    openPicByName=(name)=>{
+        return app.openPicByName(name);
+    }
+    
+
+    existsGraph=(fn)=>{
+        return app.existsGraph(fn);
     }
 
     copyPicToImgsDir=(picFullpath,showName,currGraphFullpath)=>{
@@ -36,13 +49,17 @@ class Api{
         return app.calcPicUrl(graphFileFullpath,picRelaPath);
     }
 
-    openLink=(url)=>{
-        app.openLink(url);
+    openUrl=(url)=>{
+        app.openUrl(url);
     }
 
 
     getPathItems=(dir=null)=>{
         return app.getPathItems(dir);
+    }
+
+    showDevTool=()=>{
+        app.openDevTool();
     }
 
     /**

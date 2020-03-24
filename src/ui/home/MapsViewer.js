@@ -32,6 +32,7 @@ import RefViewer from './views/RefViewer';
 
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
+import * as uiUtil from '../../common/uiUtil';
 
 import api from '../api';
 
@@ -90,6 +91,7 @@ class MapsViewer extends React.Component {
             dirs:[],            
         };
 
+        //初始化markdown解析功能
         marked.setOptions({
             renderer: new marked.Renderer(),
             highlight: function(code, language) {
@@ -126,6 +128,15 @@ class MapsViewer extends React.Component {
         this.setState({
             clientH: document.documentElement.clientHeight,
             clientW: document.documentElement.clientWidth
+        });
+    }
+
+    closeAllDlg=()=>{
+        this.setState({
+            editMapDlgVisible: false,
+            refViewerDlgVisible:false,
+            newMapDlgVisible: false,
+            selMapDlgVisible: false,
         });
     }
 
@@ -185,18 +196,7 @@ class MapsViewer extends React.Component {
             newMapName: ''
         });
     }
-
-    onNewMapDlgCancel = () => {
-        this.setState({
-            newMapDlgVisible: false
-        });
-    }
-
-    onChangeNewMapName = (e) => {
-        this.setState({
-            newMapName: e.target.value
-        });
-    }
+    
 
     onNewMapDlgOK = () => {
         //验证名称为空和文件是否存在
@@ -210,7 +210,7 @@ class MapsViewer extends React.Component {
             message.warning('图表名称格式有误，请更换另一名称');
             return;
         }
-        let fnAndFullpath = api.exists(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
+        let fnAndFullpath = api.existsGraph(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
         if (true === fnAndFullpath) {
             message.warning('该图表名称已存在，请更换另一名称');
             return;
@@ -258,11 +258,7 @@ class MapsViewer extends React.Component {
         });
     }
 
-    onEditMapDlgCancel = () => {
-        this.setState({
-            editMapDlgVisible: false
-        });
-    }
+    
 
     onChangeEditTmpTxt = (editor, data, value) => {
         this.setState({editTmpTxt:value});
@@ -361,11 +357,7 @@ class MapsViewer extends React.Component {
         });
     }
 
-    onSelMapDlgCancel = () => {
-        this.setState({
-            selMapDlgVisible: false
-        });
-    }
+    
 
 
 
@@ -385,7 +377,7 @@ class MapsViewer extends React.Component {
     }
 
     openLink=(url)=>{
-        api.openLink(url);
+        api.openUrl(url);
     }
 
     expandAll=()=>{
@@ -404,47 +396,37 @@ class MapsViewer extends React.Component {
         }
 
         this.setState({
-            currRefObj:refObj,
+            currRefObj:{...refObj},
             refViewerDlgVisible:true,
         });
-        setTimeout(this.bindLinkEvent, 800);
+        setTimeout(this.bindLinkEvent, 800);//setState会异步执行，因此需要等一会再绑定事件
     }
 
     /**
-     * markdown中的a标签禁用默认效果，而使用默认浏览器打开
+     * markdown中的a标签和img标签的事件绑定
      */
     bindLinkEvent=()=>{
         document.querySelectorAll(".markdown-body a").forEach(ele=>{
             let addr=ele.getAttribute('href');
-            if(addr.startsWith("javascript:")){
-                return;
-            }
-            if(!mindmapSvc.hasUrlPrefix(addr)){
-                addr="http://"+addr.trim();
-            }
-            ele.href="javascript:void(0);";
-            ele.addEventListener("click",()=>{
-                this.openLink(addr);
-            });
+            if(addr.startsWith("javascript:")){return;}//跳过处理过的
+            if(!mindmapSvc.hasUrlPrefix(addr)){addr="http://"+addr.trim();}//不带协议的加http前缀
+            ele.href="javascript:void(0);";//禁用默认点击效果
+            ele.addEventListener("click",()=>{this.openLink(addr);});//增加点击事件，点击时使用外部浏览器打开
         });
         document.querySelectorAll(".markdown-body img").forEach(ele=>{
-            console.log("图片了。。。");
             let addr=ele.getAttribute('src');
-            if(!(addr.startsWith("./") || addr.startsWith("../"))){
-                return;
-            }
-            console.log(this.state.activeKey,addr);
-            let picurl=api.calcPicUrl(this.state.activeKey,addr);
-            ele.src=picurl;
-            console.log(picurl);
+            if(!(addr.startsWith("./") || addr.startsWith("../"))){return;}//跳过不是相对路径的
+            let picurl=api.calcPicUrl(this.state.activeKey,addr);//使用图片的相对路径计算绝对路径，并生成file://协议的url
+            // let randomPicurl=picurl+ "?gmaprand="+(new Date().getTime());//增加随机参数
+            ele.src=picurl;//显示时使用带随机参数的路径，以防止浏览器的缓存不重新加载新图片
+            ele.style.cursor='pointer';
+            ele.style.display='block';
+            ele.addEventListener("click",()=>{this.openLink(picurl);});//本地打开时使用不带随机参数的url
         });
+        console.log("已处理<a>标签和<img>标签的url地址和事件绑定");
     }
 
-    onRefViewerDlgCancel=()=>{
-        this.setState({
-            refViewerDlgVisible:false
-        });
-    }
+    
 
 
 
@@ -463,6 +445,7 @@ class MapsViewer extends React.Component {
                                     onShowDir={api.openMapsDir}
                                     onShowCmd={api.openBash}
                                     onExpandAll={this.expandAll}
+                                    onShowDevTool={api.showDevTool}
                                 />
                                 <GraphTabs
                                     activeKey={this.state.activeKey}
@@ -485,6 +468,7 @@ class MapsViewer extends React.Component {
                                     filelist={this.state.filelist} 
                                     onOpenMapsDir={api.openMapsDir}
                                     onOpenBash={api.openBash}
+                                    onShowDevTool={api.showDevTool}
                                     onAddMap={this.onShowNewMapDlg} 
                                     onSelectMapItem={this.onSelectMapItem}
                                     onloadDir={this.loadDir}
@@ -497,8 +481,8 @@ class MapsViewer extends React.Component {
                     visible={this.state.newMapDlgVisible}
                     newMapName={this.state.newMapName}
                     onOk={this.onNewMapDlgOK}
-                    onCancel={this.onNewMapDlgCancel}
-                    onChangeNewMapName={this.onChangeNewMapName}
+                    onCancel={this.closeAllDlg}
+                    onChangeNewMapName={uiUtil.bindChangeEventToState.bind(this,this,'newMapName')}
                 />
 
                 <EditGraphDlg
@@ -510,7 +494,7 @@ class MapsViewer extends React.Component {
                     editorH={this.state.clientH - 350-50}
                     editTmpTxt={this.state.editTmpTxt}
                     onOk={this.onEditMapDlgOK}
-                    onCancel={this.onEditMapDlgCancel}
+                    onCancel={this.closeAllDlg}
                     onChangeEditTmpTxt={this.onChangeEditTmpTxt}
                 />
 
@@ -520,7 +504,7 @@ class MapsViewer extends React.Component {
                     winW={this.state.clientW}
                     dirs={this.state.dirs} 
                     filelist={this.state.filelist}
-                    onCancel={this.onSelMapDlgCancel}
+                    onCancel={this.closeAllDlg}
                     onloadDir={this.loadDir}
                     onReloadCurrDir={this.loadDir.bind(this,selectCurrDir(this.state))}
                     onSelectMapItem={this.onSelectMapItem}
@@ -532,7 +516,7 @@ class MapsViewer extends React.Component {
                     dlgW={this.state.clientW - 200}
                     bodyH={this.state.clientH - 300}
                     visible={this.state.refViewerDlgVisible}
-                    onCancel={this.onRefViewerDlgCancel}
+                    onCancel={this.closeAllDlg}
                 />
             </>
         );

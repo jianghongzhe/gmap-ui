@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout, Input,  Tabs, Modal,Form,  message, Button, Divider,Popover } from 'antd';
-import { PictureOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import { PictureOutlined, FolderOpenOutlined,QuestionCircleOutlined } from '@ant-design/icons';
 
 
 
@@ -15,6 +15,7 @@ import 'codemirror/addon/selection/active-line';
 import 'codemirror/keymap/sublime';
 
 import editorSvc from '../editorSvc';
+import * as uiUtil from '../../../common/uiUtil';
 import api from '../../api';
 
 class EditGraphDlg extends React.Component {
@@ -37,110 +38,157 @@ class EditGraphDlg extends React.Component {
         window.event.stopPropagation();
     }
 
+    hideAllDlg=()=>{
+        this.setState({
+            colorPickerVisible:false,
+            insertPicDlgVisible:false,
+        });
+    }
+
+    /**
+     * 替换内容并获得焦点
+     * @param {*} originCursor   替换前光标位置
+     * @param {*} originLineLen  替换前光标所在行的长度
+     * @param {*} newCursor      替换后光标位置
+     * @param {*} newLine        替换后整行的内容
+     * @param {*} delayFocus     是否延迟获得焦点
+     */
+    replaceLine=(originCursor,originLineLen,newCursor,newLine,delayFocus=false)=>{
+        this.codeMirrorInst.setCursor(originCursor);
+        this.codeMirrorInst.setSelection(originCursor,{line:originCursor.line,ch:originLineLen});
+        this.codeMirrorInst.replaceSelection(newLine);
+        this.codeMirrorInst.setCursor(newCursor);
+        this.codeMirrorInst.setSelection(newCursor);
+        this.codeMirrorInst.focus();
+
+        //对话框刚关闭时，不能马上获得焦点，因此这种情况需要延迟一下
+        if(delayFocus){
+            setTimeout(()=>{
+                this.codeMirrorInst.setCursor(newCursor);
+                this.codeMirrorInst.setSelection(newCursor);
+                this.codeMirrorInst.focus();
+            },500);
+        }
+    }
+
+
+
+
+    //-------------------颜色选择-----------------------------------
     onClearColor=()=>{
         this.onAddColor(null);
     }
 
-    onAddColor=(color=null)=>{
+    onAddColor=(color=null,delayFocus=false)=>{
+        //获得当前光标位置与光标所在行
         if(!this.codeMirrorInst){return;}
         let cursor=this.codeMirrorInst.getCursor();
-        let {line,ch}=cursor;
+        let {line}=cursor;
         let lineTxt=this.codeMirrorInst.getLine(line);
+        
+        //替换行
         let newLine=editorSvc.setColor(lineTxt,color);
-
-        //插入内容并设置光标位置
-        this.codeMirrorInst.setCursor({line,ch:0});
-        this.codeMirrorInst.setSelection({line,ch:0},{line,ch:lineTxt.length})
-        this.codeMirrorInst.replaceSelection(newLine);
-        this.codeMirrorInst.setCursor({line,ch:newLine.length});
-        this.codeMirrorInst.setSelection({line,ch:newLine.length});
-        this.codeMirrorInst.focus();
+        this.replaceLine({line,ch:0},lineTxt.length,{line,ch:newLine.length},newLine,delayFocus);
     }
 
-    handleColorChange=(color)=>{
-        this.hideColorPicker();
-        this.onAddColor(color.hex);
-        setTimeout(()=>{
-            this.codeMirrorInst.focus();
-        },500);
+    handleColorPickerColorChange=(color)=>{
+        this.hideAllDlg();
+        this.onAddColor(color.hex,true);
     }
 
     showColorPicker=()=>{
         this.setState({colorPickerVisible:true});
     }
-    hideColorPicker=()=>{
-        this.setState({colorPickerVisible:false});
-    }
 
+    
+
+
+
+    //-------------------增加图片-----------------------------------
+    onAddPic=(picRelaPath)=>{
+        //获得当前光标位置与光标所在行     
+        if(!this.codeMirrorInst){return;}
+        let cursor=this.codeMirrorInst.getCursor();
+        let {line,ch}=cursor;
+        let lineTxt=this.codeMirrorInst.getLine(line);
+
+        //替换行
+        let {newLinetxt, cusorPos}=editorSvc.addPic(lineTxt,ch,picRelaPath);
+        this.replaceLine({line,ch:0},lineTxt.length,{line,ch:cusorPos},newLinetxt,true);
+    }
 
     showInsertPicDlg=()=>{
         this.setState({
             insertPicDlgVisible:true,
             insertPicPath:'',
             insertPicName:'',
-
-        });
-    }
-    hideInsertPicDlg=()=>{
-        this.setState({insertPicDlgVisible:false});
-    }
-
-    test=()=>{
-        console.log("out out");
-    }
-
-    onInsertPicPathChanged=(e)=>{
-        this.setState({
-            insertPicPath:e.target.value
         });
     }
 
-    onInsertPicNameChanged=(e)=>{
-        this.setState({
-            insertPicName:e.target.value
-        });
-    }
-
-    selPic=()=>{
+    onSelPicFile=()=>{
         let selFilePaths=api.selPicFile();
         if(selFilePaths && selFilePaths[0]){
+            let fullpath=selFilePaths[0];
+            let fn=fullpath.substring(Math.max(fullpath.lastIndexOf("\\"),fullpath.lastIndexOf("/"))+1);
             this.setState({
-                insertPicPath:selFilePaths[0]
+                insertPicPath:fullpath,
+                insertPicName:fn,
             });
         }
     }
 
+    openPicByName=()=>{
+        api.openPicByName(this.state.insertPicName);
+    }
+
     onAddPicCommit=()=>{
-        console.log(1111);
+        if(null==this.state.insertPicPath || ""===this.state.insertPicPath.trim()){
+            message.warn("图片文件路径不能为空");
+            return;
+        }
+        if(!api.existsFullpath(this.state.insertPicPath)){
+            message.warn("图片文件路径不存在");
+            return;
+        }
+        if(null==this.state.insertPicName || ""===this.state.insertPicName.trim()){
+            message.warn("图片显示名称不能为空");
+            return;
+        }
+        if(this.state.insertPicName.includes("/") || this.state.insertPicName.includes("\\")){
+            message.warn('图片显示名称格式有误，不能包含 "/" 或 "\\" ');
+            return;
+        }
+        if(true===api.existsPic(this.state.insertPicName)){
+            Modal.confirm({
+                title:'是否覆盖',
+                content:<>
+                    <div css={{marginBottom:10}}>图片显示名称已存在，是否要覆盖 ？</div>
+                    <Button type="link" title='查看该显示名称的图片' css={{margin:0,padding:0}} onClick={this.openPicByName}>查看</Button>
+                </>,
+                icon:<QuestionCircleOutlined />,
+                onOk:this.copyPicAndAddTxt
+            });
+            return;
+        }
+
+        this.copyPicAndAddTxt();
+    }
+
+    copyPicAndAddTxt=()=>{
         try{
-            console.log("选择文件");
-            console.log(this.state.insertPicPath);
-            console.log(this.state.insertPicName);
-            console.log(this.props.activeKey);
-
-            let rs=null;
-            //是文件路径
-            if(true){
-                rs=api.copyPicToImgsDir(this.state.insertPicPath,this.state.insertPicName,this.props.activeKey);
-            }
-            //是网络url
-            else{
-                //。。。。下载并复制到指定目录
-            }
-
-            
-            console.log("选择文件结果",rs);
+            let rs=api.copyPicToImgsDir(this.state.insertPicPath,this.state.insertPicName,this.props.activeKey);
+            this.hideAllDlg();
+            this.onAddPic(rs); 
         }catch(e){
-            console.error(e);
+            message.error(""+e);
+            console.log(e);
         }
     }
 
 
 
     render() {
-        console.log("位置",(this.props.winW-this.props.dlgW)/2+200,);
-
-        let insertPicDlgW= (this.props.winW<800?this.props.winW-20:800);
+        let insertPicDlgW= (this.props.winW<820?this.props.winW-20:800);
 
         return (
             <>
@@ -157,6 +205,7 @@ class EditGraphDlg extends React.Component {
                     onCancel={this.props.onCancel}>
                     <div>
                         <div css={{'marginBottom':"10px"}}>
+                            {/* 颜色选择器 */}
                             {
                                 ['#cf1322','#389e0d','#0050b3','#fa8c16','#13c2c2','#ad6800','#1890ff','#722ed1','#c41d7f'].map((eachcolor,colorInd)=>(
                                     <div key={colorInd} title={eachcolor} css={getEditDlgColorBoxStyle(eachcolor)} onClick={this.onAddColor.bind(this,eachcolor)}></div>
@@ -165,19 +214,8 @@ class EditGraphDlg extends React.Component {
                             <div css={selColorStyle} title='选择颜色' onClick={this.showColorPicker}></div>  
                             <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>
 
-                            {/* <Divider type="vertical" /> */}
-                            <PictureOutlined title='插入图片' css={{
-                                fontSize:19,
-                                marginLeft:10,
-                                cursor:'pointer',
-                                transition:'all 0.2s 0.1s',
-                                '&:hover':{
-                                    opacity:0.6,
-                                    transform:'skew(-15deg)'
-                                }
-
-                            }} onClick={this.showInsertPicDlg}/>
-                            {/* <Button type="circle" css={{marginBottom:20}} size='small' title='插入图片' shape="circle" icon={<PictureOutlined />} onClick={this.showInsertPicDlg}/> */}
+                            {/* 插入图片 */}
+                            <PictureOutlined title='插入图片' css={{fontSize:19,marginLeft:10, ...baseHoverStyle}} onClick={this.showInsertPicDlg}/>
                         </div>
                         <CodeMirror
                             css={getCodeEditorStyle(this.props.editorH)}
@@ -200,6 +238,7 @@ class EditGraphDlg extends React.Component {
                     </div>
                 </Modal>
 
+                {/*插入图片对话框*/}
                 <Modal
                     title="插入图片"
                     closable={true}
@@ -209,49 +248,28 @@ class EditGraphDlg extends React.Component {
                         maxWidth:insertPicDlgW
                     }}
                     visible={this.state.insertPicDlgVisible}
-                    onCancel={this.hideInsertPicDlg}
+                    onCancel={this.hideAllDlg}
                     onOk={this.onAddPicCommit}>
 
-                    <div css={{
-                        width:'100%',
-                        display:'table',
-                        '& .row':{
-                            display: 'table-row'
-                        },
-                        '& .cell.space':{
-                            // paddingTop:10,
-                        },
-                        '& .cell':{
-                            display: 'table-cell',
-                            verticalAlign:'center',
-                            paddingTop:5,
-                            paddingBottom:5,
-                        },
-                        '& .cell.lab':{
-                            width:80,
-                        },
-                    }}>
+                    <div css={insertImgFormStyle}>
                         <div className='row'>
-                            <div className='cell lab'>
-                                图片位置：
-                            </div>
+                            <div className='cell lab'>图片位置：</div>
                             <div className='cell'>
-                                <Input value={this.state.insertPicPath} onChange={this.onInsertPicPathChanged} addonAfter={
-                                    <FolderOpenOutlined onClick={this.selPic} css={{cursor:'pointer'}}/>
-                                } placeholder='请输入图片本地路径或url' />
+                                <Input value={this.state.insertPicPath} onChange={uiUtil.bindChangeEventToState.bind(this,this,'insertPicPath')} addonAfter={
+                                    <FolderOpenOutlined onClick={this.onSelPicFile} css={{cursor:'pointer'}}/>
+                                } placeholder='请输入图片路径' />
                             </div>
                         </div>
-                        <div className='row space'>
-                            <div className='cell lab space'>
-                                显示名称：
-                            </div>
-                            <div className='cell space'>
-                                <Input value={this.state.insertPicName} onChange={this.onInsertPicNameChanged} placeholder='请输入图片显示名称'/>
+                        <div className='row'>
+                            <div className='cell lab'>显示名称：</div>
+                            <div className='cell'>
+                                <Input value={this.state.insertPicName} onChange={uiUtil.bindChangeEventToState.bind(this,this,'insertPicName')} placeholder='请输入图片显示名称'/>
                             </div>
                         </div>
                     </div>
                 </Modal>            
 
+                {/* 颜色选择对话框 */}
                 <Modal
                     title={null}
                     footer={null}
@@ -265,8 +283,8 @@ class EditGraphDlg extends React.Component {
                         maxWidth: 290
                     }}
                     visible={this.state.colorPickerVisible}
-                    onCancel={this.hideColorPicker}>
-                    <CirclePicker onChange={this.handleColorChange}/>
+                    onCancel={this.hideAllDlg}>
+                    <CirclePicker onChange={this.handleColorPickerColorChange}/>
                 </Modal>
             </>
         );
@@ -274,18 +292,26 @@ class EditGraphDlg extends React.Component {
 }
 
 
-const hoverStyle={
-    width:          16,
-    height:         16,
-    display:        'inline-block',
-    cursor:         'pointer',
-    marginRight:    10,
-    transition:     'all 0.2s 0.1s',
-    '&:hover':{
-        opacity:0.6,
-        transform:'skew(-15deg)',
-    }
-}
+
+
+
+
+const insertImgFormStyle={
+    width:'100%',
+    display:'table',
+    '& .row':{
+        display: 'table-row'
+    },
+    '& .cell':{
+        display: 'table-cell',
+        verticalAlign:'center',
+        paddingTop:5,
+        paddingBottom:5,
+    },
+    '& .cell.lab':{
+        width:80,
+    },
+};
 
 const getCodeEditorStyle=(height)=>({
     '& .CodeMirror':{
@@ -297,20 +323,37 @@ const getCodeEditorStyle=(height)=>({
     }
 });
 
+const baseHoverStyle={
+    cursor:'pointer',
+    transition:'all 0.2s 0.1s',
+    '&:hover':{
+        opacity:0.6,
+        transform:'skew(-15deg)'
+    }
+}
+
+const colorBoxhoverStyle={
+    width:          16,
+    height:         16,
+    display:        'inline-block',
+    marginRight:    10,
+    ...baseHoverStyle
+}
+
 const selColorStyle={
     backgroundImage:'linear-gradient(135deg,orange 20%,green 100%)',
-    ...hoverStyle
+    ...colorBoxhoverStyle
 };
 
 const clearColorStyle={
     backgroundColor:'white',
     border:         '1px solid gray',
-    ...hoverStyle
+    ...colorBoxhoverStyle
 };
 
 const getEditDlgColorBoxStyle=(color)=>({
     backgroundColor:color,
-    ...hoverStyle
+    ...colorBoxhoverStyle
 });
 
 

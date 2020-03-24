@@ -2,11 +2,6 @@
 
 
 const bindInputEle=(comp,iptName,ele)=>{
-    // console.log("绑2");
-    // console.log("comp",comp);
-    // console.log("iptName",iptName);
-    // console.log("ele",ele);
-    // console.log("ele.input",ele.input);
     if(ele && ele.input){
         comp[iptName]=ele.input;
     }
@@ -33,4 +28,12 @@ const doFocusBaseInner=(comp,iptName,propName)=>{
     comp[iptName].setSelectionRange(len,len);
 }
 
-export {bindInputEle,doFocus};
+
+
+const bindChangeEventToState=(comp,stateName,e)=>{
+    let newState={};
+    newState[stateName]=e.target.value;
+    comp.setState(newState);
+}
+
+export {bindInputEle,doFocus,bindChangeEventToState};
