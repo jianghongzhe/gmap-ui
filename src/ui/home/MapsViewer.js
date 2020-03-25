@@ -113,6 +113,7 @@ class MapsViewer extends React.Component {
 
 
     componentDidMount() {
+        document.querySelector("title").innerHTML=api.loadAppNameAndVersionTxt();
         window.addEventListener("resize",this.handleResize);
         this.setState({
             filelist: api.list(),
@@ -446,6 +447,7 @@ class MapsViewer extends React.Component {
                                     onShowCmd={api.openBash}
                                     onExpandAll={this.expandAll}
                                     onShowDevTool={api.showDevTool}
+                                    onReloadApp={api.reloadAppPage}
                                 />
                                 <GraphTabs
                                     activeKey={this.state.activeKey}
@@ -469,6 +471,7 @@ class MapsViewer extends React.Component {
                                     onOpenMapsDir={api.openMapsDir}
                                     onOpenBash={api.openBash}
                                     onShowDevTool={api.showDevTool}
+                                    onReloadApp={api.reloadAppPage}
                                     onAddMap={this.onShowNewMapDlg} 
                                     onSelectMapItem={this.onSelectMapItem}
                                     onloadDir={this.loadDir}

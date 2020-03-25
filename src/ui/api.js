@@ -22,6 +22,18 @@ class Api{
         return app.openPicByName(name);
     }
     
+    loadAppInfo=()=>{
+        return app.loadAppInfo();
+    }
+
+    reloadAppPage=()=>{
+        app.reloadAppPage();
+    }
+
+    loadAppNameAndVersionTxt=()=>{
+        let {showname,version}=this.loadAppInfo();
+        return showname+"　V"+version;
+    }
 
     existsGraph=(fn)=>{
         return app.existsGraph(fn);

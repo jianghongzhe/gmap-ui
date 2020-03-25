@@ -59,6 +59,7 @@ app.on('ready', () => {
     //依赖主窗口的服务进行初始化
     app.selPicFile = app.selPicFile.bind(app,mainWindow);
     app.openDevTool=app.openDevTool.bind(app,mainWindow);
+    app.reloadAppPage=app.reloadAppPage.bind(app,mainWindow);
 
     //加载初始页
     loadFirstPage();

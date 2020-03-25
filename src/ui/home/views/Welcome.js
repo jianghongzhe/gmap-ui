@@ -2,10 +2,12 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Button,Row, Col, Avatar   } from 'antd';
-import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined } from '@ant-design/icons';
+import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 
 import PathSelect from './PathSelect';
 import logourl from '../../../assets/logo.jpg';
+import { createSelector } from 'reselect';
+import api from '../../api';
 
 class Welcome extends React.Component {
     constructor(props) {
@@ -14,6 +16,8 @@ class Welcome extends React.Component {
     }
 
     render() {
+        let {showname,version}=appInfoSelector(undefined);
+
         return (
             <Row>
                 <Col span={16} offset={4}>
@@ -34,12 +38,14 @@ class Welcome extends React.Component {
                         <Col span={10}>                   
                             <div css={logoWrapperStyle}>
                                 <p><Avatar size={256} src={logourl}/></p>
-                                <p className='appname'>GMap - 思维导图<span className='ver'>v0.9</span></p>
+                                <p className='appname'>{showname}<span className='ver'>V{version}</span></p>
                                 <div className='btns'>
                                     <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
-                                    <Button type="default" className='rbtn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={this.props.onOpenMapsDir}></Button>
+                                    <Button type="default" className='r2btn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={this.props.onOpenMapsDir}></Button>
                                     <Button type="default" className='rbtn' title='打开git' shape='circle' icon={<CodeOutlined/>} size='large' onClick={this.props.onOpenBash}></Button>
                                     <Button type="default" className='rbtn' title='开发者工具' shape='circle' icon={<ControlOutlined/>} size='large' onClick={this.props.onShowDevTool}></Button>
+                                    <Button type="default" className='rbtn' title='重新载入应用' shape='circle' icon={<ReloadOutlined/>} size='large' onClick={this.props.onReloadApp}></Button>
+                                    
                                 </div>                               
                             </div>
                         </Col>
@@ -49,6 +55,13 @@ class Welcome extends React.Component {
         );
     }
 }
+
+
+
+const appInfoSelector=createSelector(
+    noUse=>noUse,
+    noUse=>api.loadAppInfo()
+);
 
 const logoWrapperStyle={
     'textAlign':'center',
@@ -65,6 +78,9 @@ const logoWrapperStyle={
         'marginTop':20
     },
     '& .btns .rbtn':{
+        'marginLeft':10
+    },
+    '& .btns .r2btn':{
         'marginLeft':20
     }
 };

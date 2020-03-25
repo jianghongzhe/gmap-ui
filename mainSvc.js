@@ -4,11 +4,15 @@ const { exec, spawn } = require('child_process');
 const path = require('path');
 
 
-//工作区目录
+//常量：工作区目录、主配置文件位置
 const mapsPath=path.join(__dirname,'gmaps');
 const imgsPath=path.join(__dirname,'gmaps','imgs');
+const packageJsonPath=path.join(__dirname,'package.json');
+const SLASH='/';
+const BACK_SLASH='\\';
 
 
+let appInfoCache=null;
 
 
 //===========暴露的接口================================================
@@ -85,7 +89,7 @@ const getPathItems=(assignedDir = null)=>{
 
     //再循环添加每一层
     try{
-        let pathitems=toSlash(path.relative(mapsDir,currDir).trim()).split("/");
+        let pathitems=toSlash(path.relative(mapsDir,currDir).trim()).split(SLASH);
         let len=pathitems.length;
         let accumulatePath=mapsDir;//从图片根目录开始累计
         for(let i=0;i<len;++i){
@@ -138,7 +142,7 @@ const listFiles = (assignedDir = null) => {
             }
             return {
                 name:       ent.name,
-                itemsName:  path.relative(basepath,fullpath),
+                itemsName:  toSlash(path.relative(basepath,fullpath)),//显示在选项卡上的名称：eg. front/css3.md
                 fullpath:   fullpath,
                 isfile:     isfile,
                 emptyDir:   isEmptyDir,
@@ -286,6 +290,25 @@ const openGitBash = () => {
     );
 }
 
+
+/**
+ * 加载应用名称版本等信息
+ */
+const loadAppInfo=()=>{
+    if(appInfoCache){
+        return appInfoCache;
+    }
+    let {name,showname,version}=JSON.parse(fs.readFileSync(packageJsonPath,'utf-8'));
+    appInfoCache={name,showname,version};
+    return appInfoCache;
+}
+
+const reloadAppPage=(mainWindow)=>{
+    //mainWindow.reload();
+    mainWindow.webContents.reloadIgnoringCache();
+}
+
+
 const openDevTool=(mainWindow)=>{
     mainWindow.webContents.openDevTools({detach:true});
 }
@@ -305,20 +328,18 @@ const init=()=>{
 
 
 
-
-
 //===========工具方法  ================================================
 /**
  * 把路径中的所有斜扛全部换为正斜扛 /
  * @param {*} path 
  */
-const toSlash=(path)=>(path.trim().replace(/\\/g,'/'));
+const toSlash=(path)=>(path.trim().replace(/\\/g,SLASH));
 
 /**
  * 把路径中的所有斜扛全部换为反斜扛 \
  * @param {*} path 
  */
-const toBackSlash=(path)=>(path.trim().replace(/[/]/g,'\\'));
+const toBackSlash=(path)=>(path.trim().replace(/[/]/g,BACK_SLASH));
 
 /**
  * 把本地全路径转换成file协议的url
@@ -384,7 +405,8 @@ module.exports={
     openDevTool,
     isDevMode,
     getDevServerUrl,
-
+    loadAppInfo,
+    reloadAppPage,
     
     
     
