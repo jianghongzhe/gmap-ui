@@ -215,7 +215,7 @@ class EditGraphDlg extends React.Component {
                             <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>
 
                             {/* 插入图片 */}
-                            <PictureOutlined title='插入图片' css={{fontSize:19,marginLeft:10, ...baseHoverStyle}} onClick={this.showInsertPicDlg}/>
+                            <PictureOutlined title='插入图片' css={insertImgStyle} onClick={this.showInsertPicDlg}/>
                         </div>
                         <CodeMirror
                             css={getCodeEditorStyle(this.props.editorH)}
@@ -323,9 +323,23 @@ const getCodeEditorStyle=(height)=>({
     }
 });
 
+
+
 const baseHoverStyle={
     cursor:'pointer',
     transition:'all 0.2s 0.1s',
+    '&:hover':{
+        borderRadius:4,
+        opacity:0.6,
+        // transform:'skew(-15deg)'
+    }
+}
+
+const insertImgStyle={
+    fontSize:19,
+    marginLeft:10, 
+    color:'#1890ff',
+    ...baseHoverStyle,
     '&:hover':{
         opacity:0.6,
         transform:'skew(-15deg)'

@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Button,Tooltip,Alert,Row, Col,  } from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined } from '@ant-design/icons';
 
 class Mindmap extends React.Component {
     constructor(props) {
@@ -11,6 +11,9 @@ class Mindmap extends React.Component {
         };   
     }
 
+    onShowTimeline=(obj)=>{
+        console.log("时间线对象",obj);
+    }
 
     render() {
         if(!this.props.cells){
@@ -52,51 +55,102 @@ class Mindmap extends React.Component {
                     {
                         this.props.cells.map((line,rowInd)=>
                             <tr key={rowInd}>
-                            <td className='paddingcell'></td>
-                            {
-                                line.map((item,colInd)=>
-                                    <td key={colInd} css={item.cls}>
-                                        <span className='themetxt'>
-                                            {item.txt}
-                                            {
-                                                (item.nd && item.nd.memo && 0<item.nd.memo.length) && 
-                                                <Tooltip title={
-                                                    <div>{item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)}</div>
-                                                }><FormOutlined className='memoicon'/></Tooltip>
-                                            }
-                                            {
-                                                (item.nd && item.nd.ref) && <Button type="link" size='small' 
-                                                    title={'查看引用 - '+item.nd.ref.showname} className='linkbtn' 
-                                                    icon={<ReadOutlined className='reficon'/>}  
-                                                    onClick={this.props.onOpenRef.bind(this,item.nd.ref)}/>
-                                            }
-                                            {
-                                                (item.nd && item.nd.links && 0<item.nd.links.length) &&
-                                                    <>{
-                                                        item.nd.links.map((link,linkInd)=>(
-                                                            // <LinkOutlined className='linkicon'
-                                                            //     title={link.name?link.name+" "+link.addr:link.addr}
-                                                            //     onClick={this.props.onOpenLink.bind(this,link.addr)}/>
+                                {/* 左边空白格 */}
+                                <td className='paddingcell'></td>
 
-                                                            <Button key={linkInd} type="link" size='small' 
-                                                                title={link.name?link.name+"  "+link.addr:link.addr} className='linkbtn' 
-                                                                icon={<LinkOutlined className='linkicon'/>}  
+
+                                {/* 中间的部分 */}
+                                {
+                                    line.map((item,colInd)=>
+                                        <td key={colInd} css={item.cls}>
+                                            
+                                            {/* 包括除折叠按钮以外的部分 */}
+                                            <span className='themetxt'>
+                                                {/* 日期部分 */}
+                                                {
+                                                    (item.nd && item.nd.dateItem) && (
+                                                        <Tooltip title={<div >{item.nd.dateItem.fullDate}，{item.nd.dateItem.msg}</div>}>
+                                                            <div className='themedateWrapper' onClick={this.props.onShowTimeline.bind(this,item.nd.dateItem.timeline)}>
+                                                                <ClockCircleOutlined className='themeicon' css={{color:item.nd.dateItem.color}}/>
+                                                                <span className='themedatetxt' css={{color:item.nd.dateItem.color}}>{item.nd.dateItem.abbrDate}</span>
+                                                            </div>
+                                                        </Tooltip>
+                                                    )
+                                                }
+                                            
+                                                {/* 主题文本 */}
+                                                <span className='themename'>{item.txt}</span>
+                                                
+                                                {/* 短备注图片，多个用div叠起来 */}
+                                                {
+                                                    (item.nd && item.nd.memo && 0<item.nd.memo.length) && (
+                                                        <Tooltip title={
+                                                            <div>
+                                                                {
+                                                                    item.nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
+                                                                }
+                                                            </div>
+                                                        }>
+                                                            <FormOutlined className='themeicon' css={colors.memo}/>
+                                                        </Tooltip>
+                                                    )
+                                                }
+
+                                                {/* 长引用按钮 */}
+                                                {
+                                                    (item.nd && item.nd.ref) && (
+                                                        <Button 
+                                                            type="link" 
+                                                            size='small' 
+                                                            title={'查看引用 - '+item.nd.ref.showname} 
+                                                            className='themebtn' 
+                                                            icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
+                                                            onClick={this.props.onOpenRef.bind(this,item.nd.ref)}/>
+                                                    )
+                                                }
+
+                                                {/* 链接按钮 */}
+                                                {
+                                                    (item.nd && item.nd.links && 0<item.nd.links.length) && <>{
+                                                        item.nd.links.map((link,linkInd)=>(
+                                                            <Button 
+                                                                key={linkInd} 
+                                                                type="link" 
+                                                                size='small' 
+                                                                title={link.name?link.name+"  "+link.addr:link.addr} 
+                                                                className='themebtn' 
+                                                                icon={<LinkOutlined className='themebtnicon' css={colors.link}/>}  
                                                                 onClick={this.props.onOpenLink.bind(this,link.addr)}/>
                                                         ))
                                                     }</>
+                                                }
+                                            </span>
+
+
+                                            {/* 折叠按钮*/}
+                                            {
+                                                (item.nd && false===item.nd.leaf ) && (
+                                                    <Button 
+                                                        type="link" 
+                                                        size='small' 
+                                                        title={item.nd.expand?"折叠":"展开"} 
+                                                        className='expbtn' 
+                                                        icon={
+                                                            item.nd.expand ?
+                                                                <MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>
+                                                                    :
+                                                                <PlusCircleOutlined className='expbtnicon' css={colors.toggle}/>
+                                                        }  
+                                                        onClick={this.props.onToggleExpand.bind(this,item)}/>
+                                                )
                                             }
-                                            
-                                        </span>
-                                        {
-                                            (item.nd && false===item.nd.leaf ) && 
-                                            <Button type="link" size='small' title={item.nd.expand?"折叠":"展开"} className='btn' 
-                                                icon={item.nd.expand ?<MinusCircleOutlined className='icon' />:<PlusCircleOutlined className='icon' />}  
-                                                onClick={this.props.onToggleExpand.bind(this,item)}/>
-                                        }
-                                    </td>    
-                                )
-                            }
-                            <td className='paddingcell'></td>
+                                        </td>    
+                                    )
+                                }
+
+
+                                {/* 右边空白格 */}
+                                <td className='paddingcell'></td>
                             </tr>
                         )
                     }
@@ -111,6 +165,22 @@ class Mindmap extends React.Component {
 
     
 }
+
+
+/*
+各图标颜色：
+日期：过期：洋红  最近：桔黄  以后
+备注、引用：浅黄
+链接：蓝
+折叠按钮：绿
+*/
+
+const colors={
+    ref: {color:'#faad14'},
+    memo: {color:'#faad14'},
+    link: {color:'#1890ff'},
+    toggle: {color:'#7cb305'},
+};
 
 const mindTabStyle={
     borderCollapse: 'separate',
@@ -130,38 +200,67 @@ const mindTabStyle={
         paddingRight:16
     },
 
-    '& td .memoicon':{
-        fontSize:16,
+
+    //日期
+    '& td .themedateWrapper':{
+        display:'inline-block',
+        cursor:'pointer',
+        marginRight:5,
         lineHeight:'16px',
-        marginLeft:5,
-        color:'#fa8c16'
+        verticalAlign:'bottom'
+    },
+    '& td .themedateWrapper .themedatetxt':{
+        display:'inline-block',
+        lineHeight:'16px',
+        marginLeft:3,
+        marginBottom:2
     },
 
-    '& td .linkbtn':{
+
+    //图标
+    '& td .themeicon':{
+        fontSize:16,
+        lineHeight:'16px',
+        marginLeft:3,
+        verticalAlign:'bottom',
+        marginBottom:0,
+    },
+    
+
+    //引用和链接按钮
+    '& td .themebtn':{
         width:16,
         height:16,
-        lineHeight:'16px',
-        fontSize:16,
+        verticalAlign:'bottom',
         padding:0,
+        lineHeight:'16px',
+        marginBottom:2,
         marginLeft:3,
-        // backgroundColor:'lightblue',
     },
-
-    '& td .reficon':{
+    '& td .themebtn .themebtnicon':{
         fontSize:16,
         lineHeight:'16px',
-        marginLeft:0,
-        color:'#fa8c16',
-        cursor:'pointer'
+        margin:0,
+        padding:0,
     },
 
-    '& td .linkicon':{
-        fontSize:16,
-        lineHeight:'16px',
-        marginLeft:0,
-        color:'#009688',
-        cursor:'pointer'
-    }
+
+    //折叠按钮
+    '& td .expbtn':{
+        width:14,
+        height:14,
+        verticalAlign:'bottom',
+        padding:0,
+        lineHeight:'14px',
+        marginBottom:3,
+        marginLeft:10,
+    },
+    '& td .expbtn .expbtnicon':{
+        fontSize:14,
+        lineHeight:'14px',
+        margin:0,
+        padding:0,
+    },
 }; 
 
 

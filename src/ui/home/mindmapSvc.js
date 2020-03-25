@@ -62,25 +62,25 @@ class MindmapSvc {
      * 展开所有节点
      * @param {*} cells 
      */
-    expandAllNds(cells){
-        let root=this.getRootNodeByCells(cells);
+    expandAllNds(cells) {
+        let root = this.getRootNodeByCells(cells);
         this.expandNode(root);
         //重新解析表格结构
         return this.parseMindMapDataInner(root);
     }
 
-    
+
 
 
     /**
      * 判断是否所有节点都已展开
      */
-    isAllNodeExpand=(cells)=>{
-        let root=this.getRootNodeByCells(cells);
+    isAllNodeExpand = (cells) => {
+        let root = this.getRootNodeByCells(cells);
         return this.isNodeExpand(root);
     }
 
-    
+
 
 
 
@@ -92,31 +92,32 @@ class MindmapSvc {
      * @param {bordTypesMap} 边框类型的枚举
      * @param {getBorderStyleCallback} 根据边框类型解析为边框样式的回调
      */
-    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,shouldValidate=true) => {
+    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true) => {
         //校验
-        if(shouldValidate){
-            if(''===txts){
+        if (shouldValidate) {
+            if ('' === txts) {
                 return {
-                    succ :  false,
-                    msg:    '内容解析失败',
-                    desc:   '图表内容不能为空 ~~~'
+                    succ: false,
+                    msg: '内容解析失败',
+                    desc: '图表内容不能为空 ~~~'
                 }
             }
-            let valiResult=mindMapValidateSvc.validate(txts);
-            
-            if(true!==valiResult){
-                console.log("验证结果",valiResult);
+            let valiResult = mindMapValidateSvc.validate(txts);
+
+            if (true !== valiResult) {
+                console.log("验证结果", valiResult);
                 return {
-                    succ :  false,
-                    msg:    '内容解析失败',
-                    desc:   valiResult+" ~~~"
+                    succ: false,
+                    msg: '内容解析失败',
+                    desc: valiResult + " ~~~"
                 }
             }
         }
 
-        try{
+        try {
             //设置共享的变量
             defaultLineColor = defLineColor;
+            defaultDateColor=defDateColor;
             bordType = bordTypesMap;
             getBorderStyle = getBorderStyleCallback;
             themeStyles = theThemeStyles;
@@ -124,12 +125,12 @@ class MindmapSvc {
             //表格行列相关计算
             let nd = this.load(txts);//根节点
             return this.parseMindMapDataInner(nd);
-        }catch(e){
+        } catch (e) {
             console.error(e);
             return {
-                succ :  false,
-                msg:    '内容解析失败',
-                desc:   "图表内容解析过程中发生错误 ~~~"
+                succ: false,
+                msg: '内容解析失败',
+                desc: "图表内容解析过程中发生错误 ~~~"
             }
         }
 
@@ -139,30 +140,30 @@ class MindmapSvc {
     //----------------如下为非暴露的方法-------------------------------------------------
 
 
-    expandNode=(nd)=>{
-        nd.expand=true;
-        if(!nd.leaf){
-            nd.childs.forEach(child=>{
+    expandNode = (nd) => {
+        nd.expand = true;
+        if (!nd.leaf) {
+            nd.childs.forEach(child => {
                 this.expandNode(child);
             });
         }
     }
 
-    getRootNodeByCells=(cells)=>{
+    getRootNodeByCells = (cells) => {
         //找到第一个有节点的单元格的节点对象
         let root = null;
-        let isFin=false;
-        for(let i in cells){
-            let line=cells[i];
-            for(let j in line){
-                let tmpCell=line[j];
-                if(tmpCell.nd){
-                    root=tmpCell.nd;
-                    isFin=true;
+        let isFin = false;
+        for (let i in cells) {
+            let line = cells[i];
+            for (let j in line) {
+                let tmpCell = line[j];
+                if (tmpCell.nd) {
+                    root = tmpCell.nd;
+                    isFin = true;
                     break;
                 }
             }
-            if(isFin){
+            if (isFin) {
                 break;
             }
         }
@@ -174,20 +175,20 @@ class MindmapSvc {
         return root;
     }
 
-    isNodeExpand=(nd)=>{
-        
+    isNodeExpand = (nd) => {
+
 
         //叶节点认为是展开状态
-        if(nd.leaf){
+        if (nd.leaf) {
             return true;
         }
 
         //从自己向子节点递归，遇到未展开，就返回false，直到最后返回true
-        if(!nd.expand){
+        if (!nd.expand) {
             return false;
         }
-        for(let i in nd.childs){
-            if(!this.isNodeExpand(nd.childs[i])){
+        for (let i in nd.childs) {
+            if (!this.isNodeExpand(nd.childs[i])) {
                 return false;
             }
         }
@@ -204,7 +205,7 @@ class MindmapSvc {
         let cols = leftAndRightCols[0] + 1 + leftAndRightCols[1];//列数
         let rootLoc = [parseInt((rows - 1) / 2), leftAndRightCols[0]];//根节点位置
 
-        
+
 
         //从根节点向下递归设置各节点的颜色
         this.setNodeLineColor(nd, defaultLineColor);
@@ -229,9 +230,11 @@ class MindmapSvc {
         }
 
         //设置根节点的文本的颜色
-        cells[rootLoc[0]][rootLoc[1]].txt = nd.str;
-        cells[rootLoc[0]][rootLoc[1]].blineColor = nd.color
-        cells[rootLoc[0]][rootLoc[1]].nd = nd;
+        let rootCell=cells[rootLoc[0]][rootLoc[1]];
+        rootCell.txt = nd.str;
+        rootCell.blineColor = nd.color
+        rootCell.nd = nd;
+        addBord(rootCell, bordType.b);
 
 
         //设置左右子树的起始行号，为了使左右的高度比较对称，叶节点少的一方应该向下移，而不应从0开始
@@ -286,38 +289,38 @@ class MindmapSvc {
 
                 //有右下边框，且下面格无右边框，且右边无下边框，则设置右下圆角
                 if (
-                    hasBord(item,bordType.r) &&
-                    hasBord(item,bordType.b) &&
-                    (j === rows - 1 || !hasBord(cells[j + 1][i],bordType.r)) &&
-                    (i === cols - 1 || !hasBord(cells[j][i + 1],bordType.b))
+                    hasBord(item, bordType.r) &&
+                    hasBord(item, bordType.b) &&
+                    (j === rows - 1 || !hasBord(cells[j + 1][i], bordType.r)) &&
+                    (i === cols - 1 || !hasBord(cells[j][i + 1], bordType.b))
                 ) {
-                    addBord(item,bordType.rbRad)
+                    addBord(item, bordType.rbRad)
                 }
 
                 //有下边框无右边框，且下面格有右边框，且右边无下边框，则把下格设右上圆角和上边框，同时把当前格下边框去掉，依次向左直到无下边框
                 if (
-                    !hasBord(item,bordType.r) &&
-                    hasBord(item,bordType.b) &&
-                    (j < rows - 1 && hasBord(cells[j + 1][i],bordType.r)) &&
-                    (i < cols - 1 && !hasBord(cells[j][i + 1],bordType.b))
+                    !hasBord(item, bordType.r) &&
+                    hasBord(item, bordType.b) &&
+                    (j < rows - 1 && hasBord(cells[j + 1][i], bordType.r)) &&
+                    (i < cols - 1 && !hasBord(cells[j][i + 1], bordType.b))
                 ) {
                     //下面格设置右上圆角和上边框
-                    addBord(cells[j + 1][i],bordType.rtRad);
-                    addBord(cells[j + 1][i],bordType.t);
+                    addBord(cells[j + 1][i], bordType.rtRad);
+                    addBord(cells[j + 1][i], bordType.t);
                     cells[j + 1][i].tlineColor = cells[j][i].blineColor;
 
                     //本格到左边所有有下边框的都去掉，同时在下边格加上边框
                     for (let k = i; k >= 0; --k) {
-                        if (!hasBord(cells[j][k],bordType.b)) {
+                        if (!hasBord(cells[j][k], bordType.b)) {
                             break;
                         }
 
                         //当前行取消下边框
-                        removeBord(cells[j][k],bordType.b);
+                        removeBord(cells[j][k], bordType.b);
 
                         //下一行增加上边框
                         if (k !== i) {
-                            addBord(cells[j + 1][k],bordType.t);
+                            addBord(cells[j + 1][k], bordType.t);
                             cells[j + 1][k].tlineColor = cells[j][k].blineColor;
                         }
                     }
@@ -332,38 +335,38 @@ class MindmapSvc {
 
                 //有左下边框，且下面格无左边框，，且右边无下边框，则设置左下圆角
                 if (
-                    hasBord(item,bordType.l) &&
-                    hasBord(item,bordType.b) &&
-                    (j === rows - 1 || !hasBord(cells[j + 1][i],bordType.l)) &&
-                    (i === 0 || !hasBord(cells[j][i - 1],bordType.b))
+                    hasBord(item, bordType.l) &&
+                    hasBord(item, bordType.b) &&
+                    (j === rows - 1 || !hasBord(cells[j + 1][i], bordType.l)) &&
+                    (i === 0 || !hasBord(cells[j][i - 1], bordType.b))
                 ) {
-                    addBord(item,bordType.lbRad);
+                    addBord(item, bordType.lbRad);
                 }
 
                 //有下边框无左边框，且下面格有左边框，且左边无下边框，则把下格设左上圆角和上边框，同时把当前格下边框去掉，依次向右直到无下边框
                 if (
-                    !hasBord(item,bordType.l) &&
-                    hasBord(item,bordType.b) &&
-                    (j < rows - 1 && hasBord(cells[j + 1][i],bordType.l)) &&
-                    (i > 0 && !hasBord(cells[j][i - 1],bordType.b))
+                    !hasBord(item, bordType.l) &&
+                    hasBord(item, bordType.b) &&
+                    (j < rows - 1 && hasBord(cells[j + 1][i], bordType.l)) &&
+                    (i > 0 && !hasBord(cells[j][i - 1], bordType.b))
                 ) {
                     //下面格设置左上圆角和上边框
-                    addBord(cells[j + 1][i],bordType.ltRad);
-                    addBord(cells[j + 1][i],bordType.t);
+                    addBord(cells[j + 1][i], bordType.ltRad);
+                    addBord(cells[j + 1][i], bordType.t);
                     cells[j + 1][i].tlineColor = cells[j][i].blineColor;
 
                     //本格到右边所有有下边框的都去掉，同时在下边格加上边框
                     for (let k = i; k < cols; ++k) {
-                        if (!hasBord(cells[j][k],bordType.b)) {
+                        if (!hasBord(cells[j][k], bordType.b)) {
                             break;
                         }
 
                         //当前行取消下边框
-                        removeBord(cells[j][k],bordType.b);
+                        removeBord(cells[j][k], bordType.b);
 
                         //下一行增加上边框
                         if (k !== i) {
-                            addBord(cells[j + 1][k],bordType.t);
+                            addBord(cells[j + 1][k], bordType.t);
                             cells[j + 1][k].tlineColor = cells[j][k].blineColor;
                         }
                     }
@@ -371,6 +374,11 @@ class MindmapSvc {
                 }
             }
         }
+
+
+        
+        
+        
 
 
         //把边框样式的记号转换为实际的样式对象
@@ -407,6 +415,12 @@ class MindmapSvc {
     setNodeLineColor = (nd, parColor = defaultLineColor) => {
         let currColor = (null == nd.color ? parColor : nd.color);//如果当前节点没有指定颜色，则使用继承的颜色（即父节点的颜色），否则使用自己的颜色
         nd.color = currColor;
+
+        //如果节点上的日期没有颜色，则继承线的颜色
+        if(nd.dateItem && (null==nd.dateItem.color || ''===nd.dateItem.color)){
+            nd.dateItem.color=currColor;
+        }
+
         nd.childs.forEach(child => {
             this.setNodeLineColor(child, currColor);
         });
@@ -518,7 +532,7 @@ class MindmapSvc {
 
         //子节点在父节点上面，设置连线到父节点的左或右边框线
         for (let i = child[0] + 1; i <= par[0]; ++i) {
-            addBord(cells[i][child[1]],(isLeft ? bordType.r : bordType.l));
+            addBord(cells[i][child[1]], (isLeft ? bordType.r : bordType.l));
             if (isLeft) {
                 cells[i][child[1]].rlineColor = parColor;
             } else {
@@ -559,9 +573,9 @@ class MindmapSvc {
         dist = rightLeafCnt;
 
         //再依次计算如果把某个节点放到左侧，侧左右侧叶节点数差值是否比当前小，如果小，就移到左侧
-        let loopFin=false;
+        let loopFin = false;
         root.childs.forEach(child => {
-            if(loopFin){
+            if (loopFin) {
                 return;
             }
 
@@ -574,7 +588,7 @@ class MindmapSvc {
                 this.setDirectionRecursively(child, true);
                 return;
             }
-            loopFin=true;
+            loopFin = true;
         });
         return [leftLeafCnt, rightLeafCnt];
     }
@@ -654,92 +668,119 @@ class MindmapSvc {
     load = (arrayOrTxt) => {
         let lastNd = null;
         let root = null;
-
+        let timeline = [];//时间线对象，后面会往里放
         // console.log("测试新解析");
         // console.log(this.loadParts(arrayOrTxt));
 
-        let {ndLines,refs}=this.loadParts(arrayOrTxt);
+        let { ndLines, refs } = this.loadParts(arrayOrTxt);
 
-        ndLines.forEach(str => {
+        ndLines.forEach(str => {           
+            //=============数据行开始======================
+
             let lev = str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
             let txt = str.substring(lev + 1).trim();
             let lineColor = null;
             let memo = [];
-            let links=[];
-            let expand=true;
-            let ref=null;
+            let links = [];
+            let expand = true;
+            let ref = null;
+            let dateItem = null;
 
-            // {
-            //     name:'',    //null或文字
-            //     addr:''     //非空，url
-            // }
 
             //内容是复合类型，则分别计算每一部分
             if (0 <= txt.indexOf("|")) {
                 txt.split('|').forEach(tmp => {
+                    //=============指定行的项开始======================
+                    
                     let item = tmp.trim();
                     if (null == item || "" === item) { return; }
 
                     //节点默认是折叠状态
                     if ('zip:' === item) {
-                        expand=false;
-                        return 
+                        expand = false;
+                        return
                     }
 
                     //是引用
-                    let refPrefixLen='ref:'.length;
-                    if(item.startsWith("ref:") && item.length>refPrefixLen){
-                        if('undefined'!==typeof(refs[item])){
-                            ref={
-                                name:item,
-                                showname:item.substring(refPrefixLen).trim(),
-                                txt:refs[item],
-                                parsedTxt:null,
+                    let refPrefixLen = 'ref:'.length;
+                    if (item.startsWith("ref:") && item.length > refPrefixLen) {
+                        if ('undefined' !== typeof (refs[item])) {
+                            ref = {
+                                name: item,
+                                showname: item.substring(refPrefixLen).trim(),
+                                txt: refs[item],
+                                parsedTxt: null,
                             }
                         }
                         return;
                     }
 
-                    //是颜色标记
-                    if (item.startsWith("c:") && item.length<=20) {
+                    //是颜色标记  c:red  c:#fcfcfc 
+                    if (item.startsWith("c:") && item.length <= 20) {
                         lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
                         return;
                     }
 
-                    //是备注标记
+                    //是备注标记  m:说明
                     if (item.startsWith("m:")) {
-                        memo.push(item.substring("m:".length).trim());//如果出现多个，则加入数组中
-                        // console.log("utqc "+memo);
+                        memo.push(item.substring("m:".length).trim());//备注可以出现多个，最终加入数组中
+                        return;
+                    }
+
+                    //日期类型 d:20.1.8、d:20.1.8,purple
+                    //匹配规则：[0]整串  [1]日期部分  [2],purple  [3]purple
+                    let dateMatchItems = /^d[:]([0-9]{2}[-/.][0-9]{1,2}[-/.][0-9]{1,2})(,(.{0,25}))?$/.exec(item);
+                    if (item.startsWith("d:") && dateMatchItems && dateMatchItems[1]) {
+                        dateItem = {
+                            fullDate: '', //2020-05-23 五
+                            msg: '', //昨天、前天、大前天，过期x天，今天、明天、后天、大后天，还差x天
+                            abbrDate: '', //是当年： 5/23   不是当年 22/3/20,
+                            timeline: timeline, //时间线对象
+                            color: null,
+                            txt: null,
+                            expired:false,
+                            near:false,
+                            future:false,
+                        };
+                        dateItem=this.parseDateInfo(dateItem,dateMatchItems[1],dateMatchItems[3]);
+                        timeline.push(dateItem);
                         return;
                     }
 
                     //是markdown链接 [文字](地址)
                     if (/^\[.+\]\(.+\)$/.test(item)) {
-                        let txt=item.substring(1,item.lastIndexOf("]")).trim();
-                        let url=item.substring(item.indexOf("(")+1,item.length-1).trim();
-                        if(!this.hasUrlPrefix(url)){
-                            url="http://"+url;
+                        let txt = item.substring(1, item.lastIndexOf("]")).trim();
+                        let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
+                        if (!this.hasUrlPrefix(url)) {
+                            url = "http://" + url;
                         }
                         links.push({
-                            name:txt,
-                            addr:url
+                            name: txt,
+                            addr: url
                         });
                         return;
                     }
 
-                    //是普通链接
-                    let urlPattern=this.isUrlPattern(item);
-                    if(false!==urlPattern){
+                    //是普通链接  http://www.xxx.com
+                    let urlPattern = this.isUrlPattern(item);
+                    if (false !== urlPattern) {
                         links.push({
-                            name:null,
-                            addr:urlPattern
+                            name: null,
+                            addr: urlPattern
                         });
                         return;
                     }
 
                     //都不是，即为文本内容
                     txt = item;//如出现多次，只保留最后一次
+
+                    //-------------指定行的项结束----------------------
                 });
+            }
+
+            //整行加载完之后，设置日期项对应的文本
+            if (dateItem) {
+                dateItem.txt = txt;
             }
 
             let nd = {
@@ -749,14 +790,13 @@ class MindmapSvc {
                 par: null,
                 color: lineColor,
                 memo: memo,
-                links:links,
+                links: links,
                 childs: [],
                 leaf: false,         //是否为叶节点
                 expand: expand,      //默认全部展开
-                ref:ref
+                ref: ref,
+                dateItem: dateItem,
             };
-
-            
 
 
             //还没有第一个节点，以第一个节点为根节点
@@ -777,28 +817,101 @@ class MindmapSvc {
 
             //每次处理完一次记录上个节点
             lastNd = nd;
+
+            //-------------数据行结束----------------------
         });
+
+        
+        //从顶部开始递归设置叶节点标志
         this.setLeaf(root);
+
+        //所有节点所加载完宾，对时间线排序
+        timeline.sort((t1, t2) => {
+            if (t1.fullDate === t2.fullDate) {
+                return 0;
+            }
+            return t1.fullDate < t2.fullDate ? -1 : 1;
+        });
+
         return root;
     }
+
+
+
+    parseDateInfo=(dateItem,datePart,colorPart)=>{
+        //指定的日期
+        let ymd = datePart.replace(/[-/.]/g, '|').split('|').map(eachPart => parseInt(eachPart));
+        let assignedDate = new Date(2000 + ymd[0], ymd[1] - 1, ymd[2]);//月份从0开始
+
+        //当前日期
+        let now = new Date();
+        now.setHours(0);
+        now.setMinutes(0);
+        now.setSeconds(0);
+        now.setMilliseconds(0);
+
+        //日期全称
+        dateItem.fullDate=""+(2000 + ymd[0])+"-"+(ymd[1]<10?"0":"")+ymd[1]+"-"+(ymd[2]<10?"0":"")+ymd[2]+" ";
+        let dayOfWeek=['日','一','二','三','四','五','六'][assignedDate.getDay()];
+        dateItem.fullDate+=dayOfWeek;
+
+        //日期简称
+        dateItem.abbrDate='';
+        if(assignedDate.getFullYear()!==now.getFullYear()){
+            dateItem.abbrDate+=ymd[0]+"/"
+        }
+        dateItem.abbrDate+=ymd[1]+"/"
+        dateItem.abbrDate+=ymd[2];
+
+        //指定日期与当前日期相差的天数
+        let dist=Math.abs((now - assignedDate)/86400000);
+
+        //指定日期小于当前日期，过期，显示为红色
+        if (assignedDate < now) {
+            dateItem.color = defaultDateColor.expired;
+            dateItem.expired=true;
+            let dayNames = [undefined, "昨天", "前天", "大前天"];
+            dateItem.msg =(dist in dayNames ? dayNames[dist] : "过期 " + dist + " 天");
+        }
+        //今天到大后天
+        else if (now <= assignedDate && dist <= 3) {
+            dateItem.color = defaultDateColor.near;
+            dateItem.near=true;
+            let dayNames = ["今天", "明天", "后天", "大后天"];
+            dateItem.msg = dayNames[dist];
+        }
+        //以后
+        else {
+            dateItem.color = defaultDateColor.future;
+            dateItem.future=true;
+            dateItem.msg = "还剩 " + dist + " 天";
+        }
+
+        //手动指定了颜色，则覆盖掉前面的颜色设置。可能是 "" 或 "red" 的格式，如果是空，则在计算节点颜色时会设置上
+        if ('undefined'!==typeof(colorPart)) {
+            dateItem.color = colorPart;
+        }
+        return dateItem;
+    }
+
 
     /**
      * 把内容拆分为
      */
-    loadParts=(alltxts)=>{
-        let refs={};
-        let ndLines=[];
-        let currRefName=null;
-        let alreadyHandleRefs=false;
+    loadParts = (alltxts) => {
+        let refs = {};
+        let ndLines = [];
+        let currRefName = null;
+        let alreadyHandleRefs = false;
 
-        alltxts.trim().replace(/\r/g,'').split("\n").forEach(line=>{
-            if("***"===line.trim() && !alreadyHandleRefs){
-                alreadyHandleRefs=true;
+        alltxts.trim().replace(/\r/g, '').split("\n").forEach(line => {
+            if ("***" === line.trim() && !alreadyHandleRefs) {
+                alreadyHandleRefs = true;
             }
 
             //还没到引用部分
-            if(!alreadyHandleRefs){
-                if(''===line.trim()){
+            if (!alreadyHandleRefs) {
+                if ('' === line.trim()) {
                     return;
                 }
                 ndLines.push(line);//此处不要trim，因为节点有层级关系，前面有制表符
@@ -807,28 +920,28 @@ class MindmapSvc {
 
             //已经到引用部分
             //是引用标识符
-            let trimLine=line.trim();
-            if(trimLine.startsWith("# ref:") && trimLine.length>"# ref:".length){
-                currRefName=trimLine.substring("# ".length);
+            let trimLine = line.trim();
+            if (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) {
+                currRefName = trimLine.substring("# ".length);
                 return;
             }
             //还没有当前标识符
-            if(null==currRefName){
+            if (null == currRefName) {
                 return;
             }
             //是已记录过的引用
-            if("undefined"!==typeof(refs[currRefName])){
+            if ("undefined" !== typeof (refs[currRefName])) {
                 // console.log("添加内容 "+currRefName,'\n['+line+']');
-                refs[currRefName]+='\n'+line;
+                refs[currRefName] += '\n' + line;
                 return;
             }
             //是新引用
             // console.log("添加新内容 "+currRefName,'['+line+']');
-            refs[currRefName]=line;
+            refs[currRefName] = line;
             return;
         });
 
-        return {ndLines,refs};
+        return { ndLines, refs };
     }
 
     setLeaf = (nd) => {
@@ -838,7 +951,7 @@ class MindmapSvc {
         });
     }
 
-    hasUrlPrefix=(url)=>{
+    hasUrlPrefix = (url) => {
         return (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || url.startsWith("ftps://"));
     }
 
@@ -847,12 +960,12 @@ class MindmapSvc {
      * @param {*} url 
      * @returns 如果是url类型，返回处理过的地址，否则抬false
      */
-    isUrlPattern=(url)=>{
-        if(this.hasUrlPrefix(url)){
+    isUrlPattern = (url) => {
+        if (this.hasUrlPrefix(url)) {
             return url.trim();
         }
-        if(url.startsWith("www.") && url.length>"www.".length){
-            return "http://"+url.trim();
+        if (url.startsWith("www.") && url.length > "www.".length) {
+            return "http://" + url.trim();
         }
         return false;
     }
@@ -873,6 +986,18 @@ const removeBord = (item, type) => {
 }
 
 
+/*
+{
+    expired:'', //过期
+    near:'',    //近几天
+    future:''   //以后
+}
+*/
+let defaultDateColor = {
+    expired:'#f5222d',//'red', //过期
+    near:'orange',    //近几天
+    future:'#fa8c16',//'#73d13d',//'green'   //以后
+};
 
 let defaultLineColor = null;
 let bordType = null;

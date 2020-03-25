@@ -27,6 +27,7 @@ class GraphTabs extends React.Component {
                                 <Mindmap cells={pane.mapCells} 
                                     onOpenLink={this.props.onOpenLink} 
                                     onOpenRef={this.props.onOpenRef}
+                                    onShowTimeline={this.props.onShowTimeline}
                                     onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} />
                             </div>
                         </TabPane>

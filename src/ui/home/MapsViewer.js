@@ -29,6 +29,7 @@ import EditGraphDlg from './views/EditGraphDlg';
 import Toolbar from './views/Toolbar';
 import GraphTabs from './views/GraphTabs';
 import RefViewer from './views/RefViewer';
+import TimelineViewer from './views/TimelineViewer';
 
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
@@ -79,7 +80,9 @@ class MapsViewer extends React.Component {
             editTmpTxt: '',
             editMapDlgVisible: false,
             refViewerDlgVisible:false,
+            timelineDlgVisible:false,
             currRefObj:{},
+            timelineObj:[],
 
             //新建图表相关
             newMapDlgVisible: false,
@@ -138,6 +141,7 @@ class MapsViewer extends React.Component {
             refViewerDlgVisible:false,
             newMapDlgVisible: false,
             selMapDlgVisible: false,
+            timelineDlgVisible:false,
         });
     }
 
@@ -227,7 +231,7 @@ class MapsViewer extends React.Component {
         }
 
         //计算导图表格信息并加入新tab      
-        let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle);
+        let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle,defaultDateColor);
         let tabdata = this.state.panes;
         tabdata.push({
             title: fn,
@@ -289,7 +293,7 @@ class MapsViewer extends React.Component {
         }
 
         item = item[0]
-        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle,false);
+        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle,defaultDateColor,false);
         item.mapTxts = txt;
         item.mapCells = cells;
         this.setState({
@@ -328,7 +332,7 @@ class MapsViewer extends React.Component {
             return;
         }
 
-        let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle);
+        let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle,defaultDateColor);
 
         //增加新选项卡并设置状态
         let tabdata = this.state.panes;
@@ -387,6 +391,14 @@ class MapsViewer extends React.Component {
         });
         this.setState({
             panes: [...this.state.panes]
+        });
+    }
+
+    onShowTimeline=(timelineObj)=>{
+        console.log("时间线",timelineObj);
+        this.setState({
+            timelineDlgVisible:true,
+            timelineObj:timelineObj,
         });
     }
 
@@ -459,6 +471,7 @@ class MapsViewer extends React.Component {
                                     onToggleExpand={this.toggleExpand}
                                     onOpenLink={this.openLink}
                                     onOpenRef={this.openRef}
+                                    onShowTimeline={this.onShowTimeline}
                                 />
                             </>
 
@@ -519,6 +532,14 @@ class MapsViewer extends React.Component {
                     dlgW={this.state.clientW - 200}
                     bodyH={this.state.clientH - 300}
                     visible={this.state.refViewerDlgVisible}
+                    onCancel={this.closeAllDlg}
+                />
+
+                <TimelineViewer
+                    visible={this.state.timelineDlgVisible}
+                    timelineObj={this.state.timelineObj}
+                    bodyH={this.state.clientH - 300}
+                    winW={this.state.clientW}
                     onCancel={this.closeAllDlg}
                 />
             </>
@@ -608,6 +629,11 @@ const getBorderStyle = (type, color = 'lightgrey') => {
     if (bordType.ltRad === type) {return {borderTopLeftRadius:radius};}
 };
 
+const defaultDateColor = {
+    expired:'#f5222d',//red', //过期
+    near:'#fa8c16',//'orange',    //近几天
+    future:'#389e0d',//'#73d13d',//'green'   //以后
+};
 
 //#2db7f5
 const centerThemeStyle = {
@@ -618,35 +644,22 @@ const centerThemeStyle = {
     '& span.themetxt':{
         whiteSpace:'nowrap',
         display:'inline-block',
-        padding:'4px 16px',
+        padding:'0px 0px  0px 0px',
+        verticalAlign:'bottom',
+        fontSize:16,
+    },
+
+    '& span.themetxt .themename':{
+        color:'white',
         backgroundColor:'#108ee9',
         borderRadius:5,
-        color:'white',
         fontSize:18,
-        lineHeight:'30px'
-    },
-
-    '& .reficon':{
-        fontSize:16,
-        lineHeight:'16px',
-        marginLeft:0,
-        color:'hotpink !important',
-        cursor:'pointer'
-    },
-
-    '& .linkicon':{
-        fontSize:16,
-        lineHeight:'16px',
-        marginLeft:0,
-        color:'hotpink !important',
-        cursor:'pointer'
-    },
-
-    '& .memoicon':{
-        fontSize:16,
-        lineHeight:'16px',
-        marginLeft:5,
-        color:'hotpink !important'
+        lineHeight:'30px',
+        padding:'4px 16px',
+        whiteSpace:'nowrap',
+        display:'inline-block',
+        marginLeft:3,
+        marginRight:3,
     },
 };
 
@@ -656,6 +669,7 @@ const secendThemeStyle = {
     verticalAlign:'bottom',
 
     '& span.themetxt':{
+        // paddingRight:5,
         whiteSpace:'nowrap',
         display:'inline-block',
         marginBottom:0,
@@ -665,25 +679,10 @@ const secendThemeStyle = {
         verticalAlign:'bottom',
     },
 
-    '& .btn':{
-        width:18,
-        height:18,
-        fontSize:14,
-        lineHeight:'16px',
-        margin:0,
-        marginLeft:5,
-        marginRight:5,
-        padding:0,
-        verticalAlign:'bottom',
-        marginBottom:1,
+    '& span.themetxt .themename':{
+        whiteSpace:'nowrap',
+        display:'inline-block',
     },
-
-    '& .btn .icon':{
-        fontSize:14,
-        lineHeight:'18px',
-        margin:0,
-        padding:0,
-    }
 };
 
 const otherThemeStyle = {
@@ -701,24 +700,11 @@ const otherThemeStyle = {
         verticalAlign:'bottom',
     },
 
-    '& .btn':{
-        width:18,
-        height:18,
-        fontSize:14,
-        lineHeight:'16px',
-        margin:0,
-        marginLeft:5,
-        marginRight:5,
-        padding:0,
-        verticalAlign:'bottom',
+    '& span.themetxt .themename':{
+        whiteSpace:'nowrap',
+        display:'inline-block',
+        
     },
-
-    '& .btn .icon':{
-        fontSize:14,
-        lineHeight:'18px',
-        margin:0,
-        padding:0,
-    }
 };
 
 const themeStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
