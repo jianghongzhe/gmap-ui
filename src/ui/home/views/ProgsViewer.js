@@ -26,6 +26,7 @@ class ProgsViewer extends React.Component {
                 footer={null}
                 onCancel={this.props.onCancel}>
                     <Table pagination={false} 
+                        bordered={true}
                         dataSource={parseDataSource(this.props)} 
                         columns={columns} 
                         size='small' 

@@ -9,21 +9,21 @@ const bindInputEle=(comp,iptName,ele)=>{
 
 
 
-const doFocus=(comp,iptName,propName)=>{
+const doFocus=(comp,iptName,propName,isProp=true)=>{
     if(comp[iptName]){
-        doFocusBaseInner(comp,iptName,propName);
+        doFocusBaseInner(comp,iptName,propName,isProp);
         return;
     }
     setTimeout(()=>{
         if(comp[iptName]){
-            doFocusBaseInner(comp,iptName,propName);
+            doFocusBaseInner(comp,iptName,propName,isProp);
             return;
         }    
     },300);
 }
 
-const doFocusBaseInner=(comp,iptName,propName)=>{
-    let len=comp.props[propName].length;
+const doFocusBaseInner=(comp,iptName,propName,isProp)=>{
+    let len=(isProp? comp.props[propName].length : comp.state[propName].length);
     comp[iptName].focus();
     comp[iptName].setSelectionRange(len,len);
 }
