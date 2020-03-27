@@ -680,6 +680,7 @@ class MindmapSvc {
 
             let lev = str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
             let txt = str.substring(lev + 1).trim();
+            let txts=[txt];
             let lineColor = null;
             let memo = [];
             let links = [];
@@ -691,6 +692,7 @@ class MindmapSvc {
 
             //内容是复合类型，则分别计算每一部分
             if (0 <= txt.indexOf("|")) {
+                txts=[];
                 txt.split('|').forEach(tmp => {
                     //=============指定行的项开始======================
                     
@@ -796,7 +798,7 @@ class MindmapSvc {
                     }
 
                     //都不是，即为文本内容
-                    txt = item;//如出现多次，只保留最后一次
+                    txts.push(item);//如出现多次，只保留最后一次
 
                     //-------------指定行的项结束----------------------
                 });
@@ -804,15 +806,15 @@ class MindmapSvc {
 
             //整行加载完之后，设置日期项对应的文本
             if (dateItem) {
-                dateItem.txt = txt;
+                dateItem.txt = txts;
             }
             if(prog){
-                prog.txt=txt;
+                prog.txt=txts;
             }
 
             let nd = {
                 lev: lev,
-                str: txt,
+                str: txts,
                 left: false,
                 par: null,
                 color: lineColor,

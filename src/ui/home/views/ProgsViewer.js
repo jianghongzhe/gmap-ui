@@ -56,6 +56,10 @@ const columns = [
         title: '事项',
         dataIndex: 'thing',
         key: 'thing',
+        render:(txt,line)=>{
+            console.log(typeof(txt),txt.length,txt);
+            return <>{txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>;
+        }
     },
     {
         title: '完成进度',

@@ -90,7 +90,14 @@ class Mindmap extends React.Component {
                                                 }
                                             
                                                 {/* 主题文本 */}
-                                                <span className='themename'>{item.txt}</span>
+                                                <span className='themename'>
+                                                    {
+                                                        "string"===typeof(item.txt) ?
+                                                            <>{item.txt}</>
+                                                                :
+                                                            <>{item.txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>
+                                                    } 
+                                                </span>
                                                 
 
                                                 {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}

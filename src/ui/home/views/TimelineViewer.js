@@ -32,7 +32,7 @@ class TimelineViewer extends React.Component {
                                 <Timeline.Item key={ind}  
                                         {...(item.near?{dot:<ClockCircleOutlined css={{ fontSize: '16px',color:item.color,marginBottom:4 }} />}:{})}   
                                         label={"（"+item.msg+"）"+item.fullDate} color={item.color}>
-                                    {item.txt}
+                                    <>{item.txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>
                                 </Timeline.Item>
                             )
                         }
