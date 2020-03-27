@@ -28,6 +28,7 @@ class GraphTabs extends React.Component {
                                     onOpenLink={this.props.onOpenLink} 
                                     onOpenRef={this.props.onOpenRef}
                                     onShowTimeline={this.props.onShowTimeline}
+                                    onShowProgs={this.props.onShowProgs}
                                     onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} />
                             </div>
                         </TabPane>

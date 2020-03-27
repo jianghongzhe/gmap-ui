@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Button,Tooltip,Alert,Row, Col,  } from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined } from '@ant-design/icons';
+import { Button,Tooltip,Alert,Row, Col,Progress  } from 'antd';
+import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 
 class Mindmap extends React.Component {
     constructor(props) {
@@ -11,9 +11,20 @@ class Mindmap extends React.Component {
         };   
     }
 
-    onShowTimeline=(obj)=>{
-        console.log("时间线对象",obj);
+    progressFormater=(st,percent)=>{
+        if('exception'===st){
+            return <CloseOutlined />;
+        }
+        if(100===percent){
+            return <CheckOutlined />;
+        }
+        return <span css={progStyle.font}>{`${percent}`}</span>;
     }
+
+    onShowProgList=(progs)=>{
+        console.log(progs);
+    }
+
 
     render() {
         if(!this.props.cells){
@@ -80,6 +91,23 @@ class Mindmap extends React.Component {
                                             
                                                 {/* 主题文本 */}
                                                 <span className='themename'>{item.txt}</span>
+                                                
+
+                                                {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}
+                                                {(item.nd && item.nd.prog) && (
+                                                    <Tooltip title={item.nd.prog.msg}>
+                                                        <Progress type="circle" 
+                                                            trailColor={progStyle.trailColor}
+                                                            format={this.progressFormater.bind(this,item.nd.prog.st)}
+                                                            className='prog'
+                                                            percent={item.nd.prog.err ? 100 : item.nd.prog.num} 
+                                                            width={progStyle.size} 
+                                                            status={item.nd.prog.st}
+                                                            onClick={this.props.onShowProgs.bind(this,item.nd.prog.allProgs)}
+                                                        />
+                                                    </Tooltip>
+                                                )}  
+
                                                 
                                                 {/* 短备注图片，多个用div叠起来 */}
                                                 {
@@ -175,12 +203,20 @@ class Mindmap extends React.Component {
 折叠按钮：绿
 */
 
+
+
 const colors={
     ref: {color:'#faad14'},
     memo: {color:'#faad14'},
     link: {color:'#1890ff'},
     toggle: {color:'#7cb305'},
 };
+
+const progStyle={
+    trailColor: '#CCC',
+    size:24,
+    font:{fontSize:12},
+}
 
 const mindTabStyle={
     borderCollapse: 'separate',
@@ -200,6 +236,13 @@ const mindTabStyle={
         paddingRight:16
     },
 
+
+    '& td .prog':{
+        marginLeft:3,
+        verticalAlign:'bottom',
+        marginBottom:1,
+        cursor:'pointer',
+    },
 
     //日期
     '& td .themedateWrapper':{

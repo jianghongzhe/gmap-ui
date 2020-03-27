@@ -31,6 +31,7 @@ import Toolbar from './views/Toolbar';
 import GraphTabs from './views/GraphTabs';
 import RefViewer from './views/RefViewer';
 import TimelineViewer from './views/TimelineViewer';
+import ProgsViewer from './views/ProgsViewer';
 
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
@@ -82,8 +83,10 @@ class MapsViewer extends React.Component {
             editMapDlgVisible: false,
             refViewerDlgVisible:false,
             timelineDlgVisible:false,
+            progsDlgVisible:false,
             currRefObj:{},
             timelineObj:[],
+            progsObj:[],
 
             //新建图表相关
             newMapDlgVisible: false,
@@ -94,6 +97,16 @@ class MapsViewer extends React.Component {
             filelist: [],
             dirs:[],            
         };
+
+        
+    }
+
+    
+
+
+    componentDidMount() {
+        document.querySelector("head > title").innerHTML=api.loadAppNameAndVersionTxt();
+        window.addEventListener("resize",this.handleResize);
 
         //初始化markdown解析功能
         marked.setOptions({
@@ -111,19 +124,17 @@ class MapsViewer extends React.Component {
             smartypants: false,
             xhtml: false
         });
-    }
-
-    
 
 
-    componentDidMount() {
-        document.querySelector("title").innerHTML=api.loadAppNameAndVersionTxt();
-        window.addEventListener("resize",this.handleResize);
+
+
         this.setState({
             filelist: api.list(),
             dirs:   api.getPathItems(),
         });
     }
+
+
 
     componentWillUnmount(){
         window.removeEventListener("resize",this.handleResize)
@@ -136,6 +147,10 @@ class MapsViewer extends React.Component {
         });
     }
 
+    componentDidUpdate(){
+        setTimeout(this.bindLinkEvent, 100);//迟延一会等视图已加载完再处理（否则第一次显示看不到效果）
+    }
+
     closeAllDlg=()=>{
         this.setState({
             editMapDlgVisible: false,
@@ -143,6 +158,7 @@ class MapsViewer extends React.Component {
             newMapDlgVisible: false,
             selMapDlgVisible: false,
             timelineDlgVisible:false,
+            progsDlgVisible:false,
         });
     }
 
@@ -403,6 +419,13 @@ class MapsViewer extends React.Component {
         });
     }
 
+    onShowProgs=(progs)=>{
+        this.setState({
+            progsObj: progs,
+            progsDlgVisible:true,
+        });
+    }
+
     openRef=(refObj)=>{
         //迟延到第一次查看时才解析
         if(null==refObj.parsedTxt){
@@ -413,13 +436,13 @@ class MapsViewer extends React.Component {
             currRefObj:{...refObj},
             refViewerDlgVisible:true,
         });
-        setTimeout(this.bindLinkEvent, 800);//setState会异步执行，因此需要等一会再绑定事件
     }
 
     /**
      * markdown中的a标签和img标签的事件绑定
      */
     bindLinkEvent=()=>{
+        //a标签禁用默认事件，改为点击后用默认浏览器打开
         document.querySelectorAll(".markdown-body a").forEach(ele=>{
             let addr=ele.getAttribute('href');
             if(addr.startsWith("javascript:")){return;}//跳过处理过的
@@ -427,6 +450,8 @@ class MapsViewer extends React.Component {
             ele.href="javascript:void(0);";//禁用默认点击效果
             ele.addEventListener("click",()=>{this.openLink(addr);});//增加点击事件，点击时使用外部浏览器打开
         });
+
+        //图片把原始地址修改为本地绝对路径url，并且增加点击事件，点击后用本地默认程序打开
         document.querySelectorAll(".markdown-body img").forEach(ele=>{
             let addr=ele.getAttribute('src');
             if(!(addr.startsWith("./") || addr.startsWith("../"))){return;}//跳过不是相对路径的
@@ -437,7 +462,18 @@ class MapsViewer extends React.Component {
             ele.style.display='block';
             ele.addEventListener("click",()=>{this.openLink(picurl);});//本地打开时使用不带随机参数的url
         });
-        console.log("已处理<a>标签和<img>标签的url地址和事件绑定");
+
+        //代码段，样式兼容问题处理：
+        //marked与highlight的兼容问题：
+        //      marked不会在pre > code中加入hljs类（而highlight需要），需手动加上
+        //github-markdown-css与highlight的兼容问题：
+        //      github-markdown-css会设置背景，而hljs中的背景无法覆盖它，所以手动使用style设置（优先级最高），该值要与hljs的样式文件对应（更换样式文件时这里的值也要改）
+        document.querySelectorAll(".markdown-body pre > code").forEach(ele=>{
+            if(!ele.className.includes("hljs")){
+                ele.className+=" hljs";
+                ele.parentNode.style.backgroundColor=codeBg;//
+            }
+        });
     }
 
     
@@ -473,6 +509,7 @@ class MapsViewer extends React.Component {
                                     onOpenLink={this.openLink}
                                     onOpenRef={this.openRef}
                                     onShowTimeline={this.onShowTimeline}
+                                    onShowProgs={this.onShowProgs}
                                 />
                             </>
 
@@ -543,10 +580,21 @@ class MapsViewer extends React.Component {
                     winW={this.state.clientW}
                     onCancel={this.closeAllDlg}
                 />
+
+                <ProgsViewer
+                    visible={this.state.progsDlgVisible}
+                    progsObj={this.state.progsObj}
+                    bodyH={this.state.clientH - 300}
+                    winW={this.state.clientW}
+                    onCancel={this.closeAllDlg}
+                />
             </>
         );
     }
 }
+
+
+const codeBg='rgba(40,44,52,1)'; //40 44 52  #282c34
 
 const getDefMapTxt=(theleName="中心主题") =>(
 `- ${theleName}

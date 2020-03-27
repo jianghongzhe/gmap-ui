@@ -669,6 +669,7 @@ class MindmapSvc {
         let lastNd = null;
         let root = null;
         let timeline = [];//时间线对象，后面会往里放
+        let progs=[];
         // console.log("测试新解析");
         // console.log(this.loadParts(arrayOrTxt));
 
@@ -685,6 +686,7 @@ class MindmapSvc {
             let expand = true;
             let ref = null;
             let dateItem = null;
+            let prog=null;
 
 
             //内容是复合类型，则分别计算每一部分
@@ -715,6 +717,28 @@ class MindmapSvc {
                         return;
                     }
 
+                    //进度   p:10   p:-20   
+                    let progMatchItems=/^p[:]([-]?)([0-9]{1,3})$/.exec(item);
+                    if(item.startsWith("p:") && progMatchItems){
+                        let isErr=(progMatchItems[1]?true:false);
+                        let num=parseInt(progMatchItems[2]);
+                        num=(num>100?100:num);
+                        let msg=(isErr?"完成到 "+num+"% 时出现错误":(100===num?"已完成":"已完成 "+num+"%"));
+
+                        prog={
+                            num: num,
+                            txt: null,//稍后加入
+                            st: isErr?'exception':(100===num?'success':'normal'),
+                            allProgs: progs,
+                            msg: msg,
+                            err : isErr,
+                            done: !isErr && 100===num,
+                            doing: !isErr && 100>num,
+                        };
+                        progs.push(prog);//保持加入的顺序不变，后面不用排序
+                        return;
+                    }
+
                     //是颜色标记  c:red  c:#fcfcfc 
                     if (item.startsWith("c:") && item.length <= 20) {
                         lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
@@ -737,13 +761,13 @@ class MindmapSvc {
                             abbrDate: '', //是当年： 5/23   不是当年 22/3/20,
                             timeline: timeline, //时间线对象
                             color: null,
-                            txt: null,
+                            txt: null,//稍后加入
                             expired:false,
                             near:false,
                             future:false,
                         };
                         dateItem=this.parseDateInfo(dateItem,dateMatchItems[1],dateMatchItems[3]);
-                        timeline.push(dateItem);
+                        timeline.push(dateItem);//后面需要根据日期来排序
                         return;
                     }
 
@@ -782,6 +806,9 @@ class MindmapSvc {
             if (dateItem) {
                 dateItem.txt = txt;
             }
+            if(prog){
+                prog.txt=txt;
+            }
 
             let nd = {
                 lev: lev,
@@ -796,6 +823,7 @@ class MindmapSvc {
                 expand: expand,      //默认全部展开
                 ref: ref,
                 dateItem: dateItem,
+                prog: prog,
             };
 
 
@@ -873,18 +901,19 @@ class MindmapSvc {
             let dayNames = [undefined, "昨天", "前天", "大前天"];
             dateItem.msg =(dist in dayNames ? dayNames[dist] : "过期 " + dist + " 天");
         }
-        //今天到大后天
-        else if (now <= assignedDate && dist <= 3) {
+        //7天之内为近期任务
+        else if (now <= assignedDate && dist <= 7) {
             dateItem.color = defaultDateColor.near;
             dateItem.near=true;
             let dayNames = ["今天", "明天", "后天", "大后天"];
-            dateItem.msg = dayNames[dist];
+
+            dateItem.msg =(dist in dayNames ? dayNames[dist]: "还剩 " + dist + " 天");
         }
         //以后
         else {
             dateItem.color = defaultDateColor.future;
             dateItem.future=true;
-            dateItem.msg = "还剩 " + dist + " 天";
+            dateItem.msg = dist+" 天以后";
         }
 
         //手动指定了颜色，则覆盖掉前面的颜色设置。可能是 "" 或 "red" 的格式，如果是空，则在计算节点颜色时会设置上

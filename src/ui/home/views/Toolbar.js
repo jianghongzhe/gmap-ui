@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout,   Button, Divider } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,CodeOutlined,ExpandAltOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,CodeOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 const { Header, Content } = Layout;
 
 class Toolbar extends React.Component {
@@ -25,8 +25,8 @@ class Toolbar extends React.Component {
                 <Divider type="vertical" className='divider'/>
                 <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowEditMapDlg} title='编辑' />
                 {
-                    this.props.showExpandAll && 
-                        <Button shape='circle' icon={<ExpandAltOutlined />} className='toolbtn' type='primary' size='large' onClick={this.props.onExpandAll} title='展开全部节点' />
+                    this.props.showExpandAll &&      
+                        <Button shape='circle' icon={<ExpandOutlined />} className='toolbtn' type='primary' size='large' onClick={this.props.onExpandAll} title='展开全部节点' />
                 }
 
                 
