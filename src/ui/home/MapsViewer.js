@@ -538,7 +538,7 @@ class MapsViewer extends React.Component {
                     onCancel={this.closeAllDlg}
                     onChangeNewMapName={uiUtil.bindChangeEventToState.bind(this,this,'newMapName')}
                 />
-
+ 
                 <EditGraphDlg
                     visible={this.state.editMapDlgVisible}
                     currMapName={this.state.currMapName}
@@ -579,7 +579,7 @@ class MapsViewer extends React.Component {
                     bodyH={this.state.clientH - 300}
                     winW={this.state.clientW}
                     onCancel={this.closeAllDlg}
-                />
+                /> 
 
                 <ProgsViewer
                     visible={this.state.progsDlgVisible}

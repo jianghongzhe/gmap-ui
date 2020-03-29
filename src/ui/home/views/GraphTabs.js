@@ -12,6 +12,8 @@ class GraphTabs extends React.Component {
         this.state = {  };
     }
     render() {
+        
+
         return (
             <Tabs
                 hideAdd={true}

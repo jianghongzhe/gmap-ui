@@ -1,15 +1,21 @@
-const { app, BrowserWindow, Menu, shell,dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net   } = require('electron');
 const fs = require('fs');
+const Url = require('url');
 const { exec, spawn } = require('child_process');
 const path = require('path');
 
 
 //常量：工作区目录、主配置文件位置
+const userPngImg=true;//默认是否
 const mapsPath=path.join(__dirname,'gmaps');
 const imgsPath=path.join(__dirname,'gmaps','imgs');
+const workPath=path.join(__dirname,'work');
 const packageJsonPath=path.join(__dirname,'package.json');
 const SLASH='/';
 const BACK_SLASH='\\';
+
+
+
 
 
 let appInfoCache=null;
@@ -19,24 +25,183 @@ let appInfoCache=null;
 
 /**
  * 计算图片在导图文件文本中的路径
+ * 设法从剪切版中找到图片放到图片目录，并返回相对于当前图导文件的相对路径
+ * 寻找方法：
+ *      剪切板有图片对象
+ *      剪切板有字符串
+ *          字符串是文件路径，尝试从路径加载图片对象
+ *          把字符串当作url，尝试下载该文件，并尝试加载下载后的文件为图片对象
+ * @param {*} showName 
+ * @param {*} currGraphFullpath 
+ */
+const copyClipboardPicToImgsDir=(showName,currGraphFullpath)=>{
+    return getImgFromClipboard().then(im=>{
+        return saveImgAndGetRelaPath(im,showName,currGraphFullpath);
+    }).catch(e=>{
+        throw {
+            succ:false,
+            msg:""+e
+        };
+    });
+}
+
+
+// setTimeout(() => {
+//     downFile("https://www.runoob.com/wp-content/uploads/2014/07/gradient_linear.png","F:\\workspace2\\front\\gmap-ui\\work\\1.jpg");
+// }, 5000);
+
+// let mm=nativeImage.createFromPath("F:\\workspace2\\front\\gmap-ui\\work\\tmp_1585425075597.png");
+// console.log(mm.isEmpty());
+
+
+/**
+ * 计算图片在导图文件文本中的路径
  * 复制指定的图片文件到图片目录，并返回相对于当前图导文件的相对路径
- * @param {*} picFullpath 
+ * @param {*} picFullpath  文件路径或url
  * @param {*} showName 
  * @param {*} currGraphFullpath
  * @returns 
  */
 const copyPicToImgsDir=(fromPicFullpath,showName,currGraphFullpath)=>{
-    let toPicFullPath=getImgsPath(showName);   //图片另存到本地的绝对路径
-    fs.copyFileSync(fromPicFullpath,toPicFullPath);//图片另存到本地
-    let graphDir=path.dirname(currGraphFullpath);//导图所在目录
+    return new Promise((res,rej)=>{
+        //是文件格式
+        if(existsFullpath(fromPicFullpath)){
+            let im=nativeImage.createFromPath(fromPicFullpath);
+            if(!im || im.isEmpty()){
+                rej({
+                    succ:false,
+                    msg:"该路径不是有效的图片"
+                });
+                return;
+            }
+            res(saveImgAndGetRelaPath(im,showName,currGraphFullpath));
+            return;
+        }
+
+
+        //是url
+        if(isUrlFormat(fromPicFullpath)){
+            let tmpFileFullpath=getTmpImgSavePath();//下载临时文件
+            downFile(fromPicFullpath,tmpFileFullpath).then(()=>{
+                let im=nativeImage.createFromPath(tmpFileFullpath);
+                if(!im || im.isEmpty()){
+                    rej({
+                        succ:false,
+                        msg:"下载的图片格式有误"
+                    });
+                    return;
+                }
+                res(saveImgAndGetRelaPath(im,showName,currGraphFullpath));
+            }).catch(e=>{
+                if(404===e){
+                    rej({
+                        succ:false,
+                        msg:"指定的图片url不存在"
+                    });
+                    return;
+                }
+                rej({
+                    succ:false,
+                    msg:"图片下载过程中出现错误"
+                });
+            });
+            return;
+        }
+
+        //都不是
+        rej({
+            succ:false,
+            msg:"图片路径或url格式有误"
+        });
+    });
+}
+
+
+/**
+ * 保存图片对象到相应目录，并计算相对于导图文件的相对路径
+ * @param {*} im 
+ * @param {*} showName 
+ * @param {*} currGraphFullpath 
+ */
+const saveImgAndGetRelaPath=(im,showName,currGraphFullpath)=>{
+    //写文件
+    let toPicFullPath=getImgsPath(showName);   //指定图片保存到本地的绝对路径
+    fs.writeFileSync(toPicFullPath,getDefFormatImgBuff(im));
 
     //计算从导图所在目录到图片的相对路径
+    let graphDir=path.dirname(currGraphFullpath);//导图所在目录
     let relapath=toSlash(path.relative(graphDir,toPicFullPath).trim());
     if(!(relapath.startsWith('./') || relapath.startsWith('../'))){
         relapath="./"+relapath;
     }
     return relapath;
 }
+
+
+/**
+ * 设法从剪切板取得图片
+ * 1、图片对象
+ * 2、文本是文件路径，尝试读取图片
+ * 3、文本是url，尝试下载
+ * @returns promise  im/null
+ */
+const getImgFromClipboard=()=>{
+    return new Promise((res,rej)=>{  
+        //图片对象
+        let im=clipboard.readImage();
+        if(im && !im.isEmpty()){
+            res(im);
+            return;
+        }
+
+        //是文件
+        let txt=(""+clipboard.readText()).trim();
+        if(fs.existsSync(txt)){
+            im=nativeImage.createFromPath(txt);
+            if(im && !im.isEmpty()){
+                res(im);
+                return;
+            }
+        }
+
+        //是url
+        if(isUrlFormat(txt)){
+            let tmpFileFullpath=getTmpImgSavePath();//下载临时路径
+            downFile(txt,tmpFileFullpath).then(()=>{
+                im=nativeImage.createFromPath(tmpFileFullpath);
+                if(im && !im.isEmpty()){
+                    res(im);
+                    return;
+                }
+                rej("下载的图片文件格式有误");
+            }).catch(e=>{
+                if(404===e){
+                    rej("指定的图片url不存在");
+                    return;
+                }
+                rej("图片下载过程中出现错误");
+            });
+            return;
+        }
+
+        //都不是
+        rej("未从剪切板中找到可用的图片信息");
+    });
+}
+
+
+
+const getDefFormatImgBuff=(im)=>{
+    return userPngImg?im.toPNG():im.toJPEG(100)
+};
+
+const getDefFormatImgExt=()=>{
+    return userPngImg?".png":".jpg";
+}
+
+const getTmpImgSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+getDefFormatImgExt()));
+
+
 
 /**
  * 计算图片实际的本地url路径
@@ -231,6 +396,12 @@ const readFile = (fullpath) => {
     }
 }
 
+
+
+
+
+
+
 /**
  * 写入文件内容，以utf-8编码写入
  * @param {*} fullpath 全路径
@@ -319,7 +490,7 @@ const openDevTool=(mainWindow)=>{
  * 创建工作目录与图片目录
  */
 const init=()=>{
-    [imgsPath].forEach(eachWorkdir=>{
+    [imgsPath,workPath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
@@ -329,6 +500,13 @@ const init=()=>{
 
 
 //===========工具方法  ================================================
+
+/**
+ * 指定文本是否为url格式
+ * @param {*} txt 
+ */
+const isUrlFormat=(txt)=>(["http://","https://","ftp://","ftps://","//","www."].some(prefix=>txt.startsWith(prefix)));
+
 /**
  * 把路径中的所有斜扛全部换为正斜扛 /
  * @param {*} path 
@@ -358,6 +536,62 @@ const getMapsPath = (fn = null) => toBackSlash((fn ? path.join(mapsPath,fn) : ma
  * @param {*} fn 如果未提供此参数表示取所在目录，否则表示该文件的全路径
  */
 const getImgsPath = (fn = null) => toBackSlash((fn ? path.join(imgsPath,fn) : imgsPath).trim());
+
+
+/**
+ * 下载文件
+ * @param {*} url 
+ * @param {*} savePath
+ * @returns promise 下载成功res 下载失败rej(异常信息/异常状态码/error)
+ */
+const downFile=(url,savePath)=>{
+    return new Promise((res,rej)=>{
+        let succReturn=false;//是否成功返回
+        try{
+            //WriteStream就绪时开始进行下载请求
+            let ws=fs.createWriteStream(savePath);
+            ws.on("ready",()=>{
+                try{
+                    const request=net.request(url);
+                    request.on("error",(err)=>{
+                        ws.end();
+                        rej(err);
+                    });
+                    request.on('response', (response) => {
+                        if(200!==response.statusCode){
+                            ws.end();
+                            rej(response.statusCode);
+                            return;
+                        }
+                        response.on('data', (chunk) => {
+                            ws.write(chunk);
+                        });
+                        response.on('error',(e)=>{
+                            ws.end();
+                            rej('error');
+                        });
+                        response.on('end', () => {
+                            succReturn=true;//只有下载完成才能瓐返回
+                            ws.end();//需要等到finish事件时才能返回结果
+                        });
+                    })
+                    request.end();
+                }catch(e){
+                    rej(e);
+                }
+            });
+
+            //WriteStream完成时返回结果（如果在调用end()之后立即返回，则内容还未flush到文件）
+            ws.on("finish",()=>{
+                if(succReturn){
+                    res();
+                }
+            })
+        }catch(e){
+            rej(e);
+        }
+    });
+}
 
 
 
@@ -392,6 +626,7 @@ module.exports={
 
     //图片相关操作
     copyPicToImgsDir,
+    copyClipboardPicToImgsDir,
     calcPicUrl,
     selPicFile,//使用操作系统对话框
 
@@ -407,6 +642,7 @@ module.exports={
     getDevServerUrl,
     loadAppInfo,
     reloadAppPage,
+    isUrlFormat,
     
     
     

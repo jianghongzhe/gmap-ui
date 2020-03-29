@@ -30,6 +30,10 @@ class Api{
         app.reloadAppPage();
     }
 
+    isUrlFormat=(txt)=>{
+        return app.isUrlFormat(txt);
+    }
+
     loadAppNameAndVersionTxt=()=>{
         let {showname,version}=this.loadAppInfo();
         return showname+"　V"+version;
@@ -37,6 +41,10 @@ class Api{
 
     existsGraph=(fn)=>{
         return app.existsGraph(fn);
+    }
+
+    copyClipboardPicToImgsDir=(showName,currGraphFullpath)=>{
+        return app.copyClipboardPicToImgsDir(showName,currGraphFullpath);
     }
 
     copyPicToImgsDir=(picFullpath,showName,currGraphFullpath)=>{

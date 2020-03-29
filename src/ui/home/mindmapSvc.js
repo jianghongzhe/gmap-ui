@@ -1,4 +1,10 @@
 import mindMapValidateSvc from './mindMapValidateSvc';
+
+
+
+//是否启用虚拟节点，启用后样式会好些，但占用空间变大，空间利用率低
+const useVisualNode=false;
+
 /**
  * 根据指定文本格式，解析为table方式显示的思维导数的数据格式
  * 
@@ -22,7 +28,10 @@ import mindMapValidateSvc from './mindMapValidateSvc';
         ref: {
             txt:'',
             parsedTxt:''
-        }
+        },
+        visual:false,
+        dateItem: dateItem,
+        prog: prog,
     }
  * 
  * 
@@ -105,7 +114,6 @@ class MindmapSvc {
             let valiResult = mindMapValidateSvc.validate(txts);
 
             if (true !== valiResult) {
-                console.log("验证结果", valiResult);
                 return {
                     succ: false,
                     msg: '内容解析失败',
@@ -197,8 +205,19 @@ class MindmapSvc {
 
 
     parseMindMapDataInner = (nd) => {
+        if(useVisualNode){
+            //清除所有虚拟节点
+            this.removeVisualNds(nd);
 
-        let leftAndRightLeafCnt = this.setDirection(nd);//左右子树叶子节点数量
+            //在根极节点的子树下设置虚拟节点
+            nd.childs.forEach(nd=>{
+                this.convertTwoSub2ThreeSub(nd);
+            });
+        }
+
+        //计算根节点子树的方向，同时在其中设置虚拟节点（如果需要）
+        let leftAndRightLeafCnt = this.setDirection(nd);
+
         let rows = Math.max(leftAndRightLeafCnt[0], leftAndRightLeafCnt[1]);//行数
         rows = (0 === rows ? 1 : rows);
         let leftAndRightCols = this.getLeftRightDeeps(nd);//左右子树深度（不包含根节点）
@@ -405,6 +424,20 @@ class MindmapSvc {
         return cells;
     }
 
+    /**
+     * 移除节点子节点中的
+     */
+    removeVisualNds=(nd)=>{
+        let len=nd.childs.length;
+        for(let i=len-1;i>=0;--i){
+            if(nd.childs[i].visual){
+                nd.childs.splice(i,1);
+                continue;
+            }
+            this.removeVisualNds(nd.childs[i]);
+        }
+    }
+
 
 
     /**
@@ -470,7 +503,9 @@ class MindmapSvc {
         if (null != forceAlignToRoot) {//强制与根节点纵坐标一致
             row = forceAlignToRoot;
         }
+        
         cells[row][col].txt = nd.str;//节点文本
+        
         cells[row][col].blineColor = nd.color;//节点下边框
         cells[row][col].nd = nd;
         let currLoc = [row, col];//当前节点位置
@@ -503,6 +538,13 @@ class MindmapSvc {
      * @param {currColor} 子节点颜色
      */
     setLine = (cells, par, child, parColor, currColor) => {
+        let childNd=cells[child[0]][child[1]].nd;
+
+        //虚拟节点不需要设置线条
+        if(childNd.visual){
+            return;
+        }
+
         //父子节点都设置下划线和颜色
         addBord(cells[par[0]][par[1]], bordType.b);
         addBord(cells[child[0]][child[1]], bordType.b);
@@ -590,6 +632,35 @@ class MindmapSvc {
             }
             loopFin = true;
         });
+
+        let ltreeCnt=0;
+        let rtreeCnt=0;
+        root.childs.forEach(child => {
+            if(child.left){
+                ++ltreeCnt;
+                return;
+            }
+            ++rtreeCnt;
+        });
+
+
+        if(useVisualNode){
+            //
+            if(2===rtreeCnt && 1===this.getLeafCnt(root.childs[ltreeCnt+0]) && 1===this.getLeafCnt(root.childs[ltreeCnt+1])){
+                let insNd=this.getVisualND(root,1,false);
+                root.childs.push(root.childs[ltreeCnt+1]);
+                root.childs[ltreeCnt+1]=insNd;
+                ++rightLeafCnt;
+            }
+            if(2===ltreeCnt && 1===this.getLeafCnt(root.childs[0]) && 1===this.getLeafCnt(root.childs[1])){
+                let insNd=this.getVisualND(root,1,true)
+                root.childs.unshift(root.childs[0]);
+                root.childs[1]=insNd;
+                ++leftLeafCnt;
+            }
+        }
+
+
         return [leftLeafCnt, rightLeafCnt];
     }
 
@@ -670,8 +741,7 @@ class MindmapSvc {
         let root = null;
         let timeline = [];//时间线对象，后面会往里放
         let progs=[];
-        // console.log("测试新解析");
-        // console.log(this.loadParts(arrayOrTxt));
+        
 
         let { ndLines, refs } = this.loadParts(arrayOrTxt);
 
@@ -863,9 +933,47 @@ class MindmapSvc {
             return t1.fullDate < t2.fullDate ? -1 : 1;
         });
 
+        
         return root;
     }
 
+    getVisualND=(par,lev,left=false)=>{
+        return {
+            lev: lev,
+            str: "　",
+            left: left,
+            par: par,
+            color: "transparent",
+            memo: [],
+            links: [],
+            childs: [],
+            leaf: true,         //是否为叶节点
+            expand: true,      //默认全部展开
+            ref: null,
+            dateItem: null,
+            prog: null,
+            visual:true,
+        };
+    }
+
+    /**
+     * 把只有两棵子树并且每个子树最多只有一个叶节点的节点，在两子树之间增加一个虚拟节点，以使最终图表好年
+     */
+    convertTwoSub2ThreeSub=(nd)=>{
+        if(nd.leaf || !nd.expand){
+            return;
+        }
+        if(useVisualNode){
+            //只有两棵子树并且每个子树最多只有一个叶节点的节点
+            if(2===nd.childs.length && 2===this.getLeafCnt(nd)){
+                nd.childs=[nd.childs[0],this.getVisualND(nd,nd.lev+1),nd.childs[1]];
+                return;
+            }
+            nd.childs.forEach(sub=>{
+                this.convertTwoSub2ThreeSub(sub);
+            });
+        }
+    }
 
 
     parseDateInfo=(dateItem,datePart,colorPart)=>{
@@ -962,12 +1070,10 @@ class MindmapSvc {
             }
             //是已记录过的引用
             if ("undefined" !== typeof (refs[currRefName])) {
-                // console.log("添加内容 "+currRefName,'\n['+line+']');
                 refs[currRefName] += '\n' + line;
                 return;
             }
             //是新引用
-            // console.log("添加新内容 "+currRefName,'['+line+']');
             refs[currRefName] = line;
             return;
         });

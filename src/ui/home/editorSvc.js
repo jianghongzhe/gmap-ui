@@ -25,7 +25,7 @@ class EditorSvc{
         return resultLine;
     }   
     
-    addPic=(originLine,pos,picRelaPath)=>{
+    addPic=(originLine,pos,picRelaPath,pname)=>{
         let resultLine=originLine;
 
         let before=resultLine.substring(0,pos);
@@ -33,7 +33,7 @@ class EditorSvc{
         let after=resultLine.substring(pos);
         after=(''===after?'':" "+after);
 
-        let addCont="![]("+picRelaPath.trim()+")";
+        let addCont="!["+pname+"]("+picRelaPath.trim()+")";
 
         resultLine=before+addCont+after;
         return {

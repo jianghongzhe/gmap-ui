@@ -14,7 +14,8 @@ import 'codemirror/mode/markdown/markdown';
 import 'codemirror/addon/selection/active-line';
 import 'codemirror/keymap/sublime';
 
-import HelpDlg from './HelpDlg';
+import HelpDlg from './edit/HelpDlg';
+import InsertImgDlg from './edit/InsertImgDlg';
 
 import editorSvc from '../editorSvc';
 import * as uiUtil from '../../../common/uiUtil';
@@ -24,14 +25,14 @@ class EditGraphDlg extends React.Component {
     constructor(props) {
         super(props);
         this.codeMirrorInst = null;
-        this.elePicPath=null;
-        this.elePicName=null;
         this.state = {
             colorPickerVisible: false,
             insertPicDlgVisible: false,
             helpDlgVisible: false,
+
             insertPicPath: '',
             insertPicName: '',
+            insertPicHasSelFileSymbol:Symbol(),
         };
     }
 
@@ -51,11 +52,7 @@ class EditGraphDlg extends React.Component {
         });
     }
 
-    componentDidUpdate(prevProps, prevState){
-        if(!prevState.insertPicDlgVisible && this.state.insertPicDlgVisible){
-            uiUtil.doFocus(this,'elePicPath','insertPicPath',false); 
-        }
-    }
+    
 
     /**
      * 替换内容并获得焦点
@@ -117,7 +114,7 @@ class EditGraphDlg extends React.Component {
 
 
     //-------------------增加图片-----------------------------------
-    onAddPic = (picRelaPath) => {
+    onAddPic = (picRelaPath,pname) => {
         //获得当前光标位置与光标所在行     
         if (!this.codeMirrorInst) { return; }
         let cursor = this.codeMirrorInst.getCursor();
@@ -125,7 +122,7 @@ class EditGraphDlg extends React.Component {
         let lineTxt = this.codeMirrorInst.getLine(line);
 
         //替换行
-        let { newLinetxt, cusorPos } = editorSvc.addPic(lineTxt, ch, picRelaPath);
+        let { newLinetxt, cusorPos } = editorSvc.addPic(lineTxt, ch, picRelaPath,pname);
         this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     }
 
@@ -144,9 +141,9 @@ class EditGraphDlg extends React.Component {
             let fn = fullpath.substring(Math.max(fullpath.lastIndexOf("\\"), fullpath.lastIndexOf("/")) + 1);
             this.setState({
                 insertPicPath: fullpath,
-                insertPicName: fn,
+                insertPicName: (''===this.state.insertPicName.trim()?fn:this.state.insertPicName),
+                insertPicHasSelFileSymbol:Symbol(),
             });
-            uiUtil.doFocus(this,'elePicPath','insertPicPath',false); 
         }
     }
 
@@ -155,12 +152,11 @@ class EditGraphDlg extends React.Component {
     }
 
     onAddPicCommit = () => {
-        if (null == this.state.insertPicPath || "" === this.state.insertPicPath.trim()) {
-            message.warn("图片文件路径不能为空");
-            return;
-        }
-        if (!api.existsFullpath(this.state.insertPicPath)) {
-            message.warn("图片文件路径不存在");
+        if (null != this.state.insertPicPath && 
+                "" !== this.state.insertPicPath.trim() && 
+                !api.existsFullpath(this.state.insertPicPath) &&
+                !api.isUrlFormat(this.state.insertPicPath)) {
+            message.warn("图片路径或url格式有误");
             return;
         }
         if (null == this.state.insertPicName || "" === this.state.insertPicName.trim()) {
@@ -176,7 +172,7 @@ class EditGraphDlg extends React.Component {
                 title: '是否覆盖',
                 content: <>
                     <div css={{ marginBottom: 10 }}>图片显示名称已存在，是否要覆盖 ？</div>
-                    <Button type="link" title='查看该显示名称的图片' css={{ margin: 0, padding: 0 }} onClick={this.openPicByName}>查看</Button>
+                    <Button type="link" title='查看已有同名图片' css={{ margin: 0, padding: 0 }} onClick={this.openPicByName}>查看已有同名图片</Button>
                 </>,
                 icon: <QuestionCircleOutlined />,
                 onOk: this.copyPicAndAddTxt
@@ -188,14 +184,19 @@ class EditGraphDlg extends React.Component {
     }
 
     copyPicAndAddTxt = () => {
-        try {
-            let rs = api.copyPicToImgsDir(this.state.insertPicPath, this.state.insertPicName, this.props.activeKey);
-            this.hideAllDlg();
-            this.onAddPic(rs);
-        } catch (e) {
-            message.error("" + e);
-            console.log(e);
+        //如果路径为空，则从剪切板找图片；否则从指定路径加载图片
+        let prom =null;
+        if(''===this.state.insertPicPath.trim()){
+            prom=api.copyClipboardPicToImgsDir(this.state.insertPicName, this.props.activeKey);
+        }else{
+            prom=api.copyPicToImgsDir(this.state.insertPicPath,this.state.insertPicName, this.props.activeKey);
         }
+        prom.then(rs=>{
+            this.hideAllDlg();console.log("pname",this.state.insertPicName);
+            this.onAddPic(rs,this.state.insertPicName);
+        }).catch(e=>{
+            message.warn(e.msg);
+        });
     }
 
 
@@ -206,17 +207,7 @@ class EditGraphDlg extends React.Component {
         });
     }
 
-    onPicPathEnter=(e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-        uiUtil.doFocus(this,'elePicName','insertPicName',false);
-    }
-
-    onPicNameEnter=(e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-        this.onAddPicCommit();
-    }
+    
 
 
 
@@ -274,46 +265,18 @@ class EditGraphDlg extends React.Component {
                 </Modal>
 
                 {/*插入图片对话框*/}
-                <Modal
-                    title="插入图片"
-                    closable={true}
-                    css={{
-                        width: insertPicDlgW,
-                        minWidth: insertPicDlgW,
-                        maxWidth: insertPicDlgW
-                    }}
+                <InsertImgDlg
+                    dlgW={insertPicDlgW}
                     visible={this.state.insertPicDlgVisible}
+                    insertPicPath={this.state.insertPicPath}
+                    insertPicName={this.state.insertPicName} 
+                    hasSelFileSymbo={this.state.insertPicHasSelFileSymbol}
                     onCancel={this.hideAllDlg}
-                    onOk={this.onAddPicCommit}>
-
-                    <div css={insertImgFormStyle}>
-                        <div className='row'>
-                            <div className='cell lab'>图片位置：</div>
-                            <div className='cell'>
-                                <Input 
-                                    value={this.state.insertPicPath}
-                                    onPressEnter={this.onPicPathEnter}
-                                    ref={uiUtil.bindInputEle.bind(this,this,'elePicPath')}
-                                    onChange={uiUtil.bindChangeEventToState.bind(this, this, 'insertPicPath')} 
-                                    addonAfter={
-                                        <FolderOpenOutlined onClick={this.onSelPicFile} css={{ cursor: 'pointer' }} />
-                                    } 
-                                    placeholder='请输入图片路径' />
-                            </div>
-                        </div>
-                        <div className='row'>
-                            <div className='cell lab'>显示名称：</div>
-                            <div className='cell'>
-                                <Input 
-                                    value={this.state.insertPicName} 
-                                    onPressEnter={this.onPicNameEnter}
-                                    ref={uiUtil.bindInputEle.bind(this,this,'elePicName')}
-                                    onChange={uiUtil.bindChangeEventToState.bind(this, this, 'insertPicName')} 
-                                    placeholder='请输入图片显示名称' />
-                            </div>
-                        </div>
-                    </div>
-                </Modal>
+                    onOk={this.onAddPicCommit}
+                    onPicPathChange={uiUtil.bindChangeEventToState.bind(this, this, 'insertPicPath')} 
+                    onPicNameChange={uiUtil.bindChangeEventToState.bind(this, this, 'insertPicName')} 
+                    onSelPicFile={this.onSelPicFile}
+                />
 
                 {/* 颜色选择对话框 */}
                 <Modal
@@ -336,8 +299,7 @@ class EditGraphDlg extends React.Component {
                 <HelpDlg
                     maxBodyH={this.props.editorH+50}
                     visible={this.state.helpDlgVisible}
-                    onCancel={this.hideAllDlg}></HelpDlg>
-                />
+                    onCancel={this.hideAllDlg}/>
             </>
         );
     }
@@ -349,22 +311,7 @@ const colorDlgAdjustX = 258;
 const colorDlgY = 204;
 
 
-const insertImgFormStyle = {
-    width: '100%',
-    display: 'table',
-    '& .row': {
-        display: 'table-row'
-    },
-    '& .cell': {
-        display: 'table-cell',
-        verticalAlign: 'center',
-        paddingTop: 5,
-        paddingBottom: 5,
-    },
-    '& .cell.lab': {
-        width: 80,
-    },
-};
+
 
 const getCodeEditorStyle = (height) => ({
     '& .CodeMirror': {

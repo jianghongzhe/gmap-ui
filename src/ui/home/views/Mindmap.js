@@ -39,9 +39,7 @@ class Mindmap extends React.Component {
             </Row>);
         }
 
-        if(false===this.props.cells.succ){
-            console.log("未通过...");
-        }
+        
 
         return (
             
@@ -95,7 +93,7 @@ class Mindmap extends React.Component {
                                                         "string"===typeof(item.txt) ?
                                                             <>{item.txt}</>
                                                                 :
-                                                            <>{item.txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>
+                                                            <>{item.txt.map((line,ind)=><span key={ind}>{0<ind && <br/>}{line}</span>)}</>
                                                     } 
                                                 </span>
                                                 
