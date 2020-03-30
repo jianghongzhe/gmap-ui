@@ -71,7 +71,7 @@ class MindmapSvc {
      * 展开所有节点
      * @param {*} cells 
      */
-    expandAllNds(cells) {
+    expandAllNds=(cells)=>{
         let root = this.getRootNodeByCells(cells);
         this.expandNode(root);
         //重新解析表格结构
