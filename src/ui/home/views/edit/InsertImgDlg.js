@@ -23,9 +23,8 @@ class InsertImgDlg extends React.Component {
             return;
         }
 
-        //如果更新了选择文件的标识，说明刚选择了文件，需要使第二个输入框（名称）获得焦点
+        //如果明刚选择了文件，需要使第二个输入框（名称）获得焦点
         if(prevProps.hasSelFileSymbo!==this.props.hasSelFileSymbo){
-            // console.log("[]",prevProps.insertPicPath,this.props.insertPicPath,prevProps.insertPicPath===this.props.insertPicPath);
             uiUtil.doFocus(this,'elePicName','insertPicName'); 
             return;
         }

@@ -1089,7 +1089,7 @@ class MindmapSvc {
     }
 
     hasUrlPrefix = (url) => {
-        return (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || url.startsWith("ftps://"));
+        return ["http://","https://","ftp://","ftps://","//"].some(prefix=>url.startsWith(prefix));
     }
 
     /**
@@ -1130,15 +1130,18 @@ const removeBord = (item, type) => {
     future:''   //以后
 }
 */
-let defaultDateColor = {
-    expired:'#f5222d',//'red', //过期
-    near:'orange',    //近几天
-    future:'#fa8c16',//'#73d13d',//'green'   //以后
-};
-
+let defaultDateColor = null;
 let defaultLineColor = null;
 let bordType = null;
 let getBorderStyle = null;
 let themeStyles = [null, null, null];
 
-export default new MindmapSvc();
+const inst=new MindmapSvc();
+
+export default {
+    hasUrlPrefix:       inst.hasUrlPrefix,
+    isAllNodeExpand:    inst.isAllNodeExpand,
+    expandAllNds:       inst.expandAllNds,
+    toggleExpandNode:   inst.toggleExpandNode,
+    parseMindMapData:   inst.parseMindMapData,
+};

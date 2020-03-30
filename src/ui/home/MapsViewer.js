@@ -1,19 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,CodeOutlined } from '@ant-design/icons';
-import {Controlled as CodeMirror} from 'react-codemirror2'
-
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/markdown/markdown';
-import 'codemirror/addon/selection/active-line';  
-import 'codemirror/keymap/sublime';
-
+import { Layout,     message } from 'antd';
 
 import marked from 'marked';
 import hljs from 'highlight.js';
-// import 'highlight.js/styles/default.css';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';
 
@@ -21,9 +12,7 @@ import 'github-markdown-css/github-markdown.css';
 import {createSelector} from 'reselect';
 
 
-import Mindmap from './views/Mindmap';
 import Welcome from './views/Welcome';
-import PathSelect from './views/PathSelect';
 import OpenGraphDlg from './views/OpenGraphDlg';
 import NewGraphDlg from './views/NewGraphDlg';
 import EditGraphDlg from './views/EditGraphDlg';
@@ -40,8 +29,7 @@ import * as uiUtil from '../../common/uiUtil';
 import api from '../api';
 
 
-const { Header, Content } = Layout;
-const { TabPane } = Tabs;
+const {  Content } = Layout;
 
 
 /**
@@ -124,9 +112,6 @@ class MapsViewer extends React.Component {
             smartypants: false,
             xhtml: false
         });
-
-
-
 
         this.setState({
             filelist: api.list(),

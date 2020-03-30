@@ -186,13 +186,13 @@ class EditGraphDlg extends React.Component {
     copyPicAndAddTxt = () => {
         //如果路径为空，则从剪切板找图片；否则从指定路径加载图片
         let prom =null;
-        if(''===this.state.insertPicPath.trim()){
+        if(''===this.state.insertPicPath.trim()){//路径为空，从剪切板取图片
             prom=api.copyClipboardPicToImgsDir(this.state.insertPicName, this.props.activeKey);
-        }else{
+        }else{//路径不为空，从文件取图片
             prom=api.copyPicToImgsDir(this.state.insertPicPath,this.state.insertPicName, this.props.activeKey);
         }
         prom.then(rs=>{
-            this.hideAllDlg();console.log("pname",this.state.insertPicName);
+            this.hideAllDlg();
             this.onAddPic(rs,this.state.insertPicName);
         }).catch(e=>{
             message.warn(e.msg);
@@ -238,9 +238,8 @@ class EditGraphDlg extends React.Component {
                             <div css={selColorStyle} title='选择颜色' onClick={this.showColorPicker}></div>
                             <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>
 
-                            {/* 插入图片 */}
+                            {/* 插入图片、帮助 */}
                             <PictureOutlined title='插入图片' css={insertImgStyle} onClick={this.showInsertPicDlg} />
-
                             <QuestionCircleOutlined title='帮助' css={helpStyle} onClick={this.showHelpPicDlg} />
                         </div>
                         <CodeMirror
