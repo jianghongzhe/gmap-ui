@@ -271,8 +271,9 @@ class MapsViewer extends React.Component {
         this.setState({editTmpTxt:value});
     }
 
+    
 
-    onEditMapDlgOK = () => {
+    onEditMapDlgOK = (closeDlg=true) => {
         //校验
         let txt = this.state.editTmpTxt;
         let valiResult=mindMapValidateSvc.validate(txt);
@@ -300,8 +301,12 @@ class MapsViewer extends React.Component {
         item.mapCells = cells;
         this.setState({
             panes: [...this.state.panes],
-            editMapDlgVisible: false
+            editMapDlgVisible: !closeDlg
         });
+
+        if(!closeDlg){
+            message.success("图表内容已保存");
+        }
     }
 
 
@@ -532,7 +537,8 @@ class MapsViewer extends React.Component {
                     winW={this.state.clientW}
                     editorH={this.state.clientH - 350-50}
                     editTmpTxt={this.state.editTmpTxt}
-                    onOk={this.onEditMapDlgOK}
+                    onOnlySave={this.onEditMapDlgOK.bind(this,false)}
+                    onOk={this.onEditMapDlgOK.bind(this,true)}
                     onCancel={this.closeAllDlg}
                     onChangeEditTmpTxt={this.onChangeEditTmpTxt}
                 />

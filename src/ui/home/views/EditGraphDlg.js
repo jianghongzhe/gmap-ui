@@ -225,7 +225,11 @@ class EditGraphDlg extends React.Component {
                     }}
                     maskClosable={false}
                     visible={this.props.visible}
-                    onOk={this.props.onOk}
+                    footer={[
+                        <Button key="btncancel" onClick={this.props.onCancel}>取消</Button>,
+                        <Button key="btnneutral" type="primary" onClick={this.props.onOnlySave}>保存</Button>,
+                        <Button key="btnok" type="primary" onClick={this.props.onOk}>保存并关闭</Button>,
+                      ]}
                     onCancel={this.props.onCancel}>
                     <div>
                         <div css={{ 'marginBottom': "10px" }}>
@@ -255,7 +259,8 @@ class EditGraphDlg extends React.Component {
                                 indentUnit: 4,
                                 keyMap: "sublime",
                                 extraKeys: {
-                                    "Ctrl-S": this.props.onOk,
+                                    "Ctrl-S": this.props.onOnlySave,
+                                    "Shift-Ctrl-S": this.props.onOk,
                                     "Esc": this.onEditMapDlgEscKey
                                 }
                             }}
