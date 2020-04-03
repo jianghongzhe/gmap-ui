@@ -290,7 +290,7 @@ class MapsViewer extends React.Component {
 
         //保存并修改状态
         let ret=api.save(this.state.activeKey, txt);
-        if(ret && false===ret.succ){
+        if(ret && false===ret.succ){    
             message.error(ret.msg);
             return;
         }

@@ -10,9 +10,21 @@ import { CirclePicker } from 'react-color'
 import { Controlled as CodeMirror } from 'react-codemirror2'
 
 import 'codemirror/lib/codemirror.css';
+import 'codemirror/addon/dialog/dialog.css';
+import 'codemirror/addon/search/matchesonscrollbar.css';
+
 import 'codemirror/mode/markdown/markdown';
-import 'codemirror/addon/selection/active-line';
 import 'codemirror/keymap/sublime';
+import 'codemirror/addon/selection/active-line';
+import 'codemirror/addon/dialog/dialog';
+import 'codemirror/addon/search/searchcursor';
+import 'codemirror/addon/search/search';
+import 'codemirror/addon/scroll/annotatescrollbar';
+import 'codemirror/addon/search/matchesonscrollbar';
+import 'codemirror/addon/search/jump-to-line';
+
+
+
 
 import HelpDlg from './edit/HelpDlg';
 import InsertImgDlg from './edit/InsertImgDlg';
@@ -40,8 +52,31 @@ class EditGraphDlg extends React.Component {
         this.codeMirrorInst = editor;
     }
 
-    onEditMapDlgEscKey = (cm) => {
-        window.event.stopPropagation();
+    onEditMapDlgPreventKey = (cm) => {
+        if(window.event){
+            window.event.stopPropagation();
+            window.event.preventDefault();
+        }
+    }
+
+    componentDidUpdate(prevProps,prevState){
+        //对话框从不显示到显示，使编辑器获得焦点
+        if(!prevProps.visible && this.props.visible){   
+            //当前已有codeMirror实例，获得焦点
+            if(this.codeMirrorInst){
+                this.doFocus();
+                return;
+            }
+            //当前还没有codeMirror实例，等待一会再获取焦点
+            setTimeout(this.doFocus, 500);
+            return;
+        }
+    }
+
+    doFocus=()=>{
+        if(this.codeMirrorInst){
+            this.codeMirrorInst.focus();
+        }
     }
 
     hideAllDlg = () => {
@@ -243,8 +278,8 @@ class EditGraphDlg extends React.Component {
                             <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>
 
                             {/* 插入图片、帮助 */}
-                            <PictureOutlined title='插入图片' css={insertImgStyle} onClick={this.showInsertPicDlg} />
-                            <QuestionCircleOutlined title='帮助' css={helpStyle} onClick={this.showHelpPicDlg} />
+                            <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={this.showInsertPicDlg} />
+                            <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={this.showHelpPicDlg} />
                         </div>
                         <CodeMirror
                             css={getCodeEditorStyle(this.props.editorH)}
@@ -259,9 +294,18 @@ class EditGraphDlg extends React.Component {
                                 indentUnit: 4,
                                 keyMap: "sublime",
                                 extraKeys: {
+                                    "Ctrl-F": "findPersistent",
+                                    "Ctrl-G": "jumpToLine",
                                     "Ctrl-S": this.props.onOnlySave,
-                                    "Shift-Ctrl-S": this.props.onOk,
-                                    "Esc": this.onEditMapDlgEscKey
+                                    "Shift-Ctrl-S": this.props.onOk,                                  
+                                    "Ctrl-P": this.showInsertPicDlg,
+                                    "Ctrl-H": this.showHelpPicDlg,
+
+                                    "Shift-Ctrl-G": this.onEditMapDlgPreventKey,
+                                    "Shift-Ctrl-F": this.onEditMapDlgPreventKey,
+                                    "Shift-Ctrl-R": this.onEditMapDlgPreventKey,
+                                    "Esc": this.onEditMapDlgPreventKey,
+                                    "Alt-G": this.onEditMapDlgPreventKey,
                                 }
                             }}
                             onBeforeChange={this.props.onChangeEditTmpTxt} />
@@ -301,7 +345,7 @@ class EditGraphDlg extends React.Component {
 
                 {/* 帮助对话框 */}
                 <HelpDlg
-                    maxBodyH={this.props.editorH+50}
+                    maxBodyH={this.props.editorH+80}
                     visible={this.state.helpDlgVisible}
                     onCancel={this.hideAllDlg}/>
             </>
