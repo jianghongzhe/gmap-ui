@@ -172,7 +172,7 @@ class Mindmap extends React.Component {
                                                             item.nd.expand ?
                                                                 <MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>
                                                                     :
-                                                                <PlusCircleOutlined className='expbtnicon' css={colors.toggle}/>
+                                                                <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
                                                         }  
                                                         onClick={this.props.onToggleExpand.bind(this,item,this.props.cells)}/>
                                                 )
@@ -215,6 +215,8 @@ const colors={
     memo: {color:'#faad14'},
     link: {color:'#1890ff'},
     toggle: {color:'#7cb305'},
+    toggle2: {color:'#eb2f96'},//#eb2f96 #9254de
+    
 };
 
 const progStyle={
