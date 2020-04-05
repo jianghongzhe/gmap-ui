@@ -10,6 +10,7 @@ const useVisualNode=false;
  * 
  * 层级式节点的格式 nd
  * {
+        id:     uuid,
         lev:    lev,        //层级
         str:    txt,        //文本
         left:   false,      //方向，true-根节点左侧 false-根节点右侧
@@ -24,7 +25,8 @@ const useVisualNode=false;
         ]
         childs: []          //子节点数组
         leaf:false,         //是否为叶节点
-        expand:true,        //是否展开
+        expand:true,        //是否展开，在为叶节点时，此值无用
+        defExp: true/false, //默认是否展开，在为叶节点时，此值无用
         ref: {
             txt:'',
             parsedTxt:''
@@ -51,12 +53,12 @@ class MindmapSvc {
     /**
      * 切换非叶节点展开状态。为了处理此状态，所有与布局相关的操作都要在调用childs之前检查expand状态，如果未展开，则不再继续执行
      */
-    toggleExpandNode = (cell) => {
-        //获取根节点
-        let root = cell.nd;
-        while (null != root.par) {
-            root = root.par;
-        }
+    toggleExpandNode = (cell,cells) => {
+        // //获取根节点
+        // let root = cell.nd;
+        // while (null != root.par) {
+        //     root = root.par;
+        // }
 
         //修改当前节点的展开状态
         if (!cell.nd.leaf) {
@@ -64,7 +66,7 @@ class MindmapSvc {
         }
 
         //重新解析表格结构
-        return this.parseMindMapDataInner(root);
+        return this.parseMindMapDataInner(cells.root);
     }
 
     /**
@@ -72,10 +74,10 @@ class MindmapSvc {
      * @param {*} cells 
      */
     expandAllNds=(cells)=>{
-        let root = this.getRootNodeByCells(cells);
-        this.expandNode(root);
+        // let root = this.getRootNodeByCells(cells);
+        this.expandNode(cells.root);
         //重新解析表格结构
-        return this.parseMindMapDataInner(root);
+        return this.parseMindMapDataInner(cells.root);
     }
 
 
@@ -85,9 +87,11 @@ class MindmapSvc {
      * 判断是否所有节点都已展开
      */
     isAllNodeExpand = (cells) => {
-        let root = this.getRootNodeByCells(cells);
-        return this.isNodeExpand(root);
+        // let root = this.getRootNodeByCells(cells);
+        return this.isNodeExpand(cells.root);
     }
+
+    
 
 
 
@@ -132,7 +136,8 @@ class MindmapSvc {
 
             //表格行列相关计算
             let nd = this.load(txts);//根节点
-            return this.parseMindMapDataInner(nd);
+            let cells= this.parseMindMapDataInner(nd);
+            return cells;
         } catch (e) {
             console.error(e);
             return {
@@ -157,31 +162,31 @@ class MindmapSvc {
         }
     }
 
-    getRootNodeByCells = (cells) => {
-        //找到第一个有节点的单元格的节点对象
-        let root = null;
-        let isFin = false;
-        for (let i in cells) {
-            let line = cells[i];
-            for (let j in line) {
-                let tmpCell = line[j];
-                if (tmpCell.nd) {
-                    root = tmpCell.nd;
-                    isFin = true;
-                    break;
-                }
-            }
-            if (isFin) {
-                break;
-            }
-        }
+    // getRootNodeByCells = (cells) => {
+    //     //找到第一个有节点的单元格的节点对象
+    //     let root = null;
+    //     let isFin = false;
+    //     for (let i in cells) {
+    //         let line = cells[i];
+    //         for (let j in line) {
+    //             let tmpCell = line[j];
+    //             if (tmpCell.nd) {
+    //                 root = tmpCell.nd;
+    //                 isFin = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (isFin) {
+    //             break;
+    //         }
+    //     }
 
-        //向上找到根节点
-        while (null != root.par) {
-            root = root.par;
-        }
-        return root;
-    }
+    //     //向上找到根节点
+    //     while (null != root.par) {
+    //         root = root.par;
+    //     }
+    //     return root;
+    // }
 
     isNodeExpand = (nd) => {
 
@@ -421,6 +426,7 @@ class MindmapSvc {
         }
 
         // cells[rootLoc[0]][rootLoc[1]].cls.push(centerThemeStyle);
+        cells.root=nd;//绑定单元格集合与根节点的对应关系
         return cells;
     }
 
@@ -741,7 +747,8 @@ class MindmapSvc {
         let root = null;
         let timeline = [];//时间线对象，后面会往里放
         let progs=[];
-        
+        let nodeIdCounter=0;
+        let nodeIdPrefix="nd_"+new Date().getTime()+"_";
 
         let { ndLines, refs } = this.loadParts(arrayOrTxt);
 
@@ -883,6 +890,7 @@ class MindmapSvc {
             }
 
             let nd = {
+                id: nodeIdPrefix+(++nodeIdCounter),
                 lev: lev,
                 str: txts,
                 left: false,
@@ -892,7 +900,8 @@ class MindmapSvc {
                 links: links,
                 childs: [],
                 leaf: false,         //是否为叶节点
-                expand: expand,      //默认全部展开
+                expand: expand,      //展开状态
+                defExp: expand,      //默认展开状态
                 ref: ref,
                 dateItem: dateItem,
                 prog: prog,
@@ -936,6 +945,7 @@ class MindmapSvc {
         
         return root;
     }
+
 
     getVisualND=(par,lev,left=false)=>{
         return {

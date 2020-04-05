@@ -379,9 +379,9 @@ class MapsViewer extends React.Component {
      * @param {key}  当前激活的选项卡的key，也即为文件全路径
      * @param {cell} 切换展开状态的当前格数据
      */
-    toggleExpand = (key, cell) => {
+    toggleExpand = (key, cell,cells) => {
         this.state.panes.filter(eachPane => key === eachPane.key).forEach(eachPane => {
-            eachPane.mapCells = mindmapSvc.toggleExpandNode(cell);
+            eachPane.mapCells = mindmapSvc.toggleExpandNode(cell,cells);
         });
         this.setState({
             panes: [...this.state.panes]

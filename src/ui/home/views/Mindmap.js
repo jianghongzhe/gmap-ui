@@ -174,7 +174,7 @@ class Mindmap extends React.Component {
                                                                     :
                                                                 <PlusCircleOutlined className='expbtnicon' css={colors.toggle}/>
                                                         }  
-                                                        onClick={this.props.onToggleExpand.bind(this,item)}/>
+                                                        onClick={this.props.onToggleExpand.bind(this,item,this.props.cells)}/>
                                                 )
                                             }
                                         </td>    
