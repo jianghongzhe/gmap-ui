@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
+import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'antd';
 import Mindmap from './Mindmap';
 
 const { TabPane } = Tabs;
@@ -15,28 +15,30 @@ class GraphTabs extends React.Component {
         
 
         return (
-            <Tabs
-                hideAdd={true}
-                type="editable-card"
-                activeKey={this.props.activeKey}
-                css={{ height:this.props.containerH, 'backgroundColor': 'white' }}
-                onChange={this.props.onChangeTab}
-                onEdit={this.props.onEditTab}>
-                {
-                    this.props.panes.map(pane => (
-                        <TabPane tab={pane.title} key={pane.key} closable={true}>
-                            <div css={getTabItemContainerStyle(this.props.contentH)}>
-                                <Mindmap cells={pane.mapCells} 
-                                    onOpenLink={this.props.onOpenLink} 
-                                    onOpenRef={this.props.onOpenRef}
-                                    onShowTimeline={this.props.onShowTimeline}
-                                    onShowProgs={this.props.onShowProgs}
-                                    onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} />
-                            </div>
-                        </TabPane>
-                    ))
-                }
-            </Tabs>
+            <Spin spinning={this.props.loading} size="large">
+                <Tabs
+                    hideAdd={true}
+                    type="editable-card"
+                    activeKey={this.props.activeKey}
+                    css={{ height:this.props.containerH, 'backgroundColor': 'white' }}
+                    onChange={this.props.onChangeTab}
+                    onEdit={this.props.onEditTab}>
+                    {
+                        this.props.panes.map(pane => (
+                            <TabPane tab={pane.title} key={pane.key} closable={true}>
+                                <div css={getTabItemContainerStyle(this.props.contentH)}>
+                                    <Mindmap cells={pane.mapCells} 
+                                        onOpenLink={this.props.onOpenLink} 
+                                        onOpenRef={this.props.onOpenRef}
+                                        onShowTimeline={this.props.onShowTimeline}
+                                        onShowProgs={this.props.onShowProgs}
+                                        onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} />
+                                </div>
+                            </TabPane>
+                        ))
+                    }
+                </Tabs>
+            </Spin>
         );
     }
 }

@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Breadcrumb,Button,Row, Col,List, Avatar,Divider   } from 'antd';
+import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 
 class PathSelect extends React.Component {
@@ -9,9 +9,16 @@ class PathSelect extends React.Component {
         super(props);
         this.state = {  };
     }
+
+    
+
+    getScrollTarget=()=>{
+        return document.getElementById('fileselectlist');
+    }
+
     render() {
         //列表样式，如果指定的forceMaxH，则保持高度和最大高度一致
-        let listWrapperStyle={'maxHeight':this.props.maxH,'overflowY':'auto','overflowX':'hidden'};
+        let listWrapperStyle={'maxHeight':this.props.maxH,'overflowY':'auto','overflowX':'hidden',};
         if(this.props.forceMaxH){
             listWrapperStyle={'height':this.props.maxH,'minHeight':this.props.maxH, ...listWrapperStyle};
         }
@@ -35,7 +42,9 @@ class PathSelect extends React.Component {
                     </Col>
                 </Row>                          
                 <Divider css={{marginTop:'10px',marginBottom:'0px'}}/>
-                <div css={listWrapperStyle}>
+                
+                <div css={listWrapperStyle} id='fileselectlist'>
+                    
                     <List
                         itemLayout="horizontal"
                         dataSource={this.props.filelist}
@@ -52,6 +61,12 @@ class PathSelect extends React.Component {
                         )}
                     />
                 </div>
+                
+                {
+                    (this.props.backtopLoc && 2===this.props.backtopLoc.length) && (
+                        <BackTop target={this.getScrollTarget} css={{right:this.props.backtopLoc[0],bottom:this.props.backtopLoc[1]}}/>
+                    )
+                }
             </>
         );
     }

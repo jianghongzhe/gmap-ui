@@ -64,6 +64,7 @@ class MapsViewer extends React.Component {
             //选项卡
             activeKey: null,// panes[0].key,
             panes: [],
+            loading:false,
 
             //编辑图表相关
             currMapName: '',
@@ -394,12 +395,10 @@ class MapsViewer extends React.Component {
 
     expandAll=()=>{
         let currPane=this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
-        if(currPane && 0<currPane.length){
-            currPane.forEach(eachPane => {
-                eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells);
-            });
+        if(currPane && 0<currPane.length){    
+            currPane.forEach(eachPane => {eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells);});
             this.setState({
-                panes: [...this.state.panes]
+                panes: [...this.state.panes],
             });
         }
     }
@@ -407,11 +406,9 @@ class MapsViewer extends React.Component {
     restoreNds=()=>{
         let currPane=this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
         if(currPane && 0<currPane.length){
-            currPane.forEach(eachPane => {
-                eachPane.mapCells = mindmapSvc.restoreAllNdExpSts(eachPane.mapCells);
-            });
+            currPane.forEach(eachPane => {eachPane.mapCells = mindmapSvc.restoreAllNdExpSts(eachPane.mapCells);});
             this.setState({
-                panes: [...this.state.panes]
+                panes: [...this.state.panes],
             });
         }
     }
@@ -510,6 +507,7 @@ class MapsViewer extends React.Component {
                                     containerH={this.state.clientH - 64}
                                     contentH={this.state.clientH - 64 - 55}
                                     panes={this.state.panes}
+                                    loading={this.state.loading}
                                     onChangeTab={this.onChangeTab}
                                     onEditTab={this.onEditTab}
                                     onToggleExpand={this.toggleExpand}
@@ -524,6 +522,7 @@ class MapsViewer extends React.Component {
 
                             <Content>
                                 <Welcome maxH={this.state.clientH-160} 
+                                    winW={this.state.clientW}
                                     dirs={this.state.dirs}
                                     filelist={this.state.filelist} 
                                     onOpenMapsDir={api.openMapsDir}
@@ -577,6 +576,7 @@ class MapsViewer extends React.Component {
                     refCont={this.state.currRefObj.parsedTxt}
                     dlgW={this.state.clientW - 200}
                     bodyH={this.state.clientH - 300}
+                    backtopLoc={[100+100,170]}
                     visible={this.state.refViewerDlgVisible}
                     onCancel={this.closeAllDlg}
                 />

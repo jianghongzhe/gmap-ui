@@ -35,7 +35,7 @@ class Toolbar extends React.Component {
                 
 
                    
-                <Button shape='circle' icon={<CompressOutlined />} disabled={!this.props.showRestore} className='toolbtn' type='primary' size='large' onClick={this.props.onRestore} title='恢复默认节点状态' />
+                <Button shape='circle' icon={<CompressOutlined />} disabled={!this.props.showRestore} className='toolbtn' type='primary' size='large' onClick={this.props.onRestore} title='恢复节点默认状态' />
                 <Button shape='circle' icon={<ExpandOutlined />} disabled={!this.props.showExpandAll} className='toolbtn' type='primary' size='large' onClick={this.props.onExpandAll} title='展开全部节点' />
                 
                 

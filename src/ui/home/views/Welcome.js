@@ -17,6 +17,7 @@ class Welcome extends React.Component {
 
     render() {
         let {showname,version}=appInfoSelector(undefined);
+        let fileselectRight= parseInt(this.props.winW*4/9)+80;
 
         return (
             <Row>
@@ -29,6 +30,7 @@ class Welcome extends React.Component {
                         <Col span={14} >
                             <PathSelect 
                                 maxH={this.props.maxH}
+                                backtopLoc={[fileselectRight,120]}
                                 dirs={this.props.dirs} 
                                 filelist={this.props.filelist}
                                 onloadDir={this.props.onloadDir}

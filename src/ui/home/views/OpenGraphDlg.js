@@ -17,6 +17,11 @@ class OpenGraphDlg extends React.Component {
             expectW=winW-50;
         }
 
+        let pathselectBacktopLoc=[
+            (winW-expectW)/2+100,
+            150
+        ];
+
         return (
             <Modal
                 title="打开图表"
@@ -31,6 +36,7 @@ class OpenGraphDlg extends React.Component {
                     <PathSelect 
                         maxH={this.props.itemsH}
                         forceMaxH={true}
+                        backtopLoc={pathselectBacktopLoc}
                         dirs={this.props.dirs} 
                         filelist={this.props.filelist}
                         onloadDir={this.props.onloadDir}
