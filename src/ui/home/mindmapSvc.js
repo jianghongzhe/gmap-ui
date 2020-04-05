@@ -80,7 +80,15 @@ class MindmapSvc {
         return this.parseMindMapDataInner(cells.root);
     }
 
+    /**
+     * 恢复节点的默认状态
+     */
+    restoreAllNdExpSts=(cells)=>{
+        this.restoreNode(cells.root);
+        return this.parseMindMapDataInner(cells.root);
+    }
 
+    
 
 
     /**
@@ -88,11 +96,15 @@ class MindmapSvc {
      */
     isAllNodeExpand = (cells) => {
         // let root = this.getRootNodeByCells(cells);
-        return this.isNodeExpand(cells.root);
+        return this.isNodeExpandRecursively(cells.root);
     }
 
-    
-
+    /**
+     * 判断所有节点中是否有展开状态变化的
+     */
+    isAnyNdExpStChanged=(cells)=>{
+        return this.isNdExpStChangedRecursively(cells.root);
+    }
 
 
 
@@ -151,7 +163,16 @@ class MindmapSvc {
 
 
     //----------------如下为非暴露的方法-------------------------------------------------
+    restoreNode=(nd)=>{
+        if (nd.leaf) {
+            return;
+        }
 
+        nd.expand=nd.defExp;
+        nd.childs.forEach(child => {
+            this.restoreNode(child);
+        });
+    }
 
     expandNode = (nd) => {
         nd.expand = true;
@@ -188,7 +209,28 @@ class MindmapSvc {
     //     return root;
     // }
 
-    isNodeExpand = (nd) => {
+    isNdExpStChangedRecursively=(nd)=>{
+        //叶节点认为展开状态没有变化
+        if (nd.leaf) {
+            return false;
+        }
+
+        //如果当前节点的展开状态有变化，则直接返回true
+        if (nd.expand !==nd.defExp) {
+            return true;
+        }
+
+        //否则递归判断子节点展开状态有无变化，若有，直接返回true
+        for (let i in nd.childs) {
+            if (this.isNdExpStChangedRecursively(nd.childs[i])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    isNodeExpandRecursively = (nd) => {
 
 
         //叶节点认为是展开状态
@@ -201,7 +243,7 @@ class MindmapSvc {
             return false;
         }
         for (let i in nd.childs) {
-            if (!this.isNodeExpand(nd.childs[i])) {
+            if (!this.isNodeExpandRecursively(nd.childs[i])) {
                 return false;
             }
         }
@@ -1150,8 +1192,11 @@ const inst=new MindmapSvc();
 
 export default {
     hasUrlPrefix:       inst.hasUrlPrefix,
-    isAllNodeExpand:    inst.isAllNodeExpand,
-    expandAllNds:       inst.expandAllNds,
     toggleExpandNode:   inst.toggleExpandNode,
     parseMindMapData:   inst.parseMindMapData,
+
+    isAllNodeExpand:    inst.isAllNodeExpand,
+    expandAllNds:       inst.expandAllNds,
+    isAnyNdExpStChanged:inst.isAnyNdExpStChanged,
+    restoreAllNdExpSts: inst.restoreAllNdExpSts,
 };

@@ -393,12 +393,27 @@ class MapsViewer extends React.Component {
     }
 
     expandAll=()=>{
-        this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key).forEach(eachPane => {
-            eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells);
-        });
-        this.setState({
-            panes: [...this.state.panes]
-        });
+        let currPane=this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
+        if(currPane && 0<currPane.length){
+            currPane.forEach(eachPane => {
+                eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells);
+            });
+            this.setState({
+                panes: [...this.state.panes]
+            });
+        }
+    }
+
+    restoreNds=()=>{
+        let currPane=this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
+        if(currPane && 0<currPane.length){
+            currPane.forEach(eachPane => {
+                eachPane.mapCells = mindmapSvc.restoreAllNdExpSts(eachPane.mapCells);
+            });
+            this.setState({
+                panes: [...this.state.panes]
+            });
+        }
     }
 
     onShowTimeline=(timelineObj)=>{
@@ -479,12 +494,14 @@ class MapsViewer extends React.Component {
                             <>
                                 <Toolbar
                                     showExpandAll={ifShowExpandAll(this.state)}
+                                    showRestore={isShowRestore(this.state)}
                                     onShowNewMapDlg={this.onShowNewMapDlg}
                                     onShowSelMapDlg={this.showSelMapDlg}
                                     onShowEditMapDlg={this.onShowEditMapDlg}
                                     onShowDir={api.openMapsDir}
                                     onShowCmd={api.openBash}
                                     onExpandAll={this.expandAll}
+                                    onRestore={this.restoreNds}
                                     onShowDevTool={api.showDevTool}
                                     onReloadApp={api.reloadAppPage}
                                 />
@@ -606,17 +623,8 @@ const ifShowExpandAll=createSelector(
     state=>state.activeKey,
     state=>state.panes,
     (key,panes)=>{
-        //不存选项卡或不存在活动选项卡，认为不显示【展开全部】按钮
-        if(null==panes || 0===panes.length){
-            return false;
-        }
-        let currPane=panes.filter(pane=>pane.key===key);
-        if(null==currPane || 0===currPane.length){
-            return false;
-        }
-        currPane=currPane[0];
-
-        if(currPane.mapCells && false===currPane.mapCells.succ){
+        let currPane=ifHasValidTab(key,panes);
+        if(false===currPane){
             return false;
         }
 
@@ -625,6 +633,41 @@ const ifShowExpandAll=createSelector(
         return !allExpand;
     }
 );
+
+const isShowRestore=createSelector(
+    state=>state.activeKey,
+    state=>state.panes,
+    (key,panes)=>{
+        let currPane=ifHasValidTab(key,panes);
+        if(false===currPane){
+            return false;
+        }
+
+        //计算当前选项卡是否有展开状态变化的节点
+        let anyChanged=mindmapSvc.isAnyNdExpStChanged(currPane.mapCells);
+        return anyChanged;
+    }
+);
+
+const ifHasValidTab=(key,panes)=>{
+    //不存选项卡或不存在活动选项卡，认为不显示按钮
+    if(null==panes || 0===panes.length){
+        return false;
+    }
+    let currPane=panes.filter(pane=>pane.key===key);
+    if(null==currPane || 0===currPane.length){
+        return false;
+    }
+    currPane=currPane[0];
+
+    //当前选项卡内容解析失败
+    if(currPane.mapCells && false===currPane.mapCells.succ){
+        return false;
+    }
+    return currPane;
+}
+
+
 
 const selectCurrDir=createSelector(
     state=>state.dirs,
