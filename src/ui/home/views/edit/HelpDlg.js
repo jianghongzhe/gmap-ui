@@ -96,6 +96,17 @@ class HelpDlg extends React.Component {
                                     </td>
                                 </tr>
                                 <tr>
+                                    <td>甘特图</td>
+                                    <td>
+                                        <div>
+                                            <div><div>基本格式</div><div>// id、起始或引用id、结束或天数、进度</div></div>
+                                            <div><div>g:id,20.4.6,20.4.7,30</div><div>// id、起始、结束、进度</div></div>
+                                            <div><div>g:id,refid,8,30</div><div>// 引用任务的后一天为起始时间</div></div>
+                                            <div><div>g:id,refid+2,20,30</div><div>// 引用任务可以向后(+)或向前(-)N天</div></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>默认折叠</td>
                                     <td>
                                         <div>
@@ -282,7 +293,7 @@ const helpTableStyle = {
         display: 'table-cell',
     },
     '& td:nth-child(2) > div > div > div:nth-child(1)': {
-        width:150,
+        width:180,
         // backgroundColor:'red',
         // textAlign:'center',
     },

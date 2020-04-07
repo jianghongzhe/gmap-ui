@@ -21,6 +21,7 @@ import GraphTabs from './views/GraphTabs';
 import RefViewer from './views/RefViewer';
 import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
+import GantDlg from './views/gantt/GantDlg';
 
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
@@ -84,7 +85,14 @@ class MapsViewer extends React.Component {
             //文件选项相关
             selMapDlgVisible: false,
             filelist: [],
-            dirs:[],            
+            dirs:[],    
+            
+            //
+            gantdlgVisible:false,
+            layoutArrows:Symbol(),
+            ds:[],
+            colKeys:[],
+            relas:[],
         };
 
         
@@ -129,12 +137,16 @@ class MapsViewer extends React.Component {
     handleResize=()=>{
         this.setState({
             clientH: document.documentElement.clientHeight,
-            clientW: document.documentElement.clientWidth
+            clientW: document.documentElement.clientWidth,
+            layoutArrows:Symbol(),
         });
     }
 
-    componentDidUpdate(){
+    componentDidUpdate(prevProps,prevState){
         setTimeout(this.bindLinkEvent, 100);//迟延一会等视图已加载完再处理（否则第一次显示看不到效果）
+        
+
+        
     }
 
     closeAllDlg=()=>{
@@ -145,6 +157,7 @@ class MapsViewer extends React.Component {
             selMapDlgVisible: false,
             timelineDlgVisible:false,
             progsDlgVisible:false,
+            gantdlgVisible:false,
         });
     }
 
@@ -414,7 +427,6 @@ class MapsViewer extends React.Component {
     }
 
     onShowTimeline=(timelineObj)=>{
-        console.log("时间线",timelineObj);
         this.setState({
             timelineDlgVisible:true,
             timelineObj:timelineObj,
@@ -426,6 +438,24 @@ class MapsViewer extends React.Component {
             progsObj: progs,
             progsDlgVisible:true,
         });
+    }
+
+    onShowGant=(gantObj)=>{
+        // ds} 
+        //             colKeys={this.state.colKeys} 
+        //             arrows={this.state.relas
+
+        // data: Array(4), colKeys: Array(42), relas
+        
+        this.setState({
+            gantdlgVisible:true,
+            ds:gantObj.data,
+            colKeys:gantObj.colKeys,
+            relas:gantObj.relas,
+            layoutArrows:Symbol(),
+        });
+
+        // console.log(gantObj);
     }
 
     openRef=(refObj)=>{
@@ -515,6 +545,7 @@ class MapsViewer extends React.Component {
                                     onOpenRef={this.openRef}
                                     onShowTimeline={this.onShowTimeline}
                                     onShowProgs={this.onShowProgs}
+                                    onShowGant={this.onShowGant}
                                 />
                             </>
 
@@ -594,6 +625,17 @@ class MapsViewer extends React.Component {
                     progsObj={this.state.progsObj}
                     bodyH={this.state.clientH - 300}
                     winW={this.state.clientW}
+                    onCancel={this.closeAllDlg}
+                />
+
+                <GantDlg 
+                    visible={this.state.gantdlgVisible}
+                    maxH={this.state.clientH-250} 
+                    maxW={this.state.clientW-200} 
+                    winW={this.state.clientW} 
+                    ds={this.state.ds} 
+                    colKeys={this.state.colKeys} 
+                    arrows={this.state.relas} 
                     onCancel={this.closeAllDlg}
                 />
             </>

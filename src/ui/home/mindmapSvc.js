@@ -1,5 +1,5 @@
 import mindMapValidateSvc from './mindMapValidateSvc';
-
+import ganttSvc from './ganttSvc';
 
 
 //是否启用虚拟节点，启用后样式会好些，但占用空间变大，空间利用率低
@@ -155,7 +155,7 @@ class MindmapSvc {
             return {
                 succ: false,
                 msg: '内容解析失败',
-                desc: "图表内容解析过程中发生错误 ~~~"
+                desc: ('string'===typeof(e)? ""+e : "图表内容解析过程中发生错误 ~~~")
             }
         }
 
@@ -789,6 +789,9 @@ class MindmapSvc {
         let root = null;
         let timeline = [];//时间线对象，后面会往里放
         let progs=[];
+        let gantData={
+            gantItems:[],
+        };
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
 
@@ -807,6 +810,7 @@ class MindmapSvc {
             let ref = null;
             let dateItem = null;
             let prog=null;
+            let gant=null;
 
 
             //内容是复合类型，则分别计算每一部分
@@ -916,6 +920,15 @@ class MindmapSvc {
                         return;
                     }
 
+
+                    //是甘特图标识
+                    let gantItem=ganttSvc.parseGantItem(item)
+                    if(false!==gantItem){
+                        gantData.gantItems.push(gantItem);
+                        gant=gantData;
+                        return;
+                    }
+
                     //都不是，即为文本内容
                     txts.push(item);//如出现多次，只保留最后一次
 
@@ -930,6 +943,10 @@ class MindmapSvc {
             if(prog){
                 prog.txt=txts;
             }
+            if(gant){
+                gant.gantItems[gant.gantItems.length-1].task=txts;
+            }
+
 
             let nd = {
                 id: nodeIdPrefix+(++nodeIdCounter),
@@ -947,6 +964,7 @@ class MindmapSvc {
                 ref: ref,
                 dateItem: dateItem,
                 prog: prog,
+                gant:gant,
             };
 
 
@@ -984,6 +1002,15 @@ class MindmapSvc {
             return t1.fullDate < t2.fullDate ? -1 : 1;
         });
 
+
+        //甘特图处理
+        // console.log("甘",gantData);
+
+        let {data,colKeys,relas}=ganttSvc.parseGantData(gantData.gantItems)
+        gantData.data=data;
+        gantData.colKeys=colKeys;
+        gantData.relas=relas;
+        // console.log(data);
         
         return root;
     }

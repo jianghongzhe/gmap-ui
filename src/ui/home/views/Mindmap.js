@@ -1,8 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Button,Tooltip,Alert,Row, Col,Progress  } from 'antd';
+import { Button,Tooltip,Alert,Row, Col,Progress,Avatar  } from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
+import gantPic from '../../../assets/gantt.png';
 
 class Mindmap extends React.Component {
     constructor(props) {
@@ -112,6 +113,11 @@ class Mindmap extends React.Component {
                                                         />
                                                     </Tooltip>
                                                 )}  
+
+                                                {/* 甘特图  */}
+                                                {(item.nd && item.nd.gant) && (
+                                                    <Avatar size={18} src={gantPic} className='gant' title='查看甘特图' onClick={this.props.onShowGant.bind(this,item.nd.gant)}/>
+                                                )}
 
                                                 
                                                 {/* 短备注图片，多个用div叠起来 */}
@@ -249,6 +255,16 @@ const mindTabStyle={
         verticalAlign:'bottom',
         marginBottom:1,
         cursor:'pointer',
+    },
+
+    '& td .gant':{
+        marginLeft:3,
+        verticalAlign:'bottom',
+        marginBottom:1,
+        cursor:'pointer',
+        borderRadius:0,
+        // color: '#f56a00', 
+        // backgroundColor: '#fde3cf',
     },
 
     //日期
