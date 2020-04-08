@@ -375,11 +375,9 @@ const getDynaCols=createSelector(
                                 {"active"===text.progSt && <div css={popoverStyle[text.progSt]}>进行中，完成 {text.prog}%</div>}
                             </>} content={<>
                                 {!Array.isArray(text.msg) &&　<div>{text.msg}</div>}
-                                {Array.isArray(text.msg) &&　<>
-                                    <span>{text.msg[0]}</span>
-                                    <span css={popoverStyle.highlightTxt}>{text.msg[1]}</span>
-                                    <span>{text.msg[2]}</span>
-                                </>}                               
+                                {Array.isArray(text.msg) &&　text.msg.map((msgitem,ind)=>(
+                                    <span key={'progmsgs-'+ind} css={msgitem.strong ? popoverStyle.highlightTxt : {}}>{msgitem.txt}</span>
+                                ))}                               
                             </>}  trigger="hover">
                                 <Progress disabled percent={text.prog}  trailColor={colors.progTrail} showInfo={false} status={text.progSt}  />
                             </Popover>

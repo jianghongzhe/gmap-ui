@@ -87,7 +87,7 @@ class GanttSvc{
         let daysSpan=0;
         
 
-        //迭代每个对象
+        //迭代每个对象，计算准确的开始结束日期，任务天数等
         gantItems.forEach((gant,ind)=>{
             //计算起始日期
             //起始日期是引用类型
@@ -107,9 +107,7 @@ class GanttSvc{
                 }
 
                 //如果没找到，并且格式为 refid+5、refid-3 的形式，
-
                 let daysAdjust=0;
-
                 let splitReg=/^(.+)([+-])([0-9]{1,3})$/;
                 let matchItems=gant.startObj.refId.match(splitReg);
                 if(null===refItem && matchItems){
@@ -191,6 +189,7 @@ class GanttSvc{
                 maxDay=gant.end;
             }
 
+            gant.overlim=false;
             if(dateUtil.dateSmallThan(gant.end,dateUtil.currDayYMD()) && gant.prog<100){
                 gant.overlim=true;
             }
@@ -204,8 +203,6 @@ class GanttSvc{
         //日期范围边界至少比实际日期范围多 3 天
         minDay=dateUtil.addDays(minDay,-3);
         maxDay=dateUtil.addDays(maxDay,3);
-
-        
 
         //保证日期间隔不小于30天
         daysSpan=dateUtil.distDays(minDay,maxDay);
@@ -230,9 +227,7 @@ class GanttSvc{
         // console.log(minDay.join("-")+" ~ "+maxDay.join("-"));
 
 
-
-
-        // console.log("所有天");
+        // 所有的天生成数组，后面迭代用
         let alldays=[];
         for(let eachDay=minDay; dateUtil.dateSmallThan(eachDay,maxDay,true); eachDay=dateUtil.addDays(eachDay,1)){
             alldays.push(eachDay);
@@ -246,12 +241,11 @@ class GanttSvc{
         yearColKeys.push(['task','任务']);
         alldays.forEach((day,ind)=>{
             let prefix="";
-            if([1,11,21].includes(day[2])){
+            if([1,11,21].includes(day[2])){//遇到每月1、11、21号，则显示月份
                 prefix=day[1]+".";
             }
             let title=[prefix+day[2],dateUtil.getWeekday(day)];//第一行日期，第二行星期
             colKeys.push(["d"+ind,title]);
-
         });
 
         
@@ -266,7 +260,7 @@ class GanttSvc{
             item.task=gantLine.task;
             item.key="gantline-"+lineInd;
             
-            //循环每个日期
+            //循环每个日期作为列
             alldays.forEach((day,colind)=>{
                 //背景颜色的覆盖关系：当前天 > 月首日 > 休息日
                 let obj={
@@ -296,8 +290,6 @@ class GanttSvc{
                     obj.headerShouldShowSetCurrdayBg=false;
                 }
 
-
-
                 //是初始日期
                 if(dateUtil.isDayEq(day,gantLine.start)){
                     obj.span=gantLine.days;
@@ -307,45 +299,70 @@ class GanttSvc{
                     obj.progSt=(100===gantLine.prog?"success":(obj.overlim?"exception":"active"));
                     item.progInd=colind;
 
+                    //有依赖项则记录对应关系，以便后面画箭头用
                     if(gantLine.hasDep){
                         relas.push({
-                            from:[
-                                gantLine.depInd,
-                                data[gantLine.depInd].progInd+1,
-                            ],
-                            to:[
-                                lineInd,
-                                colind+1,
-                            ]
+                            from:[gantLine.depInd,  data[gantLine.depInd].progInd+1,],
+                            to:[lineInd,  colind+1,]
                         });
                     }
 
-                    //今天在任务初始结束日期之间，并且跨度大于1天
+                    //今天在任务初始结束日期之间，并且跨度大于1天。由于单元格跨列，需使用渐变的样式配合百分比的背景定位来显示背景
                     if(1<gantLine.days && dateUtil.dateSmallThan(gantLine.start,currYMD,true) && dateUtil.dateSmallThan(currYMD,gantLine.end,true)){
-                        let startPercent=100*dateUtil.distDays(gantLine.start,currYMD)/(gantLine.days-1);
+                        let startPercent=100*dateUtil.distDays(gantLine.start,currYMD)/(gantLine.days-1);//位置是除去背景大小后剩余部分的百分比
                         let widPercent=100/gantLine.days;
-
-                        // console.log(startPercent,widPercent);
-
-                        //background-image:linear-gradient(gray,gray); background-position:40% 0px; background-size:20% 100%;background-repeat:no-repeat;
                         obj.percentBg=[startPercent,widPercent];
                         obj.shouldSetCurrDayBg=true;
                     }
 
 
+                    //浮动消息，两种格式：
+                    //1、字符串
+                    //2、数组 [  {txt:'aa', strong:true/false}, ... ]
                     let leftDays=dateUtil.distDays(gantLine.end,currYMD);
+                    let leftStartDays=dateUtil.distDays(gantLine.start,currYMD);
+                    //已完成
                     if(100===obj.prog){
                         obj.msg="任务已经完成";
-                    }else{
+                    }
+                    //未完成
+                    else{
+                        //过期
                         if(obj.overlim){
-                            obj.msg=["任务已经过期",leftDays,"天"];
-                        }else if(leftDays<4){
-                            let tmp=['今天','明天','后天','大后天'][leftDays];
-                            //obj.msg=["任务需要",tmp,"完成"];
-                            obj.msg="任务需要【"+tmp+"】完成";
+                            obj.msg=[
+                                {txt: "任务已经过期",},
+                                {txt: ""+leftDays, strong:true},
+                                {txt:"天"},
+                            ];
                         }
-                        else{
-                            obj.msg=["离完成还剩",leftDays,"天"];
+                        //还未开始
+                        else if(dateUtil.dateSmallThan(currYMD,gantLine.start)){
+                            obj.msg=[
+                                {txt:"距离任务开始还有"},
+                                {txt:''+leftStartDays, strong:true},
+                                {txt:"天"}
+                            ];
+                            if(leftStartDays<4){
+                                let tmp=['今天','明天','后天','大后天'][leftStartDays];
+                                obj.msg="任务将于【"+tmp+"】开始";
+                            }
+                        }
+                        //已开始
+                        else {
+                            let daysUsed=dateUtil.distDays(currYMD,gantLine.start)+1;
+                            obj.msg=[
+                                {txt:"任务已开始"},
+                                {txt:''+daysUsed, strong:true},
+                                {txt: '天，'},
+                            ];
+                            if(leftDays<4){
+                                let tmp=['今天','明天','后天','大后天'][leftDays];
+                                obj.msg.push({txt:"预计【"+tmp+"】完成"});
+                            }else{
+                                obj.msg.push({txt:'离完成还剩'});
+                                obj.msg.push({txt:''+leftDays, strong:true});
+                                obj.msg.push({txt:'天'});
+                            }
                         }
                     }
                 }
@@ -362,24 +379,18 @@ class GanttSvc{
                     obj.prog=0;
                 }
 
+                //特殊日期的背景色标识
                 if(1===obj.span && obj.isHoliday){
-                    // console.log("111");
                     obj.shouldSetHolidayBg=true;
                 }
-
-                
-
                 if(1===obj.span && obj.isCurrDay){
-                    // console.log("222");
                     obj.shouldSetCurrDayBg=true;
                 }
-
                 if(1===obj.span && obj.isFirstDay){
                     // console.log("222");
                     obj.shouldSetFirstDayBg=true;
                 }
 
-                
                 //当前天 > 月首日 > 休息日
                 //解决不同日期类型背景的优先级问题
                 if(obj.shouldSetCurrDayBg){
@@ -402,100 +413,17 @@ class GanttSvc{
 
 
 
-        // console.log(gantItems);
-        // console.log("最大最小",minDay.join("-"),maxDay.join("-"));
-
-        // console.log("relas",relas);
-
         return {data,colKeys,relas};
     }
 
     
 
-
-    // loadGanttData=()=>{
-    //     const data=[];
-
-    //     const currDayInd=parseInt(Math.random()*30)+1;
-    //     const relas=[];
-    //     const colKeys=[];
-    //     data.colKeys=colKeys;
-
-    //     for(let i=0;i<20;++i){
-    //         let item={};
-    //         let day=parseInt(Math.random()*24)+1;
-    //         let progVal=parseInt(Math.random()*120);
-    //         progVal=(progVal>100?100:progVal);
-
-    //         if(5===i){
-    //             relas.push({
-    //                 from:[i,day]
-    //             });
-    //         }
-    //         if(7===i){
-    //             relas[0].to=[i,day];
-    //         }
-
-    //         if(12===i){
-    //             relas.push({
-    //                 from:[i,day]
-    //             });
-    //         }
-    //         if(15===i){
-    //             relas[1].to=[i,day];
-    //         }
-
-    //         if(0===i){
-    //             colKeys.push(['task','任务']);
-    //         }
-
-    //         for(let j=0;j<62;++j){
-    //             if(0===j){
-    //                 item.task=["任务 - "+i];
-    //                 continue;
-    //             }
-    //             item.key=j;
-    //             item["d"+j]={
-    //                 span:( j===day?4:1),
-    //                 txt:''+(j===day?4:1),
-    //                 hasProg:(j===day),
-    //                 prog: progVal,
-    //                 isCurrDay:(currDayInd===j),
-    //             };
-    //             if(0===i){
-    //                 let prefix="";
-    //                 if(1===j || 11===j || 21===j){
-    //                     prefix="11."
-    //                 }
-    //                 if(31===j || 41===j || 51===j){
-    //                     prefix="12."
-    //                 }
-
-
-                    
-    //                 let title=[prefix+(j<=30?j:j-30),'日'];
-
-    //                 colKeys.push(["d"+j,title]);
-    //             }
-    //         }
-            
-
-    //         item["d"+(day+1)].span=0;
-    //         item["d"+(day+2)].span=0;
-    //         item["d"+(day+3)].span=0;
-    //         // console.log(item);
-    //         data.push(item);
-    //     }
-
-    //     return {data,colKeys,relas};
-    // }
 }
 
 const inst=new GanttSvc();
 
 // loadGanttData: inst.loadGanttData,
 export default {
-    parseGantData : inst.parseGantData,
-    
+    parseGantData : inst.parseGantData,    
     parseGantItem:inst.parseGantItem,
 };
