@@ -403,7 +403,6 @@ class EditGraphDlg extends React.Component {
                     onCancel={this.hideAllDlg}
                     onOk={this.onInsertDate}
                     onChange={this.onSelDateChange}/>
-                />
             </>
         );
     }
