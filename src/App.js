@@ -5,6 +5,7 @@ import logo from './logo.svg';
 import { view as MapsViewer } from './ui/home';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
+import 'moment/locale/zh-cn';
 import 'antd/dist/antd.css';
 
 

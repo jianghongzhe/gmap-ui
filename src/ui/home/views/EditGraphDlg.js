@@ -2,8 +2,8 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
-import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-
+import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOutlined } from '@ant-design/icons';
+import moment  from 'moment';
 
 
 import { CirclePicker } from 'react-color'
@@ -28,23 +28,31 @@ import 'codemirror/addon/search/jump-to-line';
 
 import HelpDlg from './edit/HelpDlg';
 import InsertImgDlg from './edit/InsertImgDlg';
+import DateDlg from './edit/DateDlg';
 
 import editorSvc from '../editorSvc';
 import * as uiUtil from '../../../common/uiUtil';
 import api from '../../api';
 
 class EditGraphDlg extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super(...arguments);
         this.codeMirrorInst = null;
         this.state = {
             colorPickerVisible: false,
             insertPicDlgVisible: false,
             helpDlgVisible: false,
+            dateDlgVisible:false,
+
+            //
+            selDateVal: moment(),//
+            selDateStr: moment().format("YYYY-MM-DD"),
 
             insertPicPath: '',
             insertPicName: '',
             insertPicHasSelFileSymbol:Symbol(),
+
+
         };
     }
 
@@ -84,6 +92,7 @@ class EditGraphDlg extends React.Component {
             colorPickerVisible: false,
             insertPicDlgVisible: false,
             helpDlgVisible: false,
+            dateDlgVisible: false,
         });
     }
 
@@ -242,6 +251,41 @@ class EditGraphDlg extends React.Component {
         });
     }
 
+
+    //-------------------插入日期-----------------------------------    
+    showDateDlg=()=>{
+        this.setState({
+            dateDlgVisible: true,
+        });
+    }
+
+    onSelDateChange=(date, dateString)=>{
+        this.setState({
+            selDateVal: date,
+            selDateStr: dateString,
+        });
+    }
+
+    onInsertDate=()=>{
+        if(null===this.state.selDateStr || ''===this.state.selDateStr){
+            message.warn("请选择日期");
+            return;
+        }
+
+        this.hideAllDlg();
+
+        //获得当前光标位置与光标所在行     
+        if (!this.codeMirrorInst) { return; }
+        let cursor = this.codeMirrorInst.getCursor();
+        let { line, ch } = cursor;
+        let lineTxt = this.codeMirrorInst.getLine(line);
+
+        //替换行
+        let targetDateStr=this.state.selDateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
+        let { newLinetxt, cusorPos } = editorSvc.addDate(lineTxt, ch, targetDateStr);
+        this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
+    }
+
     
 
 
@@ -279,6 +323,7 @@ class EditGraphDlg extends React.Component {
 
                             {/* 插入图片、帮助 */}
                             <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={this.showInsertPicDlg} />
+                            <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={this.showDateDlg} />
                             <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={this.showHelpPicDlg} />
                         </div>
                         <CodeMirror
@@ -300,6 +345,8 @@ class EditGraphDlg extends React.Component {
                                     "Shift-Ctrl-S": this.props.onOk,                                  
                                     "Ctrl-P": this.showInsertPicDlg,
                                     "Ctrl-H": this.showHelpPicDlg,
+                                    "Ctrl-T": this.showDateDlg,
+                                    
 
                                     "Shift-Ctrl-G": this.onEditMapDlgPreventKey,
                                     "Shift-Ctrl-F": this.onEditMapDlgPreventKey,
@@ -348,6 +395,15 @@ class EditGraphDlg extends React.Component {
                     maxBodyH={this.props.editorH+80}
                     visible={this.state.helpDlgVisible}
                     onCancel={this.hideAllDlg}/>
+
+                {/* 插入日期对话框 */}
+                <DateDlg
+                    visible={this.state.dateDlgVisible}
+                    value={this.state.selDateVal}
+                    onCancel={this.hideAllDlg}
+                    onOk={this.onInsertDate}
+                    onChange={this.onSelDateChange}/>
+                />
             </>
         );
     }

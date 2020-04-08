@@ -54,8 +54,8 @@ const {  Content } = Layout;
  * ]
  */
 class MapsViewer extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super(...arguments);
 
         this.state = {
             //样式相关

@@ -41,6 +41,17 @@ class EditorSvc{
             cusorPos:before.length+addCont.length
         };
     }
+
+    addDate=(originLine,pos,datestr)=>{
+        let resultLine=originLine;
+        let before=resultLine.substring(0,pos);
+        let after=resultLine.substring(pos);
+        resultLine=before+datestr+after;
+        return {
+            newLinetxt: resultLine,
+            cusorPos:before.length+datestr.length
+        };
+    }
 }
 
 export default new EditorSvc();
