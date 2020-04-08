@@ -227,7 +227,15 @@ class HelpDlg extends React.Component {
                                     <td>Ctrl + P</td>
                                     <td>
                                         <div>
-                                            <div><div>插入图片对话框</div><div></div></div>
+                                            <div><div>插入图片</div><div></div></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Ctrl + T</td>
+                                    <td>
+                                        <div>
+                                            <div><div>插入日期</div><div></div></div>
                                         </div>
                                     </td>
                                 </tr>
