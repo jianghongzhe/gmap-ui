@@ -308,11 +308,59 @@ class GanttSvc{
                     }
 
                     //今天在任务初始结束日期之间，并且跨度大于1天。由于单元格跨列，需使用渐变的样式配合百分比的背景定位来显示背景
-                    if(1<gantLine.days && dateUtil.dateSmallThan(gantLine.start,currYMD,true) && dateUtil.dateSmallThan(currYMD,gantLine.end,true)){
-                        let startPercent=100*dateUtil.distDays(gantLine.start,currYMD)/(gantLine.days-1);//位置是除去背景大小后剩余部分的百分比
-                        let widPercent=100/gantLine.days;
-                        obj.percentBg=[startPercent,widPercent];
-                        obj.shouldSetCurrDayBg=true;
+                    // if(1<gantLine.days && dateUtil.dateSmallThan(gantLine.start,currYMD,true) && dateUtil.dateSmallThan(currYMD,gantLine.end,true)){
+                    //     let startPercent=100*dateUtil.distDays(gantLine.start,currYMD)/(gantLine.days-1);//位置是除去背景大小后剩余部分的百分比
+                    //     let widPercent=100/gantLine.days;
+                    //     obj.percentBg=[startPercent,widPercent];
+                    //     obj.shouldSetCurrDayBg=true;
+                    // }
+
+                    //如果是跨多列的情况，则按每列计算
+                    if(1<gantLine.days){
+                        let percentBg=[];
+                        for(let eachDay=gantLine.start,eachDist=0; dateUtil.dateSmallThan(eachDay,gantLine.end,true); eachDay=dateUtil.addDays(eachDay,1),++eachDist){
+                            let dayProps={
+                                isCurrDay: dateUtil.isDayEq(eachDay),
+                                isHoliday: dateUtil.isHoliday(eachDay),
+                                isFirstDay:1===eachDay[2],
+                            }
+                            let startPercent=100*eachDist/(gantLine.days-1);//位置是除去背景大小后剩余部分的百分比
+                            let widPercent=100/gantLine.days;
+                            let isSpecialDay=false;
+                            let dayConfig=null;
+                            if(dayProps.isHoliday){
+                                isSpecialDay=true;
+                                dayConfig={
+                                    st:startPercent,
+                                    wid:widPercent,
+                                    isHoliday:true,
+                                };
+                            }
+                            if(dayProps.isFirstDay){
+                                isSpecialDay=true;
+                                dayConfig={
+                                    st:startPercent,
+                                    wid:widPercent,
+                                    isFirstDay:true,
+                                };
+                            }
+                            if(dayProps.isCurrDay){
+                                isSpecialDay=true;
+                                dayConfig={
+                                    st:startPercent,
+                                    wid:widPercent,
+                                    isCurrDay:true,
+                                };
+                            }
+                            if(isSpecialDay){
+                                percentBg.push(dayConfig);
+                            }
+                        }
+                        if(percentBg && 0<percentBg.length){
+                            obj.percentBg=percentBg;
+                            obj.shouldShowPercentBg=true;
+                        }
+                        
                     }
 
 
@@ -391,19 +439,19 @@ class GanttSvc{
                     obj.shouldSetFirstDayBg=true;
                 }
 
-                //当前天 > 月首日 > 休息日
+                //跨列的背景样式 > 当前天 > 月首日 > 休息日
                 //解决不同日期类型背景的优先级问题
-                if(obj.shouldSetCurrDayBg){
-                    obj.shouldSetHolidayBg=false;
+                if(obj.shouldShowPercentBg){
+                    obj.shouldSetCurrDayBg=false;
                     obj.shouldSetFirstDayBg=false;
+                    obj.shouldSetHolidayBg=false;
+                }
+                else if(obj.shouldSetCurrDayBg){
+                    obj.shouldSetFirstDayBg=false;
+                    obj.shouldSetHolidayBg=false;
                 }else if(obj.shouldSetFirstDayBg){
                     obj.shouldSetHolidayBg=false;
-                    obj.shouldSetCurrDayBg=false;
-                }else if(obj.shouldSetHolidayBg){
-                    obj.shouldSetFirstDayBg=false;
-                    obj.shouldSetCurrDayBg=false;
                 }
-
 
                 item["d"+colind]=obj;
             });

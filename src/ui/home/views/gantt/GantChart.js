@@ -350,14 +350,14 @@ const getDynaCols=createSelector(
 
                     //不同日期类型对应不同背景色
                     if(text.shouldSetCurrDayBg){
-                        if(text.percentBg){
-                            ret.props.style.backgroundImage=`linear-gradient(${colors.currday},${colors.currday})`;
-                            ret.props.style.backgroundPosition=`${text.percentBg[0]}% 0px`;
-                            ret.props.style.backgroundSize=`${text.percentBg[1]}% 100%`;
-                            ret.props.style.backgroundRepeat="no-repeat";
-                        }else{
+                        // if(text.percentBg){
+                        //     ret.props.style.backgroundImage=`linear-gradient(${colors.currday},${colors.currday})`;
+                        //     ret.props.style.backgroundPosition=`${text.percentBg[0]}% 0px`;
+                        //     ret.props.style.backgroundSize=`${text.percentBg[1]}% 100%`;
+                        //     ret.props.style.backgroundRepeat="no-repeat";
+                        // }else{
                             ret.props.style.backgroundColor=colors.currday;
-                        }
+                        // }
                     }
 
                     if(text.shouldSetHolidayBg){
@@ -366,6 +366,26 @@ const getDynaCols=createSelector(
 
                     if(text.shouldSetFirstDayBg){
                         ret.props.style.backgroundColor=colors.firstDay;
+                    }
+                    if(text.shouldShowPercentBg){
+                        let allBgStyle={
+                            im:[],
+                            pos:[],
+                            size:[],
+                            repeat:[],
+                        };
+                        text.percentBg.forEach(eachbg=>{
+                            let color=(eachbg.isHoliday?colors.holiday:(eachbg.isFirstDay?colors.firstDay:colors.currday));
+                            allBgStyle.im.push(`linear-gradient(${color},${color})`);
+                            allBgStyle.pos.push(`${eachbg.st}% 0px`);
+                            allBgStyle.size.push(`${eachbg.wid}% 100%`);
+                            allBgStyle.repeat.push("no-repeat");
+                        });
+
+                        ret.props.style.backgroundImage=allBgStyle.im.join(", ");
+                        ret.props.style.backgroundPosition=allBgStyle.pos.join(", ");
+                        ret.props.style.backgroundSize=allBgStyle.size.join(", ");
+                        ret.props.style.backgroundRepeat=allBgStyle.repeat.join(", ");
                     }
 
                
@@ -446,7 +466,7 @@ const colors={
     firstDay:'#fcffe6',//'green',
     currday:'#ffe7ba',  //'#ffe7ba';
     holiday:'#f9f9f9',
-    joinLine:'gray',//"red",
+    joinLine:'#fa8c16',//'#fa8c16',//'orange',//'#FCA236',//'grey',//'gray',//"red",
 };
 
 
