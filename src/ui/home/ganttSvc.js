@@ -235,7 +235,7 @@ class GanttSvc{
 
 
         //列名称
-        const colKeys=[];
+        const colKeys=[]; // [ [colid,colname], [colid,colname,ymd], [colid,colname,ymd] ...  ]  从第2项起每项有ymd
         const yearColKeys=[];
         colKeys.push(['task','任务']);
         yearColKeys.push(['task','任务']);
@@ -245,7 +245,7 @@ class GanttSvc{
                 prefix=day[1]+".";
             }
             let title=[prefix+day[2],dateUtil.getWeekday(day)];//第一行日期，第二行星期
-            colKeys.push(["d"+ind,title]);
+            colKeys.push(["d"+ind,title,day]);
         });
 
         

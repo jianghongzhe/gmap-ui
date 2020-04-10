@@ -284,6 +284,9 @@ const getDynaCols=createSelector(
     info=>info.winW,
     (data,colKeys,winW)=>{
         const columns = [];
+        let firstCol=null;
+        let currMonth=null;
+
         colKeys.forEach((colKey,ind)=>{
             //第一列任务名称
             if(0===ind){
@@ -314,7 +317,7 @@ const getDynaCols=createSelector(
 
             
             //添加各日期列的数据
-            columns.push({
+            let secondCol={
                 title:<>{colKey[1].map((line,titleind)=>(<React.Fragment key={'f-'+ind+'-'+titleind}>{(0<titleind) && <br key={'br'+ind}/>}<span key={'head-day-'+titleind}>{line}</span></React.Fragment>))}</>,
                 dataIndex: colKey[0],
                 key: colKey[0],
@@ -386,11 +389,28 @@ const getDynaCols=createSelector(
                     
                     return ret;
                 }
-            });
+            }
+
+
+            //第一行标题的处理
+            //与上条记录同月就追加
+            const month=colKey[2][0]+"-"+colKey[2][1];
+            if(currMonth===month){
+                firstCol.children.push(secondCol);
+                return;
+            }
+            //否则说新建
+            currMonth=month;
+            firstCol={
+                title:month,
+                align:'center',
+                children:[
+                    secondCol
+                ]
+            };
+            columns.push(firstCol);
         });
 
-
-        console.log(columns);
 
         return columns;
     }
@@ -426,7 +446,7 @@ const colors={
     firstDay:'#fcffe6',//'green',
     currday:'#ffe7ba',  //'#ffe7ba';
     holiday:'#f9f9f9',
-    joinLine:"red",
+    joinLine:'gray',//"red",
 };
 
 
