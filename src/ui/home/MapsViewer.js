@@ -26,6 +26,7 @@ import GantDlg from './views/gantt/GantDlg';
 import mindmapSvc from './mindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
 import * as uiUtil from '../../common/uiUtil';
+import markedHighlightUtil from '../../common/markedHighlightUtil';
 
 import api from '../api';
 
@@ -105,22 +106,7 @@ class MapsViewer extends React.Component {
         document.querySelector("head > title").innerHTML=api.loadAppNameAndVersionTxt();
         window.addEventListener("resize",this.handleResize);
 
-        //初始化markdown解析功能
-        marked.setOptions({
-            renderer: new marked.Renderer(),
-            highlight: function(code, language) {
-                let tmp=hljs.getLanguage(language);
-                const validLanguage = tmp ? language : 'plaintext';
-                return hljs.highlight(validLanguage, code).value;
-            },
-            pedantic: false,
-            gfm: true,
-            breaks: false,
-            sanitize: false,
-            smartLists: true,
-            smartypants: false,
-            xhtml: false
-        });
+        markedHighlightUtil.init(marked,hljs,codeBg);
 
         this.setState({
             filelist: api.list(),
@@ -493,18 +479,6 @@ class MapsViewer extends React.Component {
             ele.style.cursor='pointer';
             ele.style.display='block';
             ele.addEventListener("click",()=>{this.openLink(picurl);});//本地打开时使用不带随机参数的url
-        });
-
-        //代码段，样式兼容问题处理：
-        //marked与highlight的兼容问题：
-        //      marked不会在pre > code中加入hljs类（而highlight需要），需手动加上
-        //github-markdown-css与highlight的兼容问题：
-        //      github-markdown-css会设置背景，而hljs中的背景无法覆盖它，所以手动使用style设置（优先级最高），该值要与hljs的样式文件对应（更换样式文件时这里的值也要改）
-        document.querySelectorAll(".markdown-body pre > code").forEach(ele=>{
-            if(!ele.className.includes("hljs")){
-                ele.className+=" hljs";
-                ele.parentNode.style.backgroundColor=codeBg;//
-            }
         });
     }
 
