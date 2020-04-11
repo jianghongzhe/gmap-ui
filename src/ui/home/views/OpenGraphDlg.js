@@ -3,6 +3,9 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
 import PathSelect from './PathSelect';
+import {withEnh} from '../../common/specialDlg';
+
+const EnhDlg=withEnh(Modal);
 
 class OpenGraphDlg extends React.Component {
     constructor(props) {
@@ -23,26 +26,22 @@ class OpenGraphDlg extends React.Component {
         ];
 
         return (
-            <Modal
-                title="打开图表"
-                css={{
-                    width: expectW,
-                    minWidth: expectW,
-                    maxWidth: expectW
-                }}
-                visible={this.props.visible}
-                footer={null}
-                onCancel={this.props.onCancel}>
-                    <PathSelect 
-                        maxH={this.props.itemsH}
-                        forceMaxH={true}
-                        backtopLoc={pathselectBacktopLoc}
-                        dirs={this.props.dirs} 
-                        filelist={this.props.filelist}
-                        onloadDir={this.props.onloadDir}
-                        onReloadCurrDir={this.props.onReloadCurrDir}
-                        onSelectMapItem={this.props.onSelectMapItem}/>
-            </Modal>
+            <EnhDlg noFooter
+                    title="打开图表"
+                    size={{w:expectW}}
+                    visible={this.props.visible}
+                    onCancel={this.props.onCancel}>
+
+                <PathSelect 
+                    maxH={this.props.itemsH}
+                    forceMaxH={true}
+                    backtopLoc={pathselectBacktopLoc}
+                    dirs={this.props.dirs} 
+                    filelist={this.props.filelist}
+                    onloadDir={this.props.onloadDir}
+                    onReloadCurrDir={this.props.onReloadCurrDir}
+                    onSelectMapItem={this.props.onSelectMapItem}/>
+            </EnhDlg>
         );
     }
 }

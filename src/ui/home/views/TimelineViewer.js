@@ -3,7 +3,9 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import {  Modal, Timeline } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
+import {withEnh} from '../../common/specialDlg';
 
+const EnhDlg=withEnh(Modal);
 
 class TimelineViewer extends React.Component {
     constructor(props) {
@@ -14,31 +16,25 @@ class TimelineViewer extends React.Component {
         let dlgW= (this.props.winW<820?this.props.winW-20:800);
 
         return (
-            <Modal
-                title="查看时间线"
-                css={{
-                    width: dlgW,
-                    minWidth: dlgW,
-                    maxWidth: dlgW
-                }}
-                visible={this.props.visible}
-                maskClosable={true}
-                footer={null}
-                onCancel={this.props.onCancel}>
-                <div css={{maxHeight:this.props.bodyH,overflowY:'auto',overflowX:'hidden'}}>
-                    <Timeline mode='left' css={{marginTop:20}}>
-                        {
-                            this.props.timelineObj.map((item,ind)=>
-                                <Timeline.Item key={ind}  
-                                        {...(item.near?{dot:<ClockCircleOutlined css={{ fontSize: '16px',color:item.color,marginBottom:4 }} />}:{})}   
-                                        label={"（"+item.msg+"）"+item.fullDate} color={item.color}>
-                                    <>{item.txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>
-                                </Timeline.Item>
-                            )
-                        }
-                    </Timeline>
-                </div>
-            </Modal>
+            <EnhDlg noFooter
+                    title="查看时间线"
+                    size={{w:dlgW, h:this.props.bodyH}}
+                    visible={this.props.visible}
+                    maskClosable={true}              
+                    onCancel={this.props.onCancel}>
+                        
+                <Timeline mode='left' css={{marginTop:20}}>
+                    {
+                        this.props.timelineObj.map((item,ind)=>
+                            <Timeline.Item key={ind}  
+                                    {...(item.near?{dot:<ClockCircleOutlined css={{ fontSize: '16px',color:item.color,marginBottom:4 }} />}:{})}   
+                                    label={"（"+item.msg+"）"+item.fullDate} color={item.color}>
+                                <>{item.txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>
+                            </Timeline.Item>
+                        )
+                    }
+                </Timeline>
+            </EnhDlg>
         );
     }
 }

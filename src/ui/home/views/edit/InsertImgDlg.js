@@ -3,8 +3,11 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
 import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {withEnh} from '../../../common/specialDlg';
 
 import * as uiUtil from '../../../../common/uiUtil';
+
+const EnhDlg=withEnh(Modal);
 
 class InsertImgDlg extends React.Component {
     constructor(props) {
@@ -44,17 +47,14 @@ class InsertImgDlg extends React.Component {
 
     render() {
         return (
-            <Modal
+            <EnhDlg
                     title="插入图片"
                     closable={true}
-                    css={{
-                        width: this.props.dlgW,
-                        minWidth: this.props.dlgW,
-                        maxWidth: this.props.dlgW,
-                    }}
+                    size={{w: this.props.dlgW,}}
                     visible={this.props.visible}
                     onCancel={this.props.onCancel}
                     onOk={this.props.onOk}>
+                        
                 <div css={insertImgFormStyle}>
                     <div className='row'>
                         <div className='cell lab'>图片位置：</div>
@@ -80,7 +80,7 @@ class InsertImgDlg extends React.Component {
                         </div>
                     </div>
                 </div>
-            </Modal>
+            </EnhDlg>
         );
     }
 }

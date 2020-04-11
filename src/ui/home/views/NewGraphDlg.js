@@ -27,11 +27,11 @@ class NewGraphDlg extends React.Component {
 
     render() {
         return (
-            <Modal
-                title="新建图表"
-                visible={this.props.visible}
-                onOk={this.props.onOk}
-                onCancel={this.props.onCancel}>
+            <Modal  title="新建图表"
+                    visible={this.props.visible}
+                    onOk={this.props.onOk}
+                    onCancel={this.props.onCancel}>
+
                 <Input placeholder="请输入图表名称"
                     ref={uiUtil.bindInputEle.bind(this,this,'iptGraphName')}
                     value={this.props.newMapName} 

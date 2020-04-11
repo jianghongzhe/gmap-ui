@@ -3,42 +3,34 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
 import { VerticalAlignTopOutlined, BulbFilled } from '@ant-design/icons';
+import {withEnh} from '../../common/specialDlg';
+
+const EnhDlg=withEnh(Modal);
 
 class RefViewer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {  };
+        this.wrapperId="refviewercontainer"+new Date().getTime();
     }
 
     getScrollTarget=()=>{
-        return document.getElementById("refviewercontainer");
+        return document.getElementById(this.wrapperId);
     }
 
     render() {
         return (
-            <Modal
-                title={"查看引用 - " + this.props.refname}
-                css={{
-                    width: (this.props.dlgW) ,
-                    minWidth: (this.props.dlgW),
-                    maxWidth: (this.props.dlgW)
-                }}
-                visible={this.props.visible}
-                maskClosable={true}
-                footer={null}
-                onCancel={this.props.onCancel}>
-                <div id='refviewercontainer' css={{
-                    height:this.props.bodyH,
-                    maxHeight:this.props.bodyH,
-                    minHeight:this.props.bodyH,
-                    overflowY:'auto',
-                    overflowX:'hidden'}}>
-                    <div className='markdown-body' css={{
-                        margin:'0px auto',
-                        width:'98%',
-                        overflowX:'hidden'}}
-                        dangerouslySetInnerHTML={{__html:this.props.refCont}}>
-                    </div>
+            <EnhDlg noFooter
+                    title={"查看引用 - " + this.props.refname}
+                    size={{w:this.props.dlgW, h:this.props.bodyH, fixh:true, wrapperId:this.wrapperId}}                
+                    visible={this.props.visible}
+                    maskClosable={true}               
+                    onCancel={this.props.onCancel}>
+                <div className='markdown-body' css={{
+                    margin:'0px auto',
+                    width:'98%',
+                    overflowX:'hidden'}}
+                    dangerouslySetInnerHTML={{__html:this.props.refCont}}>
                 </div>
                 {
                     (this.props.backtopLoc && 2===this.props.backtopLoc.length) && (   
@@ -49,7 +41,7 @@ class RefViewer extends React.Component {
                         }}/>
                     )
                 }
-            </Modal>
+            </EnhDlg>
         );
     }
 }

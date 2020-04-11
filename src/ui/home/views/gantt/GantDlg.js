@@ -4,6 +4,9 @@ import React from 'react';
 import { Modal } from 'antd';
 import {  } from '@ant-design/icons';
 import GantChart from './GantChart';
+import {withEnh} from '../../../common/specialDlg';
+
+const EnhDlg=withEnh(Modal);
 
 
 class GantDlg extends React.Component {
@@ -60,26 +63,21 @@ class GantDlg extends React.Component {
     render() {
 
         return (
-            <Modal  title="甘特图"
+            <EnhDlg noFooter
+                    title="甘特图"
                     visible={this.props.visible}
-                    footer={null}
-                    onCancel={this.props.onCancel}
-                    css={{width: this.props.maxW, minWidth:this.props.maxW, maxWidth:this.props.maxW}}>
-                {/* <div css={{
-                    height:this.props.maxH,
-                    minHeight:this.props.maxH,
-                    maxHeight:this.props.maxH,
-                }}> */}
-                    <GantChart 
-                        key='gant-comp'
-                        ds={this.props.ds}
-                        colKeys={this.props.colKeys} 
-                        arrows={this.props.arrows}
-                        winW={this.props.winW} 
-                        maxh={this.props.maxH-100}  
-                        layoutArrows={this.state.layoutArrows}/>    
-                {/* </div>         */}
-            </Modal>
+                    size={{w:this.props.maxW}}
+                    onCancel={this.props.onCancel}>
+
+                <GantChart 
+                    key='gant-comp'
+                    ds={this.props.ds}
+                    colKeys={this.props.colKeys} 
+                    arrows={this.props.arrows}
+                    winW={this.props.winW} 
+                    maxh={this.props.maxH-100}  
+                    layoutArrows={this.state.layoutArrows}/>    
+            </EnhDlg>
         );
     }
 }

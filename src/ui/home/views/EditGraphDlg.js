@@ -33,6 +33,11 @@ import DateDlg from './edit/DateDlg';
 import editorSvc from '../editorSvc';
 import * as uiUtil from '../../../common/uiUtil';
 import api from '../../api';
+import {withEnh} from '../../common/specialDlg';
+
+const EnhDlg=withEnh(Modal);
+
+
 
 class EditGraphDlg extends React.Component {
     constructor() {
@@ -295,21 +300,18 @@ class EditGraphDlg extends React.Component {
 
         return (
             <>
-                <Modal
-                    title={"编辑图表 - " + this.props.currMapName}
-                    css={{
-                        width: (this.props.dlgW),
-                        minWidth: (this.props.dlgW),
-                        maxWidth: (this.props.dlgW)
-                    }}
-                    maskClosable={false}
-                    visible={this.props.visible}
-                    footer={[
-                        <Button key="btncancel" onClick={this.props.onCancel}>取消</Button>,
-                        <Button key="btnneutral" type="primary" onClick={this.props.onOnlySave}>保存</Button>,
-                        <Button key="btnok" type="primary" onClick={this.props.onOk}>保存并关闭</Button>,
-                      ]}
-                    onCancel={this.props.onCancel}>
+                <EnhDlg
+                        title={"编辑图表 - " + this.props.currMapName}
+                        size={{w:this.props.dlgW}}
+                        maskClosable={false}
+                        visible={this.props.visible}
+                        footer={[
+                            <Button key="btncancel" onClick={this.props.onCancel}>取消</Button>,
+                            <Button key="btnneutral" type="primary" onClick={this.props.onOnlySave}>保存</Button>,
+                            <Button key="btnok" type="primary" onClick={this.props.onOk}>保存并关闭</Button>,
+                        ]}
+                        onCancel={this.props.onCancel}>
+                            
                     <div>
                         <div css={{ 'marginBottom': "10px" }}>
                             {/* 颜色选择器 */}
@@ -357,7 +359,7 @@ class EditGraphDlg extends React.Component {
                             }}
                             onBeforeChange={this.props.onChangeEditTmpTxt} />
                     </div>
-                </Modal>
+                </EnhDlg>
 
                 {/*插入图片对话框*/}
                 <InsertImgDlg
@@ -374,21 +376,17 @@ class EditGraphDlg extends React.Component {
                 />
 
                 {/* 颜色选择对话框 */}
-                <Modal
-                    title={null}
-                    footer={null}
-                    closable={false}
-                    css={{
-                        left: colorDlgAdjustX - (this.props.dlgW - colorDlgW) / 2,
-                        top: colorDlgY,
-                        width: colorDlgW,
-                        minWidth: colorDlgW,
-                        maxWidth: colorDlgW
-                    }}
-                    visible={this.state.colorPickerVisible}
-                    onCancel={this.hideAllDlg}>
+                <EnhDlg noTitle noFooter closable={false}
+                        size={{w:colorDlgW}}
+                        css={{
+                            left: colorDlgAdjustX - (this.props.dlgW - colorDlgW) / 2,
+                            top: colorDlgY,
+                        }}
+                        visible={this.state.colorPickerVisible}
+                        onCancel={this.hideAllDlg}>
+
                     <CirclePicker onChange={this.handleColorPickerColorChange} />
-                </Modal>
+                </EnhDlg>
 
                 {/* 帮助对话框 */}
                 <HelpDlg

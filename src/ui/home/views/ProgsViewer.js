@@ -2,8 +2,10 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Modal, Timeline, Table,Progress,Tooltip } from 'antd';
-
 import {createSelector} from 'reselect';
+import {withEnh} from '../../common/specialDlg';
+
+const EnhDlg=withEnh(Modal);
 
 class ProgsViewer extends React.Component {
     constructor(props) {
@@ -14,24 +16,20 @@ class ProgsViewer extends React.Component {
         let dlgW = (this.props.winW < 820 ? this.props.winW - 20 : 800);
 
         return (
-            <Modal
-                title="查看事项完成进度"
-                css={{
-                    width: dlgW,
-                    minWidth: dlgW,
-                    maxWidth: dlgW
-                }}
-                visible={this.props.visible}
-                maskClosable={true}
-                footer={null}
-                onCancel={this.props.onCancel}>
-                    <Table pagination={false} 
-                        bordered={true}
-                        dataSource={parseDataSource(this.props)} 
-                        columns={columns} 
-                        size='small' 
-                        scroll={{ y: this.props.bodyH }} />
-            </Modal>
+            <EnhDlg noFooter
+                    title="查看事项完成进度"
+                    size={{w:dlgW}}                  
+                    visible={this.props.visible}
+                    maskClosable={true}
+                    onCancel={this.props.onCancel}>
+                
+                <Table pagination={false} 
+                    bordered={true}
+                    dataSource={parseDataSource(this.props)} 
+                    columns={columns} 
+                    size='small' 
+                    scroll={{ y: this.props.bodyH }} />
+            </EnhDlg>
         );
     }
 }
