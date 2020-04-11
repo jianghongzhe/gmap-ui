@@ -4,24 +4,24 @@ import React from 'react';
 import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 
+import {createSelector} from 'reselect';
+
 class PathSelect extends React.Component {
     constructor(props) {
         super(props);
         this.state = {  };
+        this.listWrapperId='fileselectlist'+new Date().getTime();
     }
 
     
 
     getScrollTarget=()=>{
-        return document.getElementById('fileselectlist');
+        return document.getElementById(this.listWrapperId);
     }
 
     render() {
         //列表样式，如果指定的forceMaxH，则保持高度和最大高度一致
-        let listWrapperStyle={'maxHeight':this.props.maxH,'overflowY':'auto','overflowX':'hidden',};
-        if(this.props.forceMaxH){
-            listWrapperStyle={'height':this.props.maxH,'minHeight':this.props.maxH, ...listWrapperStyle};
-        }
+        let listWrapperStyle=getListWrapperStyle(this.props);
 
         return (
             <>
@@ -43,14 +43,13 @@ class PathSelect extends React.Component {
                 </Row>                          
                 <Divider css={{marginTop:'10px',marginBottom:'0px'}}/>
                 
-                <div css={listWrapperStyle} id='fileselectlist'>
-                    
+                <div css={listWrapperStyle} id={this.listWrapperId}>                   
                     <List
                         itemLayout="horizontal"
                         dataSource={this.props.filelist}
                         renderItem={item => (
-                            <List.Item>
-                                <List.Item.Meta onClick={this.props.onSelectMapItem.bind(this,item)}
+                            <List.Item className='listitem' onClick={this.props.onSelectMapItem.bind(this,item)}>
+                                <List.Item.Meta 
                                     avatar={
                                         <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} 
                                             css={{ "backgroundColor": (item.isfile?'#40a9ff':'orange') }} />
@@ -71,5 +70,25 @@ class PathSelect extends React.Component {
         );
     }
 }
+
+const getListWrapperStyle=createSelector(
+    props=>props.maxH,
+    props=>props.forceMaxH,
+    (maxH,forceMaxH)=>{
+        let style={
+            'maxHeight':maxH,
+            'overflowY':'auto',
+            'overflowX':'hidden',
+            '& .listitem:hover':{
+                backgroundColor:'#EEE',
+                borderRadius:10,
+            }
+        };
+        if(forceMaxH){
+            style={'height':maxH,'minHeight':maxH, ...style};
+        }
+        return style;
+    }
+);
 
 export default PathSelect;
