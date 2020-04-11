@@ -79,10 +79,15 @@ const getListWrapperStyle=createSelector(
             'maxHeight':maxH,
             'overflowY':'auto',
             'overflowX':'hidden',
+
             '& .listitem:hover':{
                 backgroundColor:'#EEE',
                 borderRadius:10,
+            },
+            '& .listitem':{
+                transition: 'all 0.2s 0.1s',
             }
+
         };
         if(forceMaxH){
             style={'height':maxH,'minHeight':maxH, ...style};
