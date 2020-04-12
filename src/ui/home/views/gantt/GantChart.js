@@ -127,6 +127,7 @@ class GantChart extends React.Component {
                 height:parseInt(tdFrom.height/2),
                 borderRight:`1px solid ${colors.joinLine}`,
                 borderTop:`1px solid ${colors.joinLine}`,
+                // borderTopRightRadius:'6px',
             };
             
             //连接线结束点端：到结束单元格左侧结束
@@ -167,6 +168,9 @@ class GantChart extends React.Component {
                 backgroundColor:colors.joinLine,
             }
 
+            // let coner1={};
+            // let coner2={};
+
             //连接线位置校准
             if(fromx<=tox){
                 join2.top=join1.top+join1.height;
@@ -179,6 +183,30 @@ class GantChart extends React.Component {
                 to.borderLeft='0px';
             }else{
                 join2.top=from.top+from.height;
+                // to.borderBottomLeftRadius='6px';
+
+                // coner2={
+                //     left:parseInt(Math.min(fromx,tox)),
+                //     top:join2.top,
+                //     borderTopLeftRadius:'6px',
+                //     borderLeft:`1px solid ${colors.joinLine}`,
+                //     borderTop:`1px solid ${colors.joinLine}`,
+                //     width:'6px',
+                //     height:'6px',
+                // };
+                // join1.top+=6;
+                // //join1.height-=6;
+                // join2.left+=6;
+                // join2.width-=6;
+
+                // to.top+=6;
+                // to.height-=6;
+
+                // from.borderBottomRightRadius='6px';
+                // from.borderBottom=`1px solid ${colors.joinLine}`;
+                // from.height+=1;
+                // join2.width-=6;
+                
             }
 
             
@@ -202,6 +230,8 @@ class GantChart extends React.Component {
                 join1.display="none";
                 join2.display="none";
                 posArrow.display="none";
+                // coner1.display="none";
+                // coner2.display="none";
             }
 
             arrows.push({
@@ -210,6 +240,8 @@ class GantChart extends React.Component {
                 join1:join1,
                 join2:join2,
                 head:posArrow,
+                // coner1:coner1,
+                // coner2:coner2,
             });
         });
 
@@ -253,6 +285,8 @@ class GantChart extends React.Component {
                         <div key={'arrow-end-'+ind} css={{...joinLineStyle, ...each.end}}></div>
                         <div key={'arrow-join1-'+ind} css={{...joinLineStyle, ...each.join1}}></div>
                         <div key={'arrow-join2-'+ind} css={{...joinLineStyle, ...each.join2}}></div>
+                        {/* <div key={'arrow-coner1-'+ind} css={{...joinLineStyle, ...each.coner1}}></div>
+                        <div key={'arrow-coner2-'+ind} css={{...joinLineStyle, ...each.coner2}}></div> */}
                         <RightOutlined key={'arrow-head-'+ind} css={{...joinArrowStyle, ...each.head}}/>
                     </React.Fragment>
                 ))
