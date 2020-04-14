@@ -98,7 +98,7 @@ class MindmapSvc {
         // let root = this.getRootNodeByCells(cells);
         return this.isNodeExpandRecursively(cells.root);
     }
-
+    
     /**
      * 判断所有节点中是否有展开状态变化的
      */
@@ -106,7 +106,19 @@ class MindmapSvc {
         return this.isNdExpStChangedRecursively(cells.root);
     }
 
-
+    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true) => {
+        try{
+            let root=this.parseRootNode(txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true);
+            let cells= this.parseMindMapDataInner(root);
+            return cells;
+        }catch(e){
+            return {
+                succ: false,
+                msg: '内容解析失败',
+                desc: ('string'===typeof(e)? ""+e : "图表内容解析过程中发生错误 ~~~")
+            }
+        }
+    }
 
 
     /**
@@ -117,7 +129,7 @@ class MindmapSvc {
      * @param {bordTypesMap} 边框类型的枚举
      * @param {getBorderStyleCallback} 根据边框类型解析为边框样式的回调
      */
-    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true) => {
+    parseRootNode = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true) => {
         //校验
         if (shouldValidate) {
             if ('' === txts) {
@@ -148,8 +160,8 @@ class MindmapSvc {
 
             //表格行列相关计算
             let nd = this.load(txts);//根节点
-            let cells= this.parseMindMapDataInner(nd);
-            return cells;
+            this.setNodeLineColor(nd, defaultLineColor);
+            return nd;
         } catch (e) {
             console.error(e);
             return {
@@ -210,6 +222,10 @@ class MindmapSvc {
     // }
 
     isNdExpStChangedRecursively=(nd)=>{
+        if(!nd){
+            return false;
+        }
+
         //叶节点认为展开状态没有变化
         if (nd.leaf) {
             return false;
@@ -231,7 +247,9 @@ class MindmapSvc {
     }
 
     isNodeExpandRecursively = (nd) => {
-
+        if(!nd){
+            return false;
+        }
 
         //叶节点认为是展开状态
         if (nd.leaf) {
@@ -954,6 +972,7 @@ class MindmapSvc {
                 str: txts,
                 left: false,
                 par: null,
+                parid:null,
                 color: lineColor,
                 memo: memo,
                 links: links,
@@ -982,6 +1001,7 @@ class MindmapSvc {
                 tmpNd = tmpNd.par;
             }
             nd.par = tmpNd;
+            nd.parid=tmpNd.id;
             tmpNd.childs.push(nd);
 
             //每次处理完一次记录上个节点
@@ -1221,9 +1241,15 @@ export default {
     hasUrlPrefix:       inst.hasUrlPrefix,
     toggleExpandNode:   inst.toggleExpandNode,
     parseMindMapData:   inst.parseMindMapData,
+    parseRootNode:      inst.parseRootNode,
 
     isAllNodeExpand:    inst.isAllNodeExpand,
     expandAllNds:       inst.expandAllNds,
     isAnyNdExpStChanged:inst.isAnyNdExpStChanged,
     restoreAllNdExpSts: inst.restoreAllNdExpSts,
+
+    isNodeExpandRecursively:inst.isNodeExpandRecursively,
+    isNdExpStChangedRecursively:inst.isNdExpStChangedRecursively,
+    expandNode:inst.expandNode,
+    restoreNode:inst.restoreNode,
 };

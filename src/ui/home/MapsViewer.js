@@ -24,6 +24,7 @@ import ProgsViewer from './views/ProgsViewer';
 import GantDlg from './views/gantt/GantDlg';
 
 import mindmapSvc from './mindmapSvc';
+import newMindmapSvc from './newMindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
 import * as uiUtil from '../../common/uiUtil';
 import MarkedHighlightUtil from '../../common/MarkedHighlightUtil';
@@ -254,13 +255,16 @@ class MapsViewer extends React.Component {
         }
 
         //计算导图表格信息并加入新tab      
-        let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+        // let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+        let rootNd=mindmapSvc.parseRootNode(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+        let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
+
         let tabdata = this.state.panes;
         tabdata.push({
             title: fn,
             key: fullpath,
             mapTxts: defMapTxt,
-            mapCells: cells
+            ds: ndsSet,
         });
 
         //保存状态
@@ -317,9 +321,12 @@ class MapsViewer extends React.Component {
         }
 
         item = item[0]
-        let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
+        // let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
+        let rootNd=mindmapSvc.parseRootNode(txt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
+        let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
+
         item.mapTxts = txt;
-        item.mapCells = cells;
+        item.ds = ndsSet;
         this.setState({
             panes: [...this.state.panes],
             editMapDlgVisible: !closeDlg
@@ -360,7 +367,12 @@ class MapsViewer extends React.Component {
             return;
         }
 
-        let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+
+        //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+        let rootNd=mindmapSvc.parseRootNode(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+        let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
+
+        console.log("ndsSet",ndsSet);
 
         //增加新选项卡并设置状态
         let tabdata = this.state.panes;
@@ -368,7 +380,8 @@ class MapsViewer extends React.Component {
             title: item.itemsName,// item.showname,
             key: item.fullpath,
             mapTxts: origintxts,
-            mapCells: cells
+            //mapCells: cells,
+            ds: ndsSet,
         });
         this.setState({
             panes: [...tabdata],
@@ -400,9 +413,10 @@ class MapsViewer extends React.Component {
      * @param {key}  当前激活的选项卡的key，也即为文件全路径
      * @param {cell} 切换展开状态的当前格数据
      */
-    toggleExpand = (key, cell, cells) => {
-        this.state.panes.filter(eachPane => key === eachPane.key).forEach(eachPane => {
-            eachPane.mapCells = mindmapSvc.toggleExpandNode(cell, cells);
+    toggleExpand = (nd) => {
+        this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key).forEach(eachPane => {
+            //eachPane.mapCells = mindmapSvc.toggleExpandNode(cell, cells);
+            eachPane.ds=newMindmapSvc.toggleExp(eachPane.ds,nd);
         });
         this.setState({
             panes: [...this.state.panes]
@@ -416,7 +430,8 @@ class MapsViewer extends React.Component {
     expandAll = () => {
         let currPane = this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
         if (currPane && 0 < currPane.length) {
-            currPane.forEach(eachPane => { eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells); });
+            //currPane.forEach(eachPane => { eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells); });
+            currPane.forEach(eachPane => { eachPane.ds = newMindmapSvc.expandAll(eachPane.ds); });
             this.setState({
                 panes: [...this.state.panes],
             });
@@ -426,7 +441,8 @@ class MapsViewer extends React.Component {
     restoreNds = () => {
         let currPane = this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
         if (currPane && 0 < currPane.length) {
-            currPane.forEach(eachPane => { eachPane.mapCells = mindmapSvc.restoreAllNdExpSts(eachPane.mapCells); });
+            //currPane.forEach(eachPane => { eachPane.mapCells = mindmapSvc.restoreAllNdExpSts(eachPane.mapCells); });
+            currPane.forEach(eachPane => { eachPane.ds = newMindmapSvc.restore(eachPane.ds); });
             this.setState({
                 panes: [...this.state.panes],
             });
@@ -642,8 +658,9 @@ const ifShowExpandAll = createSelector(
         }
 
         //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
-        let allExpand = mindmapSvc.isAllNodeExpand(currPane.mapCells);
+        let allExpand = newMindmapSvc.isAllNodeExpand(currPane.ds);
         return !allExpand;
+        return false;
     }
 );
 
@@ -657,8 +674,9 @@ const isShowRestore = createSelector(
         }
 
         //计算当前选项卡是否有展开状态变化的节点
-        let anyChanged = mindmapSvc.isAnyNdExpStChanged(currPane.mapCells);
+        let anyChanged = newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
         return anyChanged;
+        return false;
     }
 );
 
@@ -674,7 +692,7 @@ const ifHasValidTab = (key, panes) => {
     currPane = currPane[0];
 
     //当前选项卡内容解析失败
-    if (currPane.mapCells && false === currPane.mapCells.succ) {
+    if (currPane.ds && false === currPane.ds.succ) {
         return false;
     }
     return currPane;
