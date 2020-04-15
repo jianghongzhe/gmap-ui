@@ -187,8 +187,8 @@ const wrapperStyle={
         // borderBottomLeftRadius:'5px',
         paddingBottom:0,
         paddingTop:10,
-        paddingLeft:10,
-        paddingRight:10,
+        paddingLeft:20,
+        paddingRight:20,
         // backgroundColor:'lightblue',
     },
 

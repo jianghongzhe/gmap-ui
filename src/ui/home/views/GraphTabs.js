@@ -5,6 +5,7 @@ import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'an
 import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import Mindmap from './Mindmap';
 import NewMindmap from './NewMindmap';
+import MindNode from './MindNode';
 
 const { TabPane } = Tabs;
 
@@ -18,22 +19,21 @@ class GraphTabs extends React.Component {
 
     
 
-
+    /**
+     * 节点内容的render props
+     */
     ndContentRenderer=(nd)=>{
-        return (<>
-            <span className='themetxt' css={{paddingLeft:10,paddingRight:10, ...styles.themetxt}}>
-                <span className='themename'>
-                    {
-                        "string"===typeof(nd.str) ?
-                            <>{nd.str}</>
-                                :
-                            <>{nd.str.map((line,ind)=><span key={'ndtxt-'+ind}>{0<ind && <br/>}{line}</span>)}</>
-                    } 
-                </span>
-            </span>
-        </>);
+        return <MindNode nd={nd}
+            onOpenLink={this.props.onOpenLink} 
+            onOpenRef={this.props.onOpenRef}
+            onShowTimeline={this.props.onShowTimeline}
+            onShowProgs={this.props.onShowProgs}
+            onShowGant={this.props.onShowGant}/>;
     }
 
+    /**
+     * 折叠按钮的render props
+     */
     ndExpBtnRenderer=(nd)=>{
         return (
             <Button 
@@ -51,9 +51,7 @@ class GraphTabs extends React.Component {
         );
     }
 
-    // onToggleExpState=(nd)=>{
-
-    // }
+    
 
     render() {
         
@@ -101,6 +99,7 @@ const styles={
         verticalAlign:'bottom',
         padding:0,
         lineHeight:'14px',
+
         '& .expbtnicon':{
             fontSize:14,
             lineHeight:'14px',
@@ -108,41 +107,12 @@ const styles={
             padding:0,
         }
     },
-
-
-    themetxt: {
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        verticalAlign: 'bottom',
-        // padding: '0px 0px  0px 0px',
-        // fontSize: 16,
-
-        '& .themename': {
-            // color: 'white',
-            // backgroundColor: '#108ee9',
-            // borderRadius: 5,
-            // fontSize: 18,
-            // lineHeight: '20px',
-            // padding: '8px 16px',
-            whiteSpace: 'nowrap',
-            display: 'inline-block',
-            // marginLeft: 3,
-            // marginRight: 3,
-        },
-    },
-
-    
-
 };
 
 
 const colors={
-    ref: {color:'#faad14'},
-    memo: {color:'#faad14'},
-    link: {color:'#1890ff'},
     toggle: {color:'#7cb305'},
     toggle2: {color:'#eb2f96'},//#eb2f96 #9254de
-    
 };
 
 const getTabItemContainerStyle=(h)=>({
