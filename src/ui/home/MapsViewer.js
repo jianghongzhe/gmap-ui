@@ -372,7 +372,7 @@ class MapsViewer extends React.Component {
         let rootNd=mindmapSvc.parseRootNode(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
         let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
 
-        console.log("ndsSet",ndsSet);
+        
 
         //增加新选项卡并设置状态
         let tabdata = this.state.panes;

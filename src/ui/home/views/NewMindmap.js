@@ -25,28 +25,24 @@ class NewMindmap extends React.Component {
             this.setState({
                 spinning:true,
             });
-            setTimeout(this.arrangeNdPositions, 200);
+            setTimeout(this.arrangeNdPositions, 50);
         }
     }
 
     componentDidUpdate(prevProps, prevState){
-
-
-
         //节点有变化才重新计算连线
         if(this.props.ds !==prevProps.ds && this.props.ds.tree && this.props.ds.list && this.props.ds.map){
             console.log("开始计算");
             this.setState({
                 spinning:true,
             });
-            setTimeout(this.arrangeNdPositions, 200);
+            setTimeout(this.arrangeNdPositions, 50);
         }
     }
 
     arrangeNdPositions=()=>{
         if(!this.props.ds){return;}
         newMindmapSvc.loadStyles(this.props.ds, this.props.containerSize);
-        console.log("get line style",this.props.ds.lineStyles);
         this.setState({
             ndStyles:       this.props.ds.ndStyles,
             lineStyles:     this.props.ds.lineStyles,
@@ -121,9 +117,7 @@ class NewMindmap extends React.Component {
                     {
                         this.props.ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                             {/* 节点内容 */}
-                            <div className='item' id={nd.id} style={{borderBottom:`1px solid ${nd.color}`,verticalAlign: 'bottom',}} css={
-                                (this.state.ndStyles && this.state.ndStyles[nd.id]) ? this.state.ndStyles[nd.id]: {}
-                            }>
+                            <div className='item' id={nd.id} style={{borderBottom:`1px solid ${nd.color}`, ...getNdStyle(this.state,nd)}}>
                                 {actNdRenderer(nd)}
                             </div>
 
@@ -132,13 +126,13 @@ class NewMindmap extends React.Component {
                             {/* 节点到父节点的连接线 */}
                             {
                                 (nd.parid) && (<>
-                                    <div className='linewrapper' id={`line_${nd.id}`} css={
+                                    <div className='linewrapper' id={`line_${nd.id}`} style={
                                         (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].line) ? this.state.lineStyles[nd.id].line : {}
                                     }>
-                                        <div className='linefrom' id={`linefrom_${nd.id}`} css={
+                                        <div className='linefrom' id={`linefrom_${nd.id}`} style={
                                             (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineFrom) ? this.state.lineStyles[nd.id].lineFrom : {}
                                         }></div>
-                                        <div className='lineto' id={`lineto_${nd.id}`} css={
+                                        <div className='lineto' id={`lineto_${nd.id}`} style={
                                             (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineTo) ? this.state.lineStyles[nd.id].lineTo : {}
                                         }></div>
                                     </div>
@@ -148,7 +142,7 @@ class NewMindmap extends React.Component {
                             {/* 节点的展开按钮 */}
                             {
                                 (nd.childs && 0<nd.childs.length) && 
-                                    <div id={`expbtn_${nd.id}`} className='expBtn' css={
+                                    <div id={`expbtn_${nd.id}`} className='expBtn' style={
                                         (this.state.expBtnStyles && this.state.expBtnStyles[nd.id]) ? this.state.expBtnStyles[nd.id] : {}
                                     }>
                                         {actExpBtnRenderer(nd)}
@@ -164,17 +158,27 @@ class NewMindmap extends React.Component {
 }
 
 
+const getNdStyle=(state,nd)=>{
+    return (nd && state.ndStyles && state.ndStyles[nd.id]) ? state.ndStyles[nd.id]: {};
+}
 
+const outOfViewStyle={
+    left:'-800px',
+    top:'-800px',
+};
 
-
-
-
+const baseFloatBlockStyle={
+    position: 'absolute',
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+    boxSizing: 'border-box',
+}
 
 
 const wrapperStyle={
     overflow:'hidden',
     border:'0px solid red',
-    position:'relative',
+    position:'relative',    //容器本身使用相对定位，其中内容使用绝对定位相对它来布局
     marginLeft:'auto',
     marginRight:'auto',
 
@@ -183,44 +187,32 @@ const wrapperStyle={
         position:'absolute',
         display:'inline-block',
         border:'0px solid green',
-        borderBottom:'1px solid lightgray',
-        // borderBottomLeftRadius:'5px',
+        borderBottom:'1px solid lightgray',//保留一个像素默认边框，动态计算位置后会覆盖该样式
         paddingBottom:0,
         paddingTop:10,
         paddingLeft:20,
         paddingRight:20,
-        // backgroundColor:'lightblue',
+        verticalAlign: 'bottom',
+        ...outOfViewStyle,
     },
 
     '& .expBtn':{
-        position: 'absolute',
-        backgroundColor: 'transparent',
-        overflow: 'hidden',
-        boxSizing: 'border-box',
-        zIndex:1,
+        ...baseFloatBlockStyle,
+        ...outOfViewStyle,
+        zIndex:1,   //折叠按钮显示在连接线的上层
     },
 
     '& .linewrapper': {
-        position: 'absolute',
-        backgroundColor: 'transparent',
-        overflow: 'hidden',
-        boxSizing: 'border-box',
+        ...baseFloatBlockStyle,
+        ...outOfViewStyle,
     },
   
     '& .linewrapper .linefrom': {
-        position: 'absolute',
-        backgroundColor: 'transparent',
-        boxSizing: 'border-box',
-        // borderBottom: '1px solid red',
-        // borderRight: '1px solid red',
+        ...baseFloatBlockStyle,
     },
 
     '& .linewrapper .lineto': {
-        position: 'absolute',
-        backgroundColor: 'transparent',
-        boxSizing: 'border-box',
-        // borderTop: '1px solid red',
-        // borderLeft: '1px solid red',
+        ...baseFloatBlockStyle,
     }
 };
 

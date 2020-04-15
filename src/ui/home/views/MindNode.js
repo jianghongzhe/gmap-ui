@@ -117,7 +117,7 @@ class MindNode extends React.Component {
             {
                 (nd && nd.links && 0<nd.links.length) && <>{
                     nd.links.map((link,linkInd)=>(
-                        <span css={themeBtnWrapperStyle}>
+                        <span css={themeBtnWrapperStyle} key={'link-'+linkInd}>
                             <Button 
                                 key={linkInd} 
                                 type="link" 

@@ -493,13 +493,8 @@ class NewMindmapSvc {
         //加载节点和折叠按钮所占区域大小，需要在第一次渲染之后再调，否则dom还没生成
         ndsSet.list.forEach(nd=>{
             ndsSet.rects[nd.id]=document.querySelector(`#${nd.id}`).getBoundingClientRect();
-
-            console.log("节点位置", ndsSet.rects[nd.id]);
-
             if(nd.childs && 0<nd.childs.length){
                 ndsSet.expBtnRects[nd.id]=document.querySelector(`#expbtn_${nd.id}`).getBoundingClientRect();
-
-                console.log("折叠按钮位置", ndsSet.expBtnRects[nd.id]);
             }
         });
 
@@ -515,7 +510,6 @@ class NewMindmapSvc {
         ndsSet.list.forEach(nd=>{
             if(!nd.parid){return;}
             let result=this.setLineStyle(ndsSet,nd.par,nd,ndsSet.ndStyles,'lightgray');
-            console.log("line style",result);
             newLineStyles={...newLineStyles, ...result};
         });
         ndsSet.lineStyles=newLineStyles;
