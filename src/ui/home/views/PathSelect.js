@@ -85,6 +85,7 @@ const getListWrapperStyle=createSelector(
                 borderRadius:10,
             },
             '& .listitem':{
+                cursor:'pointer',
                 transition: 'all 0.3s 0s',
                 transitionTimingFunction: 'ease',
             }

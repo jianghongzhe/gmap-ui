@@ -4,6 +4,7 @@ import React from 'react';
 import { Button,Tooltip, Progress,Avatar  } from 'antd';
 import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
+import {createSelector} from 'reselect';
 
 class MindNode extends React.Component {
     constructor(props) {
@@ -25,19 +26,19 @@ class MindNode extends React.Component {
         let nd=this.props.nd;
         if(!nd){return null;}
 
-        //按主题的不同层级设置不同样式
+        let hasExtraItems=(
+            nd.dateItem || 
+            nd.prog ||
+            nd.gant ||
+            (nd.memo && 0<nd.memo.length) ||
+            nd.ref ||
+            (nd.links && 0<nd.links.length)
+        );
+
+        //按主题的不同层级设置不同样式，同时根据是否有文本之外的内容而显示不同的样式（只对根节点）
         let themeStyle=themeStyles[nd.lev>2 ? 2 : nd.lev];
+        themeStyle=themeStyle(hasExtraItems);
 
-
-        //对中心主题，需要根据内容行数做居中处理
-        let centerThemeExtraStyle={};
-        if(0===nd.lev){
-            let lines="string"===typeof(nd.str) ? 1 : nd.str.length;
-            centerThemeExtraStyle={
-                marginBottom:-10*lines,
-            };
-        }
-        
 
         return (<span css={themeStyle}>
             {/* 日期部分 */}
@@ -54,7 +55,7 @@ class MindNode extends React.Component {
 
 
             {/* 主题文本 */}
-            <span className='themename' css={centerThemeExtraStyle}>
+            <span className='themename' >
                 {
                     "string"===typeof(nd.str) ?
                         <>{nd.str}</>
@@ -170,6 +171,7 @@ const colors={
     ref: {color:'#faad14'},
     memo: {color:'#faad14'},
     link: {color:'#1890ff'},
+    linkDark: {color:'#faad14'},
 };
 
 const gantStyle={
@@ -223,26 +225,51 @@ const baseThemeNameStyle={
     display: 'inline-block',
 };
 
-//#2db7f5
-const centerThemeStyle = {
-    ...baseThemeStyle,
-    fontSize: 18,
 
-    '& .themename': {
-        ...baseThemeNameStyle,
 
-        color: 'white',
-        backgroundColor: '#108ee9',
-        borderRadius: 5,
-        fontSize: 18,
-        lineHeight: '20px',
-        padding: '8px 16px',
+//根主题的样式，根据是否有文本之外的内容显示不同样式
+//有额外内容：显示一个边框
+//无额外内容，背景设为蓝色，文字设为白色
+const centerThemeStyle =createSelector(
+    hasExtraItems => hasExtraItems,
+    hasExtraItems =>  {
+        let baseStyle= {
+            ...baseThemeStyle,
+            fontSize: 18,
+            borderRadius: 5,
+            paddingLeft:6,
+            paddingRight:6,
+            paddingBottom:10,
+            paddingTop:10,
+            lineHeight: '20px',
         
-        marginLeft: 3,
-        marginRight: 3,
-        verticalAlign: 'bottom',
-    }, 
-};
+        
+            '& .themename': {
+                ...baseThemeNameStyle,
+                fontSize: 18,
+                lineHeight: '20px',
+                padding: '0px 2px',
+                
+                marginLeft: 0,
+                marginRight: 0,
+                verticalAlign: 'bottom',
+            }, 
+        };
+
+        //除了文本内容，还有别的项
+        if(hasExtraItems){
+            baseStyle.border='2px solid #108ee9';
+            return baseStyle;
+        }
+
+        //没有别的项
+        baseStyle.backgroundColor= '#108ee9';
+        baseStyle['& .themename'].color='white';
+        baseStyle['& .themename'].padding= '0px 8px';
+        return baseStyle;
+    }
+);
+
 
 const secendThemeStyle = {
     ...baseThemeStyle,
@@ -264,7 +291,7 @@ const otherThemeStyle = {
     },
 };
 
-const themeStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
+const themeStyles=[centerThemeStyle, ()=>secendThemeStyle, ()=>otherThemeStyle];
 
 
 export default MindNode;

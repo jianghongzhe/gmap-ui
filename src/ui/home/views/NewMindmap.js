@@ -112,12 +112,15 @@ class NewMindmap extends React.Component {
             // <Spin spinning={this.state.spinning} size='large' >
             // <div  css={{width:this.props.containerSize.w,height:this.props.containerSize.h,border:'1px solid blue',overflow:'auto'}}>
                
+            //borderBottom:'1px solid lightgray',//保留一个像素默认边框，动态计算位置后会覆盖该样式
 
                 <div css={{...wrapperStyle, ...this.state.wrapperStyle}} id='graphwrapper'>
                     {
                         this.props.ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                             {/* 节点内容 */}
-                            <div className='item' id={nd.id} style={{borderBottom:`1px solid ${nd.color}`, ...getNdStyle(this.state,nd)}}>
+                            <div className='item'  id={nd.id}
+                                    css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}
+                                    style={{ ...(nd.parid?{borderBottom:`1px solid ${nd.color}`}:{})  , ...getNdStyle(this.state,nd)}}>
                                 {actNdRenderer(nd)}
                             </div>
 
@@ -129,6 +132,9 @@ class NewMindmap extends React.Component {
                                     <div className='linewrapper' id={`line_${nd.id}`} style={
                                         (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].line) ? this.state.lineStyles[nd.id].line : {}
                                     }>
+                                        <div className='lineExp' id={`lineExp_${nd.id}`} style={
+                                            (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineExp) ? this.state.lineStyles[nd.id].lineExp : {}
+                                        }></div>
                                         <div className='linefrom' id={`linefrom_${nd.id}`} style={
                                             (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineFrom) ? this.state.lineStyles[nd.id].lineFrom : {}
                                         }></div>
@@ -187,12 +193,12 @@ const wrapperStyle={
         position:'absolute',
         display:'inline-block',
         border:'0px solid green',
-        borderBottom:'1px solid lightgray',//保留一个像素默认边框，动态计算位置后会覆盖该样式
         paddingBottom:0,
         paddingTop:10,
-        paddingLeft:20,
-        paddingRight:20,
+        // paddingLeft:20,
+        // paddingRight:20,
         verticalAlign: 'bottom',
+        // backgroundColor: 'lightblue',
         ...outOfViewStyle,
     },
 
@@ -207,6 +213,10 @@ const wrapperStyle={
         ...outOfViewStyle,
     },
   
+    '& .linewrapper .lineExp': {
+        ...baseFloatBlockStyle,
+    },
+
     '& .linewrapper .linefrom': {
         ...baseFloatBlockStyle,
     },

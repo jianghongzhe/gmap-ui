@@ -83,15 +83,24 @@ class NewMindmapSvc {
         //折叠按钮放右边
         if(!left){
             ndsSet.expBtnStyles[nd.id]={
-                left:parseInt(l+ndsSet.rects[nd.id].width-ndsSet.expBtnRects[nd.id].width/2-5), //  /2
+                left:parseInt(l+ndsSet.rects[nd.id].width), //  /2   -ndsSet.expBtnRects[nd.id].width/2-5
                 top:parseInt(t+ndsSet.rects[nd.id].height-ndsSet.expBtnRects[nd.id].height+4),
             };
+
+            if(0===nd.lev){
+                if(nd.expand){
+                    ndsSet.expBtnStyles[nd.id].top=parseInt(t+ndsSet.rects[nd.id].height/2+(nodePaddingTop/2)-ndsSet.expBtnRects[nd.id].height+4)+rootAdjustY;
+                }else{
+                    ndsSet.expBtnStyles[nd.id].top=parseInt(t+ndsSet.rects[nd.id].height/2+(nodePaddingTop/2)-(ndsSet.expBtnRects[nd.id].height/1.5)+4)+rootAdjustY;
+                }
+                
+            }
             return;
         }
 
         //放左边
         ndsSet.expBtnStyles[nd.id]={
-            left:parseInt(l-ndsSet.expBtnRects[nd.id].width/2+5),  //
+            left:parseInt(l-ndsSet.expBtnRects[nd.id].width),  //  /2+5
             top:parseInt(t+ndsSet.rects[nd.id].height-ndsSet.expBtnRects[nd.id].height+4),
         };
     }
@@ -143,6 +152,9 @@ class NewMindmapSvc {
                 currRightTop += allHeight;//
             });
         }
+
+        ndsSet.ndStyles[ndsSet.tree.id].top+=rootAdjustY;
+        
 
         return this.calcOptNdPos(ndsSet, containerSize);
     }
@@ -225,14 +237,14 @@ class NewMindmapSvc {
         let yAdjust = graphPadding - minY;
         let moreXAdjust=0;
 
-        // //如果容器大小还不到整个区域的大小-10,则增加到该值，同时x坐标也增加以保证在容器里居中
-        // if(requireW<containerSize.w-10){
-        //     moreXAdjust=(containerSize.w-10-requireW)/2;
-        //     requireW=containerSize.w-10;
-        // }
-        // if(requireH<containerSize.h-10){
-        //     requireH=containerSize.h-10;
-        // }
+        //如果容器大小还不到整个区域的大小-10,则增加到该值，同时x坐标也增加以保证在容器里居中
+        if(requireW<containerMinW){
+            moreXAdjust=(containerMinW-requireW)/2;
+            requireW=containerMinW;
+        }
+        if(requireH<containerMinH){
+            requireH=containerMinH;
+        }
 
 
 
@@ -253,8 +265,8 @@ class NewMindmapSvc {
 
     /**
      * 设置节点之间的连接线
-     * @param {*} fromNd
-     * @param {*} toNd
+     * @param {*} fromNd 父节点
+     * @param {*} toNd   子节点
      * @param {*} ndStyles
      * @param {*} color
      */
@@ -279,6 +291,12 @@ class NewMindmapSvc {
         r2.right = r2.left + r2.width;
         r2.bottom = r2.top + r2.height;
 
+        //当父节点是根节点时，连接线的纵向位置应该是中间（其他节点会是底部）
+        if(0===fromNd.lev){
+            r1.height=parseInt(r1.height/2)+(nodePaddingTop/2);
+            r1.bottom=r1.top+r1.height;
+        }
+
 
         //左边r1 右边r2
         let reverseW = false;
@@ -297,6 +315,7 @@ class NewMindmapSvc {
         let line = {};
         let lineFrom = {};
         let lineTo = {};
+        let lineExp={};
 
         //连接线起始与末尾高度一样，不需要其中的两个div
         if (t1 === t2) {
@@ -327,8 +346,8 @@ class NewMindmapSvc {
         //左下右上
         if (t1 > t2) {
             let result = {};
-            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo, color, false, reverseW);
-            result[toNd.id] = { line, lineFrom, lineTo };
+            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, false, reverseW);
+            result[toNd.id] = { line, lineFrom, lineTo, lineExp };
             // console.log(result);
             return result;
         }
@@ -336,8 +355,8 @@ class NewMindmapSvc {
         //左上右下
         if (t1 < t2) {
             let result = {};
-            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo, color, true, reverseW);
-            result[toNd.id] = { line, lineFrom, lineTo };
+            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, true, reverseW);
+            result[toNd.id] = { line, lineFrom, lineTo, lineExp };
             // console.log(result);
             return result;
         }
@@ -348,28 +367,56 @@ class NewMindmapSvc {
     /**
      * 设置节点间连接的里面两个div的具体样式
      */
-    setLinePartsStyle = (w, h, lineFrom, lineTo, color, reverseV = false, reverseW = false) => {
+    setLinePartsStyle = (w, h, lineFrom, lineTo,lineExp, color, reverseV = false, reverseW = false) => {
         //两个div水平与垂直高度
-        let toW = parseInt(w * (reverseW ? fromXRatio : 1 - fromXRatio));
-        let fromW = w - toW + lineWid;//水平位置要重叠一部分（即连接的宽度）   
+        let toW = parseInt((w-lineExpDist) * (reverseW ? fromXRatio : 1 - fromXRatio));
+        let fromW = (w-lineExpDist) - toW + lineWid;//水平位置要重叠一部分（即连接的宽度）   
         let toH = parseInt(h * (reverseW ? fromYRatio : 1 - fromYRatio));
         let fromH = h - toH;
 
         //左下右上的顺序
         if (!reverseV) {
             lineFrom.top = toH + "px";
+            lineFrom.left=lineExpDist+"px";
             lineFrom.width = fromW + "px";
             lineFrom.height = fromH + "px";
             lineFrom.borderBottomRightRadius = `${fromW}px ${fromH}px`;
             lineFrom.borderBottom = `${lineWid}px solid ${color}`;
             lineFrom.borderRight = `${lineWid}px solid ${color}`;
 
-            lineTo.left = (fromW - lineWid) + "px";
+            lineTo.left = (lineExpDist+fromW - lineWid) + "px";
             lineTo.width = toW + "px";
             lineTo.height = toH + "px";
             lineTo.borderTopLeftRadius = `${toW}px ${toH}px`;
             lineTo.borderTop = `${lineWid}px solid ${color}`;
             lineTo.borderLeft = `${lineWid}px solid ${color}`;
+
+            //左父右子
+            if(!reverseW){
+                lineFrom.left=lineExpDist+"px";
+                lineTo.left = (lineExpDist+fromW - lineWid) + "px";
+
+                lineExp.top = (h-lineWid) + "px";
+                lineExp.left = 0 + "px";
+                lineExp.height = lineWid + "px";
+                lineExp.width=lineExpDist;
+                lineExp.borderBottom= `${lineWid}px solid ${color}`;
+
+                
+            }
+            //左子右父
+            else{
+                lineFrom.left="0px";
+                lineTo.left = (fromW - lineWid) + "px";
+
+
+                lineExp.top = 0 + "px";
+                lineExp.left = (w-lineExpDist) + "px";
+                lineExp.height = lineWid + "px";
+                lineExp.width=lineExpDist;
+                lineExp.borderBottom= `${lineWid}px solid ${color}`;
+            }
+
 
             return;
         }
@@ -388,6 +435,30 @@ class NewMindmapSvc {
         lineTo.borderBottomLeftRadius = `${toW}px ${toH}px`;
         lineTo.borderBottom = `${lineWid}px solid ${color}`;
         lineTo.borderLeft = `${lineWid}px solid ${color}`;
+
+        //左父右子
+        if(!reverseW){
+            lineFrom.left=lineExpDist+"px";
+            lineTo.left = (lineExpDist+fromW - lineWid) + "px";
+
+            lineExp.top = 0 + "px";
+            lineExp.left = 0 + "px";
+            lineExp.height = lineWid + "px";
+            lineExp.width=lineExpDist;
+            lineExp.borderBottom= `${lineWid}px solid ${color}`;
+        }
+        //左子右父
+        else{
+            lineFrom.left=0+"px";
+            lineTo.left = (fromW - lineWid) + "px";
+
+            lineExp.top = (h-lineWid) + "px";
+            lineExp.left = (w-lineExpDist) + "px";
+            lineExp.height = lineWid + "px";
+            lineExp.width=lineExpDist;
+            lineExp.borderBottom= `${lineWid}px solid ${color}`;
+                
+        }
     }
 
 
@@ -607,9 +678,13 @@ export const testLoadTree = (lines) => {
 
 // }
 
-
+const rootAdjustY=11;
+const nodePaddingTop=10;
+const containerMinW=800;
+const containerMinH=600;
 const lineWid = 1;//连接线宽度，与节点的下边框宽度一致
-const ndXDist = 30;//父子节点之间水平距离
+const ndXDist = 40;//30;//父子节点之间水平距离
+const lineExpDist=16;//父子节点之间水平距离中的留给折叠按钮的距离
 const fromXRatio = 0.3;//起始线水平占比
 const fromYRatio = 0.3;//终止线水平占比
 const graphPadding = 40;//图表内容与容器边缘之间的距离
