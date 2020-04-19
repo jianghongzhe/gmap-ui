@@ -32,7 +32,6 @@ class NewMindmap extends React.Component {
     componentDidUpdate(prevProps, prevState){
         //节点有变化才重新计算连线
         if(this.props.ds !==prevProps.ds && this.props.ds.tree && this.props.ds.list && this.props.ds.map){
-            console.log("开始计算");
             this.setState({
                 spinning:true,
             });
@@ -42,7 +41,7 @@ class NewMindmap extends React.Component {
 
     arrangeNdPositions=()=>{
         if(!this.props.ds){return;}
-        newMindmapSvc.loadStyles(this.props.ds, this.props.containerSize);
+        newMindmapSvc.loadStyles(this.props.ds);
         this.setState({
             ndStyles:       this.props.ds.ndStyles,
             lineStyles:     this.props.ds.lineStyles,
@@ -62,6 +61,7 @@ class NewMindmap extends React.Component {
     
 
     render() {
+        //校验
         if(!this.props.ds){
             return (<Row>
                 <Col span={8} offset={8}>
@@ -73,7 +73,6 @@ class NewMindmap extends React.Component {
                 </Col>
             </Row>);
         }
-
         if(false===this.props.ds.succ){
             return (<Row>
                 <Col span={8} offset={8}>
@@ -85,88 +84,106 @@ class NewMindmap extends React.Component {
                 </Col>
             </Row>);
         }
-
-
         if(!this.props.ds.list){
             return null;
         }
 
 
-
-        //如果提供了节点渲染器，则使用，否则使用默认的
+        //如果提供了节点渲染器或扩展按钮渲染器，则使用，否则使用默认的
         let actNdRenderer=this.defaultContentRenderer;
+        let actExpBtnRenderer=this.defaultExpBtnRenderer;
         if(this.props.ndContentRenderer){
             actNdRenderer=this.props.ndContentRenderer;
         }
-
-        //
-        let actExpBtnRenderer=this.defaultExpBtnRenderer;
         if(this.props.ndExpBtnRenderer){
             actExpBtnRenderer=this.props.ndExpBtnRenderer;
         }
 
-        // let spinSize=32;
-        // let spinLeft=(this.props.containerSize.w-spinSize)/2;//css={{marginTop:100,marginLeft:spinLeft,}}
-
         return (
-            // <Spin spinning={this.state.spinning} size='large' >
-            // <div  css={{width:this.props.containerSize.w,height:this.props.containerSize.h,border:'1px solid blue',overflow:'auto'}}>
-               
-            //borderBottom:'1px solid lightgray',//保留一个像素默认边框，动态计算位置后会覆盖该样式
+            <div css={{...wrapperStyle, ...this.state.wrapperStyle}} id='graphwrapper'>
+                {
+                    this.props.ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
+                        {/* 节点内容  css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}*/}
+                        <div className='item'  id={nd.id} style={getNdStyle({state:this.state, nd})}>
+                            {actNdRenderer(nd)}
+                        </div>
 
-                <div css={{...wrapperStyle, ...this.state.wrapperStyle}} id='graphwrapper'>
-                    {
-                        this.props.ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
-                            {/* 节点内容 */}
-                            <div className='item'  id={nd.id}
-                                    css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}
-                                    style={{ ...(nd.parid?{borderBottom:`1px solid ${nd.color}`}:{})  , ...getNdStyle(this.state,nd)}}>
-                                {actNdRenderer(nd)}
-                            </div>
+                        {/* 节点到父节点的连接线 */}
+                        {
+                            (nd.parid) && (<>
+                                <div className='linewrapper' id={`line_${nd.id}`} style={getLineStyle({state:this.state, nd, type:'line'})}>
+                                    <div className='lineExp' id={`lineExp_${nd.id}`} style={getLineStyle({state:this.state, nd, type:'lineExp'})}></div>
+                                    <div className='linefrom' id={`linefrom_${nd.id}`} style={getLineStyle({state:this.state, nd, type:'lineFrom'})}></div>
+                                    <div className='lineto' id={`lineto_${nd.id}`} style={getLineStyle({state:this.state, nd, type:'lineTo'})}></div>
+                                </div>
+                            </>)
+                        }
 
-                            
-
-                            {/* 节点到父节点的连接线 */}
-                            {
-                                (nd.parid) && (<>
-                                    <div className='linewrapper' id={`line_${nd.id}`} style={
-                                        (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].line) ? this.state.lineStyles[nd.id].line : {}
-                                    }>
-                                        <div className='lineExp' id={`lineExp_${nd.id}`} style={
-                                            (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineExp) ? this.state.lineStyles[nd.id].lineExp : {}
-                                        }></div>
-                                        <div className='linefrom' id={`linefrom_${nd.id}`} style={
-                                            (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineFrom) ? this.state.lineStyles[nd.id].lineFrom : {}
-                                        }></div>
-                                        <div className='lineto' id={`lineto_${nd.id}`} style={
-                                            (this.state.lineStyles && this.state.lineStyles[nd.id] && this.state.lineStyles[nd.id].lineTo) ? this.state.lineStyles[nd.id].lineTo : {}
-                                        }></div>
-                                    </div>
-                                </>)
-                            }
-
-                            {/* 节点的展开按钮 */}
-                            {
-                                (nd.childs && 0<nd.childs.length) && 
-                                    <div id={`expbtn_${nd.id}`} className='expBtn' style={
-                                        (this.state.expBtnStyles && this.state.expBtnStyles[nd.id]) ? this.state.expBtnStyles[nd.id] : {}
-                                    }>
-                                        {actExpBtnRenderer(nd)}
-                                    </div>
-                            }
-                        </React.Fragment>))
-                    }
-                </div>
-            // </div>
-            // </Spin>
+                        {/* 节点的展开按钮 */}
+                        {
+                            (nd.childs && 0<nd.childs.length) && 
+                                <div id={`expbtn_${nd.id}`} className='expBtn' style={getExpBtnStyle({state:this.state, nd})}>
+                                    {actExpBtnRenderer(nd)}
+                                </div>
+                        }
+                    </React.Fragment>))
+                }
+            </div>
         );
     }
 }
 
+const getExpBtnStyle=createSelector(
+    json=>json.state,
+    json=>json.nd,
+    (state,nd)=>(
+        (nd && state.expBtnStyles && state.expBtnStyles[nd.id]) ? state.expBtnStyles[nd.id] : {}
+    )
+);
 
-const getNdStyle=(state,nd)=>{
-    return (nd && state.ndStyles && state.ndStyles[nd.id]) ? state.ndStyles[nd.id]: {};
+const getLineStyle=createSelector(
+    json=>json.state,
+    json=>json.nd,
+    json=>json.type,
+    (state,nd,type)=>(
+        (nd && state.lineStyles && state.lineStyles[nd.id] && state.lineStyles[nd.id][type]) ? 
+            state.lineStyles[nd.id][type] 
+                : 
+            {}
+    )
+);
+
+const getNdBorderStyle=(nd)=>{
+    if(!nd){
+        return {};
+    }
+
+    //根节点不设置边框，其样式由render props自己设置
+    if(0===nd.lev){
+        return {};
+    }
+    //二级节点使用四周的边框
+    if(1===nd.lev){
+        return {
+            borderRadius: 5,
+            border:`1px solid ${nd.color}`
+        };
+    }
+    //其他节点使用下边框
+    return {borderBottom:`1px solid ${nd.color}`};
 }
+
+const getNdStyle=createSelector(
+    json=>json.state,
+    json=>json.nd,
+    (state,nd)=>{
+        let borderStyle=getNdBorderStyle(nd);
+        let positionStyle=((nd && state.ndStyles && state.ndStyles[nd.id]) ? state.ndStyles[nd.id]: {});
+        return {...borderStyle, ...positionStyle};
+    }
+);
+
+
 
 const outOfViewStyle={
     left:'-800px',
@@ -194,7 +211,8 @@ const wrapperStyle={
         display:'inline-block',
         border:'0px solid green',
         paddingBottom:0,
-        paddingTop:10,
+        // paddingTop:10,
+        paddingTop:0,
         // paddingLeft:20,
         // paddingRight:20,
         verticalAlign: 'bottom',

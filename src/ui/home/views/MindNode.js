@@ -236,7 +236,7 @@ const centerThemeStyle =createSelector(
         let baseStyle= {
             ...baseThemeStyle,
             fontSize: 18,
-            borderRadius: 5,
+            borderRadius: 10,
             paddingLeft:6,
             paddingRight:6,
             paddingBottom:10,
@@ -275,6 +275,10 @@ const secendThemeStyle = {
     ...baseThemeStyle,
     fontSize: 16,
     lineHeight: '20px',
+    paddingBottom:5,
+    paddingTop:5,
+    paddingLeft:5,
+    paddingRight:5,
     
     '& .themename': {
         ...baseThemeNameStyle,
@@ -285,6 +289,8 @@ const otherThemeStyle = {
     ...baseThemeStyle,
     fontSize: 14,
     lineHeight: '18px',
+    paddingLeft:2,
+    paddingRight:2,
     
     '& .themename': {
         ...baseThemeNameStyle,
