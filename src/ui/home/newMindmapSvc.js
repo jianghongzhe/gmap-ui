@@ -386,22 +386,46 @@ class NewMindmapSvc {
         let toH = parseInt(h * (reverseW ? fromYRatio : 1 - fromYRatio));
         let fromH = h - toH;
 
+        let hasTrivialH=false;
+        if(0===toH){
+            toH+=lineWid;
+            fromH-=lineWid;
+            hasTrivialH=true;
+        }
+        if(0===fromH){
+            fromH+=lineWid;
+            toH-=lineWid;
+            hasTrivialH=true;
+        }
+
+        // if(2===h){
+        //     console.log("到这个节点了",w,h,fromW,toW,fromH,toH);
+            
+
+        // }
+
         //左下右上的顺序
         if (!reverseV) {
             lineFrom.top = toH + "px";
             lineFrom.left=lineExpDist+"px";
             lineFrom.width = fromW + "px";
             lineFrom.height = fromH + "px";
-            lineFrom.borderBottomRightRadius = `${fromW}px ${fromH}px`;
+            if(!hasTrivialH){
+                lineFrom.borderBottomRightRadius = `${fromW}px ${fromH}px`;
+                lineFrom.borderRight = `${lineWid}px solid ${color}`;
+            }
             lineFrom.borderBottom = `${lineWid}px solid ${color}`;
-            lineFrom.borderRight = `${lineWid}px solid ${color}`;
+            
 
             lineTo.left = (lineExpDist+fromW - lineWid) + "px";
             lineTo.width = toW + "px";
             lineTo.height = toH + "px";
-            lineTo.borderTopLeftRadius = `${toW}px ${toH}px`;
+            if(!hasTrivialH){
+                lineTo.borderTopLeftRadius = `${toW}px ${toH}px`;
+                lineTo.borderLeft = `${lineWid}px solid ${color}`;
+            }
             lineTo.borderTop = `${lineWid}px solid ${color}`;
-            lineTo.borderLeft = `${lineWid}px solid ${color}`;
+            
 
             //左父右子
             if(!reverseW){
@@ -433,17 +457,23 @@ class NewMindmapSvc {
         //左上右下的顺序
         lineFrom.width = fromW + "px";
         lineFrom.height = fromH + "px";
-        lineFrom.borderTopRightRadius = `${fromW}px ${fromH}px`;
+        if(!hasTrivialH){
+            lineFrom.borderTopRightRadius = `${fromW}px ${fromH}px`;
+            lineFrom.borderRight = `${lineWid}px solid ${color}`;
+        }
         lineFrom.borderTop = `${lineWid}px solid ${color}`;
-        lineFrom.borderRight = `${lineWid}px solid ${color}`;
+        
 
         lineTo.left = (fromW - lineWid) + "px";
         lineTo.top = fromH + "px";
         lineTo.width = toW + "px";
         lineTo.height = toH + "px";
-        lineTo.borderBottomLeftRadius = `${toW}px ${toH}px`;
+        if(!hasTrivialH){
+            lineTo.borderBottomLeftRadius = `${toW}px ${toH}px`;
+            lineTo.borderLeft = `${lineWid}px solid ${color}`;
+        }
         lineTo.borderBottom = `${lineWid}px solid ${color}`;
-        lineTo.borderLeft = `${lineWid}px solid ${color}`;
+        
 
         //左父右子
         if(!reverseW){

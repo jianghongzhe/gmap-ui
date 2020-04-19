@@ -1,11 +1,12 @@
-- one
-	- sss|222
-		- ss
-			- 第一点。。。。
-				- ff
-				- qq
-			- b
-			- c
-	- dd
-		- q
-	- bb
+- 内存分类
+	- 线程隔离
+		- 程序计数器|zip:
+		- 虚拟机栈
+			- 栈帧|zip:
+		- 本地方法栈|zip:
+	- 线程共享
+	- 直接内存
+		- NIO调用Native函数
+			- 堆中DirectByteBuffer引用直接内存
+		- 异常情况
+			- OOM
