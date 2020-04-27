@@ -28,6 +28,7 @@ import newMindmapSvc from './newMindmapSvc';
 import mindMapValidateSvc from './mindMapValidateSvc';
 import * as uiUtil from '../../common/uiUtil';
 import MarkedHighlightUtil from '../../common/MarkedHighlightUtil';
+import {connect} from '../../common/gflow';
 
 import api from '../api';
 
@@ -143,6 +144,7 @@ class MapsViewer extends React.Component {
     }
 
     handleResize = () => {
+        console.log("resize...");
         this.setState({
             clientH: document.documentElement.clientHeight,
             clientW: document.documentElement.clientWidth,
@@ -617,9 +619,6 @@ class MapsViewer extends React.Component {
 
                 <GantDlg
                     visible={this.state.gantdlgVisible}
-                    maxH={this.state.clientH - 250}
-                    maxW={this.state.clientW - 200}
-                    winW={this.state.clientW}
                     ds={this.state.ds}
                     colKeys={this.state.colKeys}
                     arrows={this.state.relas}
@@ -823,6 +822,10 @@ const otherThemeStyle = {
 
 const themeStyles = [centerThemeStyle, secendThemeStyle, otherThemeStyle];
 
+const mapState=()=>({
+
+});
 
 
-export default MapsViewer;
+export default connect(mapState)(MapsViewer);
+
