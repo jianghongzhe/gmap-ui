@@ -29,7 +29,7 @@ const model={
         resize:({dispatcher})=>{
             window.addEventListener("resize",()=>{
                 dispatcher.loadWinSize(null);
-                dispatcher.refreshResizeSymbol(null);console.log("model resize");
+                dispatcher.refreshResizeSymbol(null);
             });
         },
         init:({dispatcher})=>{

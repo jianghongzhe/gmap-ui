@@ -4,6 +4,7 @@ import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
 import PathSelect from './PathSelect';
 import {withEnh} from '../../common/specialDlg';
+import {connect} from '../../../common/gflow';
 
 const EnhDlg=withEnh(Modal);
 
@@ -33,7 +34,7 @@ class OpenGraphDlg extends React.Component {
                     onCancel={this.props.onCancel}>
 
                 <PathSelect 
-                    maxH={this.props.itemsH}
+                    maxH={this.props.winH- 64 - 250}
                     forceMaxH={true}
                     backtopLoc={pathselectBacktopLoc}
                     dirs={this.props.dirs} 
@@ -46,4 +47,7 @@ class OpenGraphDlg extends React.Component {
     }
 }
 
-export default OpenGraphDlg;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(OpenGraphDlg);

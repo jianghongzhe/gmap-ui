@@ -15,6 +15,9 @@ class GflowUtil{
         }
         return currModel+"/"+type;
     };
+    joinModNameAndActionType=(modName,actionType)=>{
+        return modName+"/"+actionType;
+    }
 };
 
 export default new GflowUtil();

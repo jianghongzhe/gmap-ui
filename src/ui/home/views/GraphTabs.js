@@ -6,6 +6,7 @@ import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOu
 import Mindmap from './Mindmap';
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
+import {connect} from '../../../common/gflow';
 
 const { TabPane } = Tabs;
 
@@ -62,13 +63,13 @@ class GraphTabs extends React.Component {
                     hideAdd={true}
                     type="editable-card"
                     activeKey={this.props.activeKey}
-                    css={{ height:this.props.containerH, 'backgroundColor': 'white' }}
+                    css={{ height:this.props.winH-64, 'backgroundColor': 'white' }}
                     onChange={this.props.onChangeTab}
                     onEdit={this.props.onEditTab}>
                     {
                         this.props.panes.map(pane => (
                             <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                <div css={getTabItemContainerStyle(this.props.contentH)}>
+                                <div css={getTabItemContainerStyle(this.props.winH- 64 - 55)}>
                                     <NewMindmap
                                         ds={pane.ds}
                                         ndContentRenderer={this.ndContentRenderer}
@@ -124,4 +125,7 @@ const getTabItemContainerStyle=(h)=>({
     paddingBottom:'30px'
 });
 
-export default GraphTabs;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(GraphTabs);

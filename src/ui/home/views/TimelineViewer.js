@@ -4,6 +4,7 @@ import React from 'react';
 import {  Modal, Timeline } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
+import {connect} from '../../../common/gflow';
 
 const EnhDlg=withEnh(Modal);
 
@@ -18,7 +19,7 @@ class TimelineViewer extends React.Component {
         return (
             <EnhDlg noFooter
                     title="查看时间线"
-                    size={{w:dlgW, h:this.props.bodyH}}
+                    size={{w:dlgW, h:this.props.winH-300}}
                     visible={this.props.visible}
                     maskClosable={true}              
                     onCancel={this.props.onCancel}>
@@ -39,4 +40,7 @@ class TimelineViewer extends React.Component {
     }
 }
 
-export default TimelineViewer;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(TimelineViewer);

@@ -4,6 +4,7 @@ import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
 import { VerticalAlignTopOutlined, BulbFilled } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
+import {connect} from '../../../common/gflow';
 
 const EnhDlg=withEnh(Modal);
 
@@ -22,7 +23,7 @@ class RefViewer extends React.Component {
         return (
             <EnhDlg noFooter
                     title={"查看引用 - " + this.props.refname}
-                    size={{w:this.props.dlgW, h:this.props.bodyH, fixh:true, wrapperId:this.wrapperId}}                
+                    size={{w:this.props.winW-200, h:this.props.winH-300, fixh:true, wrapperId:this.wrapperId}}                
                     visible={this.props.visible}
                     maskClosable={true}               
                     onCancel={this.props.onCancel}>
@@ -35,8 +36,8 @@ class RefViewer extends React.Component {
                 {
                     (this.props.backtopLoc && 2===this.props.backtopLoc.length) && (   
                         <BackTop  target={this.getScrollTarget} css={{
-                            right:this.props.backtopLoc[0],
-                            bottom:this.props.backtopLoc[1],
+                            right:200,
+                            bottom:170,
                             ...backtopColorStyle
                         }}/>
                     )
@@ -57,4 +58,7 @@ const backtopColorStyle={
     },
 }
 
-export default RefViewer;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(RefViewer);

@@ -34,6 +34,7 @@ import editorSvc from '../editorSvc';
 import * as uiUtil from '../../../common/uiUtil';
 import api from '../../api';
 import {withEnh} from '../../common/specialDlg';
+import {connect} from '../../../common/gflow';
 
 const EnhDlg=withEnh(Modal);
 
@@ -302,7 +303,7 @@ class EditGraphDlg extends React.Component {
             <>
                 <EnhDlg
                         title={"编辑图表 - " + this.props.currMapName}
-                        size={{w:this.props.dlgW}}
+                        size={{w:this.props.winW-200}}
                         maskClosable={false}
                         visible={this.props.visible}
                         footer={[
@@ -329,7 +330,7 @@ class EditGraphDlg extends React.Component {
                             <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={this.showHelpPicDlg} />
                         </div>
                         <CodeMirror
-                            css={getCodeEditorStyle(this.props.editorH)}
+                            css={getCodeEditorStyle(this.props.winH-400)}
                             editorDidMount={this.bindCodeMirrorInst}
                             value={this.props.editTmpTxt}
                             options={{
@@ -379,7 +380,7 @@ class EditGraphDlg extends React.Component {
                 <EnhDlg noTitle noFooter closable={false}
                         size={{w:colorDlgW}}
                         css={{
-                            left: colorDlgAdjustX - (this.props.dlgW - colorDlgW) / 2,
+                            left: colorDlgAdjustX - (this.props.winW-200 - colorDlgW) / 2,
                             top: colorDlgY,
                         }}
                         visible={this.state.colorPickerVisible}
@@ -390,7 +391,7 @@ class EditGraphDlg extends React.Component {
 
                 {/* 帮助对话框 */}
                 <HelpDlg
-                    maxBodyH={this.props.editorH+80}
+                    maxBodyH={this.props.winH-400+80}
                     visible={this.state.helpDlgVisible}
                     onCancel={this.hideAllDlg}/>
 
@@ -484,4 +485,7 @@ const getEditDlgColorBoxStyle = (color) => ({
 
 
 
-export default EditGraphDlg;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(EditGraphDlg);

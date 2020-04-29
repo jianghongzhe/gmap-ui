@@ -61,9 +61,6 @@ class MapsViewer extends React.Component {
         super(...arguments);
 
         this.state = {
-            //样式相关
-            clientH: document.documentElement.clientHeight,
-            clientW: document.documentElement.clientWidth,
 
             //选项卡
             activeKey: null,// panes[0].key,
@@ -92,7 +89,6 @@ class MapsViewer extends React.Component {
 
             //
             gantdlgVisible: false,
-            layoutArrows: Symbol(),
             ds: [],
             colKeys: [],
             relas: [],
@@ -108,7 +104,6 @@ class MapsViewer extends React.Component {
 
     componentDidMount() {
         document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
-        window.addEventListener("resize", this.handleResize);
 
         //初始化marked与hljs
         markedHighlightUtil.init(marked, hljs, {
@@ -139,18 +134,9 @@ class MapsViewer extends React.Component {
 
 
 
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.handleResize)
-    }
+    
 
-    handleResize = () => {
-        console.log("resize...");
-        this.setState({
-            clientH: document.documentElement.clientHeight,
-            clientW: document.documentElement.clientWidth,
-            layoutArrows: Symbol(),
-        });
-    }
+    
 
     componentDidUpdate(prevProps, prevState) {
         setTimeout(() => {
@@ -477,7 +463,6 @@ class MapsViewer extends React.Component {
             ds: gantObj.data,
             colKeys: gantObj.colKeys,
             relas: gantObj.relas,
-            layoutArrows: Symbol(),
         });
 
         // console.log(gantObj);
@@ -523,8 +508,6 @@ class MapsViewer extends React.Component {
                                 />
                                 <GraphTabs
                                     activeKey={this.state.activeKey}
-                                    containerH={this.state.clientH - 64}
-                                    contentH={this.state.clientH - 64 - 55}
                                     panes={this.state.panes}
                                     loading={this.state.loading}
                                     onChangeTab={this.onChangeTab}
@@ -541,8 +524,7 @@ class MapsViewer extends React.Component {
                             :
 
                             <Content>
-                                <Welcome maxH={this.state.clientH - 160}
-                                    winW={this.state.clientW}
+                                <Welcome 
                                     dirs={this.state.dirs}
                                     filelist={this.state.filelist}
                                     onOpenMapsDir={api.openMapsDir}
@@ -569,9 +551,6 @@ class MapsViewer extends React.Component {
                     visible={this.state.editMapDlgVisible}
                     currMapName={this.state.currMapName}
                     activeKey={this.state.activeKey}
-                    dlgW={this.state.clientW - 200}
-                    winW={this.state.clientW}
-                    editorH={this.state.clientH - 350 - 50}
                     editTmpTxt={this.state.editTmpTxt}
                     onOnlySave={this.onEditMapDlgOK.bind(this, false)}
                     onOk={this.onEditMapDlgOK.bind(this, true)}
@@ -581,8 +560,6 @@ class MapsViewer extends React.Component {
 
                 <OpenGraphDlg
                     visible={this.state.selMapDlgVisible}
-                    itemsH={(this.state.clientH - 64 - 250)}
-                    winW={this.state.clientW}
                     dirs={this.state.dirs}
                     filelist={this.state.filelist}
                     onCancel={this.closeAllDlg}
@@ -594,9 +571,6 @@ class MapsViewer extends React.Component {
                 <RefViewer
                     refname={this.state.currRefObj.showname}
                     refCont={this.state.currRefObj.parsedTxt}
-                    dlgW={this.state.clientW - 200}
-                    bodyH={this.state.clientH - 300}
-                    backtopLoc={[100 + 100, 170]}
                     visible={this.state.refViewerDlgVisible}
                     onCancel={this.closeAllDlg}
                 />
@@ -604,16 +578,12 @@ class MapsViewer extends React.Component {
                 <TimelineViewer
                     visible={this.state.timelineDlgVisible}
                     timelineObj={this.state.timelineObj}
-                    bodyH={this.state.clientH - 300}
-                    winW={this.state.clientW}
                     onCancel={this.closeAllDlg}
                 />
 
                 <ProgsViewer
                     visible={this.state.progsDlgVisible}
                     progsObj={this.state.progsObj}
-                    bodyH={this.state.clientH - 300}
-                    winW={this.state.clientW}
                     onCancel={this.closeAllDlg}
                 />
 

@@ -72,7 +72,9 @@ class Gflow{
         const baseEffectParam={
             ...sagaEffects,                 //redux-saga自带的副作用
             gcreater:scope.actionCreater,   //全局creater
-            creater:scope.actionCreater[ns] //当前模块的creater
+            creater:scope.actionCreater[ns],//当前模块的creater
+            ns: ns,
+            sel:defSelectCrrrModelState.bind(this,ns),
         };
         
         //循环每个副作用函数，并加入列表
@@ -272,7 +274,7 @@ class Gflow{
      *      extraMiddlewares:    [mw1, mw2, ...] //可选：其他中间传的数组
      * }
      */
-    run=({rootEle, domSelector, models, extraMiddlewares})=>{
+    run=({rootEle, domSelector, models, extraMiddlewares=[],strict=false})=>{
         //校验
         ++this.runTimes;
         if(1<this.runTimes){
@@ -289,7 +291,9 @@ class Gflow{
         ReactDOM.render( 
             <Provider store={this.store}>
                 <EventWrapperComponent subscriptionEvents={this.subscriptionFuns}>
-                    {rootEle}
+                    {
+                        true===strict ? <React.StrictMode>rootEle}</React.StrictMode> : <>{rootEle}</>
+                    }
                 </EventWrapperComponent>
             </Provider>, 
             document.querySelector(domSelector?domSelector:"#root")
@@ -343,7 +347,7 @@ class EventWrapperComponent extends React.Component{
 
 const defActionCreater=(ns,key,payload)=>({type: ns+"/"+key,payload});
 const defActionDispatcher=(store,ns,key,payload)=>(store.dispatch(defActionCreater(ns,key,payload)));
-
+const defSelectCrrrModelState=(ns)=>sagaEffects.select(state=>state[ns]);
 
 const DEFAULT_NAMESPACE="def";
 
@@ -353,3 +357,4 @@ export default {run: inst.run};//程序入口
 export const dispatcher=inst.actionDispatcher;//action dispatcher，一般在容器组件里用
 export const creater=inst.actionCreater;//action creater，一般在saga里用
 export const connect=inst.connect;//对react-redux的connect方法的包装
+export const join=gflowUtil.joinModNameAndActionType;

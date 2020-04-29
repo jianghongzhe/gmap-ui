@@ -4,6 +4,7 @@ import React from 'react';
 import { Modal, Timeline, Table,Progress,Tooltip } from 'antd';
 import {createSelector} from 'reselect';
 import {withEnh} from '../../common/specialDlg';
+import {connect} from '../../../common/gflow';
 
 const EnhDlg=withEnh(Modal);
 
@@ -28,7 +29,7 @@ class ProgsViewer extends React.Component {
                     dataSource={parseDataSource(this.props)} 
                     columns={columns} 
                     size='small' 
-                    scroll={{ y: this.props.bodyH }} />
+                    scroll={{ y: this.props.winH-300 }} />
             </EnhDlg>
         );
     }
@@ -73,4 +74,7 @@ const columns = [
     },
 ];
 
-export default ProgsViewer;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(ProgsViewer);

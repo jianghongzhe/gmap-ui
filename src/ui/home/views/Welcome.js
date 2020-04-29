@@ -8,6 +8,7 @@ import PathSelect from './PathSelect';
 import logourl from '../../../assets/logo.jpg';
 import { createSelector } from 'reselect';
 import api from '../../api';
+import {connect} from '../../../common/gflow';
 
 class Welcome extends React.Component {
     constructor(props) {
@@ -29,7 +30,7 @@ class Welcome extends React.Component {
                     }}>
                         <Col span={14} >
                             <PathSelect 
-                                maxH={this.props.maxH}
+                                maxH={this.props.winH-160}
                                 backtopLoc={[fileselectRight,120]}
                                 dirs={this.props.dirs} 
                                 filelist={this.props.filelist}
@@ -89,4 +90,7 @@ const logoWrapperStyle={
 
 
 
-export default Welcome;
+export default connect((state)=>({
+    winW:state.common.winW,
+    winH:state.common.winH,
+}))(Welcome);
