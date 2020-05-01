@@ -486,6 +486,7 @@ const getEditDlgColorBoxStyle = (color) => ({
 
 
 export default connect((state)=>({
-    winW:state.common.winW,
-    winH:state.common.winH,
+    winW:       state.common.winW,
+    winH:       state.common.winH,
+    activeKey:  state.tabs.activeKey,
 }))(EditGraphDlg);

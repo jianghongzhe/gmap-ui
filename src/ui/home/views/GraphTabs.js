@@ -3,10 +3,12 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
+import {createSelector} from 'reselect';
 import Mindmap from './Mindmap';
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
 import {connect} from '../../../common/gflow';
+import newMindmapSvc from '../../../service/newMindmapSvc';
 
 const { TabPane } = Tabs;
 
@@ -48,9 +50,15 @@ class GraphTabs extends React.Component {
                             :
                         <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
                 }  
-                onClick={this.props.onToggleExpand.bind(this,nd)}/>
+                onClick={this.props.dispatcher.tabs.toggleExpand.bind(this,nd)}/>
         );
     }
+
+    onEditTab = (targetKey, action) => {
+        if ("remove" === action) {
+            this.props.dispatcher.tabs.removeTab(targetKey);
+        }
+    };
 
     
 
@@ -64,8 +72,8 @@ class GraphTabs extends React.Component {
                     type="editable-card"
                     activeKey={this.props.activeKey}
                     css={{ height:this.props.winH-64, 'backgroundColor': 'white' }}
-                    onChange={this.props.onChangeTab}
-                    onEdit={this.props.onEditTab}>
+                    onChange={this.props.dispatcher.tabs.changeActiveKey}
+                    onEdit={this.onEditTab}>
                     {
                         this.props.panes.map(pane => (
                             <TabPane tab={pane.title} key={pane.key} closable={true}>
@@ -92,6 +100,10 @@ class GraphTabs extends React.Component {
         );
     }
 }
+
+
+
+
 
 const styles={
     expbtn:{
@@ -126,6 +138,8 @@ const getTabItemContainerStyle=(h)=>({
 });
 
 export default connect((state)=>({
-    winW:state.common.winW,
-    winH:state.common.winH,
+    winW:       state.common.winW,
+    winH:       state.common.winH,
+    activeKey:  state.tabs.activeKey,
+    panes:      state.tabs.panes,
 }))(GraphTabs);

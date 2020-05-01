@@ -63,8 +63,6 @@ class MapsViewer extends React.Component {
         this.state = {
 
             //选项卡
-            activeKey: null,// panes[0].key,
-            panes: [],
             loading: false,
 
             //编辑图表相关
@@ -84,18 +82,14 @@ class MapsViewer extends React.Component {
 
             //文件选项相关
             selMapDlgVisible: false,
-            filelist: [],
-            dirs: [],
+            
 
             //
             gantdlgVisible: false,
-            ds: [],
-            colKeys: [],
-            relas: [],
+            gantObj:null,
         };
 
-        this.mdLinkCls = "gmap_mk_link_" + new Date().getTime();
-        this.mdImgCls = "gmap_mk_img_" + new Date().getTime();
+        
 
     }
 
@@ -121,15 +115,13 @@ class MapsViewer extends React.Component {
             imgConfig: {
                 convertUrl: (oldurl) => {
                     if (!(oldurl.startsWith("./") || oldurl.startsWith("../"))) { return oldurl; }//跳过不是本地相对路径的
-                    return api.calcPicUrl(this.state.activeKey, oldurl);
+                    return api.calcPicUrl(this.props.activeKey, oldurl);
                 }
             }
         });
 
-        this.setState({
-            filelist: api.list(),
-            dirs: api.getPathItems(),
-        });
+        
+        this.props.dispatcher.filesel.load();
     }
 
 
@@ -163,46 +155,9 @@ class MapsViewer extends React.Component {
 
 
 
-    //------------选项卡操作----------------------------------------------------------------------
-    onChangeTab = (activeKey) => {
-        this.setState({ activeKey });
-    };
 
-    onEditTab = (targetKey, action) => {
-        if ("remove" === action) {
-            this.removeTab(targetKey);
-        }
-    };
+    
 
-    removeTab = (targetKey) => {
-        let { activeKey } = this.state;
-
-        //计算要删除的选项卡前一位置
-        let lastIndex = -1;
-        this.state.panes.forEach((pane, i) => {
-            if (pane.key === targetKey) {
-                lastIndex = i - 1;
-            }
-        });
-
-        //要删除以外的选项卡集合
-        const panes = this.state.panes.filter(pane => pane.key !== targetKey);
-
-        //要删除的是唯一一个选项卡
-        if (0 === panes.length) {
-            activeKey = null;
-        }
-        //要删除的项之外还有别的选项卡，并且要删除的是当前活动的选项卡
-        else if (activeKey === targetKey) {
-            activeKey = panes[lastIndex >= 0 ? lastIndex : 0].key;
-        }
-        //要删除的项之外还有别的选项卡，并且要删除的不是当前活动的选项卡，则不影响activeKey（即不需要改变）
-        else {
-            //activeKey不变
-        }
-
-        this.setState({ panes, activeKey });
-    };
 
 
 
@@ -215,113 +170,43 @@ class MapsViewer extends React.Component {
     }
 
 
-    onNewMapDlgOK = () => {
-        //验证名称为空和文件是否存在
-        let name = this.state.newMapName.trim();
-        if ('' === name) {
-            message.warning('请输入图表名称');
-            return;
+    onNewMapDlgOK = async () => {
+        try {
+            let name = this.state.newMapName.trim();
+            await this.props.dispatcher.tabs.onNewMapPromise(name);
+            this.setState({newMapDlgVisible: false,});
+        } catch (error) {
+            
         }
-        let reg = /^[^ 　\\/\t\b\r\n]+([/][^ 　\\/\t\b\r\n]+)*$/;
-        if (!reg.test(name)) {
-            message.warning('图表名称格式有误，请更换另一名称');
-            return;
-        }
-        let fnAndFullpath = api.existsGraph(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
-        if (true === fnAndFullpath) {
-            message.warning('该图表名称已存在，请更换另一名称');
-            return;
-        }
-        let [fn, themeName, fullpath] = fnAndFullpath;
-
-        //保存文件
-        let defMapTxt = getDefMapTxt(themeName);
-        let ret = api.save(fullpath, defMapTxt);
-        if (ret && false === ret.succ) {
-            message.error(ret.msg);
-            return;
-        }
-
-        //计算导图表格信息并加入新tab      
-        // let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-        let rootNd=mindmapSvc.parseRootNode(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-        let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
-
-        let tabdata = this.state.panes;
-        tabdata.push({
-            title: fn,
-            key: fullpath,
-            mapTxts: defMapTxt,
-            ds: ndsSet,
-        });
-
-        //保存状态
-        this.setState({
-            panes: [...tabdata],
-            activeKey: fullpath,
-            newMapDlgVisible: false,
-            filelist: api.list(selectCurrDir(this.state))  //新建后应该重新加载文件列表
-        });
     }
 
 
     //------------修改导图----------------------------------------------------------------------
-    onShowEditMapDlg = () => {
-        let item = this.state.panes.filter(pane => pane.key === this.state.activeKey);
-        if (null == item || 0 === item.length) {
-            return;
+    onShowEditMapDlg =async () => {
+        try {
+            let currPane=await this.props.dispatcher.tabs.selectCurrPanePromise();
+            this.setState({
+                editMapDlgVisible: true,
+                editTmpTxt: currPane.mapTxts,
+                currMapName: currPane.title
+            });
+        } catch (error) {
         }
-        this.setState({
-            editMapDlgVisible: true,
-            editTmpTxt: item[0].mapTxts,
-            currMapName: item[0].title
-        });
     }
-
-
 
     onChangeEditTmpTxt = (editor, data, value) => {
         this.setState({ editTmpTxt: value });
     }
 
-
-
-    onEditMapDlgOK = (closeDlg = true) => {
-        //校验
-        let txt = this.state.editTmpTxt;
-        let valiResult = mindMapValidateSvc.validate(txt);
-        if (true !== valiResult) {
-            message.warning(valiResult);
-            return;
-        }
-
-        //
-        let item = this.state.panes.filter(pane => pane.key === this.state.activeKey);
-        if (null == item || 0 === item.length) {
-            return;
-        }
-
-        //保存并修改状态
-        let ret = api.save(this.state.activeKey, txt);
-        if (ret && false === ret.succ) {
-            message.error(ret.msg);
-            return;
-        }
-
-        item = item[0]
-        // let cells = mindmapSvc.parseMindMapData(txt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
-        let rootNd=mindmapSvc.parseRootNode(txt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
-        let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
-
-        item.mapTxts = txt;
-        item.ds = ndsSet;
-        this.setState({
-            panes: [...this.state.panes],
-            editMapDlgVisible: !closeDlg
-        });
-
-        if (!closeDlg) {
-            message.success("图表内容已保存");
+    onEditMapDlgOK =async (closeDlg = true) => {
+        try {
+            let txt = this.state.editTmpTxt;
+            await this.props.dispatcher.tabs.onSaveMapPromise(txt);
+            this.setState({editMapDlgVisible: !closeDlg});
+            if (!closeDlg) {
+                message.success("图表内容已保存");
+            }
+        } catch (error) {
         }
     }
 
@@ -329,60 +214,13 @@ class MapsViewer extends React.Component {
 
 
     //------------选择文件功能----------------------------------------------------------------------
-    onSelectMapItem = (item) => {
-        //如果点击了目录，则显示目录下的内容
-        if (!item.isfile) {
-            this.setState({
-                filelist: api.list(item.fullpath),
-                dirs: api.getPathItems(item.fullpath),
-            });
-            return;
+    onSelectMapItem =async (item) => {
+        try{
+            await this.props.dispatcher.tabs.onSelItemPromise(item);
+            this.setState({selMapDlgVisible: false});
+        }catch(e){
+
         }
-
-        //如果选项卡中已经有该项，则激活该tab
-        if (this.state.panes.some(pane => pane.key === item.fullpath)) {
-            this.setState({
-                activeKey: item.fullpath,
-                selMapDlgVisible: false
-            });
-            return;
-        }
-
-        //加载文件内容并计算导图表格的数据
-        let origintxts = api.load(item.fullpath);
-        if (origintxts && false === origintxts.succ) {
-            message.error(origintxts.msg);
-            return;
-        }
-
-
-        //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-        let rootNd=mindmapSvc.parseRootNode(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-        let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
-
-        
-
-        //增加新选项卡并设置状态
-        let tabdata = this.state.panes;
-        tabdata.push({
-            title: item.itemsName,// item.showname,
-            key: item.fullpath,
-            mapTxts: origintxts,
-            //mapCells: cells,
-            ds: ndsSet,
-        });
-        this.setState({
-            panes: [...tabdata],
-            activeKey: item.fullpath,
-            selMapDlgVisible: false
-        });
-    }
-
-    loadDir = (dir) => {
-        this.setState({
-            filelist: api.list(dir),
-            dirs: api.getPathItems(dir),
-        });
     }
 
     showSelMapDlg = () => {
@@ -396,46 +234,10 @@ class MapsViewer extends React.Component {
 
 
     //------------导图的操作----------------------------------------------------------------------
-    /**
-     * 导图上切换展开状态
-     * @param {key}  当前激活的选项卡的key，也即为文件全路径
-     * @param {cell} 切换展开状态的当前格数据
-     */
-    toggleExpand = (nd) => {
-        this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key).forEach(eachPane => {
-            //eachPane.mapCells = mindmapSvc.toggleExpandNode(cell, cells);
-            eachPane.ds=newMindmapSvc.toggleExp(eachPane.ds,nd);
-        });
-        this.setState({
-            panes: [...this.state.panes]
-        });
-    }
-
     openLink = (url) => {
         api.openUrl(url);
     }
 
-    expandAll = () => {
-        let currPane = this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
-        if (currPane && 0 < currPane.length) {
-            //currPane.forEach(eachPane => { eachPane.mapCells = mindmapSvc.expandAllNds(eachPane.mapCells); });
-            currPane.forEach(eachPane => { eachPane.ds = newMindmapSvc.expandAll(eachPane.ds); });
-            this.setState({
-                panes: [...this.state.panes],
-            });
-        }
-    }
-
-    restoreNds = () => {
-        let currPane = this.state.panes.filter(eachPane => this.state.activeKey === eachPane.key);
-        if (currPane && 0 < currPane.length) {
-            //currPane.forEach(eachPane => { eachPane.mapCells = mindmapSvc.restoreAllNdExpSts(eachPane.mapCells); });
-            currPane.forEach(eachPane => { eachPane.ds = newMindmapSvc.restore(eachPane.ds); });
-            this.setState({
-                panes: [...this.state.panes],
-            });
-        }
-    }
 
     onShowTimeline = (timelineObj) => {
         this.setState({
@@ -452,20 +254,12 @@ class MapsViewer extends React.Component {
     }
 
     onShowGant = (gantObj) => {
-        // ds} 
-        //             colKeys={this.state.colKeys} 
-        //             arrows={this.state.relas
-
-        // data: Array(4), colKeys: Array(42), relas
+        console.log("show gant",gantObj);
 
         this.setState({
             gantdlgVisible: true,
-            ds: gantObj.data,
-            colKeys: gantObj.colKeys,
-            relas: gantObj.relas,
+            gantObj,
         });
-
-        // console.log(gantObj);
     }
 
     openRef = (refObj) => {
@@ -491,28 +285,19 @@ class MapsViewer extends React.Component {
             <>
                 <Layout>
                     {
-                        (null != this.state.panes && 0 < this.state.panes.length) ?
+                        this.props.hasPane ?
                             <>
                                 <Toolbar
-                                    showExpandAll={ifShowExpandAll(this.state)}
-                                    showRestore={isShowRestore(this.state)}
                                     onShowNewMapDlg={this.onShowNewMapDlg}
                                     onShowSelMapDlg={this.showSelMapDlg}
                                     onShowEditMapDlg={this.onShowEditMapDlg}
                                     onShowDir={api.openMapsDir}
                                     onShowCmd={api.openBash}
-                                    onExpandAll={this.expandAll}
-                                    onRestore={this.restoreNds}
                                     onShowDevTool={api.showDevTool}
                                     onReloadApp={api.reloadAppPage}
                                 />
                                 <GraphTabs
-                                    activeKey={this.state.activeKey}
-                                    panes={this.state.panes}
                                     loading={this.state.loading}
-                                    onChangeTab={this.onChangeTab}
-                                    onEditTab={this.onEditTab}
-                                    onToggleExpand={this.toggleExpand}
                                     onOpenLink={this.openLink}
                                     onOpenRef={this.openRef}
                                     onShowTimeline={this.onShowTimeline}
@@ -525,16 +310,12 @@ class MapsViewer extends React.Component {
 
                             <Content>
                                 <Welcome 
-                                    dirs={this.state.dirs}
-                                    filelist={this.state.filelist}
                                     onOpenMapsDir={api.openMapsDir}
                                     onOpenBash={api.openBash}
                                     onShowDevTool={api.showDevTool}
                                     onReloadApp={api.reloadAppPage}
                                     onAddMap={this.onShowNewMapDlg}
-                                    onSelectMapItem={this.onSelectMapItem}
-                                    onloadDir={this.loadDir}
-                                    onReloadCurrDir={this.loadDir.bind(this, selectCurrDir(this.state))} />
+                                    onSelectMapItem={this.onSelectMapItem}/>
                             </Content>
                     }
                 </Layout>
@@ -550,7 +331,6 @@ class MapsViewer extends React.Component {
                 <EditGraphDlg
                     visible={this.state.editMapDlgVisible}
                     currMapName={this.state.currMapName}
-                    activeKey={this.state.activeKey}
                     editTmpTxt={this.state.editTmpTxt}
                     onOnlySave={this.onEditMapDlgOK.bind(this, false)}
                     onOk={this.onEditMapDlgOK.bind(this, true)}
@@ -560,11 +340,7 @@ class MapsViewer extends React.Component {
 
                 <OpenGraphDlg
                     visible={this.state.selMapDlgVisible}
-                    dirs={this.state.dirs}
-                    filelist={this.state.filelist}
                     onCancel={this.closeAllDlg}
-                    onloadDir={this.loadDir}
-                    onReloadCurrDir={this.loadDir.bind(this, selectCurrDir(this.state))}
                     onSelectMapItem={this.onSelectMapItem}
                 />
 
@@ -589,9 +365,7 @@ class MapsViewer extends React.Component {
 
                 <GantDlg
                     visible={this.state.gantdlgVisible}
-                    ds={this.state.ds}
-                    colKeys={this.state.colKeys}
-                    arrows={this.state.relas}
+                    gantObj={this.state.gantObj}
                     onCancel={this.closeAllDlg}
                 />
             </>
@@ -617,67 +391,10 @@ const getDefMapTxt = (theleName = "中心主题") => (
 `
 );
 
-const ifShowExpandAll = createSelector(
-    state => state.activeKey,
-    state => state.panes,
-    (key, panes) => {
-        let currPane = ifHasValidTab(key, panes);
-        if (false === currPane) {
-            return false;
-        }
-
-        //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
-        let allExpand = newMindmapSvc.isAllNodeExpand(currPane.ds);
-        return !allExpand;
-        return false;
-    }
-);
-
-const isShowRestore = createSelector(
-    state => state.activeKey,
-    state => state.panes,
-    (key, panes) => {
-        let currPane = ifHasValidTab(key, panes);
-        if (false === currPane) {
-            return false;
-        }
-
-        //计算当前选项卡是否有展开状态变化的节点
-        let anyChanged = newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
-        return anyChanged;
-        return false;
-    }
-);
-
-const ifHasValidTab = (key, panes) => {
-    //不存选项卡或不存在活动选项卡，认为不显示按钮
-    if (null == panes || 0 === panes.length) {
-        return false;
-    }
-    let currPane = panes.filter(pane => pane.key === key);
-    if (null == currPane || 0 === currPane.length) {
-        return false;
-    }
-    currPane = currPane[0];
-
-    //当前选项卡内容解析失败
-    if (currPane.ds && false === currPane.ds.succ) {
-        return false;
-    }
-    return currPane;
-}
 
 
 
-const selectCurrDir = createSelector(
-    state => state.dirs,
-    dirs => {
-        if (null == dirs || 0 === dirs.length) {
-            return null;
-        }
-        return dirs.filter(dir => dir.iscurr)[0].fullpath;
-    }
-);
+
 
 
 
@@ -792,8 +509,8 @@ const otherThemeStyle = {
 
 const themeStyles = [centerThemeStyle, secendThemeStyle, otherThemeStyle];
 
-const mapState=()=>({
-
+const mapState=(state)=>({
+    hasPane:  state.tabs && state.tabs.panes && 0 < state.tabs.panes.length
 });
 
 

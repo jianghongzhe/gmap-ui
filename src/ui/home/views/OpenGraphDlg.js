@@ -5,6 +5,7 @@ import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
 import PathSelect from './PathSelect';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
+import ConnectedPathSelect from './ConnectedPathSelect';
 
 const EnhDlg=withEnh(Modal);
 
@@ -33,19 +34,17 @@ class OpenGraphDlg extends React.Component {
                     visible={this.props.visible}
                     onCancel={this.props.onCancel}>
 
-                <PathSelect 
+                <ConnectedPathSelect 
                     maxH={this.props.winH- 64 - 250}
                     forceMaxH={true}
                     backtopLoc={pathselectBacktopLoc}
-                    dirs={this.props.dirs} 
-                    filelist={this.props.filelist}
-                    onloadDir={this.props.onloadDir}
-                    onReloadCurrDir={this.props.onReloadCurrDir}
                     onSelectMapItem={this.props.onSelectMapItem}/>
             </EnhDlg>
         );
     }
 }
+
+
 
 export default connect((state)=>({
     winW:state.common.winW,

@@ -6,6 +6,7 @@ import {  } from '@ant-design/icons';
 import GantChart from './GantChart';
 import {withEnh} from '../../../common/specialDlg';
 import {connect} from '../../../../common/gflow';
+import { createSelector } from 'reselect';
 
 const EnhDlg=withEnh(Modal);
 
@@ -62,7 +63,7 @@ class GantDlg extends React.Component {
     }
 
     render() {
-        
+        let {ds, colKeys, relas}=getParts(this.props);
 
         return (
             <EnhDlg noFooter
@@ -73,9 +74,9 @@ class GantDlg extends React.Component {
 
                 <GantChart 
                     key='gant-comp'
-                    ds={this.props.ds}
-                    colKeys={this.props.colKeys} 
-                    arrows={this.props.arrows}
+                    ds={ds}
+                    colKeys={colKeys} 
+                    arrows={relas}
                     winW={this.props.winW} 
                     maxh={this.props.winH-250-100}  
                     layoutArrows={this.state.layoutArrows}/>    
@@ -83,6 +84,24 @@ class GantDlg extends React.Component {
         );
     }
 }
+
+const getParts=createSelector(
+    props=>props.gantObj,
+    gantObj=>{
+        if(!gantObj){
+            return {
+                ds:         [],
+                colKeys:    [],
+                relas:      [],
+            };
+        }
+        return {
+            ds:         gantObj.data? gantObj.data: [],
+            colKeys:    gantObj.colKeys? gantObj.colKeys: [],
+            relas:      gantObj.relas? gantObj.relas:[],
+        };
+    }
+);
 
 const mapState=(state)=>({
     winW:           state.common.winW,

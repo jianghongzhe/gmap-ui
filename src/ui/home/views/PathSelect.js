@@ -19,6 +19,14 @@ class PathSelect extends React.Component {
         return document.getElementById(this.listWrapperId);
     }
 
+    onSelectMapItem=(item)=>{
+        if (!item.isfile) {
+            this.props.onloadDir(item.fullpath);
+            return;
+        }
+        this.props.onSelectMapItem(item);
+    }
+
     render() {
         //列表样式，如果指定的forceMaxH，则保持高度和最大高度一致
         let listWrapperStyle=getListWrapperStyle(this.props);
@@ -38,7 +46,7 @@ class PathSelect extends React.Component {
                         </Breadcrumb>
                     </Col>
                     <Col span={2} css={{textAlign:'right'}}>
-                        <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} onClick={this.props.onReloadCurrDir} />
+                        <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} onClick={this.props.onloadCurrDir} />
                     </Col>
                 </Row>                          
                 <Divider css={{marginTop:'10px',marginBottom:'0px'}}/>
@@ -48,7 +56,7 @@ class PathSelect extends React.Component {
                         itemLayout="horizontal"
                         dataSource={this.props.filelist}
                         renderItem={item => (
-                            <List.Item className='listitem' onClick={this.props.onSelectMapItem.bind(this,item)}>
+                            <List.Item className='listitem' onClick={this.onSelectMapItem.bind(this,item)}>
                                 <List.Item.Meta 
                                     avatar={
                                         <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} 
@@ -70,6 +78,7 @@ class PathSelect extends React.Component {
         );
     }
 }
+
 
 const getListWrapperStyle=createSelector(
     props=>props.maxH,

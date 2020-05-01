@@ -3,7 +3,12 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout,   Button, Divider } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
+import {createSelector} from 'reselect';
+import newMindmapSvc from '../../../service/newMindmapSvc';
+import {connect} from '../../../common/gflow';
+
 const { Header, Content } = Layout;
+
 
 class Toolbar extends React.Component {
     constructor(props) {
@@ -11,6 +16,10 @@ class Toolbar extends React.Component {
         this.state = {  };
     }
     render() {
+        let showExpandAll=ifShowExpandAll(this.props);
+        let showRestore=isShowRestore(this.props);
+
+
         return (
             <Header css={headerStyle}>
                 <Button shape='circle' icon={<PlusOutlined />} className='toolbtnFirst' type='default' size='large' onClick={this.props.onShowNewMapDlg} title='新建' />
@@ -35,8 +44,8 @@ class Toolbar extends React.Component {
                 
 
                    
-                <Button shape='circle' icon={<CompressOutlined />} disabled={!this.props.showRestore} className='toolbtn' type='primary' size='large' onClick={this.props.onRestore} title='恢复节点默认状态' />
-                <Button shape='circle' icon={<ExpandOutlined />} disabled={!this.props.showExpandAll} className='toolbtn' type='primary' size='large' onClick={this.props.onExpandAll} title='展开全部节点' />
+                <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={this.props.dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
+                <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={this.props.dispatcher.tabs.expandAll} title='展开全部节点' />
                 
                 
 
@@ -44,6 +53,55 @@ class Toolbar extends React.Component {
             </Header>
         );
     }
+}
+
+
+const ifShowExpandAll = createSelector(
+    props => props.activeKey,
+    props => props.panes,
+    (key, panes) => {
+        let currPane = ifHasValidTab(key, panes);
+        if (false === currPane) {
+            return false;
+        }
+
+        //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
+        let allExpand = newMindmapSvc.isAllNodeExpand(currPane.ds);
+        return !allExpand;
+    }
+);
+
+const isShowRestore = createSelector(
+    props => props.activeKey,
+    props => props.panes,
+    (key, panes) => {
+        let currPane = ifHasValidTab(key, panes);
+        if (false === currPane) {
+            return false;
+        }
+
+        //计算当前选项卡是否有展开状态变化的节点
+        let anyChanged = newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
+        return anyChanged;
+    }
+);
+
+const ifHasValidTab = (key, panes) => {
+    //不存选项卡或不存在活动选项卡，认为不显示按钮
+    if (null == panes || 0 === panes.length) {
+        return false;
+    }
+    let currPane = panes.filter(pane => pane.key === key);
+    if (null == currPane || 0 === currPane.length) {
+        return false;
+    }
+    currPane = currPane[0];
+
+    //当前选项卡内容解析失败
+    if (currPane.ds && false === currPane.ds.succ) {
+        return false;
+    }
+    return currPane;
 }
 
 //#f0f2f5
@@ -66,4 +124,7 @@ const headerStyle = {
     }
 };
 
-export default Toolbar;
+export default connect((state)=>({
+    activeKey:  state.tabs.activeKey,
+    panes:      state.tabs.panes,
+}))(Toolbar);

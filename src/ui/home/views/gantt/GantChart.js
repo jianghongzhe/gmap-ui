@@ -47,7 +47,6 @@ class GantChart extends React.Component {
 
         //强制重新计算箭头位置：比如窗口大小变化、对话框显示等
         if(this.props.layoutArrows !==prevProps.layoutArrows){
-            console.log("layoutArrows已变化，重新计算箭头");
             this.debouncePutArrows();
         }
     }
@@ -58,10 +57,6 @@ class GantChart extends React.Component {
      * @param {*} delayMore 如果指定为true，则延迟更长的时间（3s）再执行操作，否则按默认的时间间隔
      */
     debouncePutArrows=(delayMore=undefined)=>{
-        console.log("设置箭头了");
-            
-        
-
         //与上次计算时间间隔太小，取消上次的任务
         let time=new Date().getTime();
         if(time-this.lastScrollTime<debounceInterval){
@@ -72,10 +67,6 @@ class GantChart extends React.Component {
 
         //延时执行
         this.lastScrollTime=time;
-        
-
-        
-
         this.scrollTimer=setTimeout(this.putArrows,true===delayMore?3000: debounceInterval);
     }
 

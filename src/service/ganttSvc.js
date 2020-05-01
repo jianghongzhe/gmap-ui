@@ -1,4 +1,4 @@
-import dateUtil from '../../common/dateUtil';
+import dateUtil from '../common/dateUtil';
 
 class GanttSvc{
     /**
@@ -259,12 +259,10 @@ class GanttSvc{
             let item={};
             item.task=gantLine.task;
             item.key="gantline-"+lineInd;
-        
-
+            
             //循环每个日期作为列
             alldays.forEach((day,colind)=>{
-                console.log("判断当前天",day,dateUtil.isDayEq(day));
-
+                
 
                 //背景颜色的覆盖关系：当前天 > 月首日 > 休息日
                 let obj={
@@ -284,17 +282,15 @@ class GanttSvc{
                     obj.headerShouldShowSetCurrdayBg=false;
                 }
                 if(obj.isFirstDay){
-                    console.log("firstday",day);
-
-                    obj.headerShouldShowSetHolidayBg=false;
                     obj.headerShouldShowSetFirstDayBg=true;
+                    obj.headerShouldShowSetHolidayBg=false;
                     obj.headerShouldShowSetCurrdayBg=false;
                 }
                 if(obj.isCurrDay){
-                    
-                    obj.headerShouldShowSetHolidayBg=true;
+                    obj.headerShouldShowSetCurrdayBg=true;
+                    obj.headerShouldShowSetHolidayBg=false;
                     obj.headerShouldShowSetFirstDayBg=false;
-                    obj.headerShouldShowSetCurrdayBg=false;
+                    
                 }
 
                 //是初始日期

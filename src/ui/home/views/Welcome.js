@@ -9,6 +9,7 @@ import logourl from '../../../assets/logo.jpg';
 import { createSelector } from 'reselect';
 import api from '../../api';
 import {connect} from '../../../common/gflow';
+import ConnectedPathSelect from './ConnectedPathSelect';
 
 class Welcome extends React.Component {
     constructor(props) {
@@ -29,13 +30,9 @@ class Welcome extends React.Component {
                         backgroundColor:'white'
                     }}>
                         <Col span={14} >
-                            <PathSelect 
+                            <ConnectedPathSelect 
                                 maxH={this.props.winH-160}
                                 backtopLoc={[fileselectRight,120]}
-                                dirs={this.props.dirs} 
-                                filelist={this.props.filelist}
-                                onloadDir={this.props.onloadDir}
-                                onReloadCurrDir={this.props.onReloadCurrDir}
                                 onSelectMapItem={this.props.onSelectMapItem}/>
                         </Col>
                         <Col span={10}>                   
@@ -65,6 +62,8 @@ const appInfoSelector=createSelector(
     noUse=>noUse,
     noUse=>api.loadAppInfo()
 );
+
+
 
 const logoWrapperStyle={
     'textAlign':'center',
