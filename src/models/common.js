@@ -1,3 +1,5 @@
+import api from '../service/api';
+
 const model={
     namespace:'common',
     state:{
@@ -26,14 +28,16 @@ const model={
         },
     },
     subscriptions:{
-        resize:({dispatcher})=>{
+        initEvent:({dispatcher})=>{
             window.addEventListener("resize",()=>{
                 dispatcher.loadWinSize(null);
                 dispatcher.refreshResizeSymbol(null);
             });
         },
-        init:({dispatcher})=>{
+        init:({dispatcher,gdispatcher})=>{
+            document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
             dispatcher.loadWinSize(null);
+            gdispatcher.filesel.load();
         },
     },
 };

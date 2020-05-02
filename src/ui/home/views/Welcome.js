@@ -7,7 +7,7 @@ import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined
 import PathSelect from './PathSelect';
 import logourl from '../../../assets/logo.jpg';
 import { createSelector } from 'reselect';
-import api from '../../api';
+import api from '../../../service/api';
 import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
 

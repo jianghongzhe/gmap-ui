@@ -282,6 +282,10 @@ const listFiles = (assignedDir = null) => {
     let basepath=getMapsPath();
     let ret=[];
 
+    
+    
+
+
     try{
         ret= fs.readdirSync(currDir, { withFileTypes: true }).filter(ent => {
             let handledFN = ent.name.toLowerCase().trim();
@@ -302,8 +306,12 @@ const listFiles = (assignedDir = null) => {
             let fullpath =path.resolve(currDir,ent.name);
             let isfile = ent.isFile();
             let isEmptyDir=false;
+            let pic=null;
             if(!isfile){
                 isEmptyDir=(0===fs.readdirSync(fullpath, { withFileTypes: true }).length);//如果是目录则看是否为空目录
+            }
+            if(isfile){
+                pic=extractPic(fullpath);
             }
             return {
                 name:       ent.name,
@@ -311,7 +319,8 @@ const listFiles = (assignedDir = null) => {
                 fullpath:   fullpath,
                 isfile:     isfile,
                 emptyDir:   isEmptyDir,
-                size:       (isfile ? fs.statSync(fullpath).size : 0)
+                size:       (isfile ? fs.statSync(fullpath).size : 0),
+                pic:        pic,
             };
         }).filter(each=>each.fullpath!==imgsDir);//不包括图片目录
     }catch(e){
@@ -320,6 +329,22 @@ const listFiles = (assignedDir = null) => {
     return ret;
 };
 
+
+const extractPic=(fullpath)=>{
+    let cont=readFile(fullpath);
+    let reg=/.*[!]\[.*?\]\((.*?)\).*/;
+    let matches=reg.exec(cont);
+    
+    if(!(matches && matches[1])){;
+        return null;
+    }
+    
+    console.log('has pic');
+    let relapath=matches[1];
+    let url=calcPicUrl(fullpath,relapath);
+    console.log(url);
+    return url;
+}
 
 /**
  * 全路径是否存在

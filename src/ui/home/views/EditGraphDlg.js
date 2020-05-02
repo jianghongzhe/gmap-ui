@@ -30,9 +30,9 @@ import HelpDlg from './edit/HelpDlg';
 import InsertImgDlg from './edit/InsertImgDlg';
 import DateDlg from './edit/DateDlg';
 
-import editorSvc from '../editorSvc';
+import editorSvc from '../../../service/editorSvc';
 import * as uiUtil from '../../../common/uiUtil';
-import api from '../../api';
+import api from '../../../service/api';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
 

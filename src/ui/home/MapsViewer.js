@@ -3,15 +3,6 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout, message } from 'antd';
 
-import marked from 'marked';
-import hljs from 'highlight.js';
-import 'highlight.js/styles/atom-one-dark-reasonable.css';
-import 'github-markdown-css/github-markdown.css';
-
-
-import { createSelector } from 'reselect';
-
-
 import Welcome from './views/Welcome';
 import OpenGraphDlg from './views/OpenGraphDlg';
 import NewGraphDlg from './views/NewGraphDlg';
@@ -23,18 +14,14 @@ import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
 import GantDlg from './views/gantt/GantDlg';
 
-import mindmapSvc from './mindmapSvc';
-import newMindmapSvc from './newMindmapSvc';
-import mindMapValidateSvc from './mindMapValidateSvc';
-import * as uiUtil from '../../common/uiUtil';
-import MarkedHighlightUtil from '../../common/MarkedHighlightUtil';
-import {connect} from '../../common/gflow';
 
-import api from '../api';
+import * as uiUtil from '../../common/uiUtil';
+import {connect} from '../../common/gflow';
+import api from '../../service/api';
 
 
 const { Content } = Layout;
-const markedHighlightUtil = new MarkedHighlightUtil();
+
 
 /**
  * panes格式：
@@ -61,81 +48,30 @@ class MapsViewer extends React.Component {
         super(...arguments);
 
         this.state = {
-
-            //选项卡
-            loading: false,
-
             //编辑图表相关
             currMapName: '',
             editTmpTxt: '',
             editMapDlgVisible: false,
+            
+            //新建图表相关
+            newMapDlgVisible: false,
+            newMapName: '',
+
+            //文件选择相关
+            selMapDlgVisible: false,
+            
+            //图表上小组件的对话框：引用、时间线、进度图、甘特图
+            gantdlgVisible: false,
             refViewerDlgVisible: false,
             timelineDlgVisible: false,
             progsDlgVisible: false,
             currRefObj: {},
             timelineObj: [],
             progsObj: [],
-
-            //新建图表相关
-            newMapDlgVisible: false,
-            newMapName: '',
-
-            //文件选项相关
-            selMapDlgVisible: false,
-            
-
-            //
-            gantdlgVisible: false,
             gantObj:null,
         };
-
-        
-
     }
-
-
-
-
-    componentDidMount() {
-        document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
-
-        //初始化marked与hljs
-        markedHighlightUtil.init(marked, hljs, {
-            codeConfig: {
-                bg: codeBg
-            },
-            linkConfig: {
-                disableDefault: true,
-                convertUrl: (oldurl) => {
-                    let addr = oldurl;
-                    if (!mindmapSvc.hasUrlPrefix(addr)) { addr = "http://" + addr.trim(); }//不带协议的加http前缀
-                    return addr;
-                }
-            },
-            imgConfig: {
-                convertUrl: (oldurl) => {
-                    if (!(oldurl.startsWith("./") || oldurl.startsWith("../"))) { return oldurl; }//跳过不是本地相对路径的
-                    return api.calcPicUrl(this.props.activeKey, oldurl);
-                }
-            }
-        });
-
-        
-        this.props.dispatcher.filesel.load();
-    }
-
-
-
     
-
-    
-
-    componentDidUpdate(prevProps, prevState) {
-        setTimeout(() => {
-            markedHighlightUtil.bindLinkClickEvent(this.openLink);
-            markedHighlightUtil.bindImgClickEvent(this.openLink);
-        }, 100);//迟延一会等视图已加载完再处理（否则第一次显示看不到效果）
-    }
 
     closeAllDlg = () => {
         this.setState({
@@ -148,16 +84,6 @@ class MapsViewer extends React.Component {
             gantdlgVisible: false,
         });
     }
-
-
-
-
-
-
-
-
-    
-
 
 
 
@@ -176,7 +102,6 @@ class MapsViewer extends React.Component {
             await this.props.dispatcher.tabs.onNewMapPromise(name);
             this.setState({newMapDlgVisible: false,});
         } catch (error) {
-            
         }
     }
 
@@ -212,14 +137,12 @@ class MapsViewer extends React.Component {
 
 
 
-
     //------------选择文件功能----------------------------------------------------------------------
     onSelectMapItem =async (item) => {
         try{
             await this.props.dispatcher.tabs.onSelItemPromise(item);
             this.setState({selMapDlgVisible: false});
         }catch(e){
-
         }
     }
 
@@ -228,8 +151,6 @@ class MapsViewer extends React.Component {
             selMapDlgVisible: true
         });
     }
-
-
 
 
 
@@ -254,8 +175,6 @@ class MapsViewer extends React.Component {
     }
 
     onShowGant = (gantObj) => {
-        console.log("show gant",gantObj);
-
         this.setState({
             gantdlgVisible: true,
             gantObj,
@@ -263,20 +182,11 @@ class MapsViewer extends React.Component {
     }
 
     openRef = (refObj) => {
-        //迟延到第一次查看时才解析
-        if (null == refObj.parsedTxt) {
-            refObj.parsedTxt = marked(refObj.txt);
-        }
-
         this.setState({
-            currRefObj: { ...refObj },
+            currRefObj: refObj,
             refViewerDlgVisible: true,
         });
     }
-
-
-
-
 
 
 
@@ -297,7 +207,6 @@ class MapsViewer extends React.Component {
                                     onReloadApp={api.reloadAppPage}
                                 />
                                 <GraphTabs
-                                    loading={this.state.loading}
                                     onOpenLink={this.openLink}
                                     onOpenRef={this.openRef}
                                     onShowTimeline={this.onShowTimeline}
@@ -345,8 +254,7 @@ class MapsViewer extends React.Component {
                 />
 
                 <RefViewer
-                    refname={this.state.currRefObj.showname}
-                    refCont={this.state.currRefObj.parsedTxt}
+                    currRefObj={this.state.currRefObj}
                     visible={this.state.refViewerDlgVisible}
                     onCancel={this.closeAllDlg}
                 />
@@ -373,141 +281,6 @@ class MapsViewer extends React.Component {
     }
 }
 
-
-const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
-
-const getDefMapTxt = (theleName = "中心主题") => (
-    `- ${theleName}
-\t- 分主题
-\t- c:#1890ff|带颜色的分主题
-\t- 带说明的分主题|m:balabala
-\t- 带链接的分主题|www.sina.com
-\t- 带链接的另一分主题|[新浪网](www.sina.com)
-\t- 带引用的分主题|ref:长段文字
-
-***
-# ref:长段文字
-这里可以放长段内容，支持markdown格式
-`
-);
-
-
-
-
-
-
-
-
-const defaultLineColor = 'lightgrey';
-
-//边框类型枚举
-const bordType = {
-    l: 1,
-    r: 2,
-    t: 4,
-    b: 8,
-    rbRad: 16,
-    lbRad: 32,
-    rtRad: 64,
-    ltRad: 128,
-};
-
-//根据边框类型动态生成对应的样式
-const getBorderStyle = (type, color = 'lightgrey') => {
-    let radius = 14;
-
-    //边框样式
-    if (bordType.l === type) { return { borderLeft: `2px solid ${color}` }; }
-    if (bordType.r === type) { return { borderRight: `2px solid ${color}` }; }
-    if (bordType.t === type) { return { borderTop: `2px solid ${color}` }; }
-    if (bordType.b === type) { return { borderBottom: `2px solid ${color}` }; }
-
-    //圆角样式
-    if (bordType.rbRad === type) { return { borderBottomRightRadius: radius }; }
-    if (bordType.lbRad === type) { return { borderBottomLeftRadius: radius }; }
-    if (bordType.rtRad === type) { return { borderTopRightRadius: radius }; }
-    if (bordType.ltRad === type) { return { borderTopLeftRadius: radius }; }
-};
-
-const defaultDateColor = {
-    expired: '#f5222d',//red', //过期
-    near: '#fa8c16',//'orange',    //近几天
-    future: '#389e0d',//'#73d13d',//'green'   //以后
-};
-
-//#2db7f5
-const centerThemeStyle = {
-    paddingTop: 0,
-    paddingBottom: 0,
-    verticalAlign: 'bottom',
-
-    '& span.themetxt': {
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        padding: '0px 0px  0px 0px',
-        verticalAlign: 'bottom',
-        fontSize: 16,
-    },
-
-    '& span.themetxt .themename': {
-        color: 'white',
-        backgroundColor: '#108ee9',
-        borderRadius: 5,
-        fontSize: 18,
-        lineHeight: '20px',
-        padding: '8px 16px',
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        marginLeft: 3,
-        marginRight: 3,
-    },
-};
-
-const secendThemeStyle = {
-    paddingTop: 12,
-    paddingBottom: 0,
-    verticalAlign: 'bottom',
-
-    '& span.themetxt': {
-        // paddingRight:5,
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        marginBottom: 0,
-        paddingBottom: 0,
-        fontSize: 16,
-        lineHeight: '20px',
-        verticalAlign: 'bottom',
-    },
-
-    '& span.themetxt .themename': {
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-    },
-};
-
-const otherThemeStyle = {
-    paddingTop: 12,
-    paddingBottom: 0,
-    verticalAlign: 'bottom',
-
-    '& span.themetxt': {
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        marginBottom: 0,
-        paddingBottom: 0,
-        fontSize: 14,
-        lineHeight: '18px',
-        verticalAlign: 'bottom',
-    },
-
-    '& span.themetxt .themename': {
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-
-    },
-};
-
-const themeStyles = [centerThemeStyle, secendThemeStyle, otherThemeStyle];
 
 const mapState=(state)=>({
     hasPane:  state.tabs && state.tabs.panes && 0 < state.tabs.panes.length

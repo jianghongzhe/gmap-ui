@@ -56,7 +56,7 @@ class PathSelect extends React.Component {
                         itemLayout="horizontal"
                         dataSource={this.props.filelist}
                         renderItem={item => (
-                            <List.Item className='listitem' onClick={this.onSelectMapItem.bind(this,item)}>
+                            <List.Item className='listitem' onClick={this.onSelectMapItem.bind(this,item)} {...getListItemExtra(item)}>
                                 <List.Item.Meta 
                                     avatar={
                                         <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} 
@@ -79,6 +79,20 @@ class PathSelect extends React.Component {
     }
 }
 
+
+const getListItemExtra=(item)=>{
+    if(item.pic){
+        return {
+            extra: <div css={{marginRight:16,width:48,height:48,
+                    backgroundImage:`url('${item.pic}')`,
+                    backgroundRepeat:'no-repeat',
+                    backgroundSize:'cover',
+                    backgroundPosition:'center center'}}></div>
+        };
+    }
+
+    return {};
+}
 
 const getListWrapperStyle=createSelector(
     props=>props.maxH,

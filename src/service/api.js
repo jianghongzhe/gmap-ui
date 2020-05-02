@@ -91,8 +91,17 @@ class Api{
             itemsName:item.itemsName,
             fullpath: item.fullpath,
             isfile:   item.isfile,
-            size:     item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>")
+            size:     item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
+            pic:      item.pic,
         }));
+
+        
+        
+        
+        
+        
+        
+                
     }
 
     /**

@@ -63,10 +63,7 @@ class GraphTabs extends React.Component {
     
 
     render() {
-        
-
         return (
-            <Spin spinning={this.props.loading} size="large">
                 <Tabs
                     hideAdd={true}
                     type="editable-card"
@@ -83,20 +80,11 @@ class GraphTabs extends React.Component {
                                         ndContentRenderer={this.ndContentRenderer}
                                         ndExpBtnRenderer={this.ndExpBtnRenderer}
                                     />
-
-                                    {/* <Mindmap cells={pane.mapCells} 
-                                        onOpenLink={this.props.onOpenLink} 
-                                        onOpenRef={this.props.onOpenRef}
-                                        onShowTimeline={this.props.onShowTimeline}
-                                        onShowProgs={this.props.onShowProgs}
-                                        onShowGant={this.props.onShowGant}
-                                        onToggleExpand={this.props.onToggleExpand.bind(this, pane.key)} /> */}
                                 </div>
                             </TabPane>
                         ))
                     }
                 </Tabs>
-            </Spin>
         );
     }
 }

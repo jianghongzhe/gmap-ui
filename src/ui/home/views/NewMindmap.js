@@ -3,7 +3,7 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import {Spin,Alert,Row, Col} from 'antd';
 import {createSelector} from 'reselect';
-import newMindmapSvc from '../newMindmapSvc';
+import newMindmapSvc from '../../../service/newMindmapSvc';
 
 class NewMindmap extends React.Component {
     constructor(props) {
