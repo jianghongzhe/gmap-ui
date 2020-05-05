@@ -794,7 +794,7 @@ class MindmapSvc {
         return cnt;
     }
 
-
+    
 
 
     /**
@@ -831,10 +831,17 @@ class MindmapSvc {
             let gant=null;
 
 
+            //内容是简单类型，把转换的竖线再恢复回来
+            let replTxt=escapeVLine(txt);
+            if (0 > replTxt.indexOf("|")) {
+                txt=unescapeVLine(replTxt);
+                txts=[txt];
+            }
+
             //内容是复合类型，则分别计算每一部分
-            if (0 <= txt.indexOf("|")) {
+            if (0 <= replTxt.indexOf("|")) {
                 txts=[];
-                txt.split('|').forEach(tmp => {
+                replTxt.split('|').map(txt=>unescapeVLine(txt)).forEach(tmp => {
                     //=============指定行的项开始======================
                     
                     let item = tmp.trim();
@@ -1207,6 +1214,14 @@ class MindmapSvc {
     }
 }
 
+
+//竖线转义相差工具方法
+const vlineEscapeTxt='___vline___';
+const escapeVLineReg=/[\\][|]/g;
+const unescapeVLineReg=new RegExp(vlineEscapeTxt,"g");
+
+const escapeVLine=(str)=>str.replace(escapeVLineReg,vlineEscapeTxt);
+const unescapeVLine=(str)=>str.replace(unescapeVLineReg,'|');
 
 
 const hasBord = (item, type) => {

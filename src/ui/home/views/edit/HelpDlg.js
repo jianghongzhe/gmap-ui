@@ -46,6 +46,7 @@ class HelpDlg extends React.Component {
                                     <div>
                                         <div><div>aaabbb</div><div>// 单行文本</div></div>
                                         <div><div>aaa|bbb</div><div>// 多行用 | 分隔</div></div>
+                                        <div><div>ls \| grep aa</div><div>// 使用 \| 来显示竖线</div></div>
                                     </div>
                                 </td>
                             </tr>
