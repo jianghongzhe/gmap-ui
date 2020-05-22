@@ -1139,6 +1139,18 @@ class MindmapSvc {
         return dateItem;
     }
 
+    isWrapLine=(line)=>{
+        if(line.trim().endsWith("\\")){
+            return {
+                flag: true,
+                newLine:  line.substring(0,line.lastIndexOf("\\")),
+            };
+        }
+        return {
+            flag: false,
+            newLine: line,
+        }
+    }
 
     /**
      * 把内容拆分为
@@ -1149,6 +1161,8 @@ class MindmapSvc {
         let currRefName = null;
         let alreadyHandleRefs = false;
 
+        let currLine=null;
+
         alltxts.trim().replace(/\r/g, '').split("\n").forEach(line => {
             if ("***" === line.trim() && !alreadyHandleRefs) {
                 alreadyHandleRefs = true;
@@ -1156,10 +1170,22 @@ class MindmapSvc {
 
             //还没到引用部分
             if (!alreadyHandleRefs) {
-                if ('' === line.trim()) {
+                if ('' === line.trim() || '\\' === line.trim()) {
                     return;
                 }
-                ndLines.push(line);//此处不要trim，因为节点有层级关系，前面有制表符
+
+
+                //如果行以“\”结尾则表示下一行还要继续
+                let {flag,newLine}=this.isWrapLine(line);
+                if(null==currLine){
+                    currLine=newLine;//第一行保留原来缩进
+                }else{
+                    currLine+=newLine.trim();//从第二行起不保留
+                }
+                if(!flag){
+                    ndLines.push(currLine);//此处不要trim，因为节点有层级关系，前面有制表符
+                    currLine=null;
+                }
                 return;
             }
 

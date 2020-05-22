@@ -5,6 +5,8 @@ import { Button,Tooltip, Progress,Avatar  } from 'antd';
 import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
 import {createSelector} from 'reselect';
+import marked from 'marked';
+
 
 class MindNode extends React.Component {
     constructor(props) {
@@ -55,12 +57,15 @@ class MindNode extends React.Component {
 
 
             {/* 主题文本 */}
-            <span className='themename' >
+            <span className='themename markdown-body' >
                 {
                     "string"===typeof(nd.str) ?
-                        <>{nd.str}</>
+                        <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
                             :
-                        <>{nd.str.map((line,ind)=><span key={'ndtxt-'+ind}>{0<ind && <br/>}{line}</span>)}</>
+                        <>{nd.str.map((line,ind)=><>
+                            {0<ind && <br key={'ndbr-'+ind}/>}
+                            <span key={'ndtxt-'+ind} dangerouslySetInnerHTML={{__html:handleSingleLine(line)}}></span>
+                        </>)}</>
                 } 
             </span>
 
@@ -136,7 +141,12 @@ class MindNode extends React.Component {
 }
 
 
-
+const handleSingleLine=(str)=>{
+    let tmp=marked(str).trim();
+    let reg=/^[<]p[>](.+)[<][/]p[>]$/;
+    tmp=tmp.replace(reg,"$1");
+    return tmp;
+}
 
 
 const themeBtnWrapperStyle={
