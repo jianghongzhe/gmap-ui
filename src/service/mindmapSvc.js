@@ -1157,11 +1157,12 @@ class MindmapSvc {
      */
     loadParts = (alltxts) => {
         let refs = {};
+        let trefs = {};
         let ndLines = [];
         let currRefName = null;
         let alreadyHandleRefs = false;
 
-        let currLine=null;
+        
 
         alltxts.trim().replace(/\r/g, '').split("\n").forEach(line => {
             if ("***" === line.trim() && !alreadyHandleRefs) {
@@ -1170,29 +1171,18 @@ class MindmapSvc {
 
             //还没到引用部分
             if (!alreadyHandleRefs) {
-                if ('' === line.trim() || '\\' === line.trim()) {
+                if ('' === line.trim()) {
                     return;
                 }
-
-
-                //如果行以“\”结尾则表示下一行还要继续
-                let {flag,newLine}=this.isWrapLine(line);
-                if(null==currLine){
-                    currLine=newLine;//第一行保留原来缩进
-                }else{
-                    currLine+=newLine.trim();//从第二行起不保留
-                }
-                if(!flag){
-                    ndLines.push(currLine);//此处不要trim，因为节点有层级关系，前面有制表符
-                    currLine=null;
-                }
+                ndLines.push(line);//此处不要trim，因为节点有层级关系，前面有制表符
                 return;
             }
 
             //已经到引用部分
             //是引用标识符
             let trimLine = line.trim();
-            if (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) {
+            if ((trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
+                    (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length)) {
                 currRefName = trimLine.substring("# ".length);
                 return;
             }
@@ -1200,14 +1190,38 @@ class MindmapSvc {
             if (null == currRefName) {
                 return;
             }
-            //是已记录过的引用
-            if ("undefined" !== typeof (refs[currRefName])) {
-                refs[currRefName] += '\n' + line;
+
+            if(currRefName.startsWith("ref:")){
+                //是已记录过的引用
+                if ("undefined" !== typeof (refs[currRefName])) {
+                    refs[currRefName] += '\n' + line;
+                    return;
+                }
+                //是新引用
+                refs[currRefName] = line;
+                return;
+            }else if(currRefName.startsWith("tref:")){
+                if(""===trimLine){
+                    return;
+                }
+
+                //是已记录过的引用
+                if ("undefined" !== typeof (trefs[currRefName])) {
+                    trefs[currRefName] += trimLine;
+                    return;
+                }
+                //是新引用
+                trefs[currRefName] = trimLine;
                 return;
             }
-            //是新引用
-            refs[currRefName] = line;
-            return;
+        });
+
+
+        ndLines=ndLines.map(line=>{
+            for(let key in trefs){
+                line=line.replace(""+key,trefs[key]);
+            }
+            return line;
         });
 
         return { ndLines, refs };

@@ -40,7 +40,6 @@ class MindMapValidateSvc{
                 continue;
             }
 
-            //todo 数据可断行后此处要调整
             if(!ret.test(line)){
                 return "第 "+(lineInd+1)+" 行的格式有误";
             }
@@ -103,7 +102,6 @@ class MindMapValidateSvc{
                 continue;
             }
 
-            //todo 数据可断行后此处要调整 afterWrapLine
             //非第一个节点
             if(hasLast && lev>lastLev+1){
                 return "第 "+(lineInd+1)+" 行的层级有误";

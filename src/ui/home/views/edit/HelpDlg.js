@@ -47,6 +47,7 @@ class HelpDlg extends React.Component {
                                         <div><div>aaabbb</div><div>// 单行文本</div></div>
                                         <div><div>aaa|bbb</div><div>// 多行用 | 分隔</div></div>
                                         <div><div>ls \| grep aa</div><div>// 使用 \| 来显示竖线</div></div>
+                                        <div><div>press `ctrl` + `c`</div><div>// 支持markdown语法</div></div>
                                     </div>
                                 </td>
                             </tr>
@@ -111,7 +112,15 @@ class HelpDlg extends React.Component {
                                 </td>
                             </tr>
                             <tr>
-                                <td>长段引用</td>
+                                <td>引用文字替换</td>
+                                <td>
+                                    <div>
+                                        <div><div>tref:xxx</div><div>// 对应引用部分 # tref:xxx</div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>长段独立引用</td>
                                 <td>
                                     <div>
                                         <div><div>ref:xxx</div><div>// 对应引用部分 # ref:xxx</div></div>
@@ -148,6 +157,22 @@ class HelpDlg extends React.Component {
                                 </td>
                             </tr>
                             <tr>
+                                <td>文字引用</td>
+                                <td>
+                                    <div>
+                                        <div><div># tref:xxx</div><div>// 节点内容可分多行写</div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>文字正文</td>
+                                <td>
+                                    <div>
+                                        <div><div>Markdown语法</div><div>// 多行会连接为一行，除非指定 | 符号</div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>引用名称</td>
                                 <td>
                                     <div>
@@ -156,7 +181,7 @@ class HelpDlg extends React.Component {
                                 </td>
                             </tr>
                             <tr>
-                                <td>正文</td>
+                                <td>引用正文</td>
                                 <td>
                                     <div>
                                         <div><div>Markdown语法</div><div>// 包括github扩展的表格等</div></div>
