@@ -74,15 +74,20 @@ class Gflow{
             gcreater:scope.actionCreater,   //全局creater
             creater:scope.actionCreater[ns],//当前模块的creater
             ns: ns,
-            sel:defSelectCrrrModelState.bind(this,ns),
+            sel:defSelectCurrModelState.bind(this,ns),
         };
         
+
+        
+           
+
+
         //循环每个副作用函数，并加入列表
-        for(let key in model.effects){
+        model.effects.forEach(item=>{
             //由于saga可以跨模块监听事件，所以如果key中自带命名空间，则直接使用，否则加入model自身的命名空间
-            let targetActionType=ns+"/"+key;
-            if(gflowUtil.isModelActionType(key)){
-                targetActionType=key;
+            let targetActionType=ns+"/"+item.k;
+            if(gflowUtil.isModelActionType(item.k)){
+                targetActionType=item.k;
             }
 
             //创建watcher，不使用takeEvery而使用take的原因是需要在调用worker时传递第二个参数（指定副作用操作符与promise的reolve、reject等）
@@ -93,7 +98,7 @@ class Gflow{
 
                     //封装第二个参数
                     let effectParam=baseEffectParam;
-                    if(action.extras && true===action.extras.promise){//action需要返回结果，则把resolve、reject加入其中
+                    if(item.prom){//action需要返回结果，则把resolve、reject加入其中
                         effectParam={
                             ...effectParam, 
                             res:        action.extras.res, 
@@ -105,12 +110,12 @@ class Gflow{
 
                     //执行副作用
                     // yield* model.effects[key](action.payload,effectParam);
-                    yield sagaEffects.fork(model.effects[key],action.payload,effectParam);
+                    yield sagaEffects.fork(item.v,action.payload,effectParam);
                 }
             };
             //运行侦听器并加入列表
             sagaItems.push(watcher());
-        }
+        });
 
         //手动监控的函数
         for(let key in model.watchers){
@@ -127,12 +132,19 @@ class Gflow{
      */
     extractActionCreatersAndActionDispatchers=(model)=>{
         let ns=model.namespace;
-        let reducersAndEffects={...model.reducers, ...model.effects};
-        for(let key in reducersAndEffects){
+        // let reducersAndEffects={...model.reducers, ...model.effects};
+        for(let key in model.reducers){
             let[targetNS,targetKey]= gflowUtil.addModelPrefix(key,ns).split("/");//如果key中自带命名空间，则直接使用，否则加入model自身的命名空间
-            this.actionCreater[targetNS][targetKey]=defActionCreater.bind(this,targetNS,targetKey);
-            this.actionDispatcher[targetNS][targetKey]=defActionDispatcher.bind(this,this.store,targetNS,targetKey);
+            this.actionCreater[targetNS][targetKey]=defActionCreater.bind(this,targetNS,targetKey,false);
+            this.actionDispatcher[targetNS][targetKey]=defActionDispatcher.bind(this,this.store,targetNS,targetKey,false);
         }
+        model.effects.forEach(item=>{
+            console.log(item,item.k);
+            let[targetNS,targetKey]= gflowUtil.addModelPrefix(item.k,ns).split("/");//如果key中自带命名空间，则直接使用，否则加入model自身的命名空间
+            console.log("----",targetNS,targetKey);
+            this.actionCreater[targetNS][targetKey]=defActionCreater.bind(this,targetNS,targetKey,item.prom);
+            this.actionDispatcher[targetNS][targetKey]=defActionDispatcher.bind(this,this.store,targetNS,targetKey,item.prom);
+        });
     }
 
     /**
@@ -153,6 +165,57 @@ class Gflow{
         }
     }
 
+
+    /**
+     * 整理effects的格式，把模块配置中不同的方式整理成同一格式，同时标记是否为promise类型
+     */
+    handleRegularEffects=(model)=>{
+        let effectList=[];
+        for(let key in model.effects){
+            //是生成器
+            console.log(key+" is generator ? "+gflowUtil.isGen(model.effects[key]));
+
+            if(gflowUtil.isGen(model.effects[key])){
+                effectList.push({
+                    k: key,
+                    v: model.effects[key],
+                    prom: gflowUtil.isPromiseActionType(key)
+                });
+                continue;
+            }
+
+            //是promise组
+            if(true===model.effects[key].promise){
+                for(let subKey in model.effects[key]){
+                    if(subKey==='promise'){continue;}
+                    if(gflowUtil.isGen(model.effects[key][subKey])){
+                        effectList.push({
+                            k: subKey,
+                            v: model.effects[key][subKey],
+                            prom: true
+                        });
+                    }
+                }
+                continue;
+            }
+
+            //是非promise组
+            if(false===model.effects[key].promise){
+                for(let subKey in model.effects[key]){
+                    if(subKey==='promise'){continue;}
+                    if(gflowUtil.isGen(model.effects[key][subKey])){
+                        effectList.push({
+                            k: subKey,
+                            v: model.effects[key][subKey],
+                            prom: false
+                        });
+                    }
+                }
+                continue;
+            }
+        }
+        model.effects=effectList;
+    }
 
     /**
      * 非空处理
@@ -195,6 +258,7 @@ class Gflow{
             if(!this.initState[model.namespace]){
                 this.initState[model.namespace]={};
             }
+            this.handleRegularEffects(model);
         });
         return [models,extraMidlewares];
     }
@@ -292,7 +356,7 @@ class Gflow{
             <Provider store={this.store}>
                 <EventWrapperComponent subscriptionEvents={this.subscriptionFuns}>
                     {
-                        true===strict ? <React.StrictMode>rootEle}</React.StrictMode> : <>{rootEle}</>
+                        true===strict ? <React.StrictMode>{rootEle}</React.StrictMode> : <>{rootEle}</>
                     }
                 </EventWrapperComponent>
             </Provider>, 
@@ -345,9 +409,13 @@ class EventWrapperComponent extends React.Component{
 
 
 
-const defActionCreater=(ns,key,payload)=>({type: ns+"/"+key,payload});
-const defActionDispatcher=(store,ns,key,payload)=>(store.dispatch(defActionCreater(ns,key,payload)));
-const defSelectCrrrModelState=(ns)=>sagaEffects.select(state=>state[ns]);
+const defActionCreater=(ns,key,isPromise,payload)=>({
+    type:       ns+"/"+key,
+    payload:    payload,
+    extras:     {promise:isPromise}
+});
+const defActionDispatcher=(store,ns,key,isPromise,payload)=>(store.dispatch(defActionCreater(ns,key,isPromise,payload)));
+const defSelectCurrModelState=(ns)=>sagaEffects.select(state=>state[ns]);
 
 const DEFAULT_NAMESPACE="def";
 

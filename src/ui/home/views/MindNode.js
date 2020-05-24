@@ -6,6 +6,7 @@ import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutline
 import gantPic from '../../../assets/gantt.png';
 import {createSelector} from 'reselect';
 import marked from 'marked';
+import './markdown-node.css';
 
 
 class MindNode extends React.Component {
@@ -56,8 +57,8 @@ class MindNode extends React.Component {
             }
 
 
-            {/* 主题文本 */}
-            <span className='themename markdown-body' >
+            {/* 主题文本 markdown-body*/}
+            <span className='themename markdown-body-node' >
                 {
                     "string"===typeof(nd.str) ?
                         <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
@@ -245,7 +246,7 @@ const centerThemeStyle =createSelector(
     hasExtraItems =>  {
         let baseStyle= {
             ...baseThemeStyle,
-            fontSize: 18,
+            fontSize: '18px !important',
             borderRadius: 10,
             paddingLeft:6,
             paddingRight:6,
@@ -256,7 +257,7 @@ const centerThemeStyle =createSelector(
         
             '& .themename': {
                 ...baseThemeNameStyle,
-                fontSize: 18,
+                fontSize: '18px !important',
                 lineHeight: '20px',
                 padding: '0px 2px',
                 
@@ -283,7 +284,7 @@ const centerThemeStyle =createSelector(
 
 const secendThemeStyle = {
     ...baseThemeStyle,
-    fontSize: 16,
+    fontSize: '16px !important',
     lineHeight: '20px',
     paddingBottom:5,
     paddingTop:5,
@@ -297,7 +298,7 @@ const secendThemeStyle = {
 
 const otherThemeStyle = {
     ...baseThemeStyle,
-    fontSize: 14,
+    fontSize: '14px !important',
     lineHeight: '18px',
     paddingLeft:2,
     paddingRight:2,

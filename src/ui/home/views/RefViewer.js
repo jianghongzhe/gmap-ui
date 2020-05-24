@@ -35,7 +35,12 @@ class RefViewer extends React.Component {
                 disableDefault: true,
                 convertUrl: (oldurl) => {
                     let addr = oldurl;
-                    if (!mindmapSvc.hasUrlPrefix(addr)) { addr = "http://" + addr.trim(); }//不带协议的加http前缀
+                    if (mindmapSvc.hasUrlPrefix(addr)){
+                        return addr;
+                    }
+                    if(addr.startsWith("./")){
+                        return api.calcAttUrl(this.props.activeKey, oldurl);
+                    }
                     return addr;
                 }
             },

@@ -48,7 +48,7 @@ class InsertImgDlg extends React.Component {
     render() {
         return (
             <EnhDlg
-                    title="插入图片"
+                    title={this.props.isImg?"插入图片":"插入附件"}
                     closable={true}
                     size={{w: this.props.dlgW,}}
                     visible={this.props.visible}
@@ -57,7 +57,7 @@ class InsertImgDlg extends React.Component {
                         
                 <div css={insertImgFormStyle}>
                     <div className='row'>
-                        <div className='cell lab'>图片位置：</div>
+                        <div className='cell lab'>{this.props.isImg?'图片位置：':'附件位置：'}</div>
                         <div className='cell'>
                             <Input 
                                 value={this.props.insertPicPath}
@@ -65,7 +65,7 @@ class InsertImgDlg extends React.Component {
                                 ref={uiUtil.bindInputEle.bind(this,this,'elePicPath')}
                                 onChange={this.props.onPicPathChange} 
                                 addonAfter={<FolderOpenOutlined onClick={this.props.onSelPicFile} css={{ cursor: 'pointer' }} />} 
-                                placeholder='请输入图片路径、url、留空（以从剪切版读取）' />
+                                placeholder={this.props.isImg?'请输入图片路径、url、留空（以从剪切版读取）':'请输入附件路径或url'} />
                         </div>
                     </div>
                     <div className='row'>
@@ -76,7 +76,7 @@ class InsertImgDlg extends React.Component {
                                 onPressEnter={this.onPicNameEnter}
                                 ref={uiUtil.bindInputEle.bind(this,this,'elePicName')}
                                 onChange={this.props.onPicNameChange} 
-                                placeholder='请输入图片显示名称' />
+                                placeholder={this.props.isImg?'请输入图片显示名称':'请输入附件显示名称'} />
                         </div>
                     </div>
                 </div>

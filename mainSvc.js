@@ -9,6 +9,7 @@ const path = require('path');
 const userPngImg=true;//默认是否
 const mapsPath=path.join(__dirname,'gmaps');
 const imgsPath=path.join(__dirname,'gmaps','imgs');
+const attsPath=path.join(__dirname,'gmaps','atts');
 const workPath=path.join(__dirname,'work');
 const packageJsonPath=path.join(__dirname,'package.json');
 const SLASH='/';
@@ -116,6 +117,52 @@ const copyPicToImgsDir=(fromPicFullpath,showName,currGraphFullpath)=>{
     });
 }
 
+/**
+ * 计算图片在导图文件文本中的路径
+ * 复制指定的图片文件到图片目录，并返回相对于当前图导文件的相对路径
+ * @param {*} picFullpath  文件路径或url
+ * @param {*} showName 
+ * @param {*} currGraphFullpath
+ * @returns 
+ */
+const copyAttToAttsDir=(fromPicFullpath,showName,currGraphFullpath)=>{
+    return new Promise((res,rej)=>{
+        //是文件格式
+        if(existsFullpath(fromPicFullpath)){
+            res(saveAttAndGetRelaPath(fromPicFullpath,showName,currGraphFullpath));
+            return;
+        }
+
+
+        //是url
+        if(isUrlFormat(fromPicFullpath)){
+            let tmpFileFullpath=getTmpAttSavePath();//下载临时文件
+            downFile(fromPicFullpath,tmpFileFullpath).then(()=>{
+                res(saveAttAndGetRelaPath(tmpFileFullpath,showName,currGraphFullpath));
+            }).catch(e=>{
+                if(404===e){
+                    rej({
+                        succ:false,
+                        msg:"指定的附件url不存在"
+                    });
+                    return;
+                }
+                rej({
+                    succ:false,
+                    msg:"附件下载过程中出现错误"
+                });
+            });
+            return;
+        }
+
+        //都不是
+        rej({
+            succ:false,
+            msg:"附件路径或url格式有误"
+        });
+    });
+}
+
 
 /**
  * 保存图片对象到相应目录，并计算相对于导图文件的相对路径
@@ -128,14 +175,23 @@ const saveImgAndGetRelaPath=(im,showName,currGraphFullpath)=>{
     let toPicFullPath=getImgsPath(showName);   //指定图片保存到本地的绝对路径
     fs.writeFileSync(toPicFullPath,getDefFormatImgBuff(im));
 
-    //计算从导图所在目录到图片的相对路径
-    let graphDir=path.dirname(currGraphFullpath);//导图所在目录
-    let relapath=toSlash(path.relative(graphDir,toPicFullPath).trim());
-    if(!(relapath.startsWith('./') || relapath.startsWith('../'))){
-        relapath="./"+relapath;
-    }
-    return relapath;
+    // //计算从导图所在目录到图片的相对路径
+    // let graphDir=path.dirname(currGraphFullpath);//导图所在目录
+    // let relapath=toSlash(path.relative(graphDir,toPicFullPath).trim());
+    // if(!(relapath.startsWith('./') || relapath.startsWith('../'))){
+    //     relapath="./"+relapath;
+    // }
+    // return relapath;
+
+    return "./"+showName;
 }
+
+const saveAttAndGetRelaPath=(fromFullpath,showName,currGraphFullpath)=>{
+    fs.copyFileSync(fromFullpath,getAttsPath(showName));
+    return "./"+showName;
+}
+
+
 
 
 /**
@@ -201,6 +257,8 @@ const getDefFormatImgExt=()=>{
 
 const getTmpImgSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+getDefFormatImgExt()));
 
+const getTmpAttSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+".dat"));
+
 
 
 /**
@@ -215,11 +273,42 @@ const calcPicUrl=(graphFileFullpath,picRelaPath)=>{
         return getDevServerUrl().trim()+"/favicon.ico";
     }
 
-    //部署模式计算真实本地url
-    let currGraphDir=path.dirname(graphFileFullpath);//当前图表文件的目录
-    let picFullpath=path.resolve(currGraphDir,picRelaPath);
-    return getFileProtocalUrl(picFullpath);
+    if(!picRelaPath.startsWith("./")){
+        return picRelaPath;
+    }
+
+    return getFileProtocalUrl(getImgsPath(picRelaPath.substring(2)));
+
+
+
+    // //部署模式计算真实本地url
+    // let currGraphDir=path.dirname(graphFileFullpath);//当前图表文件的目录
+    // let picFullpath=path.resolve(currGraphDir,picRelaPath);
+    // return getFileProtocalUrl(picFullpath);
 }
+
+const calcAttUrl=(graphFileFullpath,picRelaPath)=>{
+    //开发模式返回favicon图标
+    if(isDevMode()){
+        return getDevServerUrl().trim()+"/favicon.ico";
+    }
+
+    if(!picRelaPath.startsWith("./")){
+        return picRelaPath;
+    }
+
+    return getFileProtocalUrl(getAttsPath(picRelaPath.substring(2)));
+
+
+
+    // //部署模式计算真实本地url
+    // let currGraphDir=path.dirname(graphFileFullpath);//当前图表文件的目录
+    // let picFullpath=path.resolve(currGraphDir,picRelaPath);
+    // return getFileProtocalUrl(picFullpath);
+}
+
+
+
 
 
 
@@ -279,6 +368,7 @@ const getPathItems=(assignedDir = null)=>{
 const listFiles = (assignedDir = null) => {    
     let currDir=(assignedDir ? assignedDir : getMapsPath());
     let imgsDir=getImgsPath();
+    let attsDir=getAttsPath();
     let basepath=getMapsPath();
     let ret=[];
 
@@ -322,7 +412,7 @@ const listFiles = (assignedDir = null) => {
                 size:       (isfile ? fs.statSync(fullpath).size : 0),
                 pic:        pic,
             };
-        }).filter(each=>each.fullpath!==imgsDir);//不包括图片目录
+        }).filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir);//不包括图片目录
     }catch(e){
         console.error(e);
     }
@@ -339,10 +429,8 @@ const extractPic=(fullpath)=>{
         return null;
     }
     
-    console.log('has pic');
     let relapath=matches[1];
     let url=calcPicUrl(fullpath,relapath);
-    console.log(url);
     return url;
 }
 
@@ -361,6 +449,15 @@ const existsFullpath=(fullpath)=>{
  */
 const existsPic=(picName)=>{
     let picFullpath=getImgsPath(picName);
+    return fs.existsSync(picFullpath);
+}
+
+/**
+ * 图片是否存在
+ * @param {*} attName 
+ */
+const existsAtt=(attName)=>{
+    let picFullpath=getAttsPath(attName);
     return fs.existsSync(picFullpath);
 }
 
@@ -459,6 +556,15 @@ const selPicFile = (mainWindow) => {
     });
 }
 
+const selAttFile = (mainWindow) => {
+    return dialog.showOpenDialogSync(mainWindow, { 
+        properties: ['openFile'],
+        filters: [
+            { name: '所有', extensions: ['*'] }
+        ]
+    });
+}
+
 
 /**
  * 打开图表目录
@@ -515,7 +621,7 @@ const openDevTool=(mainWindow)=>{
  * 创建工作目录与图片目录
  */
 const init=()=>{
-    [imgsPath,workPath].forEach(eachWorkdir=>{
+    [imgsPath,attsPath,workPath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
@@ -562,6 +668,11 @@ const getMapsPath = (fn = null) => toBackSlash((fn ? path.join(mapsPath,fn) : ma
  */
 const getImgsPath = (fn = null) => toBackSlash((fn ? path.join(imgsPath,fn) : imgsPath).trim());
 
+/**
+ * 获取附件文件所在目录或文件全路径
+ * @param {*} fn 如果未提供此参数表示取所在目录，否则表示该文件的全路径
+ */
+const getAttsPath = (fn = null) => toBackSlash((fn ? path.join(attsPath,fn) : attsPath).trim());
 
 /**
  * 下载文件
@@ -642,6 +753,7 @@ module.exports={
 
     //文件操作：读写、判断存在性、列表等
     existsPic, 
+    existsAtt,
     existsGraph, 
     existsFullpath,
     readFile,
@@ -651,9 +763,12 @@ module.exports={
 
     //图片相关操作
     copyPicToImgsDir,
+    copyAttToAttsDir,
     copyClipboardPicToImgsDir,
     calcPicUrl,
+    calcAttUrl,
     selPicFile,//使用操作系统对话框
+    selAttFile,
 
     //打开外部资源：导图目录、bash控制台、网页链接或本地file协议资源、图片等
     openMapsDir, 

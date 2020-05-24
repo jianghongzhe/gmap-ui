@@ -18,6 +18,10 @@ class Api{
         return app.existsPic(picName);
     }
 
+    existsAtt=(picName)=>{
+        return app.existsAtt(picName);
+    }
+
     openPicByName=(name)=>{
         return app.openPicByName(name);
     }
@@ -50,6 +54,9 @@ class Api{
     copyPicToImgsDir=(picFullpath,showName,currGraphFullpath)=>{
         return app.copyPicToImgsDir(picFullpath,showName,currGraphFullpath);
     }
+    copyAttToAttsDir=(picFullpath,showName,currGraphFullpath)=>{
+        return app.copyAttToAttsDir(picFullpath,showName,currGraphFullpath);
+    }
 
     selPicFile=()=>{
         let rs=app.selPicFile();
@@ -65,8 +72,16 @@ class Api{
         // });
     }
 
+    selAttFile=()=>{
+        let rs=app.selAttFile();
+        return rs;
+    }
+
     calcPicUrl=(graphFileFullpath,picRelaPath)=>{
         return app.calcPicUrl(graphFileFullpath,picRelaPath);
+    }
+    calcAttUrl=(graphFileFullpath,picRelaPath)=>{
+        return app.calcAttUrl(graphFileFullpath,picRelaPath);
     }
 
     openUrl=(url)=>{

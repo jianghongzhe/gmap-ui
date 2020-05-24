@@ -1,5 +1,6 @@
 import mindMapValidateSvc from './mindMapValidateSvc';
 import ganttSvc from './ganttSvc';
+import api from './api';
 
 
 //是否启用虚拟节点，启用后样式会好些，但占用空间变大，空间利用率低
@@ -925,9 +926,15 @@ class MindmapSvc {
                     if (/^\[.+\]\(.+\)$/.test(item)) {
                         let txt = item.substring(1, item.lastIndexOf("]")).trim();
                         let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
-                        if (!this.hasUrlPrefix(url)) {
+
+                        if (this.hasUrlPrefix(url)) {
+                            url=url+"";
+                        }else if(url.startsWith("./")){
+                            url=api.calcAttUrl("",url);
+                        }else{
                             url = "http://" + url;
                         }
+
                         links.push({
                             name: txt,
                             addr: url
@@ -1235,7 +1242,7 @@ class MindmapSvc {
     }
 
     hasUrlPrefix = (url) => {
-        return ["http://","https://","ftp://","ftps://","//"].some(prefix=>url.startsWith(prefix));
+        return ["http://","https://","ftp://","ftps://","file://","//"].some(prefix=>url.startsWith(prefix));
     }
 
     /**

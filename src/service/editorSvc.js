@@ -42,6 +42,23 @@ class EditorSvc{
         };
     }
 
+    addAtt=(originLine,pos,picRelaPath,pname)=>{
+        let resultLine=originLine;
+
+        let before=resultLine.substring(0,pos);
+        before=(''===before?'':before+" ");
+        let after=resultLine.substring(pos);
+        after=(''===after?'':" "+after);
+
+        let addCont="["+pname+"]("+picRelaPath.trim()+")";
+
+        resultLine=before+addCont+after;
+        return {
+            newLinetxt: resultLine,
+            cusorPos:before.length+addCont.length
+        };
+    }
+
     addDate=(originLine,pos,datestr)=>{
         let resultLine=originLine;
         let before=resultLine.substring(0,pos);

@@ -30,11 +30,13 @@ const model={
     subscriptions:{
         initEvent:({dispatcher})=>{
             window.addEventListener("resize",()=>{
+                console.log("dispatcher",dispatcher);
                 dispatcher.loadWinSize(null);
                 dispatcher.refreshResizeSymbol(null);
             });
         },
         init:({dispatcher,gdispatcher})=>{
+            console.log("dispatcher",dispatcher);
             document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
             dispatcher.loadWinSize(null);
             gdispatcher.filesel.load();

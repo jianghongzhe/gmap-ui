@@ -1,0 +1,20 @@
+==================================================
+Filename          : v_143854289_m_601_220_124.jpg
+URL               : https://pic1.iqiyipic.com/image/20200111/78/56/v_143854289_m_601_220_124.jpg
+Content Type      : image/jpeg
+File Size         : 10,877
+Last Accessed     : 2020/1/12 星期日 02:53:21
+Server Time       : 2020/1/12 星期日 02:53:22
+Server Last Modified: 2020/1/11 星期六 18:06:38
+Expire Time       : 2021/1/10 星期日 21:32:59
+Server Name       : JSP3/2.0.14
+Server Response   : HTTP/1.1 200
+Content Encoding  : 
+Cache Name        : data_3  [27435008]
+Cache Control     : max-age=31536000
+ETag              : 
+Server IP Address : 218.68.136.41
+URL Length        : 76
+Deleted File      : No
+==================================================
+
