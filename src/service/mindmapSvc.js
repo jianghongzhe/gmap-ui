@@ -795,7 +795,9 @@ class MindmapSvc {
         return cnt;
     }
 
-    
+    splitLineItems=(line)=>{
+
+    }
 
 
     /**
@@ -814,7 +816,7 @@ class MindmapSvc {
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
 
-        let { ndLines, refs } = this.loadParts(arrayOrTxt);
+        let { ndLines, refs} = this.loadParts(arrayOrTxt);
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -1165,6 +1167,7 @@ class MindmapSvc {
     loadParts = (alltxts) => {
         let refs = {};
         let trefs = {};
+        let lrefs = {};
         let ndLines = [];
         let currRefName = null;
         let alreadyHandleRefs = false;
@@ -1188,16 +1191,20 @@ class MindmapSvc {
             //已经到引用部分
             //是引用标识符
             let trimLine = line.trim();
-            if ((trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
-                    (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length)) {
+            if (    
+                    (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
+                    (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length) 
+            ){
                 currRefName = trimLine.substring("# ".length);
                 return;
             }
+
             //还没有当前标识符
             if (null == currRefName) {
                 return;
             }
 
+            //已有当前标识符
             if(currRefName.startsWith("ref:")){
                 //是已记录过的引用
                 if ("undefined" !== typeof (refs[currRefName])) {
@@ -1224,14 +1231,26 @@ class MindmapSvc {
         });
 
 
+
+        // 
         ndLines=ndLines.map(line=>{
+            let splitPos=line.indexOf("- ")+2;
+            let front=line.substring(0,splitPos);
+            let end="|"+escapeVLine(line.substring(splitPos).trim())+"|";
+
             for(let key in trefs){
-                line=line.replace(""+key,trefs[key]);
+                end=end.replace("|"+key+"|","|"+trefs[key]+"|");
             }
-            return line;
+            while(end.startsWith("|")){
+                end=end.substring(1);
+            }
+            while(end.endsWith("|")){
+                end=end.substring(0,end.length-1);
+            }
+            return front+unescapeVLineRestore(end.trim());
         });
 
-        return { ndLines, refs };
+        return { ndLines, refs};
     }
 
     setLeaf = (nd) => {
@@ -1269,6 +1288,7 @@ const unescapeVLineReg=new RegExp(vlineEscapeTxt,"g");
 
 const escapeVLine=(str)=>str.replace(escapeVLineReg,vlineEscapeTxt);
 const unescapeVLine=(str)=>str.replace(unescapeVLineReg,'|');
+const unescapeVLineRestore=(str)=>str.replace(unescapeVLineReg,'\\|');
 
 
 const hasBord = (item, type) => {

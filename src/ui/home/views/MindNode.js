@@ -63,10 +63,10 @@ class MindNode extends React.Component {
                     "string"===typeof(nd.str) ?
                         <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
                             :
-                        <>{nd.str.map((line,ind)=><>
+                        <>{nd.str.map((line,ind)=><React.Fragment key={'ndtxts-'+ind}>
                             {0<ind && <br key={'ndbr-'+ind}/>}
                             <span key={'ndtxt-'+ind} dangerouslySetInnerHTML={{__html:handleSingleLine(line)}}></span>
-                        </>)}</>
+                        </React.Fragment>)}</>
                 } 
             </span>
 

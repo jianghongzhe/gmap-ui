@@ -26,7 +26,7 @@ class GraphTabs extends React.Component {
      * 节点内容的render props
      */
     ndContentRenderer=(nd)=>{
-        return <MindNode nd={nd}
+        return <MindNode key={nd.id} nd={nd}
             onOpenLink={this.props.onOpenLink} 
             onOpenRef={this.props.onOpenRef}
             onShowTimeline={this.props.onShowTimeline}

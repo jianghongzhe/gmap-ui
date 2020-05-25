@@ -139,9 +139,7 @@ class Gflow{
             this.actionDispatcher[targetNS][targetKey]=defActionDispatcher.bind(this,this.store,targetNS,targetKey,false);
         }
         model.effects.forEach(item=>{
-            console.log(item,item.k);
             let[targetNS,targetKey]= gflowUtil.addModelPrefix(item.k,ns).split("/");//如果key中自带命名空间，则直接使用，否则加入model自身的命名空间
-            console.log("----",targetNS,targetKey);
             this.actionCreater[targetNS][targetKey]=defActionCreater.bind(this,targetNS,targetKey,item.prom);
             this.actionDispatcher[targetNS][targetKey]=defActionDispatcher.bind(this,this.store,targetNS,targetKey,item.prom);
         });
@@ -173,8 +171,6 @@ class Gflow{
         let effectList=[];
         for(let key in model.effects){
             //是生成器
-            console.log(key+" is generator ? "+gflowUtil.isGen(model.effects[key]));
-
             if(gflowUtil.isGen(model.effects[key])){
                 effectList.push({
                     k: key,
