@@ -1,12 +1,13 @@
 const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net   } = require('electron');
 const fs = require('fs');
 const Url = require('url');
-const { exec, spawn } = require('child_process');
+const { exec, spawn, execFile } = require('child_process');
 const path = require('path');
 
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
+const fileRunnerPath=path.join(__dirname,'file_runner.exe');
 const mapsPath=path.join(__dirname,'gmaps');
 const imgsPath=path.join(__dirname,'gmaps','imgs');
 const attsPath=path.join(__dirname,'gmaps','atts');
@@ -484,17 +485,22 @@ const existsGraph = (fn) => {
 }
 
 /**
- * 打开指定地址，可能是网址或是本地file://协议的资源
+ * 打开指定url，如果是本地file://协议的资源，则使用fileRunner执行，否则使用默认的方式执行
  * @param {*} url 
  */
 const openUrl=(url)=>{
-    shell.openExternal(encodeURI(url));
-    fs.writeFileSync(workPath+"\\tmp.txt", encodeURI(url), 'utf-8');
+    if(url.startsWith("file:///")){
+        let indexPath= path.join(workPath,"tmp.txt");
+        fs.writeFileSync(indexPath, url, 'utf-8');
+        execFile(fileRunnerPath,["tmp.txt"]);
+        return;
+    }
+    shell.openExternal(url);
 }
 
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
-    shell.openExternal(encodeURI(url));
+    openUrl(url);
 }
 
 /**
@@ -573,9 +579,7 @@ const selAttFile = (mainWindow) => {
 const openMapsDir = () => {
     let mapsPath = getMapsPath();
     let url =getFileProtocalUrl(mapsPath); //转换为file协议的url
-    shell.openExternal(encodeURI(url), {
-        workingDirectory: mapsPath
-    })
+    openUrl(url);
 }
 
 /**
