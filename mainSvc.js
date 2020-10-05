@@ -488,12 +488,13 @@ const existsGraph = (fn) => {
  * @param {*} url 
  */
 const openUrl=(url)=>{
-    shell.openExternal(url);
+    shell.openExternal(encodeURI(url));
+    fs.writeFileSync(workPath+"\\tmp.txt", encodeURI(url), 'utf-8');
 }
 
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
-    shell.openExternal(url);
+    shell.openExternal(encodeURI(url));
 }
 
 /**
@@ -572,7 +573,7 @@ const selAttFile = (mainWindow) => {
 const openMapsDir = () => {
     let mapsPath = getMapsPath();
     let url =getFileProtocalUrl(mapsPath); //转换为file协议的url
-    shell.openExternal(url, {
+    shell.openExternal(encodeURI(url), {
         workingDirectory: mapsPath
     })
 }

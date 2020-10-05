@@ -1,4 +1,6 @@
 import { cleanUrl, escape as doEscape } from 'marked/src/helpers';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 /**
  * marked结合hljs实现语法高亮与点击事件处理等功能
@@ -22,8 +24,13 @@ class MarkedHighlightUtil {
 
 
         //-----------代码高亮功能----------------------------
-        //代码高亮函数
+        //代码高亮函数：如果是latex表达式，则用katex解析，否则用hljs解析
         const highlightFun = (code, language) => {
+            if('latex'===language){
+                let expStr=katex.renderToString(code,{throwOnError: false});
+                return `<div style='font-size:30px;'>${expStr}</div>`;
+            }
+
             let tmp = hljs.getLanguage(language);
             const validLanguage = tmp ? language : 'plaintext';
             return hljs.highlight(validLanguage, code).value;
