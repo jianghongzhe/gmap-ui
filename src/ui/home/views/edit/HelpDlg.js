@@ -3,14 +3,15 @@ import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
 import {withEnh} from '../../../common/specialDlg';
+import api from '../../../../service/api';
 
 const EnhDlg=withEnh(Modal);
 
 const { TabPane } = Tabs;
 
 class HelpDlg extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super(...arguments);
         this.state = {  };
     }
     render() {
@@ -152,7 +153,7 @@ class HelpDlg extends React.Component {
                                 <td>开始标志</td>
                                 <td>
                                     <div>
-                                        <div><div>***</div><div>// 每一次出现表示引用开始</div></div>
+                                        <div><div>***</div><div>// 第一次出现表示引用开始</div></div>
                                     </div>
                                 </td>
                             </tr>
@@ -184,12 +185,18 @@ class HelpDlg extends React.Component {
                                 <td>引用正文</td>
                                 <td>
                                     <div>
-                                        <div><div>Markdown语法</div><div>// 包括github扩展的表格等</div></div>
+                                        <div><div>Markdown语法</div><div>// 支持github markdown及latex</div></div>
                                     </div>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
+                            <div css={{marginTop:'10px',}}>
+                                <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
+                            </div>
+                            <div>
+                                <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明</Button>
+                            </div>
                         </div>
                     </TabPane>
                     <TabPane tab="快捷键" key="3" className='tabitem'>
