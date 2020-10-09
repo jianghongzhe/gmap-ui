@@ -20,7 +20,8 @@ const createWindow=()=>{
         show: false,
         webPreferences: {
             //preload: path.join(__dirname, 'preload.js')
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
         }
     });
     mainWindow.maximize();
