@@ -8,8 +8,12 @@ const model={
         winH:600,
         resizeSymbol: Symbol(),
         installPathValid: true,
+        allDirs: [],
     },
     reducers:{
+        setAllDirs:(state,dirs)=>{
+            return {...state, allDirs: dirs};
+        },
         setSize:(state,{winW,winH})=>{
             return {...state, winW, winH};
         },
@@ -34,6 +38,10 @@ const model={
         *refreshResizeSymbol(payload,{creater,put}){
             yield put(creater.setResizeSymbol(Symbol()));
         },
+        *reloadAllDirs(payload,{creater,put}){
+            let dirs=api.listAllDirs();
+            yield put(creater.setAllDirs(dirs));
+        }
     },
     subscriptions:{
         initEvent:({dispatcher})=>{
@@ -43,9 +51,11 @@ const model={
             });
         },
         init:({dispatcher,gdispatcher})=>{
+            //设置标题、加载窗口大小、文件列表加载、目录列表加载
             document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
             dispatcher.loadWinSize(null);
             gdispatcher.filesel.load();
+            dispatcher.reloadAllDirs(null);
 
             // 检测安装路径合理性
             let installPath=api.getBasePath();

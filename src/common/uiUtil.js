@@ -2,6 +2,7 @@
 
 
 const bindInputEle=(comp,iptName,ele)=>{
+    console.log('aaa',ele);
     if(ele && ele.input){
         comp[iptName]=ele.input;
     }

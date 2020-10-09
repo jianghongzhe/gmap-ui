@@ -25,9 +25,14 @@ let appInfoCache=null;
 
 //===========暴露的接口================================================
 
+/**
+ * 获取基路径
+ */
 const getBasePath=()=>{
     return __dirname;
 }
+
+
 
 /**
  * 计算图片在导图文件文本中的路径
@@ -364,6 +369,48 @@ const getPathItems=(assignedDir = null)=>{
         console.error(e);
     }
     return items;
+}
+
+const listAllDirs=()=>{
+    const listDir=(assignedDir, dirs)=>{
+        let currDir=(assignedDir ? assignedDir : getMapsPath());
+        let imgsDir=getImgsPath();
+        let attsDir=getAttsPath();
+        let basepath=getMapsPath();
+
+        fs.readdirSync(currDir, { withFileTypes: true }).filter(ent => {
+            let handledFN = ent.name.toLowerCase().trim();
+            return (
+                'readme.md' !== handledFN && 
+                ".git" !== handledFN
+            ) && (
+                (ent.isFile() && handledFN.endsWith(".md")) || 
+                !ent.isFile()
+            );//不是readme文件，且不是git目录，且是目录或是md文件
+        }).filter(ent=>{
+            return !ent.isFile();
+        }).map(ent => {
+            let fullpath =path.resolve(currDir,ent.name);
+            let isfile = ent.isFile();
+            
+            return {
+                name:       ent.name,
+                itemsName:  toSlash(path.relative(basepath,fullpath)),//显示在选项卡上的名称：eg. front/css3.md
+                fullpath:   fullpath,
+                isfile:     isfile,
+            };
+        }).filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir)  //不包括图片目录
+        .forEach(item=>{
+            dirs.push({
+                value: item.itemsName
+            });
+            listDir(item.fullpath, dirs);
+        });
+    }
+
+    let dirs=[];
+    listDir(null, dirs);
+    return dirs;
 }
 
 
@@ -770,6 +817,7 @@ module.exports={
     saveFile, 
     getPathItems, 
     listFiles,
+    listAllDirs,
 
     //图片相关操作
     copyPicToImgsDir,

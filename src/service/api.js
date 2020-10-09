@@ -140,6 +140,10 @@ class Api{
     getBasePath=()=>{
         return app.getBasePath();
     }
+
+    listAllDirs=()=>{
+        return app.listAllDirs();
+    }
 }
 
 

@@ -73,14 +73,18 @@ class MapsViewer extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState){
-        // if(prevProps.installPathValid && !this.props.installPathValid){
-            // alert(2);
+        if(prevProps.installPathValid && !this.props.installPathValid){
             Modal.warning({
                 title: '警告',
                 content: '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常',
             });
             return;
-        // }
+        }
+    }
+
+    componentDidMount(){
+        console.log("all paths");
+        console.log(api.listAllDirs());
     }
     
 
