@@ -136,7 +136,13 @@ class Api{
         }
         return ret;
     }
+
+    getBasePath=()=>{
+        return app.getBasePath();
+    }
 }
+
+
 
 
 const getSizeStr=(size=0)=>{

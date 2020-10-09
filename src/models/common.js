@@ -1,4 +1,5 @@
 import api from '../service/api';
+import generalSvc from '../service/generalSvc';
 
 const model={
     namespace:'common',
@@ -6,6 +7,7 @@ const model={
         winW:800,
         winH:600,
         resizeSymbol: Symbol(),
+        installPathValid: true,
     },
     reducers:{
         setSize:(state,{winW,winH})=>{
@@ -13,6 +15,12 @@ const model={
         },
         setResizeSymbol:(state,resizeSymbol)=>{
             return {...state, resizeSymbol};
+        },
+        setInstallPathValid:(state,payload)=>{
+            return {...state, installPathValid:true,};
+        },
+        setInstallPathInvalid:(state,payload)=>{
+            return {...state, installPathValid:false,};
         }
     },
     effects:{
@@ -38,6 +46,12 @@ const model={
             document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
             dispatcher.loadWinSize(null);
             gdispatcher.filesel.load();
+
+            // 检测安装路径合理性
+            let installPath=api.getBasePath();
+            if(!generalSvc.isPathValid(installPath)){
+                dispatcher.setInstallPathInvalid(null);
+            }
         },
     },
 };

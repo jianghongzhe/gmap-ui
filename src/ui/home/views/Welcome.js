@@ -12,8 +12,8 @@ import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
 
 class Welcome extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super(...arguments);
         this.state = {  };
     }
 

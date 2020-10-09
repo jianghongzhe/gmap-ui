@@ -25,6 +25,10 @@ let appInfoCache=null;
 
 //===========暴露的接口================================================
 
+const getBasePath=()=>{
+    return __dirname;
+}
+
 /**
  * 计算图片在导图文件文本中的路径
  * 设法从剪切版中找到图片放到图片目录，并返回相对于当前图导文件的相对路径
@@ -757,6 +761,7 @@ module.exports={
     init,
 
     //文件操作：读写、判断存在性、列表等
+    getBasePath,
     existsPic, 
     existsAtt,
     existsGraph, 

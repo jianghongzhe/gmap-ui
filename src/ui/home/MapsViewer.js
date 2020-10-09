@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import { Layout, message } from 'antd';
+import { Layout, message,Modal } from 'antd';
 
 import Welcome from './views/Welcome';
 import OpenGraphDlg from './views/OpenGraphDlg';
@@ -70,6 +70,17 @@ class MapsViewer extends React.Component {
             progsObj: [],
             gantObj:null,
         };
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        // if(prevProps.installPathValid && !this.props.installPathValid){
+            // alert(2);
+            Modal.warning({
+                title: '警告',
+                content: '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常',
+            });
+            return;
+        // }
     }
     
 
@@ -283,7 +294,8 @@ class MapsViewer extends React.Component {
 
 
 const mapState=(state)=>({
-    hasPane:  state.tabs && state.tabs.panes && 0 < state.tabs.panes.length
+    hasPane:  state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
+    installPathValid: state.common.installPathValid,
 });
 
 
