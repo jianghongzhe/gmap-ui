@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Button,Tooltip, Progress,Avatar  } from 'antd';
-import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
+import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
 import {createSelector} from 'reselect';
 import marked from 'marked';
@@ -131,7 +131,7 @@ class MindNode extends React.Component {
                                 size='small' 
                                 title={link.name ? link.name+"  "+link.addr:link.addr} 
                                 className='themebtn'
-                                icon={<LinkOutlined className='themebtnicon' css={colors.link}/>}  
+                                icon={getLinkIcon(link.addr)}  
                                 onClick={this.props.onOpenLink.bind(this,link.addr)}/>
                         </span>
                     ))
@@ -141,6 +141,22 @@ class MindNode extends React.Component {
     }
 }
 
+/**
+ * 根据链接的不同协议显示不同图标
+ * @param {*} addr 
+ */
+const getLinkIcon=(addr)=>{
+    if(addr.startsWith("cp://")){
+        return <CopyOutlined className='themebtnicon' css={colors.copy}/>;
+    }
+    if(addr.startsWith("dir://")){
+        return <FolderOpenOutlined className='themebtnicon' css={colors.dir}/>;
+    }
+    if(addr.startsWith("cmd://")){
+        return <CodeOutlined className='themebtnicon' css={colors.cmd}/>;
+    }
+    return <LinkOutlined className='themebtnicon' css={colors.link}/>;
+}
 
 const handleSingleLine=(str)=>{
     let tmp=marked(str).trim();
@@ -182,6 +198,9 @@ const colors={
     ref: {color:'#faad14'},
     memo: {color:'#faad14'},
     link: {color:'#1890ff'},
+    dir: {color:'orange'},
+    cmd: {color:'gray'},
+    copy: {color:'#1890ff'},
     linkDark: {color:'#faad14'},
 };
 

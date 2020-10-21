@@ -925,9 +925,12 @@ class MindmapSvc {
                     }
 
                     //是markdown链接 [文字](地址)
-                    if (/^\[.+\]\(.+\)$/.test(item)) {
+                    if (/^\[.*?\]\(.+?\)$/.test(item)) {
                         let txt = item.substring(1, item.lastIndexOf("]")).trim();
                         let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
+                        if(null===txt || ''===txt || ""===txt.trim()){
+                            txt='打开';
+                        }
 
                         if (this.hasUrlPrefix(url)) {
                             url=url+"";
@@ -1261,7 +1264,7 @@ class MindmapSvc {
     }
 
     hasUrlPrefix = (url) => {
-        return ["http://","https://","ftp://","ftps://","file://","//"].some(prefix=>url.startsWith(prefix));
+        return ["http://","https://","ftp://","ftps://","file://","dir://","cp://","cmd://","//"].some(prefix=>url.startsWith(prefix));
     }
 
     /**

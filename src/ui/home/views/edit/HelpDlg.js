@@ -46,9 +46,14 @@ class HelpDlg extends React.Component {
                                 <td>
                                     <div>
                                         <div><div>aaabbb</div><div>// 单行文本</div></div>
-                                        <div><div>aaa|bbb</div><div>// 多行用 | 分隔</div></div>
-                                        <div><div>ls \| grep aa</div><div>// 使用 \| 来显示竖线</div></div>
+                                        <div><div>aaa|bbb</div><div>// 多行用 <span css={{color:'black'}}>|</span> 分隔</div></div>
+                                        <div><div>ls \| grep aa</div><div>// 使用 <span css={{color:'black'}}>\|</span> 来显示竖线</div></div>
                                         <div><div>press `ctrl` + `c`</div><div>// 支持markdown语法</div></div>
+
+                                        <div><div>[打开](file:///d:\a\b.txt)</div><div>// 执行文件或打开目录</div></div>
+                                        <div><div>[选择](dir:///d:\a\b.txt)</div><div>// 打开目录并选择指定文件或目录</div></div>
+                                        <div><div>[执行](cmd:///dir d:\)</div><div>// 执行命令，使用 <span css={{color:'black'}}>[space]\</span> 表示换行</div></div>
+                                        <div><div>[复制](cp:///这是一段文本)</div><div>// 复制内容，使用 <span css={{color:'black'}}>[space]\</span> 表示换行</div></div>
                                     </div>
                                 </td>
                             </tr>
