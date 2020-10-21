@@ -27,7 +27,7 @@ class Toolbar extends React.Component {
 
                 <Divider type="vertical" className='divider'/>
                 <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowDir}  title='打开目录' />                                   
-                <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowCmd}  title='打开git' />
+                <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowCmd}  title='打开控制台' />
                 <Button shape='circle' icon={<ControlOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowDevTool}  title='开发者工具' />
                 <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onReloadApp}  title='重新载入应用' />
 

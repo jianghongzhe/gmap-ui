@@ -4,7 +4,7 @@ import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
-import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
+import MarkedHighlightUtil from '../../../common/MarkedHighlightUtil';
 import mindmapSvc from '../../../service/mindmapSvc';
 import api from '../../../service/api';
 import {createSelector} from 'reselect';

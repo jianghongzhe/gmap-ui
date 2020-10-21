@@ -640,7 +640,7 @@ const openGitBash = () => {
     let time = ""+new Date().getTime();
     spawn(
         'cmd.exe',
-        ['/c', `start "GMap_${time}" bash`],
+        ['/c', `start "GMap_${time}" cmd`],
         {
             shell: true,           //使用shell运行
             cwd: getMapsPath()   //当前目录为图表文件目录

@@ -42,7 +42,7 @@ class Welcome extends React.Component {
                                 <div className='btns'>
                                     <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={this.props.onAddMap}>新建</Button>
                                     <Button type="default" className='r2btn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={this.props.onOpenMapsDir}></Button>
-                                    <Button type="default" className='rbtn' title='打开git' shape='circle' icon={<CodeOutlined/>} size='large' onClick={this.props.onOpenBash}></Button>
+                                    <Button type="default" className='rbtn' title='打开控制台' shape='circle' icon={<CodeOutlined/>} size='large' onClick={this.props.onOpenBash}></Button>
                                     <Button type="default" className='rbtn' title='开发者工具' shape='circle' icon={<ControlOutlined/>} size='large' onClick={this.props.onShowDevTool}></Button>
                                     <Button type="default" className='rbtn' title='重新载入应用' shape='circle' icon={<ReloadOutlined/>} size='large' onClick={this.props.onReloadApp}></Button>
                                     

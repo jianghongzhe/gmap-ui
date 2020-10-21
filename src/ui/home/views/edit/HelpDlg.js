@@ -269,6 +269,14 @@ class HelpDlg extends React.Component {
                                 </td>
                             </tr>
                             <tr>
+                                <td>Ctrl + I</td>
+                                <td>
+                                    <div>
+                                        <div><div>插入附件</div><div></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>Ctrl + T</td>
                                 <td>
                                     <div>
