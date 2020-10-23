@@ -6,6 +6,7 @@ import * as uiUtil from '../../../common/uiUtil';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
 import {connect} from '../../../common/gflow';
+import {createSelector} from 'reselect';
 
 /**
  * 新建图表对话框
@@ -55,18 +56,7 @@ class NewGraphDlg extends React.Component {
 
     render() {
         return (
-            <Modal  title={
-                        <div>
-                            <span>新建图表</span>
-                            <Button css={{marginLeft:'15px'}} 
-                                    title='刷新目录列表' 
-                                    size='small' 
-                                    type="default" 
-                                    shape="circle" 
-                                    icon={<ReloadOutlined />} 
-                                    onClick={this.reloadAllDirs} />
-                        </div>
-                    }
+            <Modal  title={getDlgTitle(this.props)}
                     visible={this.props.visible}
                     onOk={this.props.onOk}
                     onCancel={this.props.onCancel}
@@ -88,6 +78,15 @@ class NewGraphDlg extends React.Component {
                                     onChange={this.props.onChangeNewMapDir}
                                 />
                             </td>
+                            <td css={{paddingTop:'10px',width:'50px'}}>
+                                <Button css={{marginLeft:'15px'}} 
+                                    title='刷新目录列表' 
+                                    size='small' 
+                                    type="default" 
+                                    shape="circle" 
+                                    icon={<ReloadOutlined />} 
+                                    onClick={this.reloadAllDirs} />
+                            </td>
                         </tr>
                         <tr>
                             <td css={{paddingTop:'10px',}}>图表名称：</td>
@@ -104,6 +103,7 @@ class NewGraphDlg extends React.Component {
                                     onPressEnter={this.props.onOk}
                                 />
                             </td>
+                            <td></td>
                         </tr>
                     </tbody>
                 </table>
@@ -113,6 +113,12 @@ class NewGraphDlg extends React.Component {
         );
     }
 }
+
+const getDlgTitle=createSelector(
+    props=>props.newMapDir,
+    props=>props.newMapName,
+    (dir,name)=>("新建图表 - "+(dir ? dir+"/"+(name?name:"<空>") : (name?name:"<空>")))
+);
 
 
 const mapState=(state)=>({
