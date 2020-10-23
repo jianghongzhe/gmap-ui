@@ -929,7 +929,15 @@ class MindmapSvc {
                         let txt = item.substring(1, item.lastIndexOf("]")).trim();
                         let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
                         if(null===txt || ''===txt || ""===txt.trim()){
-                            txt='打开';
+                            if(url.startsWith("cmd://")){
+                                txt='执行命令';
+                            }else if(url.startsWith("cp://")){
+                                txt='复制';
+                            }else if(url.startsWith("dir://")){
+                                txt='打开目录并选择';
+                            }else{
+                                txt='打开';
+                            }
                         }
 
                         if (this.hasUrlPrefix(url)) {
