@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
 import React from 'react';
-import {  Modal, Input,AutoComplete,Button } from 'antd';
+import {  Modal, Input,AutoComplete,Button,TreeSelect } from 'antd';
 import * as uiUtil from '../../../common/uiUtil';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
@@ -40,11 +40,6 @@ class NewGraphDlg extends React.Component {
         }
     }
 
-    
-
-    onTxtChange=(val)=>{
-        this.props.onChangeNewMapName({target:{value: val,}});
-    }
 
     bindInputEle=(ele)=>{
         this.iptEle=ele;
@@ -55,6 +50,8 @@ class NewGraphDlg extends React.Component {
     reloadAllDirs=()=>{
         this.props.dispatcher.common.reloadAllDirs();
     }
+
+    
 
     render() {
         return (
@@ -72,22 +69,51 @@ class NewGraphDlg extends React.Component {
                     }
                     visible={this.props.visible}
                     onOk={this.props.onOk}
-                    onCancel={this.props.onCancel}>
-
-                <AutoComplete
-                    css={{width:'100%'}}
-                    placeholder="请输入图表名称"
-                    backfill={false}
-                    ref={this.bindInputEle}
-                    value={this.props.newMapName} 
-                    options={this.props.allDirs}
-                    filterOption={this.filterOptionFun}
-                    onChange={this.onTxtChange} 
-                />
+                    onCancel={this.props.onCancel}
+                    width={700}>
+                
+                <table css={{width:'100%'}}>
+                    <tbody>
+                        <tr>
+                            <td css={{paddingTop:'10px',width:'80px'}}>图表目录：</td>
+                            <td css={{paddingTop:'10px',}}>
+                                <TreeSelect
+                                    style={{ width: '100%' }}
+                                    value={this.props.newMapDir}
+                                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                    treeData={this.props.allDirs}
+                                    placeholder="请选择图表目录"
+                                    treeDefaultExpandAll
+                                    allowClear
+                                    onChange={this.props.onChangeNewMapDir}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td css={{paddingTop:'10px',}}>图表名称：</td>
+                            <td css={{paddingTop:'10px',}}>
+                                <Input
+                                    css={{width:'100%'}}
+                                    placeholder="请输入图表名称"
+                                    backfill={false}
+                                    ref={this.bindInputEle}
+                                    value={this.props.newMapName} 
+                                    options={this.props.allDirs}
+                                    filterOption={this.filterOptionFun}
+                                    onChange={this.props.onChangeNewMapName} 
+                                    onPressEnter={this.props.onOk}
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                
             </Modal>
         );
     }
 }
+
 
 const mapState=(state)=>({
     allDirs: state.common.allDirs,

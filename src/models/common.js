@@ -40,6 +40,7 @@ const model={
         },
         *reloadAllDirs(payload,{creater,put}){
             let dirs=api.listAllDirs();
+            console.log('dirs',dirs);
             yield put(creater.setAllDirs(dirs));
         }
     },

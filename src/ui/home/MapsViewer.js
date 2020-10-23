@@ -56,6 +56,7 @@ class MapsViewer extends React.Component {
             //新建图表相关
             newMapDlgVisible: false,
             newMapName: '',
+            newMapDir: '',
 
             //文件选择相关
             selMapDlgVisible: false,
@@ -113,8 +114,9 @@ class MapsViewer extends React.Component {
 
     onNewMapDlgOK = async () => {
         try {
+            let dir=this.state.newMapDir ? this.state.newMapDir.trim() : '';
             let name = this.state.newMapName.trim();
-            await this.props.dispatcher.tabs.onNewMapPromise(name);
+            await this.props.dispatcher.tabs.onNewMapPromise({dir,name});
             this.setState({newMapDlgVisible: false,});
         } catch (error) {
         }
@@ -247,9 +249,11 @@ class MapsViewer extends React.Component {
                 <NewGraphDlg
                     visible={this.state.newMapDlgVisible}
                     newMapName={this.state.newMapName}
+                    newMapDir={this.state.newMapDir}
                     onOk={this.onNewMapDlgOK}
                     onCancel={this.closeAllDlg}
                     onChangeNewMapName={uiUtil.bindChangeEventToState.bind(this, this, 'newMapName')}
+                    onChangeNewMapDir={uiUtil.bindChangeEventToState.bind(this, this, 'newMapDir')}
                 />
 
                 <EditGraphDlg

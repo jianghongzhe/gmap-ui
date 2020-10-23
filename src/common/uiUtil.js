@@ -33,7 +33,7 @@ const doFocusBaseInner=(comp,iptName,propName,isProp)=>{
 
 const bindChangeEventToState=(comp,stateName,e)=>{
     let newState={};
-    newState[stateName]=e.target.value;
+    newState[stateName]=(e && e.target ? e.target.value : e);
     comp.setState(newState);
 }
 

@@ -96,7 +96,7 @@ const model={
             res();
         },
 
-        *onNewMapPromise(name,{sel,res,rej,put,gcreater,creater}){
+        *onNewMapPromise({dir,name},{sel,res,rej,put,gcreater,creater}){
             //验证名称为空和文件是否存在
             if (!name || '' === name) {
                 message.warning('请输入图表名称');
@@ -109,7 +109,8 @@ const model={
                 rej();
                 return;
             }
-            let fnAndFullpath = api.existsGraph(name);//如果存在返回true，如果不存在返回 [文件名, 全路径]
+            let joinName=(dir? dir+"/"+name : name);
+            let fnAndFullpath = api.existsGraph(joinName);//如果存在返回true，如果不存在返回 [文件名, 全路径]
             if (true === fnAndFullpath) {
                 message.warning('该图表名称已存在，请更换另一名称');
                 rej();

@@ -372,7 +372,7 @@ const getPathItems=(assignedDir = null)=>{
 }
 
 const listAllDirs=()=>{
-    const listDir=(assignedDir, dirs)=>{
+    const listDir=(assignedDir, parNode)=>{
         let currDir=(assignedDir ? assignedDir : getMapsPath());
         let imgsDir=getImgsPath();
         let attsDir=getAttsPath();
@@ -387,9 +387,11 @@ const listAllDirs=()=>{
                 (ent.isFile() && handledFN.endsWith(".md")) || 
                 !ent.isFile()
             );//不是readme文件，且不是git目录，且是目录或是md文件
-        }).filter(ent=>{
+        })
+        .filter(ent=>{
             return !ent.isFile();
-        }).map(ent => {
+        })
+        .map(ent => {
             let fullpath =path.resolve(currDir,ent.name);
             let isfile = ent.isFile();
             
@@ -399,18 +401,23 @@ const listAllDirs=()=>{
                 fullpath:   fullpath,
                 isfile:     isfile,
             };
-        }).filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir)  //不包括图片目录
+        })
+        .filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir)  //不包括图片目录
+        .map(each=>({
+            title: each.name, 
+            value: each.itemsName, 
+            fullpath: each.fullpath,
+            children:[],
+        }))
         .forEach(item=>{
-            dirs.push({
-                value: item.itemsName
-            });
-            listDir(item.fullpath, dirs);
+            listDir(item.fullpath, item);
+            parNode.children.push(item);
         });
     }
 
-    let dirs=[];
+    let dirs={children:[]};
     listDir(null, dirs);
-    return dirs;
+    return dirs.children;
 }
 
 
