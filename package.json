@@ -16,6 +16,7 @@
     "codemirror": "^5.53.2",
     "github-markdown-css": "^4.0.0",
     "highlight.js": "^9.18.1",
+    "html2canvas": "^1.0.0-rc.7",
     "katex": "^0.12.0",
     "marked": "^0.8.2",
     "react": "^16.13.1",

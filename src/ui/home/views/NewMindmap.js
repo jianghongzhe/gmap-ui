@@ -100,7 +100,7 @@ class NewMindmap extends React.Component {
         }
 
         return (
-            <div css={{...wrapperStyle, ...this.state.wrapperStyle}} id='graphwrapper'>
+            <div css={{...wrapperStyle, ...this.state.wrapperStyle}}  id={`graphwrapper_${this.props.ind}`}>
                 {
                     this.props.ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                         {/* 节点内容  css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}*/}

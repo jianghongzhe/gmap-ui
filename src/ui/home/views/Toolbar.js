@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import { Layout,   Button, Divider } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {connect} from '../../../common/gflow';
@@ -33,6 +33,7 @@ class Toolbar extends React.Component {
 
                 <Divider type="vertical" className='divider'/>
                 <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowEditMapDlg} title='编辑' />
+                
                 {/* {
                     this.props.showRestore &&      
                         <Button shape='circle' icon={<CompressOutlined />} className='toolbtn' type='primary' size='large' onClick={this.props.onRestore} title='恢复默认节点状态' />
@@ -46,6 +47,7 @@ class Toolbar extends React.Component {
                    
                 <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={this.props.dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
                 <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={this.props.dispatcher.tabs.expandAll} title='展开全部节点' />
+                <Button shape='circle' icon={<ExportOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onExpImage} title='导出图片' />
                 
                 
 

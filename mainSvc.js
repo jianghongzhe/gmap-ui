@@ -547,7 +547,7 @@ const existsGraph = (fn) => {
  * @param {*} url 
  */
 const openUrl=(url)=>{
-    if(["file://","dir://","cmd://","cp://"].some(item=>url.startsWith(item))){
+    if(["file://","dir://","cmd://","cp://","data:image/"].some(item=>url.startsWith(item))){
         let indexPath= path.join(workPath,"tmp.txt");
         fs.writeFileSync(indexPath, url, 'utf-8');
         execFile(fileRunnerPath,["tmp.txt"]);

@@ -18,6 +18,7 @@ import GantDlg from './views/gantt/GantDlg';
 import * as uiUtil from '../../common/uiUtil';
 import {connect} from '../../common/gflow';
 import api from '../../service/api';
+import html2canvas from 'html2canvas';
 
 
 const { Content } = Layout;
@@ -205,6 +206,28 @@ class MapsViewer extends React.Component {
         });
     }
 
+    onExpImage=()=>{
+        /*
+        activeKey:  state.tabs.activeKey,
+    panes
+
+        */
+        this.props.panes.forEach((item,ind)=>{
+            if(this.props.activeKey!==item.key){
+                return;
+            }
+            let ele=document.querySelector(`#graphwrapper_${ind}`);
+            if(!ele){
+                message.warn("图表状态异常，无法导出");
+                return;
+            }
+            html2canvas(ele).then((canvas)=>{
+                let base64Url=canvas.toDataURL('png');
+                api.openUrl(base64Url);
+            });
+        });
+    }
+
 
 
     render() {
@@ -222,6 +245,7 @@ class MapsViewer extends React.Component {
                                     onShowCmd={api.openBash}
                                     onShowDevTool={api.showDevTool}
                                     onReloadApp={api.reloadAppPage}
+                                    onExpImage={this.onExpImage}
                                 />
                                 <GraphTabs
                                     onOpenLink={this.openLink}
@@ -304,6 +328,8 @@ class MapsViewer extends React.Component {
 const mapState=(state)=>({
     hasPane:  state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
     installPathValid: state.common.installPathValid,
+    activeKey:  state.tabs.activeKey,
+    panes:      state.tabs.panes,
 });
 
 
