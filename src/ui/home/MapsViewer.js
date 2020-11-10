@@ -113,8 +113,11 @@ class MapsViewer extends React.Component {
     }
 
 
-    onNewMapDlgOK = async () => {
+    onNewMapDlgOK = async (e) => {
         try {
+            e.stopPropagation();
+            e.preventDefault();
+            
             let dir=this.state.newMapDir ? this.state.newMapDir.trim() : '';
             let name = this.state.newMapName.trim();
             await this.props.dispatcher.tabs.onNewMapPromise({dir,name});

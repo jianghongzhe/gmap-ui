@@ -1,6 +1,0 @@
-- 中心主题
-	- c:#fa8c16|分主题
-		- c:#fa8c16|第一
-		- c:#0050b3|第有一天
-	- c:#ad6800|带说明的分主题|m:balabala|dafdfasd
-	- c:#13c2c2|ddfa

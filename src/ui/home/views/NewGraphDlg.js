@@ -94,11 +94,11 @@ class NewGraphDlg extends React.Component {
                                 <Input
                                     css={{width:'100%'}}
                                     placeholder="请输入图表名称"
-                                    backfill={false}
+                                    // backfill={false}
                                     ref={this.bindInputEle}
                                     value={this.props.newMapName} 
-                                    options={this.props.allDirs}
-                                    filterOption={this.filterOptionFun}
+                                    // options={this.props.allDirs}
+                                    // filterOption={this.filterOptionFun}
                                     onChange={this.props.onChangeNewMapName} 
                                     onPressEnter={this.props.onOk}
                                 />
