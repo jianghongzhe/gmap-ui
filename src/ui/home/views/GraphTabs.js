@@ -74,7 +74,7 @@ class GraphTabs extends React.Component {
                     {
                         this.props.panes.map((pane,ind) => (
                             <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                <div css={getTabItemContainerStyle(this.props.winH- 64 - 55)}>
+                                <div css={getTabItemContainerStyle(this.props.winH- 64 - 55-1)}>
                                     <NewMindmap
                                         ind={ind}
                                         ds={pane.ds}

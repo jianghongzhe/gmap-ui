@@ -1,7 +1,7 @@
 const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net   } = require('electron');
 const fs = require('fs');
 const Url = require('url');
-const { exec, spawn, execFile } = require('child_process');
+const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
 
 
@@ -553,6 +553,12 @@ const openUrl=(url)=>{
         execFile(fileRunnerPath,["tmp.txt"]);
         return;
     }
+    if(["shot://","shotCombine://"].some(item=>url.startsWith(item))){
+        let indexPath= path.join(workPath,"tmp.txt");
+        fs.writeFileSync(indexPath, url, 'utf-8');
+        execFileSync(fileRunnerPath,["tmp.txt"]);
+        return;
+    }
     shell.openExternal(url);
 }
 
@@ -620,6 +626,19 @@ const selPicFile = (mainWindow) => {
         ]
     });
 }
+
+
+const openSaveFileDlg = (mainWindow) => {
+    return dialog.showSaveDialogSync(mainWindow, { 
+        properties: [/*'saveFile'*/],
+        filters: [
+            { name: '图片', extensions: 'bmp,jpg,jpeg,png,gif,svg,webp'.split(',') },
+            { name: '所有', extensions: ['*'] }
+        ]
+    });
+}
+
+
 
 const selAttFile = (mainWindow) => {
     return dialog.showOpenDialogSync(mainWindow, { 
@@ -833,6 +852,7 @@ module.exports={
     calcPicUrl,
     calcAttUrl,
     selPicFile,//使用操作系统对话框
+    openSaveFileDlg,
     selAttFile,
 
     //打开外部资源：导图目录、bash控制台、网页链接或本地file协议资源、图片等

@@ -72,6 +72,10 @@ class Api{
         // });
     }
 
+    openSaveFileDlg=()=>{
+        return app.openSaveFileDlg();
+    }
+
     selAttFile=()=>{
         let rs=app.selAttFile();
         return rs;

@@ -61,6 +61,7 @@ app.on('ready', () => {
     app.selPicFile = app.selPicFile.bind(app,mainWindow);
     app.openDevTool=app.openDevTool.bind(app,mainWindow);
     app.reloadAppPage=app.reloadAppPage.bind(app,mainWindow);
+    app.openSaveFileDlg=app.openSaveFileDlg.bind(app,mainWindow);
 
     //加载初始页
     loadFirstPage();

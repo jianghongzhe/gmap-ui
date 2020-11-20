@@ -18,7 +18,8 @@ import GantDlg from './views/gantt/GantDlg';
 import * as uiUtil from '../../common/uiUtil';
 import {connect} from '../../common/gflow';
 import api from '../../service/api';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
+import screenShot from '../../service/screenShot';
 
 
 const { Content } = Layout;
@@ -224,10 +225,16 @@ class MapsViewer extends React.Component {
                 message.warn("图表状态异常，无法导出");
                 return;
             }
-            html2canvas(ele).then((canvas)=>{
-                let base64Url=canvas.toDataURL('png');
-                api.openUrl(base64Url);
-            });
+            let containerEle=ele.parentNode;
+            let {x,y}=containerEle.getBoundingClientRect();
+
+            
+            screenShot(api.openSaveFileDlg,api.openUrl,containerEle,ele,x,y);
+
+            // html2canvas(ele).then((canvas)=>{
+            //     let base64Url=canvas.toDataURL('png');
+            //     api.openUrl(base64Url);
+            // });
         });
     }
 
