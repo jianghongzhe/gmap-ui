@@ -228,7 +228,13 @@ class MapsViewer extends React.Component {
             let containerEle=ele.parentNode;
             let {x,y}=containerEle.getBoundingClientRect();
 
-            console.log("devmode", api.isDevMode());
+
+            if(!api.isMaximized()){
+                message.warn("请先点击最大化按钮后再导出图片");
+                return;
+            }
+
+
             
             screenShot(
                 api.openSaveFileDlg,    //保存文件对话框函数

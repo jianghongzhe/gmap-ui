@@ -818,6 +818,9 @@ const downFile=(url,savePath)=>{
  */
 const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? true : false);
 
+
+const isMaximized=(mainWindow)=>(mainWindow.isMaximized());
+
 /**
  * 获得开发模式的主页访问地址
  */
@@ -864,6 +867,7 @@ module.exports={
     //杂项
     openDevTool,
     isDevMode,
+    isMaximized,
     getDevServerUrl,
     loadAppInfo,
     reloadAppPage,

@@ -76,6 +76,10 @@ class Api{
         return app.isDevMode();
     }
 
+    isMaximized=()=>{
+        return app.isMaximized();
+    }
+
     openSaveFileDlg=()=>{
         return app.openSaveFileDlg();
     }

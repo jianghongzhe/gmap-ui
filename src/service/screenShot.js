@@ -145,7 +145,6 @@ class ScreenShotSvc{
         setTimeout(() => {
             //截取当前索引处的图片
             let startTop=(this.hasBrowserMenu ? startTopWithTitleAndMenu : startTopWithOnlyTitle);//浏览器有菜单栏和无菜单栏所占的高度不同
-            console.log("startTop",this.hasBrowserMenu,startTop);
             this.takeScrenShotFun(`shot://${window.screenLeft+startLeft+this.offsetX},${window.screenTop+startTop+this.offsetY},${allPos[y][x].width},${allPos[y][x].height},${allPos[y][x].filename}`);    
             
             //未到一行最后，移到下一个图片继续截取
