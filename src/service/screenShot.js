@@ -14,7 +14,7 @@ class ScreenShotSvc{
      * @param {*} offsetX           要开始截取的部分相对于浏览器主内容区域左端的偏移
      * @param {*} offsetY           要开始截取的部分相对于浏览器主内容区域上端的偏移
      */
-    doScreenShot=(selFileFun, takeScrenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0)=>{       
+    doScreenShot=(selFileFun, takeScrenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true)=>{       
         //当前截屏任务未完成时不允许进行操作
         if(this.doing){
             return;
@@ -35,6 +35,7 @@ class ScreenShotSvc{
         };
         
         //等对话框关闭后再开始截取
+        this.hasBrowserMenu=hasBrowserMenu;
         this.offsetX=offsetX;
         this.offsetY=offsetY;
         this.doing=true;
@@ -143,6 +144,8 @@ class ScreenShotSvc{
         //等滚动完后，延迟一段时间再进行截屏操作
         setTimeout(() => {
             //截取当前索引处的图片
+            let startTop=(this.hasBrowserMenu ? startTopWithTitleAndMenu : startTopWithOnlyTitle);//浏览器有菜单栏和无菜单栏所占的高度不同
+            console.log("startTop",this.hasBrowserMenu,startTop);
             this.takeScrenShotFun(`shot://${window.screenLeft+startLeft+this.offsetX},${window.screenTop+startTop+this.offsetY},${allPos[y][x].width},${allPos[y][x].height},${allPos[y][x].filename}`);    
             
             //未到一行最后，移到下一个图片继续截取
@@ -236,7 +239,8 @@ const splitPos=(viewPortWidth, contentWidth)=>{
 
 
 const startLeft=0;//标题和菜单部分占用的高度
-const startTop=43;//标题和菜单部分占用的高度
+const startTopWithTitleAndMenu=43;//标题和菜单部分占用的高度
+const startTopWithOnlyTitle=23;//标题部分占用的高度
 const scrollbarThick=17;//滚动条的宽度
 
 export default new ScreenShotSvc().doScreenShot;

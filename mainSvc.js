@@ -816,7 +816,7 @@ const downFile=(url,savePath)=>{
 /**
  * 通过环境变量判断当前是否为开发模式
  */
-const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL);
+const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? true : false);
 
 /**
  * 获得开发模式的主页访问地址

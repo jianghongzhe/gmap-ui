@@ -228,8 +228,18 @@ class MapsViewer extends React.Component {
             let containerEle=ele.parentNode;
             let {x,y}=containerEle.getBoundingClientRect();
 
+            console.log("devmode", api.isDevMode());
             
-            screenShot(api.openSaveFileDlg,api.openUrl,containerEle,ele,x,y);
+            screenShot(
+                api.openSaveFileDlg,    //保存文件对话框函数
+                api.openUrl,            //执行截屏的函数
+                containerEle,           //容器元素
+                ele,                    //内容元素
+                Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
+                Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
+                api.isDevMode()         //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+            );
+
 
             // html2canvas(ele).then((canvas)=>{
             //     let base64Url=canvas.toDataURL('png');

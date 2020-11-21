@@ -72,6 +72,10 @@ class Api{
         // });
     }
 
+    isDevMode=()=>{
+        return app.isDevMode();
+    }
+
     openSaveFileDlg=()=>{
         return app.openSaveFileDlg();
     }
