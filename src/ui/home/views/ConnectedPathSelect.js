@@ -4,18 +4,14 @@ import React from 'react';
 import PathSelect from './PathSelect';
 import {connect} from '../../../common/gflow';
 
-
-class ConnectedPathSelect extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.state = {  };
-    }
-    render() {
-        return <PathSelect {...this.props} 
-            onloadDir={this.props.dispatcher.filesel.load}
-            onloadCurrDir={this.props.dispatcher.filesel.loadCurrDir}
-        />;
-    }
+/**
+ * 路径选择组件的包装
+ */
+const ConnectedPathSelect=(props)=>{
+    return <PathSelect {...props} 
+        onloadDir={props.dispatcher.filesel.load}
+        onloadCurrDir={props.dispatcher.filesel.loadCurrDir}
+    />;
 }
 
 const mapState=(state)=>({

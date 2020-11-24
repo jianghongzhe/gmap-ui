@@ -6,45 +6,62 @@ import PathSelect from './PathSelect';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
+import {createSelector} from 'reselect';
 
 const EnhDlg=withEnh(Modal);
 
-class OpenGraphDlg extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {  };
-    }
-    render() {
-        //宽度计算
-        let winW=this.props.winW;
-        let expectW=900;
-        if(winW<=expectW){
-            expectW=winW-50;
+/**
+ * 打开图表对话框
+ * @param {*} props 
+ */
+const OpenGraphDlg=(props)=>{
+    let {dlgW, backtopLoc, contentMaxH}=calcSizeProps(props);
+
+    return (
+        <EnhDlg noFooter
+                title="打开图表"
+                size={{w:dlgW}}
+                visible={props.visible}
+                onCancel={props.onCancel}>
+            <ConnectedPathSelect 
+                maxH={contentMaxH}
+                forceMaxH={true}
+                backtopLoc={backtopLoc}
+                onSelectMapItem={props.onSelectMapItem}/>
+        </EnhDlg>
+    );
+    
+}
+
+/**
+ * 计算对话框相关大小和位置等信息
+ */
+const calcSizeProps=createSelector(
+    props=>props.winW,
+    props=>props.winH,
+    (winW, winH)=>{
+        //对话框宽度计算
+        let dlgW=900;
+        if(winW<=dlgW){
+            dlgW=winW-50;
         }
 
-        let pathselectBacktopLoc=[
-            (winW-expectW)/2+100,
+        //backtop按钮的位置计算：右、上
+        let backtopLoc=[
+            (winW-dlgW)/2+100,
             150
         ];
 
-        return (
-            <EnhDlg noFooter
-                    title="打开图表"
-                    size={{w:expectW}}
-                    visible={this.props.visible}
-                    onCancel={this.props.onCancel}>
+        //对话框内容区的最大高度
+        let contentMaxH=winH- 64 - 250;
 
-                <ConnectedPathSelect 
-                    maxH={this.props.winH- 64 - 250}
-                    forceMaxH={true}
-                    backtopLoc={pathselectBacktopLoc}
-                    onSelectMapItem={this.props.onSelectMapItem}/>
-            </EnhDlg>
-        );
+        return {
+            dlgW,
+            backtopLoc,
+            contentMaxH
+        };
     }
-}
-
-
+);
 
 export default connect((state)=>({
     winW:state.common.winW,

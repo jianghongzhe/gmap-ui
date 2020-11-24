@@ -9,52 +9,49 @@ import {connect} from '../../../common/gflow';
 
 const { Header, Content } = Layout;
 
+/**
+ * 工具栏
+ * @param {*} props 
+ */
+const Toolbar=(props)=>{
+    let showExpandAll=ifShowExpandAll(props);
+    let showRestore=isShowRestore(props);
 
-class Toolbar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {  };
-    }
-    render() {
-        let showExpandAll=ifShowExpandAll(this.props);
-        let showRestore=isShowRestore(this.props);
+    return (
+        <Header css={headerStyle}>
+            <Button shape='circle' icon={<PlusOutlined />} className='toolbtnFirst' type='default' size='large' onClick={props.onShowNewMapDlg} title='新建' />
+            <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowSelMapDlg} title='打开' />
 
+            <Divider type="vertical" className='divider'/>
+            <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDir}  title='打开目录' />                                   
+            <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowCmd}  title='打开控制台' />
+            <Button shape='circle' icon={<ControlOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDevTool}  title='开发者工具' />
+            <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={props.onReloadApp}  title='重新载入应用' />
 
-        return (
-            <Header css={headerStyle}>
-                <Button shape='circle' icon={<PlusOutlined />} className='toolbtnFirst' type='default' size='large' onClick={this.props.onShowNewMapDlg} title='新建' />
-                <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowSelMapDlg} title='打开' />
-
-                <Divider type="vertical" className='divider'/>
-                <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowDir}  title='打开目录' />                                   
-                <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowCmd}  title='打开控制台' />
-                <Button shape='circle' icon={<ControlOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowDevTool}  title='开发者工具' />
-                <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onReloadApp}  title='重新载入应用' />
-
-                <Divider type="vertical" className='divider'/>
-                <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onShowEditMapDlg} title='编辑' />
-                
-                {/* {
-                    this.props.showRestore &&      
-                        <Button shape='circle' icon={<CompressOutlined />} className='toolbtn' type='primary' size='large' onClick={this.props.onRestore} title='恢复默认节点状态' />
-                }
-                {
-                    this.props.showExpandAll &&      
-                        <Button shape='circle' icon={<ExpandOutlined />} className='toolbtn' type='primary' size='large' onClick={this.props.onExpandAll} title='展开全部节点' />
-                } */}
-                
-
-                   
-                <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={this.props.dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
-                <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={this.props.dispatcher.tabs.expandAll} title='展开全部节点' />
-                <Button shape='circle' icon={<ExportOutlined />} className='toolbtn' type='default' size='large' onClick={this.props.onExpImage} title='导出图片' />
-                
-                
+            <Divider type="vertical" className='divider'/>
+            <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowEditMapDlg} title='编辑' />
+            
+            {/* {
+                props.showRestore &&      
+                    <Button shape='circle' icon={<CompressOutlined />} className='toolbtn' type='primary' size='large' onClick={props.onRestore} title='恢复默认节点状态' />
+            }
+            {
+                props.showExpandAll &&      
+                    <Button shape='circle' icon={<ExpandOutlined />} className='toolbtn' type='primary' size='large' onClick={props.onExpandAll} title='展开全部节点' />
+            } */}
+            
 
                 
-            </Header>
-        );
-    }
+            <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={props.dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
+            <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={props.dispatcher.tabs.expandAll} title='展开全部节点' />
+            <Button shape='circle' icon={<ExportOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} title='导出图片' />
+            
+            
+
+            
+        </Header>
+    );
+    
 }
 
 
