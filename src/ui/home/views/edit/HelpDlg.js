@@ -29,13 +29,16 @@ const HelpDlg=(props)=>{
                             </tr>
                             {
                                 nodes.map((item,ind)=>(
-                                    <tr>
+                                    <tr key={ind}>
                                         <td>{item[0]}</td>
                                         <td>
                                             {
                                                 item[1].map((subitem,subInd)=>(
                                                     <div key={''+ind+"_"+subInd}>
-                                                        <div><div>{subitem[0]}</div><div dangerouslySetInnerHTML={{__html:subitem[1]}}></div></div>
+                                                        <div>
+                                                            <div>{subitem[0]}</div>
+                                                            <div dangerouslySetInnerHTML={{__html:subitem[1]}}></div>
+                                                        </div>
                                                     </div>
                                                 ))
                                             }

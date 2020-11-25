@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal, Input,AutoComplete,Button,TreeSelect } from 'antd';
 import * as uiUtil from '../../../common/uiUtil';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
@@ -11,112 +11,109 @@ import {createSelector} from 'reselect';
 /**
  * 新建图表对话框
  */
-class NewGraphDlg extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.iptGraphName=null;
-        this.state = { 
-            autoCompleteItems:[],
-        };
-        this.iptEle=null;
-    }
+const NewGraphDlg=(props)=>{
+    const [name, setName]=useState('');
+    const [dir, setDir]=useState('');
+    const nameEle=useRef();
+
+    //每次显示时把输入框设置焦点
+    useEffect(()=>{
+        if(props.visible){
+            setName('');
+            setTimeout(() => {
+                if(nameEle.current){
+                    nameEle.current.focus();
+                }
+            }, 300);
+        }
+    },[props.visible]);
+
+    //加载所有目录层次
+    const reloadAllDirs=useCallback(()=>{
+        props.dispatcher.common.reloadAllDirs();
+    },[props.dispatcher]);
 
     /**
-     * 对话框从不可见变为可见时，让输入框获得焦点
-     * @param {*} prevProps 
-     * @param {*} prevState 
+     * 修改事件
+     * @param {*} fun 
+     * @param {*} e 
      */
-    componentDidUpdate(prevProps, prevState){
-        if(!prevProps.visible && this.props.visible){
-            if(this.iptEle){
-                this.iptEle.focus();
-            }else{
-                setTimeout(() => {
-                    if(this.iptEle){
-                        this.iptEle.focus();
-                    }
-                }, 500);
-            }
-            return;
-        }
-    }
+    const onChange=(fun,e)=>{
+        let val=(e && e.target ? e.target.value : e);
+        val=('undefined'===typeof(val) ? '' : val);
+        fun(val);
+    };
 
-
-    bindInputEle=(ele)=>{
-        this.iptEle=ele;
-    }
-
-    filterOptionFun=(inputValue, option) =>option.value.startsWith(inputValue);
-
-    reloadAllDirs=()=>{
-        this.props.dispatcher.common.reloadAllDirs();
+    /**
+     * 确定事件
+     * @param {*} e 
+     */
+    const onOk=(e)=>{
+        e.stopPropagation();
+        e.preventDefault();
+        props.onOk({dir:dir.trim(), name:name.trim()});
     }
 
     
-
-    render() {
-        return (
-            <Modal  title={getDlgTitle(this.props)}
-                    visible={this.props.visible}
-                    onOk={this.props.onOk}
-                    onCancel={this.props.onCancel}
-                    width={700}>
-                
-                <table css={{width:'100%'}}>
-                    <tbody>
-                        <tr>
-                            <td css={{paddingTop:'10px',width:'80px'}}>图表目录：</td>
-                            <td css={{paddingTop:'10px',}}>
-                                <TreeSelect
-                                    style={{ width: '100%' }}
-                                    value={this.props.newMapDir}
-                                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                                    treeData={this.props.allDirs}
-                                    placeholder="请选择图表目录"
-                                    treeDefaultExpandAll
-                                    allowClear
-                                    onChange={this.props.onChangeNewMapDir}
-                                />
-                            </td>
-                            <td css={{paddingTop:'10px',width:'50px'}}>
-                                <Button css={{marginLeft:'15px'}} 
-                                    title='刷新目录列表' 
-                                    size='small' 
-                                    type="default" 
-                                    shape="circle" 
-                                    icon={<ReloadOutlined />} 
-                                    onClick={this.reloadAllDirs} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td css={{paddingTop:'10px',}}>图表名称：</td>
-                            <td css={{paddingTop:'10px',}}>
-                                <Input
-                                    css={{width:'100%'}}
-                                    placeholder="请输入图表名称"
-                                    // backfill={false}
-                                    ref={this.bindInputEle}
-                                    value={this.props.newMapName} 
-                                    // options={this.props.allDirs}
-                                    // filterOption={this.filterOptionFun}
-                                    onChange={this.props.onChangeNewMapName} 
-                                    onPressEnter={this.props.onOk}
-                                />
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                
-            </Modal>
-        );
-    }
+    return (
+        <Modal  title={getDlgTitle({dir, name})}
+                visible={props.visible}
+                onOk={onOk}
+                onCancel={props.onCancel}
+                width={700}>
+            
+            <table css={{width:'100%'}}>
+                <tbody>
+                    <tr>
+                        <td css={{paddingTop:'10px',width:'80px'}}>图表目录：</td>
+                        <td css={{paddingTop:'10px',}}>
+                            <TreeSelect
+                                style={{ width: '100%' }}
+                                value={dir}
+                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                treeData={props.allDirs}
+                                placeholder="请选择图表目录"
+                                treeDefaultExpandAll
+                                allowClear
+                                onChange={onChange.bind(this,setDir)}
+                            />
+                        </td>
+                        <td css={{paddingTop:'10px',width:'50px'}}>
+                            <Button css={{marginLeft:'15px'}} 
+                                title='刷新目录列表' 
+                                size='small' 
+                                type="default" 
+                                shape="circle" 
+                                icon={<ReloadOutlined />} 
+                                onClick={reloadAllDirs} />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td css={{paddingTop:'10px',}}>图表名称：</td>
+                        <td css={{paddingTop:'10px',}}>
+                            <Input
+                                css={{width:'100%'}}
+                                placeholder="请输入图表名称"
+                                ref={nameEle}
+                                value={name} 
+                                onChange={onChange.bind(this,setName)} 
+                                onPressEnter={onOk}
+                            />
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            
+        </Modal>
+    );
+    
 }
 
 const getDlgTitle=createSelector(
-    props=>props.newMapDir,
-    props=>props.newMapName,
+    props=>props.dir.trim(),
+    props=>props.name.trim(),
     (dir,name)=>("新建图表 - "+(dir ? dir+"/"+(name?name:"<空>") : (name?name:"<空>")))
 );
 

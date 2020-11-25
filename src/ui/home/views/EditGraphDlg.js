@@ -50,10 +50,6 @@ class EditGraphDlg extends React.Component {
             helpDlgVisible: false,
             dateDlgVisible:false,
 
-            //
-            selDateVal: moment(),//
-            selDateStr: moment().format("YYYY-MM-DD"),
-
             insertPicPath: '',
             insertPicName: '',
             insertPicHasSelFileSymbol:Symbol(),
@@ -341,15 +337,10 @@ class EditGraphDlg extends React.Component {
         });
     }
 
-    onSelDateChange=(date, dateString)=>{
-        this.setState({
-            selDateVal: date,
-            selDateStr: dateString,
-        });
-    }
+    
 
-    onInsertDate=()=>{
-        if(null===this.state.selDateStr || ''===this.state.selDateStr){
+    onInsertDate=(dateStr)=>{
+        if(null===dateStr || ''===dateStr.trim()){
             message.warn("请选择日期");
             return;
         }
@@ -363,7 +354,7 @@ class EditGraphDlg extends React.Component {
         let lineTxt = this.codeMirrorInst.getLine(line);
 
         //替换行
-        let targetDateStr=this.state.selDateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
+        let targetDateStr=dateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
         let { newLinetxt, cusorPos } = editorSvc.addDate(lineTxt, ch, targetDateStr);
         this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     }
@@ -477,10 +468,9 @@ class EditGraphDlg extends React.Component {
                 {/* 插入日期对话框 */}
                 <DateDlg
                     visible={this.state.dateDlgVisible}
-                    value={this.state.selDateVal}
                     onCancel={this.hideAllDlg}
                     onOk={this.onInsertDate}
-                    onChange={this.onSelDateChange}/>
+                    />
             </>
         );
     }
