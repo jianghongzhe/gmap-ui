@@ -567,6 +567,13 @@ const openPicByName=(picName)=>{
     openUrl(url);
 }
 
+const openAttByName=(attName)=>{
+    let url=getFileProtocalUrl(getAttsPath(attName));
+    openUrl(url);
+}
+
+
+
 /**
  * 读取文件内容，以utf-8编码读取
  * @param {*} fullpath 全路径
@@ -863,6 +870,7 @@ module.exports={
     openGitBash, 
     openUrl, 
     openPicByName,
+    openAttByName,
 
     //杂项
     openDevTool,

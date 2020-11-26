@@ -25,6 +25,10 @@ class Api{
     openPicByName=(name)=>{
         return app.openPicByName(name);
     }
+
+    openAttByName=(name)=>{
+        return app.openAttByName(name);
+    }
     
     loadAppInfo=()=>{
         return app.loadAppInfo();

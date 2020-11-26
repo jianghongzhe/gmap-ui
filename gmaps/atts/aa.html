@@ -1,0 +1,44 @@
+<script>
+function fn(){
+            //console.log(this);
+            let tmp=this;
+            /*return ()=>{
+                console.log(this);
+            }*/
+            return function(){
+            		console.log(this);
+            }
+        }
+        const obj={name:'张三'};
+        //fn();
+        //const resFn=fn.call(obj);
+        //resFn();
+        //(resFn.bind(obj))();
+        
+        //let fn2=fn.bind(obj);
+        //console.log(fn2);
+        //fn();
+        //fn2();
+        
+ 
+ 
+ function add(x,y){
+ 	console.log(x,y,x+y);
+ }       
+ 
+ //add(1,2);
+ //const add2=add.bind(window,1);
+ //add2(3);
+ 
+ 
+ const add3=add.bind(window,1,5);
+ //add3();
+        
+   add.call(this,1,20)    ;
+        
+        
+        
+       //resFn.call("222");
+//返回函数的函数
+    
+</script>

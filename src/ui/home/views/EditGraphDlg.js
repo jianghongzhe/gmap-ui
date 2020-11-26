@@ -50,9 +50,6 @@ class EditGraphDlg extends React.Component {
             helpDlgVisible: false,
             dateDlgVisible:false,
 
-            insertPicPath: '',
-            insertPicName: '',
-            insertPicHasSelFileSymbol:Symbol(),
             isImg:true,
 
         };
@@ -187,8 +184,6 @@ class EditGraphDlg extends React.Component {
     showInsertPicDlg = () => {
         this.setState({
             insertPicDlgVisible: true,
-            insertPicPath: '',
-            insertPicName: '',
             isImg:true,
         });
     }
@@ -196,130 +191,16 @@ class EditGraphDlg extends React.Component {
     showInsertAttDlg=()=>{
         this.setState({
             insertPicDlgVisible: true,
-            insertPicPath: '',
-            insertPicName: '',
             isImg:false,
         });
     }
 
-    onSelPicFile = () => {
-        let selFilePaths = (this.state.isImg ? api.selPicFile() : api.selAttFile());
-        if (selFilePaths && selFilePaths[0]) {
-            let fullpath = selFilePaths[0];
-            let fn = fullpath.substring(Math.max(fullpath.lastIndexOf("\\"), fullpath.lastIndexOf("/")) + 1);
-            this.setState({
-                insertPicPath: fullpath,
-                insertPicName: (''===this.state.insertPicName.trim()?fn:this.state.insertPicName),
-                insertPicHasSelFileSymbol:Symbol(),
-            });
-        }
-    }
+    
 
-    openPicByName = () => {
-        api.openPicByName(this.state.insertPicName);
-    }
 
-    onAddPicCommit = () => {
-        if(this.state.isImg){
-            if (null != this.state.insertPicPath && 
-                    "" !== this.state.insertPicPath.trim() && 
-                    !api.existsFullpath(this.state.insertPicPath) &&
-                    !api.isUrlFormat(this.state.insertPicPath)) {
-                message.warn("图片路径或url格式有误");
-                return;
-            }
-            if (null == this.state.insertPicName || "" === this.state.insertPicName.trim()) {
-                message.warn("图片显示名称不能为空");
-                return;
-            }
-            if (this.state.insertPicName.includes("/") || this.state.insertPicName.includes("\\")) {
-                message.warn('图片显示名称格式有误，不能包含 "/" 或 "\\" ');
-                return;
-            }
-            if (true === api.existsPic(this.state.insertPicName)) {
-                Modal.confirm({
-                    title: '是否覆盖',
-                    content: <>
-                        <div css={{ marginBottom: 10 }}>图片显示名称已存在，是否要覆盖 ？</div>
-                        <Button type="link" title='查看已有同名图片' css={{ margin: 0, padding: 0 }} onClick={this.openPicByName}>查看已有同名图片</Button>
-                    </>,
-                    icon: <QuestionCircleOutlined />,
-                    onOk: this.copyPicAndAddTxt
-                });
-                return;
-            }
+    
 
-            this.copyPicAndAddTxt();
-            return;
-        }
-        if(!this.state.isImg){
-            if (null == this.state.insertPicPath && 
-                    "" === this.state.insertPicPath.trim()) {
-                message.warn("附件路径或url不能为空");
-                return;
-            }
-            if (null != this.state.insertPicPath && 
-                    "" !== this.state.insertPicPath.trim() && 
-                    !api.existsFullpath(this.state.insertPicPath) &&
-                    !api.isUrlFormat(this.state.insertPicPath)) {
-                message.warn("附件路径或url格式有误");
-                return;
-            }
-            if (null == this.state.insertPicName || "" === this.state.insertPicName.trim()) {
-                message.warn("附件显示名称不能为空");
-                return;
-            }
-            if (this.state.insertPicName.includes("/") || this.state.insertPicName.includes("\\")) {
-                message.warn('附件显示名称格式有误，不能包含 "/" 或 "\\" ');
-                return;
-            }
-            if (true === api.existsAtt(this.state.insertPicName)) {
-                Modal.confirm({
-                    title: '是否覆盖',
-                    content: <>
-                        <div css={{ marginBottom: 10 }}>附件显示名称已存在，是否要覆盖 ？</div>
-                        <Button type="link" title='查看已有同名附件' css={{ margin: 0, padding: 0 }} onClick={this.openPicByName}>查看已有同名附件</Button>
-                    </>,
-                    icon: <QuestionCircleOutlined />,
-                    onOk: this.copyPicAndAddTxt
-                });
-                return;
-            }
-
-            this.copyPicAndAddTxt();
-            return;
-        }
-    }
-
-    copyPicAndAddTxt = () => {
-        if(this.state.isImg){
-            //如果路径为空，则从剪切板找图片；否则从指定路径加载图片
-            let prom =null;
-            if(''===this.state.insertPicPath.trim()){//路径为空，从剪切板取图片
-                prom=api.copyClipboardPicToImgsDir(this.state.insertPicName, this.props.activeKey);
-            }else{//路径不为空，从文件取图片
-                prom=api.copyPicToImgsDir(this.state.insertPicPath,this.state.insertPicName, this.props.activeKey);
-            }
-            prom.then(rs=>{
-                this.hideAllDlg();
-                this.onAddPic(rs,this.state.insertPicName);
-            }).catch(e=>{
-                message.warn(e.msg);
-            });
-            return;
-        }
-        if(!this.state.isImg){
-            //如果路径为空，则从剪切板找图片；否则从指定路径加载图片
-            let prom = api.copyAttToAttsDir(this.state.insertPicPath,this.state.insertPicName, this.props.activeKey);          
-            prom.then(rs=>{
-                this.hideAllDlg();
-                this.onAddAtt(rs,this.state.insertPicName);
-            }).catch(e=>{
-                message.warn(e.msg);
-            });
-            return;
-        }
-    }
+    
 
 
 
@@ -432,18 +313,14 @@ class EditGraphDlg extends React.Component {
                 </EnhDlg>
 
                 {/*插入图片对话框*/}
-                <InsertImgDlg
-                    dlgW={insertPicDlgW}
+                <InsertImgDlg                    
                     visible={this.state.insertPicDlgVisible}
-                    insertPicPath={this.state.insertPicPath}
-                    insertPicName={this.state.insertPicName} 
-                    hasSelFileSymbo={this.state.insertPicHasSelFileSymbol}
-                    onCancel={this.hideAllDlg}
-                    onOk={this.onAddPicCommit}
+                    dlgW={insertPicDlgW}
                     isImg={this.state.isImg}
-                    onPicPathChange={uiUtil.bindChangeEventToState.bind(this, this, 'insertPicPath')} 
-                    onPicNameChange={uiUtil.bindChangeEventToState.bind(this, this, 'insertPicName')} 
-                    onSelPicFile={this.onSelPicFile}
+                    activeKey={this.props.activeKey}
+                    onAddPic ={this.onAddPic}
+                    onAddAtt={this.onAddAtt}
+                    onCancel={this.hideAllDlg}
                 />
 
                 {/* 颜色选择对话框 */}

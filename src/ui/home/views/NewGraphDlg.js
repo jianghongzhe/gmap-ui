@@ -38,11 +38,11 @@ const NewGraphDlg=(props)=>{
      * @param {*} fun 
      * @param {*} e 
      */
-    const onChange=(fun,e)=>{
+    const onChange=useCallback((fun,e)=>{
         let val=(e && e.target ? e.target.value : e);
         val=('undefined'===typeof(val) ? '' : val);
         fun(val);
-    };
+    },[]);
 
     /**
      * 确定事件
