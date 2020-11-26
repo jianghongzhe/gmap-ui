@@ -26,9 +26,7 @@ const InsertImgDlg=(props)=>{
             setPicPath('');
             setPicName('');
             setTimeout(() => {
-                if(elePicPath.current){
-                    elePicPath.current.focus();
-                }
+                onFocusEle(elePicPath);
             }, 300);
        }
     },[props.visible]);
@@ -49,7 +47,7 @@ const InsertImgDlg=(props)=>{
      * @param {*} nextRef 
      * @param {*} e 
      */
-    const onFocusEle=(nextRef,e)=>{
+    const onFocusEle=useCallback((nextRef,e)=>{
         if(e){
             e.preventDefault();
             e.stopPropagation();
@@ -57,7 +55,7 @@ const InsertImgDlg=(props)=>{
         if(nextRef && nextRef.current){
             nextRef.current.focus();
         }
-    }
+    },[]);
 
     /**
      * 选择图片或附件文件，选择后更新输入框，并使第二个输入框获得焦点

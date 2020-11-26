@@ -8,138 +8,139 @@ import {createSelector} from 'reselect';
 import marked from 'marked';
 import './markdown-node.css';
 
+/**
+ * 导图的节点
+ * @param {*} props 
+ */
+const MindNode=(props)=>{
+    //如果节点不存在，不需要渲染
+    const nd=props.nd;
+    if(!nd){return null;}
 
-class MindNode extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {  };
-    }
+    //节点是否有额外内容
+    const hasExtraItems=(
+        nd.dateItem || 
+        nd.prog ||
+        nd.gant ||
+        (nd.memo && 0<nd.memo.length) ||
+        nd.ref ||
+        (nd.links && 0<nd.links.length)
+    );
 
-    progressFormater=(st,percent)=>{
-        if('exception'===st){
-            return <CloseOutlined />;
-        }
-        if(100===percent){
-            return <CheckOutlined />;
-        }
-        return <span css={progStyle.font}>{`${percent}`}</span>;
-    }
-
-    render() {
-        let nd=this.props.nd;
-        if(!nd){return null;}
-
-        let hasExtraItems=(
-            nd.dateItem || 
-            nd.prog ||
-            nd.gant ||
-            (nd.memo && 0<nd.memo.length) ||
-            nd.ref ||
-            (nd.links && 0<nd.links.length)
-        );
-
-        //按主题的不同层级设置不同样式，同时根据是否有文本之外的内容而显示不同的样式（只对根节点）
-        let themeStyle=themeStyles[nd.lev>2 ? 2 : nd.lev];
-        themeStyle=themeStyle(hasExtraItems);
+    //按主题的不同层级设置不同样式，同时根据是否有文本之外的内容而显示不同的样式（只对根节点）
+    let themeStyle=themeStyles[nd.lev>2 ? 2 : nd.lev];
+    themeStyle=themeStyle(hasExtraItems);
 
 
-        return (<span css={themeStyle}>
-            {/* 日期部分 */}
-            {
-                (nd && nd.dateItem) && (
-                    <Tooltip title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
-                        <div css={dateStyle} onClick={this.props.onShowTimeline.bind(this,nd.dateItem.timeline)}>
-                            <ClockCircleOutlined className='themeicon' css={{color:nd.dateItem.color}}/>
-                            <span className='themedatetxt' css={{color:nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
-                        </div>
-                    </Tooltip>
-                )
-            }
-
-
-            {/* 主题文本 markdown-body*/}
-            <span className='themename markdown-body-node' >
-                {
-                    "string"===typeof(nd.str) ?
-                        <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
-                            :
-                        <>{nd.str.map((line,ind)=><React.Fragment key={'ndtxts-'+ind}>
-                            {0<ind && <br key={'ndbr-'+ind}/>}
-                            <span key={'ndtxt-'+ind} dangerouslySetInnerHTML={{__html:handleSingleLine(line)}}></span>
-                        </React.Fragment>)}</>
-                } 
-            </span>
-
-            {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}
-            {(nd && nd.prog) && (
-                <Tooltip title={nd.prog.msg}>
-                    <Progress type="circle" 
-                        trailColor={progStyle.trailColor}
-                        format={this.progressFormater.bind(this,nd.prog.st)}
-                        css={progStyle.style}
-                        percent={nd.prog.err ? 100 : nd.prog.num} 
-                        width={progStyle.size} 
-                        status={nd.prog.st}
-                        onClick={this.props.onShowProgs.bind(this,nd.prog.allProgs)}
-                    />
+    return (<span css={themeStyle}>
+        {/* 日期部分 */}
+        {
+            (nd && nd.dateItem) && (
+                <Tooltip title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
+                    <div css={dateStyle} onClick={props.onShowTimeline.bind(this,nd.dateItem.timeline)}>
+                        <ClockCircleOutlined className='themeicon' css={{color:nd.dateItem.color}}/>
+                        <span className='themedatetxt' css={{color:nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
+                    </div>
                 </Tooltip>
-            )}  
+            )
+        }
 
-            {/* 甘特图  */}
-            {(nd && nd.gant) && (
-                <Avatar size={18} src={gantPic} css={gantStyle} title='查看甘特图' onClick={this.props.onShowGant.bind(this,nd.gant)}/>
-            )}
 
-            {/* 短备注，多个用div叠起来 */}
+        {/* 主题文本 markdown-body*/}
+        <span className='themename markdown-body-node' >
             {
-                (nd && nd.memo && 0<nd.memo.length) && (
-                    <Tooltip title={
-                        <div>
-                            {
-                                nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
-                            }
-                        </div>
-                    }>
-                        <FormOutlined  css={{...themeIconStyle, ...colors.memo}}/>
-                    </Tooltip>
-                )
-            }
+                "string"===typeof(nd.str) ?
+                    <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
+                        :
+                    <>{nd.str.map((line,ind)=><React.Fragment key={'ndtxts-'+ind}>
+                        {0<ind && <br key={'ndbr-'+ind}/>}
+                        <span key={'ndtxt-'+ind} dangerouslySetInnerHTML={{__html:handleSingleLine(line)}}></span>
+                    </React.Fragment>)}</>
+            } 
+        </span>
 
-            {/* 长引用按钮 */}
-            {
-                (nd && nd.ref) && (
-                    <span css={themeBtnWrapperStyle}>
+        {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}
+        {(nd && nd.prog) && (
+            <Tooltip title={nd.prog.msg}>
+                <Progress type="circle" 
+                    trailColor={progStyle.trailColor}
+                    format={progressFormater.bind(this,nd.prog.st)}
+                    css={progStyle.style}
+                    percent={nd.prog.err ? 100 : nd.prog.num} 
+                    width={progStyle.size} 
+                    status={nd.prog.st}
+                    onClick={props.onShowProgs.bind(this,nd.prog.allProgs)}
+                />
+            </Tooltip>
+        )}  
+
+        {/* 甘特图  */}
+        {(nd && nd.gant) && (
+            <Avatar size={18} src={gantPic} css={gantStyle} title='查看甘特图' onClick={props.onShowGant.bind(this,nd.gant)}/>
+        )}
+
+        {/* 短备注，多个用div叠起来 */}
+        {
+            (nd && nd.memo && 0<nd.memo.length) && (
+                <Tooltip title={
+                    <div>
+                        {
+                            nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
+                        }
+                    </div>
+                }>
+                    <FormOutlined  css={{...themeIconStyle, ...colors.memo}}/>
+                </Tooltip>
+            )
+        }
+
+        {/* 长引用按钮 */}
+        {
+            (nd && nd.ref) && (
+                <span css={themeBtnWrapperStyle}>
+                    <Button 
+                        type="link" 
+                        size='small' 
+                        title={'查看引用 - '+nd.ref.showname} 
+                        className='themebtn'
+                        icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
+                        onClick={props.onOpenRef.bind(this,nd.ref)}/>
+                </span>
+            )
+        }
+
+        {/* 链接按钮 */}
+        {
+            (nd && nd.links && 0<nd.links.length) && <>{
+                nd.links.map((link,linkInd)=>(
+                    <span css={themeBtnWrapperStyle} key={'link-'+linkInd}>
                         <Button 
+                            key={linkInd} 
                             type="link" 
                             size='small' 
-                            title={'查看引用 - '+nd.ref.showname} 
+                            title={link.name ? link.name+"  "+link.addr:link.addr} 
                             className='themebtn'
-                            icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
-                            onClick={this.props.onOpenRef.bind(this,nd.ref)}/>
+                            icon={getLinkIcon(link.addr)}  
+                            onClick={props.onOpenLink.bind(this,link.addr)}/>
                     </span>
-                )
-            }
-
-            {/* 链接按钮 */}
-            {
-                (nd && nd.links && 0<nd.links.length) && <>{
-                    nd.links.map((link,linkInd)=>(
-                        <span css={themeBtnWrapperStyle} key={'link-'+linkInd}>
-                            <Button 
-                                key={linkInd} 
-                                type="link" 
-                                size='small' 
-                                title={link.name ? link.name+"  "+link.addr:link.addr} 
-                                className='themebtn'
-                                icon={getLinkIcon(link.addr)}  
-                                onClick={this.props.onOpenLink.bind(this,link.addr)}/>
-                        </span>
-                    ))
-                }</>
-            }
-        </span>);
-    }
+                ))
+            }</>
+        }
+    </span>);
+    
 }
+
+const progressFormater=(st,percent)=>{
+    if('exception'===st){
+        return <CloseOutlined />;
+    }
+    if(100===percent){
+        return <CheckOutlined />;
+    }
+    return <span css={progStyle.font}>{`${percent}`}</span>;
+}
+
+
 
 /**
  * 根据链接的不同协议显示不同图标
