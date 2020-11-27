@@ -1,5 +1,8 @@
+import { FindInPage } from 'electron-find';
+
+
 const {app,getCurrentWebContents} = window.require('electron').remote;
-const { FindInPage } =window.require('electron-find');
+
 
 class Api{
 
