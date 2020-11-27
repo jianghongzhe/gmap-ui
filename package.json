@@ -1,7 +1,7 @@
 {
   "name": "gmap",
   "showname": "GMap - 思维导图",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "private": true,
   "homepage": "./",
   "main": "main.js",
@@ -16,6 +16,7 @@
     "ahooks": "^2.9.1",
     "antd": "^4.8.2",
     "codemirror": "^5.58.2",
+    "electron-find": "^1.0.6",
     "github-markdown-css": "^4.0.0",
     "highlight.js": "^9.18.3",
     "html2canvas": "^1.0.0-rc.7",

@@ -53,6 +53,19 @@ const model={
         },
     },
     effects:{
+        *removeTabCheckShouldStopFindInPage(payload,{creater,sel,res,rej}){
+            const {panes}=yield sel();
+            if(1===panes.length){
+                api.closeFindInPageDlg();
+            }
+            yield put(creater.removeTab(payload));
+        },
+
+        /**
+         * 移动到前一个选项卡，支持循环滚动
+         * @param {*} payload 
+         * @param {*} param1 
+         */
         *movePreTab(payload,{creater,sel,res,rej}){
             let {activeKey,panes}=yield sel();
             let currInd=-1;
@@ -61,12 +74,26 @@ const model={
                     currInd=ind;
                 }
             });
-            if(currInd<=0){
+            if(currInd<0){
                 return;
             }
-            yield put(creater.changeActiveKey(panes[currInd-1].key));
+            //不是第一个，前移
+            if(currInd>0){
+                yield put(creater.changeActiveKey(panes[currInd-1].key));
+                return;
+            }
+            //是第一个，移到最后一个
+            if(0===currInd && panes.length>=2){
+                yield put(creater.changeActiveKey(panes[panes.length-1].key));
+                return;
+            }
         },
 
+        /**
+         * 移动到后一个选项卡，支持循环滚动
+         * @param {*} payload 
+         * @param {*} param1 
+         */
         *moveNextTab(payload,{creater,sel,res,rej}){
             let {activeKey,panes}=yield sel();
             let currInd=-1;
@@ -75,10 +102,20 @@ const model={
                     currInd=ind;
                 }
             });
-            if(currInd<0 || currInd>=panes.length-1){
+            if(currInd<0){
                 return;
             }
-            yield put(creater.changeActiveKey(panes[currInd+1].key));
+            //不是最后一个，后移
+            if(currInd<panes.length-1){
+                yield put(creater.changeActiveKey(panes[currInd+1].key));
+                return;
+            }
+            //是最后一个，移到第一个
+            if(currInd===panes.length-1 && panes.length>=2){
+                yield put(creater.changeActiveKey(panes[0].key));
+                return;
+            }
+            
         },
 
 

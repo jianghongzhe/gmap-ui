@@ -1,104 +1,28 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
-import Mindmap from './Mindmap';
+
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
 import {connect} from '../../../common/gflow';
-import newMindmapSvc from '../../../service/newMindmapSvc';
+
 import api from '../../../service/api';
-import FindInPageDlg from './FindInPageDlg';
-import {useBoolean} from 'ahooks';
+
 
 const { TabPane } = Tabs;
 
+
+
+/**
+ * 选项卡组件
+ * @param {*} props 
+ */
 const GraphTabs=(props)=>{
-    const [findDlgVisible, {setTrue: showFindDlg, setFalse}]=useBoolean(false);
+
     
-
-    const hideFindDlg=useCallback(()=>{
-        setFalse();
-        api.stopFindInPage();
-    },[setFalse]);
-
-    useEffect(()=>{
-        const keyHandle=(e)=>{
-            // code: "PageDown"
-            //ctrlKey: true
-            // PageUp
-
-            // findInPage
-            /*
-            Escape
-            ArrowRight
-            ArrowLeft
-            */
-            //e.altKey 
-            //e.shiftKey
-           
-            // console.log(e);
-
-            if(e && false===e.ctrlKey && false===e.altKey && false===e.shiftKey && 'Escape'===e.code && true!==props.editing){
-                api.stopFindInPage();
-                return;
-            }
-            if(e && false===e.ctrlKey && 'ArrowLeft'===e.code && true!==props.editing){
-                api.findInPagePre();
-                return;
-            }
-            if(e && false===e.ctrlKey && 'ArrowRight'===e.code && true!==props.editing){
-                api.stopFindInPage();
-                return;
-            }
-
-
-            console.log(e.code);
-
-            if(e && true===e.ctrlKey && 'KeyF'===e.code && true!==props.editing){
-                console.log("22 ----<");
-                // api.findInPage("22");
-                console.log("22 ---->");
-
-                showFindDlg();
-                return;
-            }
-            if(e && true===e.ctrlKey && 'KeyG'===e.code && true!==props.editing){
-                console.log("22 ----<");
-                api.findInPageNext("22");
-                console.log("22 ---->");
-                return;
-            }
-            if(e && true===e.ctrlKey && 'KeyH'===e.code && true!==props.editing){
-                console.log("22 ----<");
-                api.findInPagePre("22");
-                console.log("22 ---->");
-                return;
-            }
-            
-            if(e && true===e.altKey && 'KeyW'===e.code && true!==props.editing){
-                e.stopPropagation();
-                e.preventDefault();
-                onEditTab(props.activeKey,"remove");
-                return;
-            }
-            if(e && true===e.ctrlKey && 'PageUp'===e.code && true!==props.editing){
-                props.dispatcher.tabs.movePreTab();
-                return;
-            }
-            if(e && true===e.ctrlKey && 'PageDown'===e.code && true!==props.editing){
-                props.dispatcher.tabs.moveNextTab();
-                return;
-            }
-
-            
-        }
-
-        document.addEventListener('keyup', keyHandle);
-        return ()=>document.removeEventListener('keyup',keyHandle);
-    },[props.panes, props.editing, props.activeKey,findDlgVisible]);
     
     /**
      * 节点内容的render props
@@ -137,12 +61,55 @@ const GraphTabs=(props)=>{
      * @param {*} targetKey 
      * @param {*} action 
      */
-    const onEditTab = (targetKey, action) => {
+    const onEditTab =useCallback((targetKey, action) => {
         if ("remove" === action) {
-            props.dispatcher.tabs.removeTab(targetKey);
+            props.dispatcher.tabs.removeTabCheckShouldStopFindInPage(targetKey);
         }
-    };
+    },[props.dispatcher.tabs]);
 
+
+    /**
+     * 初始化快捷键，并在组件销毁时移除
+     */
+    useEffect(()=>{
+        const keyHandle=(e)=>{
+            //ctrl+f 网页内查找
+            if(e && true===e.ctrlKey && 'KeyF'===e.code && true!==props.editing){
+                api.showFindInPageDlg();
+                return;
+            }
+            //esc 关闭网页内查找
+            if(e && false===e.ctrlKey && false===e.altKey && false===e.shiftKey && 'Escape'===e.code && true!==props.editing){
+                api.closeFindInPageDlg();
+                return;
+            }
+            
+            //alt+w 关闭当前选项卡（未使用ctrl+w，因为快捷键已被chrome使用，程序不能捕获到事件）
+            if(e && true===e.altKey && 'KeyW'===e.code && true!==props.editing){
+                // e.stopPropagation();
+                // e.preventDefault();
+                onEditTab(props.activeKey,"remove");
+                return;
+            }
+
+            //ctrl+PageUp 前一个选项卡
+            if(e && true===e.ctrlKey && 'PageUp'===e.code && true!==props.editing){
+                props.dispatcher.tabs.movePreTab();
+                return;
+            }
+
+            //ctrl+PageDown 后一个选项卡
+            if(e && true===e.ctrlKey && 'PageDown'===e.code && true!==props.editing){
+                props.dispatcher.tabs.moveNextTab();
+                return;
+            }
+        }
+
+        document.addEventListener('keydown', keyHandle);
+        return ()=>document.removeEventListener('keydown',keyHandle);
+    },[props.editing,props.activeKey,props.dispatcher.tabs,onEditTab]);
+
+    
     
     return <React.Fragment>
         <Tabs
@@ -167,12 +134,7 @@ const GraphTabs=(props)=>{
                 ))
             }
         </Tabs>
-        <FindInPageDlg 
-            visible={findDlgVisible} 
-            onCancel={hideFindDlg}
-        />
     </React.Fragment>;
-    
 }
 
 

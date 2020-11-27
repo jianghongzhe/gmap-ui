@@ -63,6 +63,8 @@ const model={
             if(!generalSvc.isPathValid(installPath)){
                 dispatcher.setInstallPathInvalid(null);
             }
+
+            api.initFindInPageDlg();
         },
     },
 };

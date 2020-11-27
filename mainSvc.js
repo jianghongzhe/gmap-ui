@@ -818,21 +818,7 @@ const downFile=(url,savePath)=>{
     });
 }
 
-const findInPage=(mainWindow,txt)=>{
-    mainWindow.webContents.findInPage(txt);
-}
 
-const findInPageNext=(mainWindow,txt)=>{
-    mainWindow.webContents.findInPage(txt,{findNext:true,});
-}
-
-const findInPagePre=(mainWindow,txt)=>{
-    mainWindow.webContents.findInPage(txt,{forward:false, findNext:true,});
-}
-
-const stopFindInPage=(mainWindow)=>{
-    mainWindow.webContents.stopFindInPage('clearSelection');
-}
 
 
 
@@ -896,10 +882,7 @@ module.exports={
     loadAppInfo,
     reloadAppPage,
     isUrlFormat,
-    findInPage,
-    findInPageNext,
-    findInPagePre,
-    stopFindInPage,
+    
     
     
 };

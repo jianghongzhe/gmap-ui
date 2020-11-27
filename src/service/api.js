@@ -1,6 +1,26 @@
-const {app} = window.require('electron').remote;
+const {app,getCurrentWebContents} = window.require('electron').remote;
+const { FindInPage } =window.require('electron-find');
 
 class Api{
+
+
+    /**
+     * 初始化查找对话框，需要在页面加载完之后调用
+     */
+    initFindInPageDlg=()=>{
+        this.findInPageDlg = new FindInPage(getCurrentWebContents(),{
+            offsetTop: 118,
+            offsetRight: 20,
+        });
+    }
+
+    showFindInPageDlg=()=>{
+        this.findInPageDlg.openFindWindow();
+    }
+
+    closeFindInPageDlg=()=>{
+        this.findInPageDlg.closeFindWindow();
+    }
 
     openBash=()=>{
         app.openGitBash();
@@ -30,19 +50,7 @@ class Api{
         return app.openAttByName(name);
     }
 
-    findInPage=(txt)=>{
-        return app.findInPage(txt);
-    }
-    findInPageNext=(txt)=>{
-        return app.findInPageNext(txt);
-    }
-    findInPagePre=(txt)=>{
-        return app.findInPagePre(txt);
-    }
-
-    stopFindInPage=()=>{
-        return app.stopFindInPage();
-    }
+    
 
 
     
