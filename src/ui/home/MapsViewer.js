@@ -266,6 +266,7 @@ class MapsViewer extends React.Component {
                                     onExpImage={this.onExpImage}
                                 />
                                 <GraphTabs
+                                    editing={this.state.editMapDlgVisible}
                                     onOpenLink={this.openLink}
                                     onOpenRef={this.openRef}
                                     onShowTimeline={this.onShowTimeline}

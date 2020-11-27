@@ -63,6 +63,10 @@ app.on('ready', () => {
     app.reloadAppPage=app.reloadAppPage.bind(app,mainWindow);
     app.openSaveFileDlg=app.openSaveFileDlg.bind(app,mainWindow);
     app.isMaximized=app.isMaximized.bind(app,mainWindow);
+    app.findInPage=app.findInPage.bind(app,mainWindow);
+    app.findInPageNext=app.findInPageNext.bind(app,mainWindow);
+    app.findInPagePre=app.findInPagePre.bind(app,mainWindow);
+    app.stopFindInPage=app.stopFindInPage.bind(app,mainWindow);
 
     //加载初始页
     loadFirstPage();

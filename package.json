@@ -13,6 +13,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "ahooks": "^2.9.1",
     "antd": "^4.8.2",
     "codemirror": "^5.58.2",
     "github-markdown-css": "^4.0.0",

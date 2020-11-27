@@ -29,6 +29,22 @@ class Api{
     openAttByName=(name)=>{
         return app.openAttByName(name);
     }
+
+    findInPage=(txt)=>{
+        return app.findInPage(txt);
+    }
+    findInPageNext=(txt)=>{
+        return app.findInPageNext(txt);
+    }
+    findInPagePre=(txt)=>{
+        return app.findInPagePre(txt);
+    }
+
+    stopFindInPage=()=>{
+        return app.stopFindInPage();
+    }
+
+
     
     loadAppInfo=()=>{
         return app.loadAppInfo();

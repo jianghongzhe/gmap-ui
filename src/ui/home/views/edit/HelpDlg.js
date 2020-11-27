@@ -88,24 +88,31 @@ const HelpDlg=(props)=>{
                     <div className='wrapper'>
                         <table css={helpTableStyle}>
                             <tbody>
-                            <tr>
-                                <th>按键</th>
-                                <th>功能</th>
-                            </tr>
                             {
-                                shortcuts.map((item,ind)=>(
+                                shortcuts.map((item,ind)=><React.Fragment>
                                     <tr key={ind}>
-                                        <td>{item[0]}</td>
-                                        <td>
-                                            <div>
-                                                <div>
-                                                    <div>{item[1]}</div>
-                                                    <div></div>
-                                                </div>
-                                            </div>
-                                        </td>
+                                        <th colSpan='2' css={{fontWeight:'bold',}}>{item.title}</th>
                                     </tr>
-                                ))
+                                    <tr>
+                                        <th>按键</th>
+                                        <th>功能</th>
+                                    </tr>
+                                    <React.Fragment>
+                                    {
+                                        item.rows.map((row,rowInd)=><tr key={ind+"_"+rowInd}>
+                                            <td>{row[0]}</td>
+                                            <td>
+                                                <div>
+                                                    <div>
+                                                        <div>{row[1]}</div>
+                                                        <div></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>)
+                                    }
+                                    </React.Fragment>
+                                </React.Fragment>)
                             }
                             </tbody>
                         </table>
@@ -195,16 +202,29 @@ const refs=[
 
 
 const shortcuts=[
-    ['Ctrl + S','只保存'],
-    ['Ctrl + Shift + S','保存并关闭'],
-    ['Ctrl + F','查找对话框'],
-    ['Enter','下一个'],
-    ['Shift + Enter','上一个'],
-    ['Ctrl + G','跳转到指定行'],
-    ['Ctrl + P','插入图片'],
-    ['Ctrl + I','插入附件'],
-    ['Ctrl + T','插入日期'],
-    ['Ctrl + H','打开帮助页'],
+    {
+        title:'导图编辑窗口',
+        rows:[
+            ['Ctrl + S','只保存'],
+            ['Ctrl + Shift + S','保存并关闭'],
+            ['Ctrl + F','查找对话框'],
+            ['Enter','下一个'],
+            ['Shift + Enter','上一个'],
+            ['Ctrl + G','跳转到指定行'],
+            ['Ctrl + P','插入图片'],
+            ['Ctrl + I','插入附件'],
+            ['Ctrl + T','插入日期'],
+            ['Ctrl + H','打开帮助页'],
+        ]
+    },
+    {
+        title:'导图浏览窗口',
+        rows:[
+            ['Alt+W','关闭当前选项卡'],
+            ['Ctrl+PageUp','选中前一个选项卡'],
+            ['Ctrl+PageDown','选中后一个选项卡'],
+        ]
+    }
 ];
 
 

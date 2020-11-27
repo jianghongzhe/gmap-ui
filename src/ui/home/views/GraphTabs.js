@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
@@ -9,35 +9,113 @@ import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
 import {connect} from '../../../common/gflow';
 import newMindmapSvc from '../../../service/newMindmapSvc';
+import api from '../../../service/api';
+import FindInPageDlg from './FindInPageDlg';
+import {useBoolean} from 'ahooks';
 
 const { TabPane } = Tabs;
 
-class GraphTabs extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {  };
-    }
-
-
-
+const GraphTabs=(props)=>{
+    const [findDlgVisible, {setTrue: showFindDlg, setFalse}]=useBoolean(false);
     
 
+    const hideFindDlg=useCallback(()=>{
+        setFalse();
+        api.stopFindInPage();
+    },[setFalse]);
+
+    useEffect(()=>{
+        const keyHandle=(e)=>{
+            // code: "PageDown"
+            //ctrlKey: true
+            // PageUp
+
+            // findInPage
+            /*
+            Escape
+            ArrowRight
+            ArrowLeft
+            */
+            //e.altKey 
+            //e.shiftKey
+           
+            // console.log(e);
+
+            if(e && false===e.ctrlKey && false===e.altKey && false===e.shiftKey && 'Escape'===e.code && true!==props.editing){
+                api.stopFindInPage();
+                return;
+            }
+            if(e && false===e.ctrlKey && 'ArrowLeft'===e.code && true!==props.editing){
+                api.findInPagePre();
+                return;
+            }
+            if(e && false===e.ctrlKey && 'ArrowRight'===e.code && true!==props.editing){
+                api.stopFindInPage();
+                return;
+            }
+
+
+            console.log(e.code);
+
+            if(e && true===e.ctrlKey && 'KeyF'===e.code && true!==props.editing){
+                console.log("22 ----<");
+                // api.findInPage("22");
+                console.log("22 ---->");
+
+                showFindDlg();
+                return;
+            }
+            if(e && true===e.ctrlKey && 'KeyG'===e.code && true!==props.editing){
+                console.log("22 ----<");
+                api.findInPageNext("22");
+                console.log("22 ---->");
+                return;
+            }
+            if(e && true===e.ctrlKey && 'KeyH'===e.code && true!==props.editing){
+                console.log("22 ----<");
+                api.findInPagePre("22");
+                console.log("22 ---->");
+                return;
+            }
+            
+            if(e && true===e.altKey && 'KeyW'===e.code && true!==props.editing){
+                e.stopPropagation();
+                e.preventDefault();
+                onEditTab(props.activeKey,"remove");
+                return;
+            }
+            if(e && true===e.ctrlKey && 'PageUp'===e.code && true!==props.editing){
+                props.dispatcher.tabs.movePreTab();
+                return;
+            }
+            if(e && true===e.ctrlKey && 'PageDown'===e.code && true!==props.editing){
+                props.dispatcher.tabs.moveNextTab();
+                return;
+            }
+
+            
+        }
+
+        document.addEventListener('keyup', keyHandle);
+        return ()=>document.removeEventListener('keyup',keyHandle);
+    },[props.panes, props.editing, props.activeKey,findDlgVisible]);
+    
     /**
      * 节点内容的render props
      */
-    ndContentRenderer=(nd)=>{
+    const ndContentRenderer=(nd)=>{
         return <MindNode key={nd.id} nd={nd}
-            onOpenLink={this.props.onOpenLink} 
-            onOpenRef={this.props.onOpenRef}
-            onShowTimeline={this.props.onShowTimeline}
-            onShowProgs={this.props.onShowProgs}
-            onShowGant={this.props.onShowGant}/>;
+            onOpenLink={props.onOpenLink} 
+            onOpenRef={props.onOpenRef}
+            onShowTimeline={props.onShowTimeline}
+            onShowProgs={props.onShowProgs}
+            onShowGant={props.onShowGant}/>;
     }
 
     /**
      * 折叠按钮的render props
      */
-    ndExpBtnRenderer=(nd)=>{
+    const ndExpBtnRenderer=(nd)=>{
         return (
             <Button 
                 type="link" 
@@ -50,44 +128,51 @@ class GraphTabs extends React.Component {
                             :
                         <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
                 }  
-                onClick={this.props.dispatcher.tabs.toggleExpand.bind(this,nd)}/>
+                onClick={props.dispatcher.tabs.toggleExpand.bind(this,nd)}/>
         );
     }
 
-    onEditTab = (targetKey, action) => {
+    /**
+     * 删除tab
+     * @param {*} targetKey 
+     * @param {*} action 
+     */
+    const onEditTab = (targetKey, action) => {
         if ("remove" === action) {
-            this.props.dispatcher.tabs.removeTab(targetKey);
+            props.dispatcher.tabs.removeTab(targetKey);
         }
     };
 
     
-
-    render() {
-        return (
-                <Tabs
-                    hideAdd={true}
-                    type="editable-card"
-                    activeKey={this.props.activeKey}
-                    css={{ height:this.props.winH-64, 'backgroundColor': 'white' }}
-                    onChange={this.props.dispatcher.tabs.changeActiveKey}
-                    onEdit={this.onEditTab}>
-                    {
-                        this.props.panes.map((pane,ind) => (
-                            <TabPane tab={pane.title} key={pane.key} closable={true}>
-                                <div css={getTabItemContainerStyle(this.props.winH- 64 - 55-1)}>
-                                    <NewMindmap
-                                        ind={ind}
-                                        ds={pane.ds}
-                                        ndContentRenderer={this.ndContentRenderer}
-                                        ndExpBtnRenderer={this.ndExpBtnRenderer}
-                                    />
-                                </div>
-                            </TabPane>
-                        ))
-                    }
-                </Tabs>
-        );
-    }
+    return <React.Fragment>
+        <Tabs
+            hideAdd={true}
+            type="editable-card"
+            activeKey={props.activeKey}
+            css={{ height:props.winH-64, 'backgroundColor': 'white' }}
+            onChange={props.dispatcher.tabs.changeActiveKey}
+            onEdit={onEditTab}>
+            {
+                props.panes.map((pane,ind) => (
+                    <TabPane tab={pane.title} key={pane.key} closable={true}>
+                        <div css={getTabItemContainerStyle(props.winH- 64 - 55-1)}>
+                            <NewMindmap
+                                ind={ind}
+                                ds={pane.ds}
+                                ndContentRenderer={ndContentRenderer}
+                                ndExpBtnRenderer={ndExpBtnRenderer}
+                            />
+                        </div>
+                    </TabPane>
+                ))
+            }
+        </Tabs>
+        <FindInPageDlg 
+            visible={findDlgVisible} 
+            onCancel={hideFindDlg}
+        />
+    </React.Fragment>;
+    
 }
 
 

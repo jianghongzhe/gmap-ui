@@ -3,6 +3,7 @@ import {message} from 'antd';
 import mindmapSvc from '../service/mindmapSvc';
 import newMindmapSvc from '../service/newMindmapSvc';
 import mindMapValidateSvc from '../service/mindMapValidateSvc';
+import { put } from 'redux-saga/effects';
 
 
 const model={
@@ -52,6 +53,35 @@ const model={
         },
     },
     effects:{
+        *movePreTab(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            let currInd=-1;
+            panes.forEach((pane,ind)=>{
+                if(pane.key===activeKey){
+                    currInd=ind;
+                }
+            });
+            if(currInd<=0){
+                return;
+            }
+            yield put(creater.changeActiveKey(panes[currInd-1].key));
+        },
+
+        *moveNextTab(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            let currInd=-1;
+            panes.forEach((pane,ind)=>{
+                if(pane.key===activeKey){
+                    currInd=ind;
+                }
+            });
+            if(currInd<0 || currInd>=panes.length-1){
+                return;
+            }
+            yield put(creater.changeActiveKey(panes[currInd+1].key));
+        },
+
+
         *selectCurrPanePromise(payload,{sel,res,rej}){
             let currState=yield sel();
             let item = currState.panes.filter(pane => pane.key === currState.activeKey);
