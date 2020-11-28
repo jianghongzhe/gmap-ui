@@ -89,7 +89,7 @@ const HelpDlg=(props)=>{
                         <table css={helpTableStyle}>
                             <tbody>
                             {
-                                shortcuts.map((item,ind)=><React.Fragment>
+                                shortcuts.map((item,ind)=><React.Fragment key={ind}>
                                     <tr key={ind}>
                                         <th colSpan='2' css={{fontWeight:'bold',}}>{item.title}</th>
                                     </tr>

@@ -53,7 +53,13 @@ const model={
         },
         init:({dispatcher,gdispatcher})=>{
             //设置标题、加载窗口大小、文件列表加载、目录列表加载
-            document.querySelector("head > title").innerHTML = api.loadAppNameAndVersionTxt();
+            let titleTxt=api.loadAppNameAndVersionTxt();
+            const vers=api.getInnerModuleVersions();
+            console.log(vers);
+            
+            document.querySelector("head > title").innerHTML = titleTxt+`　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
+            
+
             dispatcher.loadWinSize(null);
             gdispatcher.filesel.load();
             dispatcher.reloadAllDirs(null);

@@ -25,6 +25,10 @@ class Api{
         this.findInPageDlg.closeFindWindow();
     }
 
+    getInnerModuleVersions=()=>{
+        return app.getInnerModuleVersions();
+    }
+
     openBash=()=>{
         app.openGitBash();
     }

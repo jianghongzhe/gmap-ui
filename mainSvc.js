@@ -830,6 +830,9 @@ const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? 
 
 const isMaximized=(mainWindow)=>(mainWindow.isMaximized());
 
+const getInnerModuleVersions=()=>(process.versions);
+
+
 /**
  * 获得开发模式的主页访问地址
  */
@@ -882,6 +885,7 @@ module.exports={
     loadAppInfo,
     reloadAppPage,
     isUrlFormat,
+    getInnerModuleVersions,
     
     
     
