@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
@@ -18,15 +18,14 @@ const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
 const markedHighlightUtil = new MarkedHighlightUtil();
 
-class RefViewer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {  };
-        this.wrapperId="refviewercontainer"+new Date().getTime();
-    }
+/**
+ * 引用查看器
+ * @param {*} props 
+ */
+const RefViewer=(props)=>{
+    const [wrapperId]=useState(()=>"refviewercontainer"+new Date().getTime());
 
-    componentDidMount(){
-        //初始化marked与hljs
+    useEffect(()=>{
         markedHighlightUtil.init(marked, hljs, {
             codeConfig: {
                 bg: codeBg
@@ -39,7 +38,7 @@ class RefViewer extends React.Component {
                         return addr;
                     }
                     if(addr.startsWith("./")){
-                        return api.calcAttUrl(this.props.activeKey, oldurl);
+                        return api.calcAttUrl(props.activeKey, oldurl);
                     }
                     return addr;
                 }
@@ -47,59 +46,58 @@ class RefViewer extends React.Component {
             imgConfig: {
                 convertUrl: (oldurl) => {
                     if (!(oldurl.startsWith("./") || oldurl.startsWith("../"))) { return oldurl; }//跳过不是本地相对路径的
-                    return api.calcPicUrl(this.props.activeKey, oldurl);
+                    return api.calcPicUrl(props.activeKey, oldurl);
                 }
             }
         });
-    }
+    },[props.activeKey]);
 
-    componentDidUpdate(prevProps, prevState) {
-        //每次显示时重新绑定点击事件
-        if(!prevProps.visible && this.props.visible){
+    
+    useEffect(()=>{
+        if(props.visible){
             setTimeout(() => {
                 markedHighlightUtil.bindLinkClickEvent(api.openUrl);
                 markedHighlightUtil.bindImgClickEvent(api.openUrl);
-            }, 100);//迟延一会等视图已加载完再处理（否则第一次显示看不到效果）
+            }, 100);//迟
         }
-    }
+    },[props.visible]);
+    
 
-    getScrollTarget=()=>{
-        return document.getElementById(this.wrapperId);
-    }
+    
 
-    render() {
-        let result=dataSelector(this.props);
-        if(null===result){
-            return null;
-        }
-        let {refname,refCont}=result;
-        
-
-        return (
-            <EnhDlg noFooter
-                    title={"查看引用 - " + refname}
-                    size={{w:this.props.winW-200, h:this.props.winH-300, fixh:true, wrapperId:this.wrapperId}}                
-                    visible={this.props.visible}
-                    maskClosable={true}               
-                    onCancel={this.props.onCancel}>
-                <div className='markdown-body' css={{
-                    margin:'0px auto',
-                    width:'98%',
-                    overflowX:'hidden'}}
-                    dangerouslySetInnerHTML={{__html:refCont}}>
-                </div>
-                {
-                    (this.props.backtopLoc && 2===this.props.backtopLoc.length) && (   
-                        <BackTop  target={this.getScrollTarget} css={{
-                            right:200,
-                            bottom:170,
-                            ...backtopColorStyle
-                        }}/>
-                    )
-                }
-            </EnhDlg>
-        );
+    const getScrollTarget=useCallback(()=>document.getElementById(wrapperId),[wrapperId]);
+    let result=dataSelector(props);
+    if(null===result){
+        return null;
     }
+    let {refname,refCont}=result;
+    
+
+    return (
+        <EnhDlg noFooter
+                title={"查看引用 - " + refname}
+                size={{w:props.winW-200, h:props.winH-300, fixh:true, wrapperId:wrapperId}}                
+                visible={props.visible}
+                maskClosable={true}               
+                onCancel={props.onCancel}>
+            <div className='markdown-body' css={{
+                margin:'0px auto',
+                width:'98%',
+                overflowX:'hidden'}}
+                dangerouslySetInnerHTML={{__html:refCont}}>
+            </div>
+            {
+                (props.backtopLoc && 2===props.backtopLoc.length) && (   
+                    <BackTop  target={getScrollTarget} css={{
+                        right:200,
+                        bottom:170,
+                        ...backtopColorStyle
+                    }}/>
+                )
+            }
+        </EnhDlg>
+    );
+    
 }
 
 const dataSelector=createSelector(

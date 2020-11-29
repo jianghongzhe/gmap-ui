@@ -8,31 +8,28 @@ import {connect} from '../../../common/gflow';
 
 const EnhDlg=withEnh(Modal);
 
-class ProgsViewer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
-    }
-    render() {
-        let dlgW = (this.props.winW < 820 ? this.props.winW - 20 : 800);
+/**
+ * 进度对话框
+ */
+const ProgsViewer=(props)=>{
+    let dlgW = (props.winW < 820 ? props.winW - 20 : 800);
 
-        return (
-            <EnhDlg noFooter
-                    title="查看事项完成进度"
-                    size={{w:dlgW}}                  
-                    visible={this.props.visible}
-                    maskClosable={true}
-                    onCancel={this.props.onCancel}>
-                
-                <Table pagination={false} 
-                    bordered={true}
-                    dataSource={parseDataSource(this.props)} 
-                    columns={columns} 
-                    size='small' 
-                    scroll={{ y: this.props.winH-300 }} />
-            </EnhDlg>
-        );
-    }
+    return (
+        <EnhDlg noFooter
+                title="查看事项完成进度"
+                size={{w:dlgW}}                  
+                visible={props.visible}
+                maskClosable={true}
+                onCancel={props.onCancel}>
+            
+            <Table pagination={false} 
+                bordered={true}
+                dataSource={parseDataSource(props)} 
+                columns={columns} 
+                size='small' 
+                scroll={{ y: props.winH-300 }} />
+        </EnhDlg>
+    );
 }
 
 const parseDataSource=createSelector(
