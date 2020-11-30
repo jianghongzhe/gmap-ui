@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
 import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
 import moment  from 'moment';
@@ -39,60 +39,61 @@ import {connect} from '../../../common/gflow';
 const EnhDlg=withEnh(Modal);
 
 
+/**
+ * 编辑图表对话框
+ */
+const EditGraphDlg=(props)=>{
+    const codeMirrorInstRef=useRef(null);
 
-class EditGraphDlg extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.codeMirrorInst = null;
-        this.state = {
-            colorPickerVisible: false,
-            insertPicDlgVisible: false,
-            helpDlgVisible: false,
-            dateDlgVisible:false,
+    const [colorPickerVisible, setColorPickerVisible]=useState(false);
+    const [insertPicDlgVisible, setInsertPicDlgVisible]=useState(false);
+    const [helpDlgVisible, setHelpDlgVisible]=useState(false);
+    const [dateDlgVisible, setDateDlgVisible]=useState(false);
+    const [isImg, setIsImg]=useState(true);
 
-            isImg:true,
+    const bindCodeMirrorInstRef=useCallback((ele)=>{
+        codeMirrorInstRef.current=ele;
+    },[]);
 
-        };
-    }
-
-    bindCodeMirrorInst = (editor) => {
-        this.codeMirrorInst = editor;
-    }
-
-    onEditMapDlgPreventKey = (cm) => {
+    /**
+     * 防止默认事件触发的处理
+     */
+    const onEditMapDlgPreventKey =useCallback(() => {
         if(window.event){
             window.event.stopPropagation();
             window.event.preventDefault();
         }
-    }
+    },[]);
 
-    componentDidUpdate(prevProps,prevState){
-        //对话框从不显示到显示，使编辑器获得焦点
-        if(!prevProps.visible && this.props.visible){   
-            //当前已有codeMirror实例，获得焦点
-            if(this.codeMirrorInst){
-                this.doFocus();
-                return;
+    /**
+     * 显示后获取焦点
+     */
+    useEffect(()=>{
+       if(props.visible) {
+            const focusFun=()=>{
+                if(codeMirrorInstRef.current){
+                    console.log("focus", codeMirrorInstRef.current.focus);
+                    codeMirrorInstRef.current.focus();
+                    return true;
+                }
+                return false;
             }
-            //当前还没有codeMirror实例，等待一会再获取焦点
-            setTimeout(this.doFocus, 500);
-            return;
-        }
-    }
 
-    doFocus=()=>{
-        if(this.codeMirrorInst){
-            this.codeMirrorInst.focus();
-        }
-    }
+            // if(focusFun()){
+            //     return;
+            // }
+            setTimeout(focusFun, 500);
+       }
+    },[props.visible]);
 
-    hideAllDlg = () => {
-        this.setState({
-            colorPickerVisible: false,
-            insertPicDlgVisible: false,
-            helpDlgVisible: false,
-            dateDlgVisible: false,
-        });
+    
+
+
+    const hideAllDlg = () => {
+        setColorPickerVisible(false);
+        setInsertPicDlgVisible(false);
+        setHelpDlgVisible(false);
+        setDateDlgVisible(false);
     }
 
     
@@ -105,51 +106,59 @@ class EditGraphDlg extends React.Component {
      * @param {*} newLine        替换后整行的内容
      * @param {*} delayFocus     是否延迟获得焦点
      */
-    replaceLine = (originCursor, originLineLen, newCursor, newLine, delayFocus = false) => {
-        this.codeMirrorInst.setCursor(originCursor);
-        this.codeMirrorInst.setSelection(originCursor, { line: originCursor.line, ch: originLineLen });
-        this.codeMirrorInst.replaceSelection(newLine);
-        this.codeMirrorInst.setCursor(newCursor);
-        this.codeMirrorInst.setSelection(newCursor);
-        this.codeMirrorInst.focus();
+    const replaceLine =useCallback((originCursor, originLineLen, newCursor, newLine, delayFocus = false) => {
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const codeMirrorInst=codeMirrorInstRef.current;
+        codeMirrorInst.setCursor(originCursor);
+        codeMirrorInst.setSelection(originCursor, { line: originCursor.line, ch: originLineLen });
+        codeMirrorInst.replaceSelection(newLine);
+        codeMirrorInst.setCursor(newCursor);
+        codeMirrorInst.setSelection(newCursor);
+        codeMirrorInst.focus();
 
         //对话框刚关闭时，不能马上获得焦点，因此这种情况需要延迟一下
         if (delayFocus) {
             setTimeout(() => {
-                this.codeMirrorInst.setCursor(newCursor);
-                this.codeMirrorInst.setSelection(newCursor);
-                this.codeMirrorInst.focus();
+                codeMirrorInst.setCursor(newCursor);
+                codeMirrorInst.setSelection(newCursor);
+                codeMirrorInst.focus();
             }, 500);
         }
-    }
+    },[]);
 
 
 
 
     //-------------------颜色选择-----------------------------------
-    onClearColor = () => {
-        this.onAddColor(null);
-    }
+    const onAddColor =useCallback((color = null, delayFocus = false) => {
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const codeMirrorInst=codeMirrorInstRef.current;
 
-    onAddColor = (color = null, delayFocus = false) => {
         //获得当前光标位置与光标所在行
-        if (!this.codeMirrorInst) { return; }
-        let cursor = this.codeMirrorInst.getCursor();
+        let cursor = codeMirrorInst.getCursor();
         let { line } = cursor;
-        let lineTxt = this.codeMirrorInst.getLine(line);
+        let lineTxt = codeMirrorInst.getLine(line);
 
         //替换行
         let newLine = editorSvc.setColor(lineTxt, color);
-        this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: newLine.length }, newLine, delayFocus);
+        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: newLine.length }, newLine, delayFocus);
+    },[]);
+
+    const onClearColor =useCallback(() => {
+        onAddColor(null);
+    },[onAddColor]);
+
+    const handleColorPickerColorChange = (color) => {
+        hideAllDlg();
+        onAddColor(color.hex, true);
     }
 
-    handleColorPickerColorChange = (color) => {
-        this.hideAllDlg();
-        this.onAddColor(color.hex, true);
-    }
-
-    showColorPicker = () => {
-        this.setState({ colorPickerVisible: true });
+    const showColorPicker = () => {
+        setColorPickerVisible(true);
     }
 
 
@@ -157,43 +166,47 @@ class EditGraphDlg extends React.Component {
 
 
     //-------------------增加图片-----------------------------------
-    onAddPic = (picRelaPath,pname) => {
+    const onAddPic = (picRelaPath,pname) => {
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const codeMirrorInst=codeMirrorInstRef.current;
+
         //获得当前光标位置与光标所在行     
-        if (!this.codeMirrorInst) { return; }
-        let cursor = this.codeMirrorInst.getCursor();
+        let cursor = codeMirrorInst.getCursor();
         let { line, ch } = cursor;
-        let lineTxt = this.codeMirrorInst.getLine(line);
+        let lineTxt = codeMirrorInst.getLine(line);
 
         //替换行
         let { newLinetxt, cusorPos } = editorSvc.addPic(lineTxt, ch, picRelaPath,pname);
-        this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
+        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     }
 
-    onAddAtt = (picRelaPath,pname) => {
+    const onAddAtt = (picRelaPath,pname) => {
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const codeMirrorInst=codeMirrorInstRef.current;
+
         //获得当前光标位置与光标所在行     
-        if (!this.codeMirrorInst) { return; }
-        let cursor = this.codeMirrorInst.getCursor();
+        let cursor = codeMirrorInst.getCursor();
         let { line, ch } = cursor;
-        let lineTxt = this.codeMirrorInst.getLine(line);
+        let lineTxt = codeMirrorInst.getLine(line);
 
         //替换行
         let { newLinetxt, cusorPos } = editorSvc.addAtt(lineTxt, ch, picRelaPath,pname);
-        this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
+        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     }
 
-    showInsertPicDlg = () => {
-        this.setState({
-            insertPicDlgVisible: true,
-            isImg:true,
-        });
-    }
+    const showInsertPicDlg =useCallback(() => {
+        setIsImg(true);
+        setInsertPicDlgVisible(true);
+    },[setIsImg, setInsertPicDlgVisible]);
 
-    showInsertAttDlg=()=>{
-        this.setState({
-            insertPicDlgVisible: true,
-            isImg:false,
-        });
-    }
+    const showInsertAttDlg=useCallback(()=>{
+        setIsImg(false);
+        setInsertPicDlgVisible(true);
+    },[setIsImg, setInsertPicDlgVisible]);
 
     
 
@@ -204,153 +217,152 @@ class EditGraphDlg extends React.Component {
 
 
 
-    showHelpPicDlg = () => {
-        this.setState({
-            helpDlgVisible: true,
-        });
+    const showHelpPicDlg = () => {
+        setHelpDlgVisible(true);
     }
 
 
     //-------------------插入日期-----------------------------------    
-    showDateDlg=()=>{
-        this.setState({
-            dateDlgVisible: true,
-        });
+    const showDateDlg=()=>{
+        setDateDlgVisible(true);
     }
 
     
 
-    onInsertDate=(dateStr)=>{
+    const onInsertDate=(dateStr)=>{
         if(null===dateStr || ''===dateStr.trim()){
             message.warn("请选择日期");
             return;
         }
 
-        this.hideAllDlg();
+        hideAllDlg();
 
-        //获得当前光标位置与光标所在行     
-        if (!this.codeMirrorInst) { return; }
-        let cursor = this.codeMirrorInst.getCursor();
+        //获得当前光标位置与光标所在行
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const codeMirrorInst=codeMirrorInstRef.current; 
+        let cursor = codeMirrorInst.getCursor();
         let { line, ch } = cursor;
-        let lineTxt = this.codeMirrorInst.getLine(line);
+        let lineTxt = codeMirrorInst.getLine(line);
 
         //替换行
         let targetDateStr=dateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
         let { newLinetxt, cusorPos } = editorSvc.addDate(lineTxt, ch, targetDateStr);
-        this.replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
+        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     }
 
     
 
 
 
-    render() {
-        let insertPicDlgW = (this.props.winW < 820 ? this.props.winW - 20 : 800);
+    
+    let insertPicDlgW = (props.winW < 820 ? props.winW - 20 : 800);
 
-        return (
-            <>
-                <EnhDlg
-                        title={"编辑图表 - " + this.props.currMapName}
-                        size={{w:this.props.winW-200}}
-                        maskClosable={false}
-                        visible={this.props.visible}
-                        footer={[
-                            <Button key="btncancel" onClick={this.props.onCancel}>取消</Button>,
-                            <Button key="btnneutral" type="primary" onClick={this.props.onOnlySave}>保存</Button>,
-                            <Button key="btnok" type="primary" onClick={this.props.onOk}>保存并关闭</Button>,
-                        ]}
-                        onCancel={this.props.onCancel}>
-                            
-                    <div>
-                        <div css={{ 'marginBottom': "10px" }}>
-                            {/* 颜色选择器 */}
-                            {
-                                ['#cf1322', '#389e0d', '#0050b3', '#fa8c16', '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'].map((eachcolor, colorInd) => (
-                                    <div key={colorInd} title={eachcolor} css={getEditDlgColorBoxStyle(eachcolor)} onClick={this.onAddColor.bind(this, eachcolor)}></div>
-                                ))
-                            }
-                            <div css={selColorStyle} title='选择颜色' onClick={this.showColorPicker}></div>
-                            <div css={clearColorStyle} title='清除颜色' onClick={this.onClearColor}></div>
+    return (
+        <>
+            <EnhDlg
+                    title={"编辑图表 - " + props.currMapName}
+                    size={{w:props.winW-200}}
+                    maskClosable={false}
+                    visible={props.visible}
+                    footer={[
+                        <Button key="btncancel" onClick={props.onCancel}>取消</Button>,
+                        <Button key="btnneutral" type="primary" onClick={props.onOnlySave}>保存</Button>,
+                        <Button key="btnok" type="primary" onClick={props.onOk}>保存并关闭</Button>,
+                    ]}
+                    onCancel={props.onCancel}>
+                        
+                <div>
+                    <div css={{ 'marginBottom': "10px" }}>
+                        {/* 颜色选择器 */}
+                        {
+                            ['#cf1322', '#389e0d', '#0050b3', '#fa8c16', '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'].map((eachcolor, colorInd) => (
+                                <div key={colorInd} title={eachcolor} css={getEditDlgColorBoxStyle(eachcolor)} onClick={onAddColor.bind(this, eachcolor)}></div>
+                            ))
+                        }
+                        <div css={selColorStyle} title='选择颜色' onClick={showColorPicker}></div>
+                        <div css={clearColorStyle} title='清除颜色' onClick={onClearColor}></div>
 
-                            {/* 插入图片、帮助 */}
-                            <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={this.showDateDlg} />
-                            <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={this.showInsertPicDlg} />
-                            <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={this.showInsertAttDlg} />
-                            <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={this.showHelpPicDlg} />
-                        </div>
-                        <CodeMirror
-                            css={getCodeEditorStyle(this.props.winH-400)}
-                            editorDidMount={this.bindCodeMirrorInst}
-                            value={this.props.editTmpTxt}
-                            options={{
-                                lineNumbers: true,
-                                theme: 'default',
-                                mode: 'markdown',
-                                styleActiveLine: true,
-                                indentWithTabs: true,
-                                indentUnit: 4,
-                                keyMap: "sublime",
-                                extraKeys: {
-                                    "Ctrl-F": "findPersistent",
-                                    "Ctrl-G": "jumpToLine",
-                                    "Ctrl-S": this.props.onOnlySave,
-                                    "Shift-Ctrl-S": this.props.onOk,                                  
-                                    "Ctrl-P": this.showInsertPicDlg,
-                                    "Ctrl-I": this.showInsertAttDlg,
-                                    "Ctrl-H": this.showHelpPicDlg,
-                                    "Ctrl-T": this.showDateDlg,
-                                    
-
-                                    "Shift-Ctrl-G": this.onEditMapDlgPreventKey,
-                                    "Shift-Ctrl-F": this.onEditMapDlgPreventKey,
-                                    "Shift-Ctrl-R": this.onEditMapDlgPreventKey,
-                                    "Esc": this.onEditMapDlgPreventKey,
-                                    "Alt-G": this.onEditMapDlgPreventKey,
-                                }
-                            }}
-                            onBeforeChange={this.props.onChangeEditTmpTxt} />
+                        {/* 插入图片、帮助 */}
+                        <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={showDateDlg} />
+                        <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={showInsertPicDlg} />
+                        <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} />
+                        <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={showHelpPicDlg} />
                     </div>
-                </EnhDlg>
+                    <CodeMirror
+                        css={getCodeEditorStyle(props.winH-400)}
+                        editorDidMount={bindCodeMirrorInstRef}
+                        value={props.editTmpTxt}
+                        options={{
+                            lineNumbers: true,
+                            theme: 'default',
+                            mode: 'markdown',
+                            styleActiveLine: true,
+                            indentWithTabs: true,
+                            indentUnit: 4,
+                            keyMap: "sublime",
+                            extraKeys: {
+                                "Ctrl-F": "findPersistent",
+                                "Ctrl-G": "jumpToLine",
+                                "Ctrl-S": props.onOnlySave,
+                                "Shift-Ctrl-S": props.onOk,                                  
+                                "Ctrl-P": showInsertPicDlg,
+                                "Ctrl-I": showInsertAttDlg,
+                                "Ctrl-H": showHelpPicDlg,
+                                "Ctrl-T": showDateDlg,
+                                
 
-                {/*插入图片对话框*/}
-                <InsertImgDlg                    
-                    visible={this.state.insertPicDlgVisible}
-                    dlgW={insertPicDlgW}
-                    isImg={this.state.isImg}
-                    activeKey={this.props.activeKey}
-                    onAddPic ={this.onAddPic}
-                    onAddAtt={this.onAddAtt}
-                    onCancel={this.hideAllDlg}
-                />
-
-                {/* 颜色选择对话框 */}
-                <EnhDlg noTitle noFooter closable={false}
-                        size={{w:colorDlgW}}
-                        css={{
-                            left: colorDlgAdjustX - (this.props.winW-200 - colorDlgW) / 2,
-                            top: colorDlgY,
+                                "Shift-Ctrl-G": onEditMapDlgPreventKey,
+                                "Shift-Ctrl-F": onEditMapDlgPreventKey,
+                                "Shift-Ctrl-R": onEditMapDlgPreventKey,
+                                "Esc": onEditMapDlgPreventKey,
+                                "Alt-G": onEditMapDlgPreventKey,
+                            }
                         }}
-                        visible={this.state.colorPickerVisible}
-                        onCancel={this.hideAllDlg}>
+                        onBeforeChange={props.onChangeEditTmpTxt} />
+                </div>
+            </EnhDlg>
 
-                    <CirclePicker onChange={this.handleColorPickerColorChange} />
-                </EnhDlg>
+            {/*插入图片对话框*/}
+            <InsertImgDlg                    
+                visible={insertPicDlgVisible}
+                dlgW={insertPicDlgW}
+                isImg={isImg}
+                activeKey={props.activeKey}
+                onAddPic ={onAddPic}
+                onAddAtt={onAddAtt}
+                onCancel={hideAllDlg}
+            />
 
-                {/* 帮助对话框 */}
-                <HelpDlg
-                    maxBodyH={this.props.winH-400+80}
-                    visible={this.state.helpDlgVisible}
-                    onCancel={this.hideAllDlg}/>
+            {/* 颜色选择对话框 */}
+            <EnhDlg noTitle noFooter closable={false}
+                    size={{w:colorDlgW}}
+                    css={{
+                        left: colorDlgAdjustX - (props.winW-200 - colorDlgW) / 2,
+                        top: colorDlgY,
+                    }}
+                    visible={colorPickerVisible}
+                    onCancel={hideAllDlg}>
 
-                {/* 插入日期对话框 */}
-                <DateDlg
-                    visible={this.state.dateDlgVisible}
-                    onCancel={this.hideAllDlg}
-                    onOk={this.onInsertDate}
-                    />
-            </>
-        );
-    }
+                <CirclePicker onChange={handleColorPickerColorChange} />
+            </EnhDlg>
+
+            {/* 帮助对话框 */}
+            <HelpDlg
+                maxBodyH={props.winH-400+80}
+                visible={helpDlgVisible}
+                onCancel={hideAllDlg}/>
+
+            {/* 插入日期对话框 */}
+            <DateDlg
+                visible={dateDlgVisible}
+                onCancel={hideAllDlg}
+                onOk={onInsertDate}
+                />
+        </>
+    );
+    
 }
 
 //颜色选择对话框位置

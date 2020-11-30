@@ -21,7 +21,7 @@ const { TabPane } = Tabs;
  * @param {*} props 
  */
 const GraphTabs=(props)=>{
-
+    let beginTime=new Date().getTime();
     
     
     /**
@@ -111,7 +111,7 @@ const GraphTabs=(props)=>{
 
     
     
-    return <React.Fragment>
+    const result= <React.Fragment>
         <Tabs
             hideAdd={true}
             type="editable-card"
@@ -135,6 +135,10 @@ const GraphTabs=(props)=>{
             }
         </Tabs>
     </React.Fragment>;
+
+    let endTime=new Date().getTime();
+    console.log(`tab渲染时间：${(endTime-beginTime)} ms`);
+    return result;
 }
 
 

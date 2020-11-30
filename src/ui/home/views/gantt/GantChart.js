@@ -11,7 +11,7 @@ class GantChart extends React.Component {
         super(props);
         this.state = { 
             arrows:[],//箭头位置
-         };
+        };
 
         this.lastScrollTime=0;
         this.scrollTimer=null;
