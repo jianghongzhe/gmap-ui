@@ -827,6 +827,7 @@ const downFile=(url,savePath)=>{
  */
 const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? true : false);
 
+const hasDevToolExtension=()=>(process && process.env && process.env.DEV_TOOL_EXTENSION_URL ? true : false);
 
 const isMaximized=(mainWindow)=>(mainWindow.isMaximized());
 
@@ -839,6 +840,13 @@ const getInnerModuleVersions=()=>(process.versions);
 const getDevServerUrl=()=>{
     if(isDevMode()){
         return process.env.DEV_SERVER_URL;
+    }
+    return '';
+}
+
+const getDevToolExtensionUrl=()=>{
+    if(hasDevToolExtension()){
+        return process && process.env && process.env.DEV_TOOL_EXTENSION_URL;
     }
     return '';
 }
@@ -882,6 +890,8 @@ module.exports={
     isDevMode,
     isMaximized,
     getDevServerUrl,
+    hasDevToolExtension,
+    getDevToolExtensionUrl,
     loadAppInfo,
     reloadAppPage,
     isUrlFormat,

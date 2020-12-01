@@ -111,6 +111,15 @@ class Api{
         return app.isDevMode();
     }
 
+
+    hasDevToolExtension=()=>{
+        return app.hasDevToolExtension();
+    }
+
+    getDevToolExtensionUrl=()=>{
+        return app.getDevToolExtensionUrl();
+    }
+
     isMaximized=()=>{
         return app.isMaximized();
     }

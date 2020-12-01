@@ -64,6 +64,11 @@ app.on('ready', () => {
     app.openSaveFileDlg=app.openSaveFileDlg.bind(app,mainWindow);
     app.isMaximized=app.isMaximized.bind(app,mainWindow);
     
+    if(app.isDevMode() && app.hasDevToolExtension()){
+        const extPath=app.getDevToolExtensionUrl();
+        BrowserWindow.addDevToolsExtension(extPath);
+    }
+    
 
     //加载初始页
     loadFirstPage();

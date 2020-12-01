@@ -39,6 +39,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "electron_nonono": "set DEV_SERVER_URL=http://localhost:3000 && set DEV_TOOL_EXTENSION_URL= && electron --inspect=5858 .",
     "electron": "set DEV_SERVER_URL=http://localhost:3000 && electron --inspect=5858 ."
   },
   "eslintConfig": {
@@ -57,6 +58,7 @@
     ]
   },
   "devDependencies": {
-    "electron": "^8.5.3"
+    "electron": "^8.5.3",
+    "electron-react-devtools": "^0.5.3"
   }
 }
