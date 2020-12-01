@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Layout, message,Modal } from 'antd';
 
 import Welcome from './views/Welcome';
@@ -45,86 +45,90 @@ const { Content } = Layout;
  *      }
  * ]
  */
-class MapsViewer extends React.Component {
-    constructor() {
-        super(...arguments);
+const MapsViewer=(props)=>{
+    const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
+    const [selMapDlgVisible, setSelMapDlgVisible]=useState(false);
 
-        this.state = {
-            //编辑图表相关
-            currMapName: '',
-            editTmpTxt: '',
-            editMapDlgVisible: false,
-            
-            //新建图表相关
-            newMapDlgVisible: false,
+    const [{currMapName,editTmpTxt,editMapDlgVisible}, setEditDlgState]= useState({
+        currMapName: '',
+        editTmpTxt: '',
+        editMapDlgVisible: false,
+    });
 
-            //文件选择相关
-            selMapDlgVisible: false,
-            
-            //图表上小组件的对话框：引用、时间线、进度图、甘特图
-            gantdlgVisible: false,
-            refViewerDlgVisible: false,
-            timelineDlgVisible: false,
-            progsDlgVisible: false,
-            currRefObj: {},
-            timelineObj: [],
+    const [{gantdlgVisible, gantObj}, setGantdlgState]=useState({
+        gantdlgVisible: false,
+        gantObj:null,
+    });
+
+    const [{refViewerDlgVisible, currRefObj}, setRefViewerDlgState]=useState({
+        refViewerDlgVisible: false,
+        currRefObj:{},
+    });
+
+    const [{timelineDlgVisible, timelineObj}, setTimelineDlgState]=useState({
+        timelineDlgVisible: false,
+        timelineObj: [],
+    });
+
+    const [{progsDlgVisible, progsObj}, setProgsDlgState]=useState({
+        progsDlgVisible: false,
             progsObj: [],
-            gantObj:null,
-        };
-    }
+    });
 
-    componentDidUpdate(prevProps, prevState){
-        if(prevProps.installPathValid && !this.props.installPathValid){
+    useEffect(()=>{
+        if(!props.installPathValid){
             Modal.warning({
                 title: '警告',
                 content: '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常',
             });
             return;
         }
-    }
+    },[props.installPathValid]);
 
-    componentDidMount(){
-        console.log("all paths");
-        console.log(api.listAllDirs());
-    }
+
+    
     
 
-    closeAllDlg = () => {
-        this.setState({
-            editMapDlgVisible: false,
-            refViewerDlgVisible: false,
-            newMapDlgVisible: false,
-            selMapDlgVisible: false,
-            timelineDlgVisible: false,
-            progsDlgVisible: false,
-            gantdlgVisible: false,
-        });
-    }
+    const closeAllDlg =useCallback(() => {
+        setNewMapDlgVisible(false);
+        setSelMapDlgVisible(false);
+        setEditDlgState((state)=>({...state, editMapDlgVisible:false}));
+        setRefViewerDlgState((state)=>({...state, refViewerDlgVisible:false}));
+        setTimelineDlgState((state)=>({...state, timelineDlgVisible:false}));
+        setProgsDlgState((state)=>({...state, progsDlgVisible:false}));
+        setGantdlgState((state)=>({...state, gantdlgVisible:false}));
+    },[
+        setNewMapDlgVisible,
+        setSelMapDlgVisible,
+        setEditDlgState,
+        setRefViewerDlgState,
+        setTimelineDlgState,
+        setProgsDlgState,
+        setGantdlgState
+    ]);
 
 
 
     //------------新建图表操作----------------------------------------------------------------------
-    onShowNewMapDlg = () => {
-        this.setState({
-            newMapDlgVisible: true,
-        });
-    }
+    const onShowNewMapDlg =useCallback(() => {
+        setNewMapDlgVisible(true);
+    },[setNewMapDlgVisible]);
 
 
-    onNewMapDlgOK = async ({dir,name}) => {
+    const onNewMapDlgOK = async ({dir,name}) => {
         try {
-            await this.props.dispatcher.tabs.onNewMapPromise({dir,name});
-            this.setState({newMapDlgVisible: false,});
+            await props.dispatcher.tabs.onNewMapPromise({dir,name});
+            setNewMapDlgVisible(false);
         } catch (error) {
         }
     }
 
 
     //------------修改导图----------------------------------------------------------------------
-    onShowEditMapDlg =async () => {
+    const onShowEditMapDlg =async () => {
         try {
-            let currPane=await this.props.dispatcher.tabs.selectCurrPanePromise();
-            this.setState({
+            let currPane=await props.dispatcher.tabs.selectCurrPanePromise();
+            setEditDlgState({
                 editMapDlgVisible: true,
                 editTmpTxt: currPane.mapTxts,
                 currMapName: currPane.title
@@ -133,15 +137,15 @@ class MapsViewer extends React.Component {
         }
     }
 
-    onChangeEditTmpTxt = (editor, data, value) => {
-        this.setState({ editTmpTxt: value });
-    }
+    const onChangeEditTmpTxt =useCallback((editor, data, value) => {
+        setEditDlgState((state)=>({...state, editTmpTxt: value}));
+    },[setEditDlgState]);
 
-    onEditMapDlgOK =async (closeDlg = true) => {
+    const onEditMapDlgOK =async (closeDlg = true) => {
         try {
-            let txt = this.state.editTmpTxt;
-            await this.props.dispatcher.tabs.onSaveMapPromise(txt);
-            this.setState({editMapDlgVisible: !closeDlg});
+            let txt = editTmpTxt;
+            await props.dispatcher.tabs.onSaveMapPromise(txt);
+            setEditDlgState(state=>({...state, editMapDlgVisible: !closeDlg}));
             if (!closeDlg) {
                 message.success("图表内容已保存");
             }
@@ -152,64 +156,53 @@ class MapsViewer extends React.Component {
 
 
     //------------选择文件功能----------------------------------------------------------------------
-    onSelectMapItem =async (item) => {
+    const onSelectMapItem =async (item) => {
         try{
-            await this.props.dispatcher.tabs.onSelItemPromise(item);
-            this.setState({selMapDlgVisible: false});
+            await props.dispatcher.tabs.onSelItemPromise(item);
+            setSelMapDlgVisible(false);
         }catch(e){
         }
     }
 
-    showSelMapDlg = () => {
-        this.setState({
-            selMapDlgVisible: true
-        });
-    }
+    const showSelMapDlg =useCallback(() => {
+        setSelMapDlgVisible(true);
+    },[setSelMapDlgVisible]);
 
 
 
     //------------导图的操作----------------------------------------------------------------------
-    openLink = (url) => {
-        api.openUrl(url);
-    }
 
-
-    onShowTimeline = (timelineObj) => {
-        this.setState({
+    const onShowTimeline =useCallback((timelineObj) => {
+        setTimelineDlgState({
             timelineDlgVisible: true,
             timelineObj: timelineObj,
         });
-    }
+    },[setTimelineDlgState]);
 
-    onShowProgs = (progs) => {
-        this.setState({
+    const onShowProgs =useCallback((progs) => {
+        setProgsDlgState({
             progsObj: progs,
             progsDlgVisible: true,
         });
-    }
+    },[setProgsDlgState]);
 
-    onShowGant = (gantObj) => {
-        this.setState({
+    const onShowGant =useCallback((gantObj) => {
+        setGantdlgState({
             gantdlgVisible: true,
             gantObj,
         });
-    }
+    },[setGantdlgState]);
 
-    openRef = (refObj) => {
-        this.setState({
+    const openRef =useCallback((refObj) => {
+        setRefViewerDlgState({
             currRefObj: refObj,
             refViewerDlgVisible: true,
         });
-    }
+    },[setRefViewerDlgState]);
 
-    onExpImage=()=>{
-        /*
-        activeKey:  state.tabs.activeKey,
-    panes
-
-        */
-        this.props.panes.forEach((item,ind)=>{
-            if(this.props.activeKey!==item.key){
+    const onExpImage=useCallback(()=>{
+        props.panes.forEach((item,ind)=>{
+            if(props.activeKey!==item.key){
                 return;
             }
             let ele=document.querySelector(`#graphwrapper_${ind}`);
@@ -244,107 +237,105 @@ class MapsViewer extends React.Component {
             //     api.openUrl(base64Url);
             // });
         });
-    }
+    },[props.activeKey, props.panes]);
 
+    
+    return (
+        <React.Fragment>
+            <Layout>
+                {
+                    props.hasPane ?
+                        <>
+                            <Toolbar
+                                onShowNewMapDlg={onShowNewMapDlg}
+                                onShowSelMapDlg={showSelMapDlg}
+                                onShowEditMapDlg={onShowEditMapDlg}
+                                onShowDir={api.openMapsDir}
+                                onShowCmd={api.openBash}
+                                onShowDevTool={api.showDevTool}
+                                onReloadApp={api.reloadAppPage}
+                                onExpImage={onExpImage}
+                            />
+                            <GraphTabs
+                                editing={editMapDlgVisible}
+                                onOpenLink={api.openUrl}
+                                onOpenRef={openRef}
+                                onShowTimeline={onShowTimeline}
+                                onShowProgs={onShowProgs}
+                                onShowGant={onShowGant}
+                            />
+                        </>
 
+                        :
 
-    render() {
-        return (
-            <>
-                <Layout>
-                    {
-                        this.props.hasPane ?
-                            <>
-                                <Toolbar
-                                    onShowNewMapDlg={this.onShowNewMapDlg}
-                                    onShowSelMapDlg={this.showSelMapDlg}
-                                    onShowEditMapDlg={this.onShowEditMapDlg}
-                                    onShowDir={api.openMapsDir}
-                                    onShowCmd={api.openBash}
-                                    onShowDevTool={api.showDevTool}
-                                    onReloadApp={api.reloadAppPage}
-                                    onExpImage={this.onExpImage}
-                                />
-                                <GraphTabs
-                                    editing={this.state.editMapDlgVisible}
-                                    onOpenLink={this.openLink}
-                                    onOpenRef={this.openRef}
-                                    onShowTimeline={this.onShowTimeline}
-                                    onShowProgs={this.onShowProgs}
-                                    onShowGant={this.onShowGant}
-                                />
-                            </>
+                        <Content>
+                            <Welcome 
+                                onOpenMapsDir={api.openMapsDir}
+                                onOpenBash={api.openBash}
+                                onShowDevTool={api.showDevTool}
+                                onReloadApp={api.reloadAppPage}
+                                onAddMap={onShowNewMapDlg}
+                                onSelectMapItem={onSelectMapItem}/>
+                        </Content>
+                }
+            </Layout>
 
-                            :
+            <NewGraphDlg
+                visible={newMapDlgVisible}
+                onOk={onNewMapDlgOK}
+                onCancel={closeAllDlg}
+            />
 
-                            <Content>
-                                <Welcome 
-                                    onOpenMapsDir={api.openMapsDir}
-                                    onOpenBash={api.openBash}
-                                    onShowDevTool={api.showDevTool}
-                                    onReloadApp={api.reloadAppPage}
-                                    onAddMap={this.onShowNewMapDlg}
-                                    onSelectMapItem={this.onSelectMapItem}/>
-                            </Content>
-                    }
-                </Layout>
+            <EditGraphDlg
+                visible={editMapDlgVisible}
+                currMapName={currMapName}
+                editTmpTxt={editTmpTxt}
+                onOnlySave={onEditMapDlgOK.bind(this, false)}
+                onOk={onEditMapDlgOK.bind(this, true)}
+                onCancel={closeAllDlg}
+                onChangeEditTmpTxt={onChangeEditTmpTxt}
+            />
 
-                <NewGraphDlg
-                    visible={this.state.newMapDlgVisible}
-                    onOk={this.onNewMapDlgOK}
-                    onCancel={this.closeAllDlg}
-                />
+            <OpenGraphDlg
+                visible={selMapDlgVisible}
+                onCancel={closeAllDlg}
+                onSelectMapItem={onSelectMapItem}
+            />
 
-                <EditGraphDlg
-                    visible={this.state.editMapDlgVisible}
-                    currMapName={this.state.currMapName}
-                    editTmpTxt={this.state.editTmpTxt}
-                    onOnlySave={this.onEditMapDlgOK.bind(this, false)}
-                    onOk={this.onEditMapDlgOK.bind(this, true)}
-                    onCancel={this.closeAllDlg}
-                    onChangeEditTmpTxt={this.onChangeEditTmpTxt}
-                />
+            <RefViewer
+                currRefObj={currRefObj}
+                visible={refViewerDlgVisible}
+                onCancel={closeAllDlg}
+            />
 
-                <OpenGraphDlg
-                    visible={this.state.selMapDlgVisible}
-                    onCancel={this.closeAllDlg}
-                    onSelectMapItem={this.onSelectMapItem}
-                />
+            <TimelineViewer
+                visible={timelineDlgVisible}
+                timelineObj={timelineObj}
+                onCancel={closeAllDlg}
+            />
 
-                <RefViewer
-                    currRefObj={this.state.currRefObj}
-                    visible={this.state.refViewerDlgVisible}
-                    onCancel={this.closeAllDlg}
-                />
+            <ProgsViewer
+                visible={progsDlgVisible}
+                progsObj={progsObj}
+                onCancel={closeAllDlg}
+            />
 
-                <TimelineViewer
-                    visible={this.state.timelineDlgVisible}
-                    timelineObj={this.state.timelineObj}
-                    onCancel={this.closeAllDlg}
-                />
-
-                <ProgsViewer
-                    visible={this.state.progsDlgVisible}
-                    progsObj={this.state.progsObj}
-                    onCancel={this.closeAllDlg}
-                />
-
-                <GantDlg
-                    visible={this.state.gantdlgVisible}
-                    gantObj={this.state.gantObj}
-                    onCancel={this.closeAllDlg}
-                />
-            </>
-        );
-    }
+            <GantDlg
+                visible={gantdlgVisible}
+                gantObj={gantObj}
+                onCancel={closeAllDlg}
+            />
+        </React.Fragment>
+    );
+    
 }
 
 
 const mapState=(state)=>({
-    hasPane:  state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
-    installPathValid: state.common.installPathValid,
-    activeKey:  state.tabs.activeKey,
-    panes:      state.tabs.panes,
+    hasPane:            state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
+    installPathValid:   state.common.installPathValid,
+    activeKey:          state.tabs.activeKey,
+    panes:              state.tabs.panes,
 });
 
 

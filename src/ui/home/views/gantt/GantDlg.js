@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from 'antd';
 import {  } from '@ant-design/icons';
 import GantChart from './GantChart';
@@ -10,79 +10,65 @@ import { createSelector } from 'reselect';
 
 const EnhDlg=withEnh(Modal);
 
-
-class GantDlg extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { 
-            layoutArrows:null
-        };
-        this.showCnt=0;
-        this.isForceUpdate=false;
-
-    }
+/**
+ * 甘特图对话框
+ * @param {*} props 
+ */
+const GantDlg=(props)=>{
+    const [layoutArrows, setLayoutArrows]=useState(null);
+    const showCntRef=useRef(0);
+    
+    /**
+     * 延迟重绘箭头位置
+     */
+    const delayRelayoutArrows=useCallback(()=>{
+        setTimeout(()=>{
+            setLayoutArrows(Symbol());
+        }, 100);
+    },[setLayoutArrows]);
+    
+    /**
+     * 第2次以上渲染，引发重绘
+     */
+    useEffect(()=>{
+        if(props.visible){
+            showCntRef.current=showCntRef.current+1;         
+            if(1<showCntRef.current){
+                console.log("gant - 第2次以上渲染，引发重绘");
+                delayRelayoutArrows();
+            }
+        }
+    },[props.visible]);
 
     /**
-     * 强制重绘并重新计算箭头位置
-     * 两种情况会触发强制重绘：
-     * 1、对话框第2次以后的显示，如果不强制则表格变形
-     * 2、窗口大小变化
-     * @param {*} prevProps 
-     * @param {*} prevState 
+     * 窗口大小调整，引发重绘
      */
-    componentDidUpdate(prevProps,prevState){
-        //设置箭头位置
-        if(this.isForceUpdate){
-            this.isForceUpdate=false;
-            this.setState({
-                layoutArrows: Symbol()
-            });
-            return;
-        }
+    useEffect(()=>{
+        console.log("gant - 窗口大小调整，引发重绘");
+        delayRelayoutArrows();
+    },[props.resizeSymbol]);
 
-        //当不是第一次显示时进行强制重绘（保证表格不变形（不这样会变形）），并触发下次进行箭头位置计算
-        if(!prevProps.visible && this.props.visible){
-            ++this.showCnt;            
-            if(1<this.showCnt){
-                setTimeout(()=>{
-                    this.isForceUpdate=true;//此标志会使重绘完成之后再回调本方法，进行第二次操作：设置箭头位置
-                    this.forceUpdate();
-                }, 100);
-            }
-            return;
-        }
 
-        //当窗口大小有变化时也进行强制重绘，并触发下次进行箭头位置计算
-        if(this.props.resizeSymbol!==prevProps.resizeSymbol){
-            setTimeout(()=>{
-                this.isForceUpdate=true;//此标志会使重绘完成之后再回调本方法，进行第二次操作：设置箭头位置
-                this.forceUpdate();
-            }, 100);
-            return;
-        }
-    }
+    let {ds, colKeys, relas}=getParts(props);
 
-    render() {
-        let {ds, colKeys, relas}=getParts(this.props);
+    return (
+        <EnhDlg noFooter
+                title="甘特图"
+                visible={props.visible}
+                size={{w:props.winW-200}}
+                onCancel={props.onCancel}>
 
-        return (
-            <EnhDlg noFooter
-                    title="甘特图"
-                    visible={this.props.visible}
-                    size={{w:this.props.winW-200}}
-                    onCancel={this.props.onCancel}>
-
-                <GantChart 
-                    key='gant-comp'
-                    ds={ds}
-                    colKeys={colKeys} 
-                    arrows={relas}
-                    winW={this.props.winW} 
-                    maxh={this.props.winH-250-100}  
-                    layoutArrows={this.state.layoutArrows}/>    
-            </EnhDlg>
-        );
-    }
+            <GantChart 
+                key='gant-comp'
+                ds={ds}
+                colKeys={colKeys} 
+                arrows={relas}
+                winW={props.winW} 
+                maxh={props.winH-250-100}  
+                layoutArrows={layoutArrows}/>    
+        </EnhDlg>
+    );
+    
 }
 
 const getParts=createSelector(

@@ -11,7 +11,7 @@ import 'antd/dist/antd.css';
 
 function App() {
     return (
-        <>
+        <React.Fragment>
             <Global styles={{
                 body: {
                     margin: 0,
@@ -21,7 +21,7 @@ function App() {
             <ConfigProvider locale={zhCN}>
                 <MapsViewer />
             </ConfigProvider>
-        </>
+        </React.Fragment>
     );
 }
 

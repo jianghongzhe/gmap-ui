@@ -9,6 +9,10 @@ const EnhDlg=withEnh(Modal);
 
 const { TabPane } = Tabs;
 
+/**
+ * 帮助对话框
+ * @param {*} props 
+ */
 const HelpDlg=(props)=>{
     return (
         <EnhDlg noFooter

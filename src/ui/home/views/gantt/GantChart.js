@@ -1,85 +1,36 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/core';
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Progress, Table,Popover } from 'antd';
 import { RightOutlined } from '@ant-design/icons';
 
 import {createSelector} from 'reselect';
+import userEvent from '@testing-library/user-event';
 
-class GantChart extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { 
-            arrows:[],//箭头位置
-        };
-
-        this.lastScrollTime=0;
-        this.scrollTimer=null;
-        this.gantEleId='ganttTable-'+new Date().getTime();
-    }
-
-
-    componentDidMount(){
-        setTimeout(() => {
-            //注册有滚动事件时计算箭头位置
-            let ele=document.querySelector(`#${this.gantEleId} .ant-table-body`);
-            if(ele){
-                ele.addEventListener("scroll",this.debouncePutArrows);
-            }
-            //现在触发一次计算
-            this.debouncePutArrows();
-        }, 200);
-    }
-
-    componentWillUnmount(){
-        let ele=document.querySelector(`#${this.gantEleId} .ant-table-body`);
-        if(ele){
-            ele.removeEventListener("scroll",this.debouncePutArrows);
-        }
-    }
-
-    componentDidUpdate(prevProps,prevState){
-        // //重新定位箭头的标志更改，则重新定位
-        // if(this.props.layoutArrows !==prevProps.layoutArrows || this.props.maxh!==prevProps.maxh){
-        //     //  this.debouncePutArrows(true);
-            
-        // }
-
-        //强制重新计算箭头位置：比如窗口大小变化、对话框显示等
-        if(this.props.layoutArrows !==prevProps.layoutArrows){
-            this.debouncePutArrows();
-        }
-    }
+/**
+ * 甘特图组件
+ * @param {*} props 
+ */
+const GantChart=(props)=>{
+    const [arrows, setArrows]=useState([]);
+    const [gantEleId]=useState(()=>'ganttTable-'+new Date().getTime());
+    const lastScrollTimeRef=useRef(0);
+    const scrollTimerRef=useRef(null);
+  
 
 
-    /**
-     * 延时执行设置箭头位置
-     * @param {*} delayMore 如果指定为true，则延迟更长的时间（3s）再执行操作，否则按默认的时间间隔
-     */
-    debouncePutArrows=(delayMore=undefined)=>{
-        //与上次计算时间间隔太小，取消上次的任务
-        let time=new Date().getTime();
-        if(time-this.lastScrollTime<debounceInterval){
-            if(null!==this.scrollTimer){
-                clearTimeout(this.scrollTimer);
-            }
-        }
-
-        //延时执行
-        this.lastScrollTime=time;
-        this.scrollTimer=setTimeout(this.putArrows,true===delayMore?3000: debounceInterval);
-    }
+    
 
 
     /**
      * 摆放箭头位置
      */
-    putArrows=()=>{
+    const putArrows=useCallback(()=>{
         let arrows=[];
 
         //边界范围定义
-        let eleFirstCell=document.querySelector(`#${this.gantEleId} table tr:nth-child(1) th:nth-child(1)`);
-        let eleLastCell=document.querySelector(`#${this.gantEleId} .ant-table-body`);
+        let eleFirstCell=document.querySelector(`#${gantEleId} table tr:nth-child(1) th:nth-child(1)`);
+        let eleLastCell=document.querySelector(`#${gantEleId} .ant-table-body`);
         if(!eleFirstCell || !eleLastCell){
             return;
         }
@@ -96,11 +47,11 @@ class GantChart extends React.Component {
 
 
         //根据连接关系计算每组连接线的位置（css样式）
-        this.props.arrows.forEach((rela)=>{
+        props.arrows.forEach((rela)=>{
             //起始单元格与结束单元格位置
             let shouldHidden=false;//用于判断当连接线超出边界范围时不显示
-            let eleFrom=document.querySelector(`#${this.gantEleId} table tr:nth-child(${rela.from[0]+2}) td:nth-child(${rela.from[1]+1})`);
-            let eleTo=document.querySelector(`#${this.gantEleId} table tr:nth-child(${rela.to[0]+2}) td:nth-child(${rela.to[1]+1})`);
+            let eleFrom=document.querySelector(`#${gantEleId} table tr:nth-child(${rela.from[0]+2}) td:nth-child(${rela.from[1]+1})`);
+            let eleTo=document.querySelector(`#${gantEleId} table tr:nth-child(${rela.to[0]+2}) td:nth-child(${rela.to[1]+1})`);
             if(!eleFrom || !eleTo){
                 return;
             }
@@ -236,54 +187,94 @@ class GantChart extends React.Component {
             });
         });
 
-
-        this.setState({
-            arrows: arrows
-        });
-    }
+        setArrows(arrows);
+    },[props.arrows, setArrows]);
 
 
-    render() {
-        
-
-        if(!this.props.ds || !this.props.ds[0] || !this.props.colKeys || !this.props.colKeys[0] || !this.props.arrows){
-            return null;
+    /**
+     * 延时执行设置箭头位置
+     * @param {*} delayMore 如果指定为true，则延迟更长的时间（3s）再执行操作，否则按默认的时间间隔
+     */
+    const debouncePutArrows=useCallback((delayMore=undefined)=>{
+        //与上次计算时间间隔太小，取消上次的任务
+        let time=new Date().getTime();
+        if(time-lastScrollTimeRef.current<debounceInterval){
+            if(null!==scrollTimerRef.current){
+                clearTimeout(scrollTimerRef.current);
+            }
         }
 
-        //动态计算列配置信息
-        let colsConfig=getDynaCols({data:this.props.ds, colKeys:this.props.colKeys, winW:this.props.winW});
-        
-        //滚动高度：该配置如果省略，即表格不纵向滚动，则表格布局会发生变化，一些dom元素取不到，不能完成箭头定位
-        let graphH={y:400};
-        if(this.props.maxh){
-            graphH={y:this.props.maxh};
+        //延时执行
+        lastScrollTimeRef.current=time;
+        scrollTimerRef.current=setTimeout(putArrows,true===delayMore?3000: debounceInterval);
+    },[putArrows]);
+
+
+
+    useEffect(()=>{
+        //注册有滚动事件以计算箭头位置，并且现在触发一次计算
+        setTimeout(() => {
+            let ele=document.querySelector(`#${gantEleId} .ant-table-body`);
+            if(ele){
+                ele.addEventListener("scroll",debouncePutArrows);
+            }
+            debouncePutArrows();
+        }, 200);
+
+        return ()=>{
+            let ele=document.querySelector(`#${gantEleId} .ant-table-body`);
+            if(ele){
+                ele.removeEventListener("scroll",debouncePutArrows);
+            }
         }
+    },[debouncePutArrows]);
+
+    useEffect(()=>{
+        debouncePutArrows();
+    },[props.layoutArrows, debouncePutArrows]);
+
+
+    
         
-        // console.log("ds",this.props.ds);
 
-        return (<React.Fragment key='gantconatiner'>
-            {/* 表格部分 */}
-            <Table id={this.gantEleId} tableLayout='fixed' size="small" bordered={true} pagination={false} 
-                    scroll={{x:'max-content', ...graphH}} 
-                    dataSource={this.props.ds} 
-                    columns={colsConfig} />
-
-            {/* 连接线部分 */}
-            {
-                this.state.arrows.map((each,ind)=>(
-                    <React.Fragment key={'arrow-'+ind}>
-                        <div key={'arrow-st-'+ind} css={{...joinLineStyle, ...each.st}}></div>
-                        <div key={'arrow-end-'+ind} css={{...joinLineStyle, ...each.end}}></div>
-                        <div key={'arrow-join1-'+ind} css={{...joinLineStyle, ...each.join1}}></div>
-                        <div key={'arrow-join2-'+ind} css={{...joinLineStyle, ...each.join2}}></div>
-                        {/* <div key={'arrow-coner1-'+ind} css={{...joinLineStyle, ...each.coner1}}></div>
-                        <div key={'arrow-coner2-'+ind} css={{...joinLineStyle, ...each.coner2}}></div> */}
-                        <RightOutlined key={'arrow-head-'+ind} css={{...joinArrowStyle, ...each.head}}/>
-                    </React.Fragment>
-                ))
-            } 
-        </React.Fragment>);
+    if(!props.ds || !props.ds[0] || !props.colKeys || !props.colKeys[0] || !props.arrows){
+        return null;
     }
+
+    //动态计算列配置信息
+    let colsConfig=getDynaCols({data:props.ds, colKeys:props.colKeys, winW:props.winW});
+    
+    //滚动高度：该配置如果省略，即表格不纵向滚动，则表格布局会发生变化，一些dom元素取不到，不能完成箭头定位
+    let graphH={y:400};
+    if(props.maxh){
+        graphH={y:props.maxh};
+    }
+    
+    // console.log("ds",props.ds);
+
+    return (<React.Fragment key='gantconatiner'>
+        {/* 表格部分 */}
+        <Table id={gantEleId} tableLayout='fixed' size="small" bordered={true} pagination={false} 
+                scroll={{x:'max-content', ...graphH}} 
+                dataSource={props.ds} 
+                columns={colsConfig} />
+
+        {/* 连接线部分 */}
+        {
+            arrows.map((each,ind)=>(
+                <React.Fragment key={'arrow-'+ind}>
+                    <div key={'arrow-st-'+ind} css={{...joinLineStyle, ...each.st}}></div>
+                    <div key={'arrow-end-'+ind} css={{...joinLineStyle, ...each.end}}></div>
+                    <div key={'arrow-join1-'+ind} css={{...joinLineStyle, ...each.join1}}></div>
+                    <div key={'arrow-join2-'+ind} css={{...joinLineStyle, ...each.join2}}></div>
+                    {/* <div key={'arrow-coner1-'+ind} css={{...joinLineStyle, ...each.coner1}}></div>
+                    <div key={'arrow-coner2-'+ind} css={{...joinLineStyle, ...each.coner2}}></div> */}
+                    <RightOutlined key={'arrow-head-'+ind} css={{...joinArrowStyle, ...each.head}}/>
+                </React.Fragment>
+            ))
+        } 
+    </React.Fragment>);
+    
 }
 
 const getDynaCols2=()=>{
