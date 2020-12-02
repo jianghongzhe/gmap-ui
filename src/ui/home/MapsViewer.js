@@ -115,17 +115,17 @@ const MapsViewer=(props)=>{
     },[setNewMapDlgVisible]);
 
 
-    const onNewMapDlgOK = async ({dir,name}) => {
+    const onNewMapDlgOK =useCallback(async ({dir,name}) => {
         try {
             await props.dispatcher.tabs.onNewMapPromise({dir,name});
             setNewMapDlgVisible(false);
         } catch (error) {
         }
-    }
+    },[props.dispatcher, setNewMapDlgVisible]);
 
 
     //------------修改导图----------------------------------------------------------------------
-    const onShowEditMapDlg =async () => {
+    const onShowEditMapDlg =useCallback(async () => {
         try {
             let currPane=await props.dispatcher.tabs.selectCurrPanePromise();
             setEditDlgState({
@@ -135,13 +135,13 @@ const MapsViewer=(props)=>{
             });
         } catch (error) {
         }
-    }
+    },[props.dispatcher, setEditDlgState]);
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));
     },[setEditDlgState]);
 
-    const onEditMapDlgOK =async (closeDlg = true) => {
+    const onEditMapDlgOK =useCallback(async (closeDlg = true) => {
         try {
             let txt = editTmpTxt;
             await props.dispatcher.tabs.onSaveMapPromise(txt);
@@ -151,18 +151,19 @@ const MapsViewer=(props)=>{
             }
         } catch (error) {
         }
-    }
+    },[props.dispatcher, setEditDlgState, editTmpTxt]);
 
 
 
     //------------选择文件功能----------------------------------------------------------------------
-    const onSelectMapItem =async (item) => {
+    const onSelectMapItem =useCallback(async (item) => {
         try{
             await props.dispatcher.tabs.onSelItemPromise(item);
             setSelMapDlgVisible(false);
         }catch(e){
         }
-    }
+    },[props.dispatcher, setSelMapDlgVisible]);
+
 
     const showSelMapDlg =useCallback(() => {
         setSelMapDlgVisible(true);
