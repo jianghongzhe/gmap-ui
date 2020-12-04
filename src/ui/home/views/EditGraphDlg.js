@@ -6,8 +6,8 @@ import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOut
 import moment  from 'moment';
 
 
-import { CirclePicker } from 'react-color'
-import { Controlled as CodeMirror } from 'react-codemirror2'
+import { CirclePicker,PhotoshopPicker } from 'react-color';
+import { Controlled as CodeMirror } from 'react-codemirror2';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.css';
@@ -36,6 +36,8 @@ import api from '../../../service/api';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
 
+import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
+
 const EnhDlg=withEnh(Modal);
 
 
@@ -46,6 +48,7 @@ const EditGraphDlg=(props)=>{
     const codeMirrorInstRef=useRef(null);
 
     const [colorPickerVisible, setColorPickerVisible]=useState(false);
+    const [advColorPickerVisible, setAdvColorPickerVisible]=useState(false);
     const [insertPicDlgVisible, setInsertPicDlgVisible]=useState(false);
     const [helpDlgVisible, setHelpDlgVisible]=useState(false);
     const [dateDlgVisible, setDateDlgVisible]=useState(false);
@@ -91,6 +94,7 @@ const EditGraphDlg=(props)=>{
 
     const hideAllDlg = () => {
         setColorPickerVisible(false);
+        setAdvColorPickerVisible(false);
         setInsertPicDlgVisible(false);
         setHelpDlgVisible(false);
         setDateDlgVisible(false);
@@ -157,8 +161,14 @@ const EditGraphDlg=(props)=>{
         onAddColor(color.hex, true);
     }
 
+    
+
     const showColorPicker = () => {
         setColorPickerVisible(true);
+    }
+
+    const showAdvColorPicker = () => {
+        setAdvColorPickerVisible(true);
     }
 
 
@@ -282,6 +292,7 @@ const EditGraphDlg=(props)=>{
                             ))
                         }
                         <div css={selColorStyle} title='选择颜色' onClick={showColorPicker}></div>
+                        <div css={selColorStyleAdv} title='选择颜色（高级）' onClick={showAdvColorPicker}></div>
                         <div css={clearColorStyle} title='清除颜色' onClick={onClearColor}></div>
 
                         {/* 插入图片、帮助 */}
@@ -348,6 +359,32 @@ const EditGraphDlg=(props)=>{
                 <CirclePicker onChange={handleColorPickerColorChange} />
             </EnhDlg>
 
+            <AdvColorPickerDlg
+                w={advColorDlgW}
+                l={advColorDlgAdjustX - (props.winW-200 - advColorDlgW) / 2}
+                t={colorDlgY}
+                visible={advColorPickerVisible}
+                onCancel={hideAllDlg}
+                onOk={handleColorPickerColorChange}
+            />
+
+            {/* <EnhDlg noTitle noFooter closable={false}
+                    size={{w:advColorDlgW}}
+                    css={{
+                        left: advColorDlgAdjustX - (props.winW-200 - advColorDlgW) / 2,
+                        top: colorDlgY,
+                    }}
+                    visible={advColorPickerVisible}
+                    onCancel={hideAllDlg}>
+
+                <PhotoshopPicker color={advColor.hex} onChangeComplete={handleAdvColorPickerColorChange} onAccept ={setColorCommit} onCancel={hideAllDlg}/>
+            </EnhDlg> */}
+
+
+            
+
+
+
             {/* 帮助对话框 */}
             <HelpDlg
                 maxBodyH={props.winH-400+80}
@@ -367,7 +404,9 @@ const EditGraphDlg=(props)=>{
 
 //颜色选择对话框位置
 const colorDlgW = 290;
+const advColorDlgW = 564;
 const colorDlgAdjustX = 258;
+const advColorDlgAdjustX = 284;
 const colorDlgY = 204;
 
 
@@ -427,6 +466,11 @@ const colorBoxhoverStyle = {
 
 const selColorStyle = {
     backgroundImage: 'linear-gradient(135deg,orange 20%,green 100%)',
+    ...colorBoxhoverStyle
+};
+
+const selColorStyleAdv = {
+    backgroundImage: 'linear-gradient(135deg,red 20%,green 100%)',
     ...colorBoxhoverStyle
 };
 

@@ -331,4 +331,4 @@ const otherThemeStyle = {
 const themeStyles=[centerThemeStyle, ()=>secendThemeStyle, ()=>otherThemeStyle];
 
 
-export default MindNode;
+export default React.memo(MindNode);

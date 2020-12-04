@@ -639,7 +639,13 @@ const openSaveFileDlg = (mainWindow) => {
     return dialog.showSaveDialogSync(mainWindow, { 
         properties: [/*'saveFile'*/],
         filters: [
-            { name: '图片', extensions: 'bmp,jpg,jpeg,png,gif,svg,webp'.split(',') },
+            { name: 'JPG图片', extensions: ['jpg'] },
+            { name: 'PNG图片', extensions: ['png'] },
+            { name: 'GIF图片', extensions: ['gif'] },
+            { name: 'BMP图片', extensions: ['bmp'] },
+            { name: 'JPEG图片', extensions: ['jpeg'] },
+            { name: 'SVG图片', extensions: ['svg'] },
+            { name: 'WEBP图片', extensions: ['webp'] },
             { name: '所有', extensions: ['*'] }
         ]
     });

@@ -177,9 +177,10 @@ const getTabItemContainerStyle=(h)=>({
     paddingBottom:'30px'
 });
 
-export default connect((state)=>({
+
+export default React.memo(connect((state)=>({
     winW:       state.common.winW,
     winH:       state.common.winH,
     activeKey:  state.tabs.activeKey,
     panes:      state.tabs.panes,
-}))(GraphTabs);
+}))(GraphTabs));
