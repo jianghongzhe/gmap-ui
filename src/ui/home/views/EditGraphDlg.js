@@ -37,6 +37,7 @@ import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
 
 import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
+import ColorPickerDlg from './edit/ColorPickerDlg';
 
 const EnhDlg=withEnh(Modal);
 
@@ -163,13 +164,13 @@ const EditGraphDlg=(props)=>{
 
     
 
-    const showColorPicker = () => {
+    const showColorPicker =useCallback(() => {
         setColorPickerVisible(true);
-    }
+    },[setColorPickerVisible]);
 
-    const showAdvColorPicker = () => {
+    const showAdvColorPicker =useCallback(() => {
         setAdvColorPickerVisible(true);
-    }
+    },[setAdvColorPickerVisible]);
 
 
 
@@ -347,40 +348,22 @@ const EditGraphDlg=(props)=>{
             />
 
             {/* 颜色选择对话框 */}
-            <EnhDlg noTitle noFooter closable={false}
-                    size={{w:colorDlgW}}
-                    css={{
-                        left: colorDlgAdjustX - (props.winW-200 - colorDlgW) / 2,
-                        top: colorDlgY,
-                    }}
-                    visible={colorPickerVisible}
-                    onCancel={hideAllDlg}>
-
-                <CirclePicker onChange={handleColorPickerColorChange} />
-            </EnhDlg>
-
-            <AdvColorPickerDlg
-                w={advColorDlgW}
-                l={advColorDlgAdjustX - (props.winW-200 - advColorDlgW) / 2}
+            <ColorPickerDlg
                 t={colorDlgY}
+                offsetX={colorDlgAdjustX}
+                parW={props.winW-200}
+                visible={colorPickerVisible}
+                onCancel={hideAllDlg}
+                onOk={handleColorPickerColorChange}
+            />
+            <AdvColorPickerDlg
+                t={colorDlgY}
+                offsetX={advColorDlgAdjustX}
+                parW={props.winW-200}
                 visible={advColorPickerVisible}
                 onCancel={hideAllDlg}
                 onOk={handleColorPickerColorChange}
             />
-
-            {/* <EnhDlg noTitle noFooter closable={false}
-                    size={{w:advColorDlgW}}
-                    css={{
-                        left: advColorDlgAdjustX - (props.winW-200 - advColorDlgW) / 2,
-                        top: colorDlgY,
-                    }}
-                    visible={advColorPickerVisible}
-                    onCancel={hideAllDlg}>
-
-                <PhotoshopPicker color={advColor.hex} onChangeComplete={handleAdvColorPickerColorChange} onAccept ={setColorCommit} onCancel={hideAllDlg}/>
-            </EnhDlg> */}
-
-
             
 
 
@@ -403,8 +386,6 @@ const EditGraphDlg=(props)=>{
 }
 
 //颜色选择对话框位置
-const colorDlgW = 290;
-const advColorDlgW = 564;
 const colorDlgAdjustX = 258;
 const advColorDlgAdjustX = 284;
 const colorDlgY = 204;
@@ -470,7 +451,7 @@ const selColorStyle = {
 };
 
 const selColorStyleAdv = {
-    backgroundImage: 'linear-gradient(135deg,red 20%,green 100%)',
+    backgroundImage: 'linear-gradient(135deg,orange 20%,pink 40%,green 100%)',
     ...colorBoxhoverStyle
 };
 
