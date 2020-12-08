@@ -13,6 +13,7 @@ import marked from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';
+import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
@@ -23,6 +24,12 @@ const markedHighlightUtil = new MarkedHighlightUtil();
  * @param {*} props 
  */
 const RefViewer=(props)=>{
+    const {winW,winH,activeKey}=useSelector((state)=>({
+        winW:       state.common.winW,
+        winH:       state.common.winH,
+        activeKey:  state.tabs.activeKey,
+    }));
+
     const [wrapperId]=useState(()=>"refviewercontainer"+new Date().getTime());
 
     useEffect(()=>{
@@ -38,7 +45,7 @@ const RefViewer=(props)=>{
                         return addr;
                     }
                     if(addr.startsWith("./")){
-                        return api.calcAttUrl(props.activeKey, oldurl);
+                        return api.calcAttUrl(activeKey, oldurl);
                     }
                     return addr;
                 }
@@ -46,11 +53,11 @@ const RefViewer=(props)=>{
             imgConfig: {
                 convertUrl: (oldurl) => {
                     if (!(oldurl.startsWith("./") || oldurl.startsWith("../"))) { return oldurl; }//跳过不是本地相对路径的
-                    return api.calcPicUrl(props.activeKey, oldurl);
+                    return api.calcPicUrl(activeKey, oldurl);
                 }
             }
         });
-    },[props.activeKey]);
+    },[activeKey]);
 
     
     useEffect(()=>{
@@ -76,7 +83,7 @@ const RefViewer=(props)=>{
     return (
         <EnhDlg noFooter
                 title={"查看引用 - " + refname}
-                size={{w:props.winW-200, h:props.winH-300, fixh:true, wrapperId:wrapperId}}                
+                size={{w:winW-200, h:winH-300, fixh:true, wrapperId:wrapperId}}                
                 visible={props.visible}
                 maskClosable={true}               
                 onCancel={props.onCancel}>
@@ -126,8 +133,4 @@ const backtopColorStyle={
     },
 }
 
-export default React.memo(connect((state)=>({
-    winW:       state.common.winW,
-    winH:       state.common.winH,
-    activeKey:  state.tabs.activeKey,
-}))(RefViewer));
+export default React.memo(RefViewer);

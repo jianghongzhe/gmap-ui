@@ -10,14 +10,20 @@ import { createSelector } from 'reselect';
 import api from '../../../service/api';
 import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
+import { useSelector } from 'react-redux';
 
 /**
  * 首页
  * @param {*} props 
  */
 const Welcome=(props)=>{
+    const {winW,winH}=useSelector((state)=>({
+        winW:state.common.winW,
+        winH:state.common.winH,
+    }));
+
     const [appInfo]=useState(()=>appInfoSelector(undefined));
-    const fileselectRight= calcBackTopRight(props);
+    const fileselectRight= calcBackTopRight({winW,winH});
 
     return (
         <Row>
@@ -29,7 +35,7 @@ const Welcome=(props)=>{
                 }}>
                     <Col span={14} >
                         <ConnectedPathSelect 
-                            maxH={props.winH-160}
+                            maxH={winH-160}
                             backtopLoc={[fileselectRight,120]}
                             onSelectMapItem={props.onSelectMapItem}/>
                     </Col>
@@ -91,7 +97,4 @@ const logoWrapperStyle={
 
 
 
-export default React.memo(connect((state)=>({
-    winW:state.common.winW,
-    winH:state.common.winH,
-}))(Welcome));
+export default React.memo(Welcome);

@@ -270,4 +270,4 @@ const insertImgFormStyle = {
     },
 };
 
-export default InsertImgDlg;
+export default React.memo(InsertImgDlg);

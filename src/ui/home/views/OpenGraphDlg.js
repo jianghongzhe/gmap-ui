@@ -7,6 +7,7 @@ import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
 import {createSelector} from 'reselect';
+import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 
@@ -15,7 +16,12 @@ const EnhDlg=withEnh(Modal);
  * @param {*} props 
  */
 const OpenGraphDlg=(props)=>{
-    let {dlgW, backtopLoc, contentMaxH}=calcSizeProps(props);
+    const {winW,winH}=useSelector((state)=>({
+        winW:state.common.winW,
+        winH:state.common.winH,
+    }));
+
+    let {dlgW, backtopLoc, contentMaxH}=calcSizeProps({winW,winH});
 
     return (
         <EnhDlg noFooter
@@ -63,7 +69,4 @@ const calcSizeProps=createSelector(
     }
 );
 
-export default connect((state)=>({
-    winW:state.common.winW,
-    winH:state.common.winH,
-}))(OpenGraphDlg);
+export default React.memo(OpenGraphDlg);

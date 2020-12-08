@@ -7,9 +7,10 @@ import {createSelector} from 'reselect';
 
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
-import {connect} from '../../../common/gflow';
+import {connect,dispatcher} from '../../../common/gflow';
 
 import api from '../../../service/api';
+import { useSelector } from 'react-redux';
 
 
 const { TabPane } = Tabs;
@@ -21,6 +22,14 @@ const { TabPane } = Tabs;
  * @param {*} props 
  */
 const GraphTabs=(props)=>{
+    const {winW,winH,activeKey,panes}= useSelector((state)=>({
+        winW:       state.common.winW,
+        winH:       state.common.winH,
+        activeKey:  state.tabs.activeKey,
+        panes:      state.tabs.panes,
+    }));
+
+
     let beginTime=new Date().getTime();
     
     
@@ -52,7 +61,7 @@ const GraphTabs=(props)=>{
                             :
                         <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
                 }  
-                onClick={props.dispatcher.tabs.toggleExpand.bind(this,nd)}/>
+                onClick={dispatcher.tabs.toggleExpand.bind(this,nd)}/>
         );
     }
 
@@ -63,9 +72,9 @@ const GraphTabs=(props)=>{
      */
     const onEditTab =useCallback((targetKey, action) => {
         if ("remove" === action) {
-            props.dispatcher.tabs.removeTabCheckShouldStopFindInPage(targetKey);
+            dispatcher.tabs.removeTabCheckShouldStopFindInPage(targetKey);
         }
-    },[props.dispatcher.tabs]);
+    },[dispatcher.tabs]);
 
 
     /**
@@ -88,26 +97,26 @@ const GraphTabs=(props)=>{
             if(e && true===e.altKey && 'KeyW'===e.code && true!==props.editing){
                 // e.stopPropagation();
                 // e.preventDefault();
-                onEditTab(props.activeKey,"remove");
+                onEditTab(activeKey,"remove");
                 return;
             }
 
             //ctrl+PageUp 前一个选项卡
             if(e && true===e.ctrlKey && 'PageUp'===e.code && true!==props.editing){
-                props.dispatcher.tabs.movePreTab();
+                dispatcher.tabs.movePreTab();
                 return;
             }
 
             //ctrl+PageDown 后一个选项卡
             if(e && true===e.ctrlKey && 'PageDown'===e.code && true!==props.editing){
-                props.dispatcher.tabs.moveNextTab();
+                dispatcher.tabs.moveNextTab();
                 return;
             }
         }
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[props.editing,props.activeKey,props.dispatcher.tabs,onEditTab]);
+    },[props.editing,activeKey,dispatcher.tabs,onEditTab]);
 
     
     
@@ -115,14 +124,14 @@ const GraphTabs=(props)=>{
         <Tabs
             hideAdd={true}
             type="editable-card"
-            activeKey={props.activeKey}
-            css={{ height:props.winH-64, 'backgroundColor': 'white' }}
-            onChange={props.dispatcher.tabs.changeActiveKey}
+            activeKey={activeKey}
+            css={{ height:winH-64, 'backgroundColor': 'white' }}
+            onChange={dispatcher.tabs.changeActiveKey}
             onEdit={onEditTab}>
             {
-                props.panes.map((pane,ind) => (
+                panes.map((pane,ind) => (
                     <TabPane tab={pane.title} key={pane.key} closable={true}>
-                        <div css={getTabItemContainerStyle(props.winH- 64 - 55-1)}>
+                        <div css={getTabItemContainerStyle(winH- 64 - 55-1)}>
                             <NewMindmap
                                 ind={ind}
                                 ds={pane.ds}
@@ -178,9 +187,4 @@ const getTabItemContainerStyle=(h)=>({
 });
 
 
-export default React.memo(connect((state)=>({
-    winW:       state.common.winW,
-    winH:       state.common.winH,
-    activeKey:  state.tabs.activeKey,
-    panes:      state.tabs.panes,
-}))(GraphTabs));
+export default React.memo(GraphTabs);

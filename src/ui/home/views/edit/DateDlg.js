@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx,Global } from '@emotion/core';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DatePicker, Calendar } from 'antd';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
 import moment  from 'moment';
@@ -36,14 +36,14 @@ const DateDlg=(props)=>{
     },[setDate]);
 
     //确定按钮事件
-    const onOk=()=>{
+    const onOk=useCallback(()=>{
         props.onOk(date.format("YYYY-MM-DD"));
-    }
+    },[props.onOk, date]);
 
-    const dlgScale={
+    const dlgScale=useMemo(()=>({
         w:340,
         h:390,
-    };
+    }),[]);
 
     return (
         <EnhDlg  title="选择日期"
@@ -112,4 +112,4 @@ const commonDaysStyle={
     }
 };
 
-export default DateDlg;
+export default React.memo(DateDlg);

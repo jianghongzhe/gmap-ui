@@ -5,6 +5,7 @@ import {  Modal, Timeline } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
+import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 
@@ -12,12 +13,17 @@ const EnhDlg=withEnh(Modal);
  * 时间线对话框
  */
 const TimelineViewer=(props)=>{
-    let dlgW= (props.winW<820?props.winW-20:800);
+    const {winW,winH}=useSelector((state)=>({
+        winW:state.common.winW,
+        winH:state.common.winH,
+    }));
+
+    let dlgW= (winW<820?winW-20:800);
 
     return (
         <EnhDlg noFooter
                 title="查看时间线"
-                size={{w:dlgW, h:props.winH-300}}
+                size={{w:dlgW, h:winH-300}}
                 visible={props.visible}
                 maskClosable={true}              
                 onCancel={props.onCancel}>
@@ -38,7 +44,4 @@ const TimelineViewer=(props)=>{
     
 }
 
-export default connect((state)=>({
-    winW:state.common.winW,
-    winH:state.common.winH,
-}))(TimelineViewer);
+export default React.memo(TimelineViewer);

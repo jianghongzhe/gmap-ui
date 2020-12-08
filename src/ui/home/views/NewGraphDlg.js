@@ -5,13 +5,18 @@ import {  Modal, Input,AutoComplete,Button,TreeSelect } from 'antd';
 import * as uiUtil from '../../../common/uiUtil';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
-import {connect} from '../../../common/gflow';
+import {connect,dispatcher} from '../../../common/gflow';
 import {createSelector} from 'reselect';
+import { useSelector } from 'react-redux';
 
 /**
  * 新建图表对话框
  */
 const NewGraphDlg=(props)=>{
+    const {allDirs}=useSelector((state)=>({
+        allDirs: state.common.allDirs,
+    }));
+
     const [name, setName]=useState('');
     const [dir, setDir]=useState('');
     const nameEle=useRef();
@@ -30,8 +35,8 @@ const NewGraphDlg=(props)=>{
 
     //加载所有目录层次
     const reloadAllDirs=useCallback(()=>{
-        props.dispatcher.common.reloadAllDirs();
-    },[props.dispatcher]);
+        dispatcher.common.reloadAllDirs();
+    },[dispatcher]);
 
     /**
      * 修改事件
@@ -71,7 +76,7 @@ const NewGraphDlg=(props)=>{
                                 style={{ width: '100%' }}
                                 value={dir}
                                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                                treeData={props.allDirs}
+                                treeData={allDirs}
                                 placeholder="请选择图表目录"
                                 treeDefaultExpandAll
                                 allowClear
@@ -118,8 +123,6 @@ const getDlgTitle=createSelector(
 );
 
 
-const mapState=(state)=>({
-    allDirs: state.common.allDirs,
-});
 
-export default connect(mapState)(NewGraphDlg);
+
+export default React.memo(NewGraphDlg);

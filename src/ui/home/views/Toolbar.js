@@ -5,7 +5,8 @@ import { Layout,   Button, Divider } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
-import {connect} from '../../../common/gflow';
+import {connect,dispatcher} from '../../../common/gflow';
+import { useSelector } from 'react-redux';
 
 const { Header, Content } = Layout;
 
@@ -14,8 +15,13 @@ const { Header, Content } = Layout;
  * @param {*} props 
  */
 const Toolbar=(props)=>{
-    let showExpandAll=ifShowExpandAll(props);
-    let showRestore=isShowRestore(props);
+    const {activeKey,panes}=useSelector((state)=>({
+        activeKey:  state.tabs.activeKey,
+        panes:      state.tabs.panes,
+    }));
+    const tmp={activeKey,panes};
+    let showExpandAll=ifShowExpandAll(tmp);
+    let showRestore=isShowRestore(tmp);
 
     return (
         <Header css={headerStyle}>
@@ -42,8 +48,8 @@ const Toolbar=(props)=>{
             
 
                 
-            <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={props.dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
-            <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={props.dispatcher.tabs.expandAll} title='展开全部节点' />
+            <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
+            <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.expandAll} title='展开全部节点' />
             <Button shape='circle' icon={<ExportOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} title='导出图片' />
             
             
@@ -123,7 +129,4 @@ const headerStyle = {
     }
 };
 
-export default connect((state)=>({
-    activeKey:  state.tabs.activeKey,
-    panes:      state.tabs.panes,
-}))(Toolbar);
+export default React.memo(Toolbar);

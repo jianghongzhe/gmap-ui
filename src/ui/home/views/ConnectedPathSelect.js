@@ -2,21 +2,29 @@
 import { css, jsx } from '@emotion/core';
 import React from 'react';
 import PathSelect from './PathSelect';
-import {connect} from '../../../common/gflow';
+import {connect,dispatcher} from '../../../common/gflow';
+import { useSelector } from 'react-redux';
+
 
 /**
  * 路径选择组件的包装
  */
 const ConnectedPathSelect=(props)=>{
-    return <PathSelect {...props} 
-        onloadDir={props.dispatcher.filesel.load}
-        onloadCurrDir={props.dispatcher.filesel.loadCurrDir}
+    const {filelist, dirs}= useSelector((state)=>{
+        return {
+            filelist:   state.filesel.filelist,
+            dirs:       state.filesel.dirs,
+        }
+    });
+
+    const extProps={...props, filelist, dirs};
+
+    return <PathSelect {...extProps} 
+        onloadDir={dispatcher.filesel.load}
+        onloadCurrDir={dispatcher.filesel.loadCurrDir}
     />;
 }
 
-const mapState=(state)=>({
-    filelist:   state.filesel.filelist,
-    dirs:       state.filesel.dirs,
-});
 
-export default connect(mapState)(ConnectedPathSelect);
+
+export default React.memo(ConnectedPathSelect);

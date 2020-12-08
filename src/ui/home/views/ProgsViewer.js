@@ -5,6 +5,7 @@ import { Modal, Timeline, Table,Progress,Tooltip } from 'antd';
 import {createSelector} from 'reselect';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
+import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 
@@ -12,7 +13,12 @@ const EnhDlg=withEnh(Modal);
  * 进度对话框
  */
 const ProgsViewer=(props)=>{
-    let dlgW = (props.winW < 820 ? props.winW - 20 : 800);
+    const {winW,winH}=useSelector((state)=>({
+        winW:state.common.winW,
+        winH:state.common.winH,
+    }));
+
+    let dlgW = (winW < 820 ? winW - 20 : 800);
 
     return (
         <EnhDlg noFooter
@@ -27,7 +33,7 @@ const ProgsViewer=(props)=>{
                 dataSource={parseDataSource(props)} 
                 columns={columns} 
                 size='small' 
-                scroll={{ y: props.winH-300 }} />
+                scroll={{ y: winH-300 }} />
         </EnhDlg>
     );
 }
@@ -71,7 +77,4 @@ const columns = [
     },
 ];
 
-export default connect((state)=>({
-    winW:state.common.winW,
-    winH:state.common.winH,
-}))(ProgsViewer);
+export default React.memo(ProgsViewer);

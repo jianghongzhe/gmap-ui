@@ -7,6 +7,7 @@ import GantChart from './GantChart';
 import {withEnh} from '../../../common/specialDlg';
 import {connect} from '../../../../common/gflow';
 import { createSelector } from 'reselect';
+import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 
@@ -15,6 +16,12 @@ const EnhDlg=withEnh(Modal);
  * @param {*} props 
  */
 const GantDlg=(props)=>{
+    const {winW,winH,resizeSymbol}= useSelector((state)=>({
+        winW:           state.common.winW,
+        winH:           state.common.winH,
+        resizeSymbol:   state.common.resizeSymbol
+    }));
+
     const [layoutArrows, setLayoutArrows]=useState(null);
     const showCntRef=useRef(0);
     
@@ -46,7 +53,7 @@ const GantDlg=(props)=>{
     useEffect(()=>{
         console.log("gant - 窗口大小调整，引发重绘");
         delayRelayoutArrows();
-    },[props.resizeSymbol]);
+    },[resizeSymbol]);
 
 
     let {ds, colKeys, relas}=getParts(props);
@@ -55,7 +62,7 @@ const GantDlg=(props)=>{
         <EnhDlg noFooter
                 title="甘特图"
                 visible={props.visible}
-                size={{w:props.winW-200}}
+                size={{w:winW-200}}
                 onCancel={props.onCancel}>
 
             <GantChart 
@@ -63,8 +70,8 @@ const GantDlg=(props)=>{
                 ds={ds}
                 colKeys={colKeys} 
                 arrows={relas}
-                winW={props.winW} 
-                maxh={props.winH-250-100}  
+                winW={winW} 
+                maxh={winH-250-100}  
                 layoutArrows={layoutArrows}/>    
         </EnhDlg>
     );
@@ -89,10 +96,6 @@ const getParts=createSelector(
     }
 );
 
-const mapState=(state)=>({
-    winW:           state.common.winW,
-    winH:           state.common.winH,
-    resizeSymbol:   state.common.resizeSymbol
-});
 
-export default connect(mapState)(GantDlg);
+
+export default React.memo(GantDlg);

@@ -291,4 +291,4 @@ const helpTableStyle = {
     },
 };
 
-export default HelpDlg;
+export default React.memo(HelpDlg);

@@ -16,10 +16,11 @@ import GantDlg from './views/gantt/GantDlg';
 
 
 import * as uiUtil from '../../common/uiUtil';
-import {connect} from '../../common/gflow';
+import {connect,dispatcher} from '../../common/gflow';
 import api from '../../service/api';
 // import html2canvas from 'html2canvas';
 import screenShot from '../../service/screenShot';
+import { useSelector } from 'react-redux';
 
 
 const { Content } = Layout;
@@ -46,6 +47,14 @@ const { Content } = Layout;
  * ]
  */
 const MapsViewer=(props)=>{
+    const {hasPane,installPathValid,activeKey,panes}= useSelector((state)=>({
+        hasPane:            state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
+        installPathValid:   state.common.installPathValid,
+        activeKey:          state.tabs.activeKey,
+        panes:              state.tabs.panes,
+    }));
+
+
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
     const [selMapDlgVisible, setSelMapDlgVisible]=useState(false);
 
@@ -76,14 +85,14 @@ const MapsViewer=(props)=>{
     });
 
     useEffect(()=>{
-        if(!props.installPathValid){
+        if(!installPathValid){
             Modal.warning({
                 title: '警告',
                 content: '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常',
             });
             return;
         }
-    },[props.installPathValid]);
+    },[installPathValid]);
 
 
     
@@ -117,17 +126,17 @@ const MapsViewer=(props)=>{
 
     const onNewMapDlgOK =useCallback(async ({dir,name}) => {
         try {
-            await props.dispatcher.tabs.onNewMapPromise({dir,name});
+            await dispatcher.tabs.onNewMapPromise({dir,name});
             setNewMapDlgVisible(false);
         } catch (error) {
         }
-    },[props.dispatcher, setNewMapDlgVisible]);
+    },[dispatcher, setNewMapDlgVisible]);
 
 
     //------------修改导图----------------------------------------------------------------------
     const onShowEditMapDlg =useCallback(async () => {
         try {
-            let currPane=await props.dispatcher.tabs.selectCurrPanePromise();
+            let currPane=await dispatcher.tabs.selectCurrPanePromise();
             setEditDlgState({
                 editMapDlgVisible: true,
                 editTmpTxt: currPane.mapTxts,
@@ -135,7 +144,7 @@ const MapsViewer=(props)=>{
             });
         } catch (error) {
         }
-    },[props.dispatcher, setEditDlgState]);
+    },[dispatcher, setEditDlgState]);
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));
@@ -144,25 +153,25 @@ const MapsViewer=(props)=>{
     const onEditMapDlgOK =useCallback(async (closeDlg = true) => {
         try {
             let txt = editTmpTxt;
-            await props.dispatcher.tabs.onSaveMapPromise(txt);
+            await dispatcher.tabs.onSaveMapPromise(txt);
             setEditDlgState(state=>({...state, editMapDlgVisible: !closeDlg}));
             if (!closeDlg) {
                 message.success("图表内容已保存");
             }
         } catch (error) {
         }
-    },[props.dispatcher, setEditDlgState, editTmpTxt]);
+    },[dispatcher, setEditDlgState, editTmpTxt]);
 
 
 
     //------------选择文件功能----------------------------------------------------------------------
     const onSelectMapItem =useCallback(async (item) => {
         try{
-            await props.dispatcher.tabs.onSelItemPromise(item);
+            await dispatcher.tabs.onSelItemPromise(item);
             setSelMapDlgVisible(false);
         }catch(e){
         }
-    },[props.dispatcher, setSelMapDlgVisible]);
+    },[dispatcher, setSelMapDlgVisible]);
 
 
     const showSelMapDlg =useCallback(() => {
@@ -202,8 +211,8 @@ const MapsViewer=(props)=>{
     },[setRefViewerDlgState]);
 
     const onExpImage=useCallback(()=>{
-        props.panes.forEach((item,ind)=>{
-            if(props.activeKey!==item.key){
+        panes.forEach((item,ind)=>{
+            if(activeKey!==item.key){
                 return;
             }
             let ele=document.querySelector(`#graphwrapper_${ind}`);
@@ -238,14 +247,14 @@ const MapsViewer=(props)=>{
             //     api.openUrl(base64Url);
             // });
         });
-    },[props.activeKey, props.panes]);
+    },[activeKey, panes]);
 
     
     return (
         <React.Fragment>
             <Layout>
                 {
-                    props.hasPane ?
+                    hasPane ?
                         <>
                             <Toolbar
                                 onShowNewMapDlg={onShowNewMapDlg}
@@ -332,13 +341,6 @@ const MapsViewer=(props)=>{
 }
 
 
-const mapState=(state)=>({
-    hasPane:            state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
-    installPathValid:   state.common.installPathValid,
-    activeKey:          state.tabs.activeKey,
-    panes:              state.tabs.panes,
-});
 
-
-export default connect(mapState)(MapsViewer);
+export default React.memo(MapsViewer);
 

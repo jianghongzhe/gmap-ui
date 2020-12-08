@@ -38,6 +38,7 @@ import {connect} from '../../../common/gflow';
 
 import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
 import ColorPickerDlg from './edit/ColorPickerDlg';
+import {useSelector} from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 
@@ -46,6 +47,12 @@ const EnhDlg=withEnh(Modal);
  * 编辑图表对话框
  */
 const EditGraphDlg=(props)=>{
+    const {winW,winH,activeKey}= useSelector((state)=>({
+        winW:       state.common.winW,
+        winH:       state.common.winH,
+        activeKey:  state.tabs.activeKey,
+    }));
+
     const codeMirrorInstRef=useRef(null);
 
     const [colorPickerVisible, setColorPickerVisible]=useState(false);
@@ -268,13 +275,13 @@ const EditGraphDlg=(props)=>{
 
 
     
-    let insertPicDlgW = (props.winW < 820 ? props.winW - 20 : 800);
+    let insertPicDlgW = (winW < 820 ? winW - 20 : 800);
 
     return (
         <>
             <EnhDlg
                     title={"编辑图表 - " + props.currMapName}
-                    size={{w:props.winW-200}}
+                    size={{w:winW-200}}
                     maskClosable={false}
                     visible={props.visible}
                     footer={[
@@ -303,7 +310,7 @@ const EditGraphDlg=(props)=>{
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={showHelpPicDlg} />
                     </div>
                     <CodeMirror
-                        css={getCodeEditorStyle(props.winH-400)}
+                        css={getCodeEditorStyle(winH-400)}
                         editorDidMount={bindCodeMirrorInstRef}
                         value={props.editTmpTxt}
                         options={{
@@ -341,7 +348,7 @@ const EditGraphDlg=(props)=>{
                 visible={insertPicDlgVisible}
                 dlgW={insertPicDlgW}
                 isImg={isImg}
-                activeKey={props.activeKey}
+                activeKey={activeKey}
                 onAddPic ={onAddPic}
                 onAddAtt={onAddAtt}
                 onCancel={hideAllDlg}
@@ -351,7 +358,7 @@ const EditGraphDlg=(props)=>{
             <ColorPickerDlg
                 t={colorDlgY}
                 offsetX={colorDlgAdjustX}
-                parW={props.winW-200}
+                parW={winW-200}
                 visible={colorPickerVisible}
                 onCancel={hideAllDlg}
                 onOk={handleColorPickerColorChange}
@@ -359,7 +366,7 @@ const EditGraphDlg=(props)=>{
             <AdvColorPickerDlg
                 t={colorDlgY}
                 offsetX={advColorDlgAdjustX}
-                parW={props.winW-200}
+                parW={winW-200}
                 visible={advColorPickerVisible}
                 onCancel={hideAllDlg}
                 onOk={handleColorPickerColorChange}
@@ -370,7 +377,7 @@ const EditGraphDlg=(props)=>{
 
             {/* 帮助对话框 */}
             <HelpDlg
-                maxBodyH={props.winH-400+80}
+                maxBodyH={winH-400+80}
                 visible={helpDlgVisible}
                 onCancel={hideAllDlg}/>
 
@@ -468,8 +475,4 @@ const getEditDlgColorBoxStyle = (color) => ({
 
 
 
-export default connect((state)=>({
-    winW:       state.common.winW,
-    winH:       state.common.winH,
-    activeKey:  state.tabs.activeKey,
-}))(EditGraphDlg);
+export default React.memo(EditGraphDlg);
