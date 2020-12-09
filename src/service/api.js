@@ -18,7 +18,9 @@ class Api{
     }
 
     showFindInPageDlg=()=>{
-        this.findInPageDlg.openFindWindow();
+        //this.findInPageDlg.openFindWindow();
+
+        app.showFindInPage();
     }
 
     closeFindInPageDlg=()=>{
