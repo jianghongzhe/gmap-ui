@@ -1,59 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>网页内查找</title>
-    <style>
-    body{
-        margin:0px;
-        padding:0px;
-    }
-    #root{
-        border:1px solid gray;
-    }
-    #ipt{
-        height:30px;
-        line-height: 30px;
-        font-size: 20px;
-        border:0px;
-        outline-width:0px;
-        background-color: lightgrey;
-    }
-    .btnItem img{
-        width:18px;
-        height:18px;
-        
-        cursor: pointer;
-    }
-    .btnItem{
-        background-color: transparent;
-        display:inline-block;
-        margin-top: 10px;
-    }
-    </style>
-  </head>
-  <body>
-        <script>
-        function onChange(e){
-            // const val=document.querySelector("#ipt").value;
-            // console.log(val);
-
-            // const {app} = window.require('electron').remote;
-            // console.log(app.find);
-            // app.find(val);
-        }
-        </script>
-    
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <title>网页内查找</title>
+        <link rel="stylesheet" href="./style.css">
+    </head>
+    <body>
         <div id="root">
-            <input id='ipt' oninput="onChange();"/>
-            <span>0/0</span>
-            <span class='btnItem'><img src='./up.png'/></span>
-            <span class='btnItem'><img src='./down.png'/></span>
-            <span class='btnItem'><img src='./close.png'/></span>
+            <input id='ipt'/>
+            <span id='percent'>0/0</span>
+            <div id='splitLine'></div>
+            <span id='btnPre' class='btnItem' title='上一个'><img src='./up.png'/></span>
+            <span id='btnNext' class='btnItem' title='下一个'><img src='./down.png'/></span>
+            <span id='btnClose' class='btnItem' title='关闭'><img src='./close.png'/></span>
         </div>
-    
-  </body>
+        <script src='./main.js'></script>
+    </body>
 </html>

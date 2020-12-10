@@ -19,8 +19,8 @@ class Api{
 
     showFindInPageDlg=()=>{
         //this.findInPageDlg.openFindWindow();
-
-        app.showFindInPage();
+        console.log('app.showFindInPage',app.showFindInPage);
+        app.showFindInPage(300,140);
     }
 
     closeFindInPageDlg=()=>{

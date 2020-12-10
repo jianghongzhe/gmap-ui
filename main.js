@@ -1,52 +1,13 @@
 
-const { app, BrowserWindow, Menu,Fr  } = require('electron');
+const { app, BrowserWindow, Menu} = require('electron');
 const mainSvc = require('./mainSvc');
+const findInPageSvc= require('./findInPageSvc');
 
 let mainWindow = null;
 
 app.commandLine.appendSwitch("--disable-http-cache");
 
-let extWins=[];
 
-const createFindInPageWin=()=>{
-    if(extWins.length>=1){
-        return;
-    }
-
-    const win = new BrowserWindow({
-        width: 500,
-        height: 300,
-        show: false,
-        parent: mainWindow,
-        x:0,
-        y:100,
-        resizable:false,
-        frame: app.isDevMode(),
-        webPreferences: {
-            //preload: path.join(__dirname, 'preload.js')
-            nodeIntegration: true,
-            enableRemoteModule: true,
-        }
-    });
-    win.loadFile(__dirname + '\\findinpage\\index.html');
-    win.show();
-    win.on('closed', function () {
-        extWins=[];
-        stopFind();
-    });
-    extWins.push(win);
-}
-
-const find=(txt)=>{
-    mainWindow.webContents.findInPage(txt,{
-        forward:true,
-        findNext:false,
-    });
-}
-
-const stopFind=()=>{
-    mainWindow.webContents.stopFindInPage("clearSelection");
-}
 
 
 const createWindow=()=>{
@@ -106,8 +67,14 @@ app.on('ready', () => {
     app.openSaveFileDlg=app.openSaveFileDlg.bind(app,mainWindow);
     app.isMaximized=app.isMaximized.bind(app,mainWindow);
 
-    app.showFindInPage=createFindInPageWin;
-    app.find=find;
+
+    findInPageSvc.init(app, mainWindow)
+
+    
+    
+    
+
+
     
     if(app.isDevMode() && app.hasDevToolExtension()){
         const extPath=app.getDevToolExtensionUrl();
