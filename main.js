@@ -2,6 +2,7 @@
 const { app, BrowserWindow, Menu} = require('electron');
 const mainSvc = require('./mainSvc');
 const findInPageSvc= require('./findInPageSvc');
+const fs = require('fs');
 
 let mainWindow = null;
 
@@ -98,5 +99,11 @@ app.on('activate', function () {
     }
 });
 
-
+process.on('uncaughtException', (err, origin) => {
+    fs.appendFileSync(
+        __dirname+"\\log.txt",
+        `Caught exception: ${err}\nException origin: ${origin}\n\n`,
+        'utf-8'
+    );
+});
 

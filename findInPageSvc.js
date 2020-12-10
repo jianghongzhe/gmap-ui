@@ -1,4 +1,5 @@
 const {BrowserWindow} = require('electron');
+const fs = require('fs');
 
 /**
  * 初始化
@@ -9,11 +10,13 @@ const init=(_app, _mainWindow)=>{
     const app=_app;
     const mainWindow=_mainWindow;
     let findWin=null; //网页内查找窗口
+
     
     /**
      * 主窗口渲染进程查找事件：转发到查找窗口渲染进程
      */
     mainWindow.webContents.on("found-in-page",(e, result)=>{
+        fs.appendFileSync(__dirname+"\\log.txt","收到查找事件："+JSON.stringify(result)+'\r\n','utf-8');
         if(findWin){
             findWin.webContents.send("findinpage-places",result);
         }
@@ -52,10 +55,12 @@ const init=(_app, _mainWindow)=>{
         findWin.loadFile(__dirname + '\\findinpage\\index.html');
 
         //窗口关闭事件
-        findWin.on('closed', function () {
+        findWin.on('closed', ()=>{
+            console.log('close find dlg');
             findWin=null;       //清空窗口引用
-            app.stopFind();     //取消查找
-            mainWindow.focus(); //主窗口激活
+            // app.stopFind();     //取消查找
+            // mainWindow.focus(); //主窗口激活
+            console.log('close find dlg 222');
         });
 
         //如果是开发模式，打开控制台

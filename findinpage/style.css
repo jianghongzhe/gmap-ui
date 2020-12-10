@@ -24,7 +24,6 @@ body{
 }
 
 #percent{
-    visibility: hidden; 
     width:60px;
     max-width:60px;
     overflow: hidden; 

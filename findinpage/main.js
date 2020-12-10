@@ -60,6 +60,7 @@ const closeWin=()=>{
  */
 const initIpcEvent=()=>{
     ipcRenderer.on("findinpage-places",(e, result)=>{
+        console.log("查找结果",result);
         elePercent.innerHTML=`${result.activeMatchOrdinal}/${result.matches}`;
         elePercent.style.visibility=(0===result.matches ? 'hidden' : null);
     });
