@@ -18,13 +18,11 @@ class Api{
     }
 
     showFindInPageDlg=()=>{
-        //this.findInPageDlg.openFindWindow();
-        console.log('app.showFindInPage',app.showFindInPage);
         app.showFindInPage(300,140);
     }
 
     closeFindInPageDlg=()=>{
-        this.findInPageDlg.closeFindWindow();
+        app.hideFindInPage();
     }
 
     getInnerModuleVersions=()=>{

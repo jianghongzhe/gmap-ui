@@ -10,23 +10,28 @@ let eleBtnNext=null;
 let eleBtnClose=null;
 
 
-
+/**
+ * 基本查找函数：当内容为空时，停止查找，并隐藏比值
+ * @param {*} fun 具体的查找函数
+ */
 const baseFind=(fun)=>{
     const val=eleIpt.value.trim();
     if(''===val){
         app.stopFind();
-        elePercent.innerHTML='0/0';
-        elePercent.style.visibility='hidden';
+        setRate(0,0);
         return;
     }
     fun(val);
 };
 
 /**
- * 查找
+ * 查找：
+ * 由于第一次查找时收不到当前查找位置的事件，因此再分别执行查找下一个与查找上一个
  */
 const find=()=>{
     baseFind(app.find);
+    findNext();
+    findPre();
 };
 
 /**
@@ -44,26 +49,41 @@ const findPre=()=>{
 };
 
 /**
- * 关闭窗口
+ * 关闭窗口：使用隐藏的方式，不真正关闭
  */
 const closeWin=()=>{
-    window.close();
+    eleIpt.value='';
+    setRate(0,0);
+    app.stopFind();
+    app.hideFindInPage();
 }
-
-
-
 
 
 /**
  * 初始化ipc交互事件：
  * 1、查找位置变更事件：如果没有匹配则隐藏分数部分
+ * 2、清空事件：清空输入框和匹配位置，停止查找
  */
 const initIpcEvent=()=>{
     ipcRenderer.on("findinpage-places",(e, result)=>{
         console.log("查找结果",result);
-        elePercent.innerHTML=`${result.activeMatchOrdinal}/${result.matches}`;
-        elePercent.style.visibility=(0===result.matches ? 'hidden' : null);
+        setRate(result.activeMatchOrdinal, result.matches);
     });
+    ipcRenderer.on("clear-find",(e, result)=>{
+        eleIpt.value='';
+        setRate(0,0);
+        app.stopFind();
+    });
+};
+
+/**
+ * 设置查找位置的值，如果没有匹配项，则隐藏
+ * @param {*} curr 
+ * @param {*} sum 
+ */
+const setRate=(curr=0,sum=0)=>{
+    elePercent.innerHTML=`${curr}/${sum}`;
+    elePercent.style.visibility=(0===sum ? 'hidden' : null);
 };
 
 /**

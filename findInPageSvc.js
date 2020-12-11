@@ -13,26 +13,34 @@ const init=(_app, _mainWindow)=>{
 
     
     /**
-     * 主窗口渲染进程查找事件：转发到查找窗口渲染进程
+     * 隐藏查找窗口
      */
-    mainWindow.webContents.on("found-in-page",(e, result)=>{
-        fs.appendFileSync(__dirname+"\\log.txt","收到查找事件："+JSON.stringify(result)+'\r\n','utf-8');
-        if(findWin){
-            findWin.webContents.send("findinpage-places",result);
+    const hideFindInPage=()=>{
+        if(null!=findWin){
+            findWin.webContents.send("clear-find",{});
+            findWin.hide();
         }
-    });
+    };
 
     /**
-     * 打开查找窗口
+     * 打开查找窗口，默认位置在父窗口右上角
+     * 使用延迟加载的方式，第一次调用时初始化窗口和事件，之后的调用只控制窗口的显示/隐藏
      * @param {*} winW   窗口宽度
      * @param {*} winTop 窗口纵坐标(不包括菜单栏)
      */
     const showFindInPage=(winW=300,winTop=160)=>{
-        // 已存在查找窗口，不处理
+        // --------- 已存在查找窗口，直接显示 -----------------
         if(null!=findWin){
+            if(!findWin.isVisible()){
+                findWin.show();
+                findWin.focus();
+            }
+            findWin.focus();
             return;
         }
 
+
+        // --------- 未存在查找窗口，初始化 -----------------
         //获取主窗口的大小
         const [w,h]=mainWindow.getSize();
 
@@ -51,22 +59,20 @@ const init=(_app, _mainWindow)=>{
                 enableRemoteModule: true,
             }
         });
-        findWin.show();
         findWin.loadFile(__dirname + '\\findinpage\\index.html');
-
-        //窗口关闭事件
-        findWin.on('closed', ()=>{
-            console.log('close find dlg');
-            findWin=null;       //清空窗口引用
-            // app.stopFind();     //取消查找
-            // mainWindow.focus(); //主窗口激活
-            console.log('close find dlg 222');
-        });
+        findWin.show();
 
         //如果是开发模式，打开控制台
         if(app.isDevMode()){
             findWin.webContents.toggleDevTools();
         }
+
+        // 主窗口渲染进程收到查找事件后，转发到查找窗口渲染进程
+        mainWindow.webContents.on("found-in-page",(e, result)=>{
+            if(findWin && findWin.webContents){
+                findWin.webContents.send("findinpage-places",result);
+            }
+        });
     };
 
     /**
@@ -114,6 +120,7 @@ const init=(_app, _mainWindow)=>{
      * 方法绑定到app
      */
     app.showFindInPage=showFindInPage;
+    app.hideFindInPage=hideFindInPage;
     app.find=find;
     app.findNext=findNext;
     app.findPre=findPre;
