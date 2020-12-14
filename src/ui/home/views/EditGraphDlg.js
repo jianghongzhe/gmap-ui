@@ -3,42 +3,18 @@ import { css, jsx } from '@emotion/core';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
 import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
-import moment  from 'moment';
+import {useSelector} from 'react-redux';
 
-
-import { CirclePicker,PhotoshopPicker } from 'react-color';
-import { Controlled as CodeMirror } from 'react-codemirror2';
-
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/dialog/dialog.css';
-import 'codemirror/addon/search/matchesonscrollbar.css';
-
-import 'codemirror/mode/markdown/markdown';
-import 'codemirror/keymap/sublime';
-import 'codemirror/addon/selection/active-line';
-import 'codemirror/addon/dialog/dialog';
-import 'codemirror/addon/search/searchcursor';
-import 'codemirror/addon/search/search';
-import 'codemirror/addon/scroll/annotatescrollbar';
-import 'codemirror/addon/search/matchesonscrollbar';
-import 'codemirror/addon/search/jump-to-line';
-
-
-
+import {withEnh} from '../../common/specialDlg';
 
 import HelpDlg from './edit/HelpDlg';
 import InsertImgDlg from './edit/InsertImgDlg';
 import DateDlg from './edit/DateDlg';
-
-import editorSvc from '../../../service/editorSvc';
-import * as uiUtil from '../../../common/uiUtil';
-import api from '../../../service/api';
-import {withEnh} from '../../common/specialDlg';
-import {connect} from '../../../common/gflow';
-
 import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
 import ColorPickerDlg from './edit/ColorPickerDlg';
-import {useSelector} from 'react-redux';
+import Editor from './edit/Editor';
+
+
 
 const EnhDlg=withEnh(Modal);
 
@@ -53,8 +29,8 @@ const EditGraphDlg=(props)=>{
         activeKey:  state.tabs.activeKey,
     }));
 
-    const codeMirrorInstRef=useRef(null);
 
+    const [editorAction, setEditorAction]= useState(null);
     const [colorPickerVisible, setColorPickerVisible]=useState(false);
     const [advColorPickerVisible, setAdvColorPickerVisible]=useState(false);
     const [insertPicDlgVisible, setInsertPicDlgVisible]=useState(false);
@@ -62,110 +38,39 @@ const EditGraphDlg=(props)=>{
     const [dateDlgVisible, setDateDlgVisible]=useState(false);
     const [isImg, setIsImg]=useState(true);
 
-    const bindCodeMirrorInstRef=useCallback((ele)=>{
-        codeMirrorInstRef.current=ele;
-    },[]);
-
-    /**
-     * 防止默认事件触发的处理
-     */
-    const onEditMapDlgPreventKey =useCallback(() => {
-        if(window.event){
-            window.event.stopPropagation();
-            window.event.preventDefault();
-        }
-    },[]);
-
-    /**
-     * 显示后获取焦点
-     */
-    useEffect(()=>{
-       if(props.visible) {
-            const focusFun=()=>{
-                if(codeMirrorInstRef.current){
-                    codeMirrorInstRef.current.focus();
-                    codeMirrorInstRef.current.refresh();
-                    return true;
-                }
-                return false;
-            }
-            setTimeout(focusFun, 0);
-       }
-    },[props.visible]);
-
     
 
-
-    const hideAllDlg = () => {
+    const hideAllDlg =useCallback(() => {
         setColorPickerVisible(false);
         setAdvColorPickerVisible(false);
         setInsertPicDlgVisible(false);
         setHelpDlgVisible(false);
         setDateDlgVisible(false);
-    }
+    },[setColorPickerVisible, setAdvColorPickerVisible, setInsertPicDlgVisible, setHelpDlgVisible, setDateDlgVisible]);
 
-    
-
-    /**
-     * 替换内容并获得焦点
-     * @param {*} originCursor   替换前光标位置
-     * @param {*} originLineLen  替换前光标所在行的长度
-     * @param {*} newCursor      替换后光标位置
-     * @param {*} newLine        替换后整行的内容
-     * @param {*} delayFocus     是否延迟获得焦点
-     */
-    const replaceLine =useCallback((originCursor, originLineLen, newCursor, newLine, delayFocus = false) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-        codeMirrorInst.setCursor(originCursor);
-        codeMirrorInst.setSelection(originCursor, { line: originCursor.line, ch: originLineLen });
-        codeMirrorInst.replaceSelection(newLine);
-        codeMirrorInst.setCursor(newCursor);
-        codeMirrorInst.setSelection(newCursor);
-        codeMirrorInst.focus();
-
-        //对话框刚关闭时，不能马上获得焦点，因此这种情况需要延迟一下
-        if (delayFocus) {
-            setTimeout(() => {
-                codeMirrorInst.setCursor(newCursor);
-                codeMirrorInst.setSelection(newCursor);
-                codeMirrorInst.focus();
-            }, 500);
-        }
-    },[]);
+    const showHelpPicDlg = useCallback(() => {
+        setHelpDlgVisible(true);
+    },[setHelpDlgVisible]);
 
 
 
-
-    //-------------------颜色选择-----------------------------------
+    //-------------------颜色选择相关-----------------------------------
     const onAddColor =useCallback((color = null, delayFocus = false) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-
-        //获得当前光标位置与光标所在行
-        let cursor = codeMirrorInst.getCursor();
-        let { line } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let newLine = editorSvc.setColor(lineTxt, color);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: newLine.length }, newLine, delayFocus);
-    },[]);
+        setEditorAction({
+            type: 'addColor',
+            color,
+            delayFocus
+        });
+    },[setEditorAction]);
 
     const onClearColor =useCallback(() => {
         onAddColor(null);
     },[onAddColor]);
 
-    const handleColorPickerColorChange = (color) => {
+    const handleColorPickerColorChange =useCallback((color) => {
         hideAllDlg();
         onAddColor(color.hex, true);
-    }
-
-    
+    },[hideAllDlg, onAddColor]);
 
     const showColorPicker =useCallback(() => {
         setColorPickerVisible(true);
@@ -177,40 +82,22 @@ const EditGraphDlg=(props)=>{
 
 
 
+    //-------------------增加图片或附件相关-----------------------------------
+    const onAddPic =useCallback((picRelaPath,pname) => {
+        setEditorAction({
+            type:       'addPic',
+            relaPath:   picRelaPath,
+            name:       pname,
+        });
+    },[setEditorAction]);
 
-
-    //-------------------增加图片-----------------------------------
-    const onAddPic = (picRelaPath,pname) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-
-        //获得当前光标位置与光标所在行     
-        let cursor = codeMirrorInst.getCursor();
-        let { line, ch } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let { newLinetxt, cusorPos } = editorSvc.addPic(lineTxt, ch, picRelaPath,pname);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
-    }
-
-    const onAddAtt = (picRelaPath,pname) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-
-        //获得当前光标位置与光标所在行     
-        let cursor = codeMirrorInst.getCursor();
-        let { line, ch } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let { newLinetxt, cusorPos } = editorSvc.addAtt(lineTxt, ch, picRelaPath,pname);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
-    }
+    const onAddAtt =useCallback((picRelaPath,pname) => {
+        setEditorAction({
+            type:       'addAtt',
+            relaPath:   picRelaPath, 
+            name:       pname,
+        });
+    },[setEditorAction]);
 
     const showInsertPicDlg =useCallback(() => {
         setIsImg(true);
@@ -222,56 +109,29 @@ const EditGraphDlg=(props)=>{
         setInsertPicDlgVisible(true);
     },[setIsImg, setInsertPicDlgVisible]);
 
-    
-
-
-    
-
-    
 
 
 
-    const showHelpPicDlg = () => {
-        setHelpDlgVisible(true);
-    }
-
-
-    //-------------------插入日期-----------------------------------    
-    const showDateDlg=()=>{
+    //-------------------插入日期相关-----------------------------------    
+    const showDateDlg=useCallback(()=>{
         setDateDlgVisible(true);
-    }
+    },[setDateDlgVisible]);
 
-    
-
-    const onInsertDate=(dateStr)=>{
+    const onInsertDate=useCallback((dateStr)=>{
         if(null===dateStr || ''===dateStr.trim()){
             message.warn("请选择日期");
             return;
         }
 
         hideAllDlg();
-
-        //获得当前光标位置与光标所在行
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current; 
-        let cursor = codeMirrorInst.getCursor();
-        let { line, ch } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let targetDateStr=dateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
-        let { newLinetxt, cusorPos } = editorSvc.addDate(lineTxt, ch, targetDateStr);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
-    }
+        setEditorAction({
+            type: 'addDate',
+            date: dateStr.trim(),
+        });        
+    },[hideAllDlg, setEditorAction]);
 
     
 
-
-
-    
-    let insertPicDlgW = (winW < 820 ? winW - 20 : 800);
 
     return (
         <>
@@ -285,13 +145,12 @@ const EditGraphDlg=(props)=>{
                         <Button key="btnneutral" type="primary" onClick={props.onOnlySave}>保存</Button>,
                         <Button key="btnok" type="primary" onClick={props.onOk}>保存并关闭</Button>,
                     ]}
-                    onCancel={props.onCancel}>
-                        
+                    onCancel={props.onCancel}>              
                 <div>
                     <div css={{ 'marginBottom': "10px" }}>
                         {/* 颜色选择器 */}
                         {
-                            ['#cf1322', '#389e0d', '#0050b3', '#fa8c16', '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'].map((eachcolor, colorInd) => (
+                            commonColors.map((eachcolor, colorInd) => (
                                 <div key={colorInd} title={eachcolor} css={getEditDlgColorBoxStyle(eachcolor)} onClick={onAddColor.bind(this, eachcolor)}></div>
                             ))
                         }
@@ -299,50 +158,30 @@ const EditGraphDlg=(props)=>{
                         <div css={selColorStyleAdv} title='选择颜色（高级）' onClick={showAdvColorPicker}></div>
                         <div css={clearColorStyle} title='清除颜色' onClick={onClearColor}></div>
 
-                        {/* 插入图片、帮助 */}
+                        {/* 插入日期、图片、附件、帮助 */}
                         <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={showDateDlg} />
                         <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={showInsertPicDlg} />
                         <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} />
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={showHelpPicDlg} />
                     </div>
-                    <CodeMirror
-                        css={getCodeEditorStyle(winH-400)}
-                        editorDidMount={bindCodeMirrorInstRef}
+                    <Editor
                         value={props.editTmpTxt}
-                        options={{
-                            lineNumbers: true,
-                            theme: 'default',
-                            mode: 'markdown',
-                            styleActiveLine: true,
-                            indentWithTabs: true,
-                            indentUnit: 4,
-                            keyMap: "sublime",
-                            extraKeys: {
-                                "Ctrl-F": "findPersistent",
-                                "Ctrl-G": "jumpToLine",
-                                "Ctrl-S": props.onOnlySave,
-                                "Shift-Ctrl-S": props.onOk,                                  
-                                "Ctrl-P": showInsertPicDlg,
-                                "Ctrl-I": showInsertAttDlg,
-                                "Ctrl-H": showHelpPicDlg,
-                                "Ctrl-T": showDateDlg,
-                                
-
-                                "Shift-Ctrl-G": onEditMapDlgPreventKey,
-                                "Shift-Ctrl-F": onEditMapDlgPreventKey,
-                                "Shift-Ctrl-R": onEditMapDlgPreventKey,
-                                "Esc": onEditMapDlgPreventKey,
-                                "Alt-G": onEditMapDlgPreventKey,
-                            }
-                        }}
-                        onBeforeChange={props.onChangeEditTmpTxt} />
+                        visible={props.visible}
+                        action={editorAction}
+                        onChange={props.onChangeEditTmpTxt}
+                        onOnlySave={props.onOnlySave}
+                        onOk={props.onOk}
+                        onShowInsertPicDlg={showInsertPicDlg}
+                        onShowInsertAttDlg={showInsertAttDlg}
+                        onShowHelpDlg={showHelpPicDlg}
+                        onShowDateDlg={showDateDlg}
+                    />
                 </div>
             </EnhDlg>
 
             {/*插入图片对话框*/}
             <InsertImgDlg                    
                 visible={insertPicDlgVisible}
-                dlgW={insertPicDlgW}
                 isImg={isImg}
                 activeKey={activeKey}
                 onAddPic ={onAddPic}
@@ -368,9 +207,6 @@ const EditGraphDlg=(props)=>{
                 onOk={handleColorPickerColorChange}
             />
             
-
-
-
             {/* 帮助对话框 */}
             <HelpDlg
                 maxBodyH={winH-400+80}
@@ -394,6 +230,10 @@ const advColorDlgAdjustX = 284;
 const colorDlgY = 204;
 
 
+const commonColors=[
+    '#cf1322', '#389e0d', '#0050b3', '#fa8c16', 
+    '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'
+];
 
 
 const getCodeEditorStyle = (height) => ({

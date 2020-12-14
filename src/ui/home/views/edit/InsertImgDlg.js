@@ -6,6 +6,7 @@ import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@an
 import {withEnh} from '../../../common/specialDlg';
 import api from '../../../../service/api';
 import * as uiUtil from '../../../../common/uiUtil';
+import {useSelector} from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 
@@ -14,6 +15,12 @@ const EnhDlg=withEnh(Modal);
  * @param {*} props 
  */
 const InsertImgDlg=(props)=>{
+    const {winW}= useSelector((state)=>({
+        winW:       state.common.winW,
+    }));
+
+    const insertPicDlgW = (winW < 820 ? winW - 20 : 800);
+
     const [picPath, setPicPath]=useState('');
     const [picName, setPicName]=useState('');
 
@@ -218,7 +225,7 @@ const InsertImgDlg=(props)=>{
         <EnhDlg
                 title={props.isImg?"插入图片":"插入附件"}
                 closable={true}
-                size={{w: props.dlgW,}}
+                size={{w: insertPicDlgW}}
                 visible={props.visible}
                 onCancel={props.onCancel}
                 onOk={onOk}>
