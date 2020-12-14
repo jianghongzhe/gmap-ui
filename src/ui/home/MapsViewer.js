@@ -134,7 +134,7 @@ const MapsViewer=(props)=>{
 
 
     //------------修改导图----------------------------------------------------------------------
-    const onShowEditMapDlg =useCallback(async () => {
+    const onShowEditMapDlgInner=async () => {
         try {
             let currPane=await dispatcher.tabs.selectCurrPanePromise();
             setEditDlgState({
@@ -144,7 +144,11 @@ const MapsViewer=(props)=>{
             });
         } catch (error) {
         }
-    },[dispatcher, setEditDlgState]);
+    };
+
+    const onShowEditMapDlg =useCallback(() => {
+        onShowEditMapDlgInner();
+    },[onShowEditMapDlgInner]);
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));

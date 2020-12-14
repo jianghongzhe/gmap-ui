@@ -83,17 +83,13 @@ const EditGraphDlg=(props)=>{
        if(props.visible) {
             const focusFun=()=>{
                 if(codeMirrorInstRef.current){
-                    console.log("focus", codeMirrorInstRef.current.focus);
                     codeMirrorInstRef.current.focus();
+                    codeMirrorInstRef.current.refresh();
                     return true;
                 }
                 return false;
             }
-
-            // if(focusFun()){
-            //     return;
-            // }
-            setTimeout(focusFun, 500);
+            setTimeout(focusFun, 0);
        }
     },[props.visible]);
 

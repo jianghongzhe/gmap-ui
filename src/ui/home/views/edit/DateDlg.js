@@ -40,11 +40,6 @@ const DateDlg=(props)=>{
         props.onOk(date.format("YYYY-MM-DD"));
     },[props.onOk, date]);
 
-    const dlgScale=useMemo(()=>({
-        w:340,
-        h:390,
-    }),[]);
-
     return (
         <EnhDlg  title="选择日期"
                 closable={true}
@@ -84,6 +79,11 @@ const DateDlg=(props)=>{
     );
     
 }
+
+const dlgScale={
+    w:340,
+    h:390,
+};
 
 const getDatePickerPopoverStyle=(parCls)=>{
     let result={};
