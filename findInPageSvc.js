@@ -12,55 +12,35 @@ const init=(_app, _mainWindow)=>{
     let findWin=null; //网页内查找窗口
 
     
+    
     /**
-     * 隐藏查找窗口
+     * 初始化查找窗口，但不显示
+     * @param {*} winW 
      */
-    const hideFindInPage=()=>{
-        if(null!=findWin){
-            findWin.webContents.send("clear-find",{});
-            findWin.hide();
-        }
-    };
-
-    /**
-     * 打开查找窗口，默认位置在父窗口右上角
-     * 使用延迟加载的方式，第一次调用时初始化窗口和事件，之后的调用只控制窗口的显示/隐藏
-     * @param {*} winW   窗口宽度
-     * @param {*} winTop 窗口纵坐标(不包括菜单栏)
-     */
-    const showFindInPage=(winW=300,winTop=160)=>{
-        // --------- 已存在查找窗口，直接显示 -----------------
-        if(null!=findWin){
-            if(!findWin.isVisible()){
-                findWin.show();
-                findWin.focus();
-            }
-            findWin.focus();
+    const initWin=(winW)=>{
+        if(null!==findWin){
             return;
         }
 
-
-        // --------- 未存在查找窗口，初始化 -----------------
-        //获取主窗口的大小
-        const [w,h]=mainWindow.getSize();
-
-        //初始化查找窗口
+        //创建查找窗口
         findWin = new BrowserWindow({
-            width:      winW,
-            height:     55,
-            show:       false,
-            parent:     mainWindow,
-            x:          w-winW-30,  //水平位置居右
-            y:          winTop+(app.isDevMode()?20:0), //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
-            resizable:  false,
-            frame:      false,
-            webPreferences: {
+            width:          winW,
+            height:         55,
+            show:           false,      //默认
+            parent:         mainWindow,
+            x:              -9999,
+            y:              -9999,
+            resizable:      false,
+            frame:          false,
+            backgroundColor:'#FFFFFF',
+            webPreferences:     {
                 nodeIntegration:    true,
                 enableRemoteModule: true,
             }
         });
+
+        //加载文件
         findWin.loadFile(__dirname + '\\findinpage\\index.html');
-        findWin.show();
 
         //如果是开发模式，打开控制台
         if(app.isDevMode()){
@@ -73,6 +53,51 @@ const init=(_app, _mainWindow)=>{
                 findWin.webContents.send("findinpage-places",result);
             }
         });
+    };
+
+    /**
+     * 计算查找窗口的显示位置（根据主窗口的大小和位置）
+     * @param {*} winW      窗口宽度
+     * @param {*} winTop    窗口纵坐标(不包括菜单栏)
+     */
+    const calcWinLocation=(winW,winTop)=>{
+        const [w,h]=mainWindow.getSize();
+        let {x:mainWinX, y:mainWinY}=mainWindow.getBounds();      
+        if(mainWindow.isMaximized()){
+            mainWinX=0;
+            mainWinY=0;
+        }
+        const x=(w-winW-30)+mainWinX; //水平位置：居右
+        const y=(winTop+(app.isDevMode()?20:0))+mainWinY; //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
+        return {x,y};
+    };
+
+    /**
+     * 隐藏查找窗口
+     */
+    const hideFindInPage=()=>{
+        if(null!=findWin){
+            findWin.webContents.send("clear-find",{});
+            findWin.setBounds({ x:-9999, y:-9999});
+            findWin.hide();
+        }
+    };
+
+    /**
+     * 打开查找窗口，默认位置在父窗口右上角
+     * 使用延迟加载的方式，第一次调用时初始化窗口和事件，之后的调用只控制窗口的显示/隐藏
+     * @param {*} winW   窗口宽度
+     * @param {*} winTop 窗口纵坐标(不包括菜单栏)
+     */
+    const showFindInPage=(winW=300,winTop=160)=>{
+        initWin(winW);//初始化窗口
+        const {x,y}=calcWinLocation(winW, winTop);//计算窗口位置
+
+        if(!findWin.isVisible()){
+            findWin.show();
+        }
+        findWin.setBounds({x,y});
+        findWin.focus();
     };
 
     /**
