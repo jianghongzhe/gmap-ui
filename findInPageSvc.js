@@ -19,9 +19,11 @@ const init=(_app, _mainWindow)=>{
      */
     const initWin=(winW)=>{
         if(null!==findWin){
+            console.log("find dlg has been init, no need to reinit");
             return;
         }
 
+        console.log("will init find dlg");
         //创建查找窗口
         findWin = new BrowserWindow({
             width:          winW,
@@ -144,6 +146,7 @@ const init=(_app, _mainWindow)=>{
     /**
      * 方法绑定到app
      */
+    app.initFindInPage=initWin;
     app.showFindInPage=showFindInPage;
     app.hideFindInPage=hideFindInPage;
     app.find=find;

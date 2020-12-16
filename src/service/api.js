@@ -11,10 +11,7 @@ class Api{
      * 初始化查找对话框，需要在页面加载完之后调用
      */
     initFindInPageDlg=()=>{
-        this.findInPageDlg = new FindInPage(getCurrentWebContents(),{
-            offsetTop: 118,
-            offsetRight: 20,
-        });
+        app.initFindInPage(300);
     }
 
     showFindInPageDlg=()=>{
