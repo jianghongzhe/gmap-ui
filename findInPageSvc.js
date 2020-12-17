@@ -82,6 +82,7 @@ const init=(_app, _mainWindow)=>{
             findWin.webContents.send("clear-find",{});
             findWin.setBounds({ x:-9999, y:-9999});
             findWin.hide();
+            mainWindow.focus();
         }
     };
 
