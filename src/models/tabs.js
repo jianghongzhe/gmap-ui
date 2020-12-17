@@ -62,11 +62,11 @@ const model={
         },
 
         /**
-         * 移动到前一个选项卡，支持循环滚动
+         * 切换到前一个选项卡，支持循环滚动
          * @param {*} payload 
          * @param {*} param1 
          */
-        *movePreTab(payload,{creater,sel,res,rej}){
+        *togglePreTab(payload,{creater,sel,res,rej}){
             let {activeKey,panes}=yield sel();
             let currInd=-1;
             panes.forEach((pane,ind)=>{
@@ -90,11 +90,11 @@ const model={
         },
 
         /**
-         * 移动到后一个选项卡，支持循环滚动
+         * 切换到后一个选项卡，支持循环滚动
          * @param {*} payload 
          * @param {*} param1 
          */
-        *moveNextTab(payload,{creater,sel,res,rej}){
+        *toggleNextTab(payload,{creater,sel,res,rej}){
             let {activeKey,panes}=yield sel();
             let currInd=-1;
             panes.forEach((pane,ind)=>{
@@ -117,6 +117,49 @@ const model={
             }
             
         },
+
+
+
+        /**
+         * 当前选项卡前移，支持循环滚动
+         * @param {*} payload 
+         * @param {*} param1 
+         */
+        *movePreTab(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            let activeInd=getActiveInd({activeKey,panes});
+            if(false===activeInd){
+                return;
+            }
+
+            let otherInd=activeInd-1;
+            otherInd=(otherInd<0?panes.length-1:otherInd);
+            yield put(creater.setPanes(swapTwoPane([...panes],activeInd,otherInd)));
+        },
+
+        /**
+         * 当前选项卡后移，支持循环滚动
+         * @param {*} payload 
+         * @param {*} param1 
+         */
+        *moveNextTab(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            let activeInd=getActiveInd({activeKey,panes});
+            if(false===activeInd){
+                return;
+            }
+
+            let otherInd=activeInd+1;
+            otherInd=(otherInd>=panes.length?0:otherInd);
+            yield put(creater.setPanes(swapTwoPane([...panes],activeInd,otherInd)));
+        },
+
+
+
+
+
+
+
 
 
         *selectCurrPanePromise(payload,{sel,res,rej}){
@@ -292,6 +335,29 @@ const model={
     }
 
 };
+
+const getActiveInd=({activeKey,panes})=>{
+    let activeInd=-1;
+    panes.forEach((pane,ind)=>{
+        if(pane.key===activeKey){
+            activeInd=ind;
+        }
+    });
+    if(-1===activeInd){
+        return false;
+    }
+    return activeInd
+}
+
+const swapTwoPane=(panes, ind1, ind2)=>{
+    let t=panes[ind1];
+    panes[ind1]=panes[ind2];
+    panes[ind2]=t;
+    return panes;
+}
+
+
+
 
 const getDefMapTxt = (theleName = "中心主题") => (
     `- ${theleName}

@@ -227,6 +227,8 @@ const shortcuts=[
             ['Alt+W','关闭当前选项卡'],
             ['Ctrl+PageUp','选中前一个选项卡'],
             ['Ctrl+PageDown','选中后一个选项卡'],
+            ['Ctrl+Shift+PageUp','当前选项卡前移'],
+            ['Ctrl+Shift+PageDown','当前选项卡后移'],
         ]
     }
 ];

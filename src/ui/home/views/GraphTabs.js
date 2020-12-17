@@ -102,13 +102,25 @@ const GraphTabs=(props)=>{
             }
 
             //ctrl+PageUp 前一个选项卡
-            if(e && true===e.ctrlKey && 'PageUp'===e.code && true!==props.editing){
-                dispatcher.tabs.movePreTab();
+            if(e && true===e.ctrlKey && 'PageUp'===e.code && false===e.shiftKey && true!==props.editing){
+                dispatcher.tabs.togglePreTab();
                 return;
             }
 
             //ctrl+PageDown 后一个选项卡
-            if(e && true===e.ctrlKey && 'PageDown'===e.code && true!==props.editing){
+            if(e && true===e.ctrlKey && 'PageDown'===e.code && false===e.shiftKey && true!==props.editing){
+                dispatcher.tabs.toggleNextTab();
+                return;
+            }
+
+            //ctrl+Shift+PageUp 前一个选项卡
+            if(e && true===e.ctrlKey && 'PageUp'===e.code && true===e.shiftKey && true!==props.editing){
+                dispatcher.tabs.movePreTab();
+                return;
+            }
+
+            //ctrl+Shift+PageDown 后一个选项卡
+            if(e && true===e.ctrlKey && 'PageDown'===e.code && true===e.shiftKey && true!==props.editing){
                 dispatcher.tabs.moveNextTab();
                 return;
             }
