@@ -11,7 +11,7 @@ import {connect,dispatcher} from '../../../common/gflow';
 
 import api from '../../../service/api';
 import { useSelector } from 'react-redux';
-
+import keyDetector from '../../../common/keyDetector';
 
 const { TabPane } = Tabs;
 
@@ -74,7 +74,7 @@ const GraphTabs=(props)=>{
         if ("remove" === action) {
             dispatcher.tabs.removeTabCheckShouldStopFindInPage(targetKey);
         }
-    },[dispatcher.tabs]);
+    },[]);
 
 
     /**
@@ -82,79 +82,78 @@ const GraphTabs=(props)=>{
      */
     useEffect(()=>{
         const keyHandle=(e)=>{
-            //ctrl+f 网页内查找
-            if(e && true===e.ctrlKey && 'KeyF'===e.code && true!==props.editing){
-                api.showFindInPageDlg();
-                return;
-            }
-            //esc 关闭网页内查找
-            if(e && false===e.ctrlKey && false===e.altKey && false===e.shiftKey && 'Escape'===e.code && true!==props.editing){
-                api.closeFindInPageDlg();
-                return;
-            }
-            
-            //alt+w 关闭当前选项卡（未使用ctrl+w，因为快捷键已被chrome使用，程序不能捕获到事件）
-            if(e && true===e.altKey && 'KeyW'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
-                // e.stopPropagation();
-                // e.preventDefault();
-                onEditTab(activeKey,"remove");
-                return;
-            }
+            keyDetector.on(e,{
+                //ctrl+f 网页内查找
+                'ctrl+f':(e)=>{
+                    if(true===props.editing){return;}
+                    api.showFindInPageDlg();
+                },
 
-            //alt+shift+w 关闭全部选项卡
-            if(e && true===e.altKey && 'KeyW'===e.code && true===e.shiftKey && false===e.ctrlKey && true!==props.editing){
-                dispatcher.tabs.removeAllTabs();
-                return;
-            }
+                //esc 关闭网页内查找
+                'esc':(e)=>{
+                    if(true===props.editing){return;}
+                    api.closeFindInPageDlg();
+                },
 
-            //alt+o 关闭其他选项卡
-            if(e && true===e.altKey && 'KeyO'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
-                dispatcher.tabs.removeOtherTabs();
-                return;
-            }
+                //alt+w 关闭当前选项卡（未使用ctrl+w，因为快捷键已被chrome使用，程序不能捕获到事件）
+                'alt+w':(e)=>{
+                    if(true===props.editing){return;}
+                    onEditTab(activeKey,"remove");
+                },
 
-            //alt+p 关闭右侧选项卡
-            if(e && true===e.altKey && 'KeyP'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
-                dispatcher.tabs.removeRightTabs();
-                return;
-            }
+                //alt+shift+w 关闭全部选项卡
+                'alt+shift+w':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.removeAllTabs();
+                },
 
-            //alt+i 关闭左侧选项卡
-            if(e && true===e.altKey && 'KeyI'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
-                dispatcher.tabs.removeLeftTabs();
-                return;
-            }
+                //alt+o 关闭其他选项卡
+                'alt+o':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.removeOtherTabs();
+                },
 
+                //alt+p 关闭右侧选项卡
+                'alt+p':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.removeRightTabs();
+                },
 
+                //alt+i 关闭左侧选项卡
+                'alt+i':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.removeLeftTabs();
+                },
 
-            //ctrl+PageUp 前一个选项卡
-            if(e && true===e.ctrlKey && 'PageUp'===e.code && false===e.shiftKey && true!==props.editing){
-                dispatcher.tabs.togglePreTab();
-                return;
-            }
+                //ctrl+PageUp 前一个选项卡
+                'ctrl+pgup':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.togglePreTab();
+                },
 
-            //ctrl+PageDown 后一个选项卡
-            if(e && true===e.ctrlKey && 'PageDown'===e.code && false===e.shiftKey && true!==props.editing){
-                dispatcher.tabs.toggleNextTab();
-                return;
-            }
+                //ctrl+PageDown 后一个选项卡
+                'ctrl+pgdn':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.toggleNextTab();
+                },
 
-            //ctrl+Shift+PageUp 前一个选项卡
-            if(e && true===e.ctrlKey && 'PageUp'===e.code && true===e.shiftKey && true!==props.editing){
-                dispatcher.tabs.movePreTab();
-                return;
-            }
+                //ctrl+Shift+PageUp 选项卡前移
+                'ctrl+shift+pgup':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.movePreTab();
+                },
 
-            //ctrl+Shift+PageDown 后一个选项卡
-            if(e && true===e.ctrlKey && 'PageDown'===e.code && true===e.shiftKey && true!==props.editing){
-                dispatcher.tabs.moveNextTab();
-                return;
-            }
+                //ctrl+Shift+PageDown 选项卡后移
+                'ctrl+shift+pgdn':(e)=>{
+                    if(true===props.editing){return;}
+                    dispatcher.tabs.moveNextTab();
+                },
+            });
         }
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[props.editing,activeKey,dispatcher.tabs,onEditTab]);
+    },[props.editing, activeKey, onEditTab]);
 
     
     
