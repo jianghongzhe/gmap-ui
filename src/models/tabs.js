@@ -154,8 +154,17 @@ const model={
             yield put(creater.setPanes(swapTwoPane([...panes],activeInd,otherInd)));
         },
 
-
-
+        /**
+         * 移除所有选项卡
+         * @param {*} payload 
+         * @param {*} param1 
+         */
+        *removeAllTabs(payload,{creater,sel,res,rej}){
+            yield put(creater.setPanesAndActiveKey({
+                panes:[],
+                activeKey:null,
+            }));
+        },
 
 
 

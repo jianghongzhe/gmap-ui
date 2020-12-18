@@ -94,10 +94,16 @@ const GraphTabs=(props)=>{
             }
             
             //alt+w 关闭当前选项卡（未使用ctrl+w，因为快捷键已被chrome使用，程序不能捕获到事件）
-            if(e && true===e.altKey && 'KeyW'===e.code && true!==props.editing){
+            if(e && true===e.altKey && 'KeyW'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
                 // e.stopPropagation();
                 // e.preventDefault();
                 onEditTab(activeKey,"remove");
+                return;
+            }
+
+            //alt+shift+w 关闭全部选项卡
+            if(e && true===e.altKey && 'KeyW'===e.code && true===e.shiftKey && false===e.ctrlKey && true!==props.editing){
+                dispatcher.tabs.removeAllTabs();
                 return;
             }
 
