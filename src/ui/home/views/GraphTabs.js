@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/core';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,FileMarkdownOutlined,PictureOutlined,FileTextOutlined,FileOutlined,BookOutlined,FileImageOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 
 import NewMindmap from './NewMindmap';
@@ -148,7 +148,12 @@ const GraphTabs=(props)=>{
             onEdit={onEditTab}>
             {
                 panes.map((pane,ind) => (
-                    <TabPane tab={pane.title} key={pane.key} closable={true}>
+                    <TabPane tab={
+                        <span>
+                            {pane.key===activeKey ? <FileMarkdownOutlined /> : <FileOutlined/>}
+                            {pane.title}
+                        </span>
+                    } key={pane.key} closable={true}>
                         <div css={getTabItemContainerStyle(winH- 64 - 55-1)}>
                             <NewMindmap
                                 ind={ind}
