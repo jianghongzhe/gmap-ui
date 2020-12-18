@@ -166,6 +166,41 @@ const model={
             }));
         },
 
+        *removeOtherTabs(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            if(panes.length<=1){
+                return;
+            }
+            let newPanes=panes.filter(pane=>pane.key===activeKey);
+            yield put(creater.setPanes(newPanes));
+        },
+
+        *removeRightTabs(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            let activeInd=getActiveInd({activeKey,panes});
+            if(false===activeInd){
+                return;
+            }
+            if(activeInd>=panes.length-1){
+                return;
+            }
+            let newPanes=panes.filter((pane,ind)=>ind<=activeInd);
+            yield put(creater.setPanes(newPanes));
+        },
+
+        *removeLeftTabs(payload,{creater,sel,res,rej}){
+            let {activeKey,panes}=yield sel();
+            let activeInd=getActiveInd({activeKey,panes});
+            if(false===activeInd){
+                return;
+            }
+            if(activeInd<=0){
+                return;
+            }
+            let newPanes=panes.filter((pane,ind)=>ind>=activeInd);
+            yield put(creater.setPanes(newPanes));
+        },
+
 
 
 

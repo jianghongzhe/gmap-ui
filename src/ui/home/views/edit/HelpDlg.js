@@ -226,6 +226,9 @@ const shortcuts=[
         rows:[
             ['Alt+W','关闭当前选项卡'],
             ['Alt+Shift+W','关闭所有选项卡'],
+            ['Alt+O','关闭其它选项卡'],
+            ['Alt+P','关闭右侧选项卡'],
+            ['Alt+I','关闭左侧选项卡'],
             ['Ctrl+PageUp','选中前一个选项卡'],
             ['Ctrl+PageDown','选中后一个选项卡'],
             ['Ctrl+Shift+PageUp','当前选项卡前移'],

@@ -107,6 +107,26 @@ const GraphTabs=(props)=>{
                 return;
             }
 
+            //alt+o 关闭其他选项卡
+            if(e && true===e.altKey && 'KeyO'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
+                dispatcher.tabs.removeOtherTabs();
+                return;
+            }
+
+            //alt+p 关闭右侧选项卡
+            if(e && true===e.altKey && 'KeyP'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
+                dispatcher.tabs.removeRightTabs();
+                return;
+            }
+
+            //alt+i 关闭左侧选项卡
+            if(e && true===e.altKey && 'KeyI'===e.code && false===e.shiftKey && false===e.ctrlKey && true!==props.editing){
+                dispatcher.tabs.removeLeftTabs();
+                return;
+            }
+
+
+
             //ctrl+PageUp 前一个选项卡
             if(e && true===e.ctrlKey && 'PageUp'===e.code && false===e.shiftKey && true!==props.editing){
                 dispatcher.tabs.togglePreTab();
