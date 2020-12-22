@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx,Global } from '@emotion/core';
+import { css, jsx,Global } from '@emotion/react';
 import React from 'react';
 import logo from './logo.svg';
 import { view as MapsViewer } from './ui/home';

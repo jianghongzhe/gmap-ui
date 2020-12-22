@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { css, jsx } from '@emotion/core';
+import { css, jsx } from '@emotion/react';
 import React from 'react';
 import PathSelect from './PathSelect';
 import {connect,dispatcher} from '../../../common/gflow';
