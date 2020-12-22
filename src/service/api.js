@@ -1,6 +1,3 @@
-import { FindInPage } from 'electron-find';
-
-
 const {app,getCurrentWebContents} = window.require('electron').remote;
 
 

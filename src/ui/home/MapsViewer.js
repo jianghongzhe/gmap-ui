@@ -18,7 +18,6 @@ import GantDlg from './views/gantt/GantDlg';
 import * as uiUtil from '../../common/uiUtil';
 import {connect,dispatcher} from '../../common/gflow';
 import api from '../../service/api';
-// import html2canvas from 'html2canvas';
 import screenShot from '../../service/screenShot';
 import { useSelector } from 'react-redux';
 
@@ -240,12 +239,6 @@ const MapsViewer=(props)=>{
                 Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
                 api.isDevMode()         //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
             );
-
-
-            // html2canvas(ele).then((canvas)=>{
-            //     let base64Url=canvas.toDataURL('png');
-            //     api.openUrl(base64Url);
-            // });
         });
     },[activeKey, panes]);
 
