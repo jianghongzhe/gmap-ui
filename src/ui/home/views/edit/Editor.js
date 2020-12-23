@@ -21,13 +21,6 @@ import 'codemirror/addon/scroll/annotatescrollbar';
 import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
 
-
-
-
-
-
-
-
 import editorSvc from '../../../../service/editorSvc';
 import { createSelector } from 'reselect';
 
@@ -38,6 +31,7 @@ import { createSelector } from 'reselect';
  * @param {*} props 
  */
 const Editor=(props)=>{
+
     const {winH}= useSelector((state)=>({
         winH:       state.common.winH,
     }));
@@ -158,7 +152,7 @@ const Editor=(props)=>{
      * 显示后获取焦点并刷新
      */
     useEffect(()=>{
-        if(props.visible) {
+        if(props.forceRefresh) {
              const focusFun=()=>{
                 if(codeMirrorInstRef.current){
                     codeMirrorInstRef.current.focus();
@@ -169,7 +163,7 @@ const Editor=(props)=>{
              }
              setTimeout(focusFun, 0);
         }
-    },[props.visible]);
+    },[props.forceRefresh]);
 
     useEffect(()=>{
         if(!props.action){
@@ -239,4 +233,4 @@ const getCodeEditorStyle = createSelector(
 );
 
 
-export default Editor;
+export default React.memo(Editor);

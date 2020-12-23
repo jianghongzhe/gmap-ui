@@ -29,7 +29,7 @@ const EditGraphDlg=(props)=>{
         activeKey:  state.tabs.activeKey,
     }));
 
-
+    const [editorForceRefresh, setEditorForceRefresh]= useState(Symbol());
     const [editorAction, setEditorAction]= useState(null);
     const [colorPickerVisible, setColorPickerVisible]=useState(false);
     const [advColorPickerVisible, setAdvColorPickerVisible]=useState(false);
@@ -132,6 +132,15 @@ const EditGraphDlg=(props)=>{
 
     
 
+    /**
+     * 每次显示后强制子编辑器组件重新渲染
+     */
+    useEffect(()=>{
+        if(props.visible){
+            setEditorForceRefresh(Symbol());
+        }
+    },[props.visible]);
+
 
     return (
         <>
@@ -166,7 +175,7 @@ const EditGraphDlg=(props)=>{
                     </div>
                     <Editor
                         value={props.editTmpTxt}
-                        visible={props.visible}
+                        forceRefresh={editorForceRefresh}
                         action={editorAction}
                         onChange={props.onChangeEditTmpTxt}
                         onOnlySave={props.onOnlySave}
