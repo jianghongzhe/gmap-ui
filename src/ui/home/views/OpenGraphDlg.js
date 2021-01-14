@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from '@emotion/react';
+/** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
 import PathSelect from './PathSelect';

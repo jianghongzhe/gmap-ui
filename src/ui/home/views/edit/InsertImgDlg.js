@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from '@emotion/react';
+/** @jsxImportSource @emotion/react */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
 import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons';

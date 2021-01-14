@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from '@emotion/react';
+/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal, Input,AutoComplete,Button,TreeSelect } from 'antd';
 import * as uiUtil from '../../../common/uiUtil';

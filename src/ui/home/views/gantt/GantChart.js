@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from '@emotion/react';
+/** @jsxImportSource @emotion/react */
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Progress, Table,Popover } from 'antd';
 import { RightOutlined } from '@ant-design/icons';

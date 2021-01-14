@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from '@emotion/react';
+/** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Modal, Timeline, Table,Progress,Tooltip } from 'antd';
 import {createSelector} from 'reselect';
