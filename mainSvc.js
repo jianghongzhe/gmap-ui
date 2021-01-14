@@ -478,6 +478,20 @@ const listFiles = (assignedDir = null) => {
     return ret;
 };
 
+const getFileItem=(fn)=>{
+    if(!fn.endsWith(".md")){
+        fn+=".md";
+    }
+    let fullpath=toBackSlash(path.join(mapsPath,fn));
+    let showName=toSlash(path.relative(mapsPath,fullpath));
+    return {
+        isfile: true,
+        emptyDir: false,
+        fullpath,
+        itemsName: showName,
+    };
+};
+
 
 const extractPic=(fullpath)=>{
     let cont=readFile(fullpath);
@@ -902,6 +916,7 @@ module.exports={
     reloadAppPage,
     isUrlFormat,
     getInnerModuleVersions,
+    getFileItem,
     
     
     

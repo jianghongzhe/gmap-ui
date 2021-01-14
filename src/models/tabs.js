@@ -375,9 +375,40 @@ const model={
                 eachPane.ds = newMindmapSvc.restore(eachPane.ds);
                 yield put(creater.setPanes([...currState.panes]));
             }
+        },
+
+        /**
+         * 复制当前导图链接（用来做导图之间的跳转）
+         * @param {*} payload 
+         * @param {*} param1 
+         */
+        *copyCurrMapLink(payload,{sel,put,creater}){
+            let currState=yield sel();
+            let pane=getCurrPane(currState.panes, currState.activeKey);
+            if(false===pane){return;}
+
+            let title=trimMdSuffix(pane.title);                
+            let linkStr=`[跳转到导图 - ${title}](gmap://${title})`;
+            let cmd=`cp://${linkStr}`;
+            api.openUrl(cmd);
         }
     }
 
+};
+
+const trimMdSuffix=(str)=>{
+    if(str.endsWith(".md")){
+        str=str.substring(0,str.length-".md".length);
+    }
+    return str;
+}
+
+const getCurrPane=(panes, activeKey)=>{
+    let currPanes = panes.filter(eachPane => activeKey === eachPane.key);
+    if (currPanes && 0 < currPanes.length) {
+        return currPanes[0];
+    }
+    return false;
 };
 
 const getActiveInd=({activeKey,panes})=>{

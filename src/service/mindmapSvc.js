@@ -1272,7 +1272,7 @@ class MindmapSvc {
     }
 
     hasUrlPrefix = (url) => {
-        return ["http://","https://","ftp://","ftps://","file://","dir://","cp://","cmd://","//"].some(prefix=>url.startsWith(prefix));
+        return ["http://","https://","ftp://","ftps://","file://","dir://","cp://","cmd://","gmap://","//"].some(prefix=>url.startsWith(prefix));
     }
 
     /**

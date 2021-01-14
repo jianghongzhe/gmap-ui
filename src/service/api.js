@@ -1,3 +1,6 @@
+import {message} from 'antd';
+import {dispatcher} from '../common/gflow';
+
 const {app,getCurrentWebContents} = window.require('electron').remote;
 
 
@@ -135,6 +138,20 @@ class Api{
     }
 
     openUrl=(url)=>{
+        if(url.startsWith("gmap://")){
+            let fn=url.substring("gmap://".length);
+            let flag=app.existsGraph(fn);
+            if(true!==flag){
+                message.warning("链接已经失效，请修改后重试");
+                return;
+            }
+
+            let item=app.getFileItem(fn);
+            dispatcher.tabs.onSelItemPromise(item).then();
+            // console.log("笔记链接跳转：",url,item);
+            return;
+        }
+
         app.openUrl(url);
     }
 

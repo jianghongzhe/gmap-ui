@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/react';
 import React from 'react';
 import { Layout,   Button, Divider } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {connect,dispatcher} from '../../../common/gflow';
@@ -36,7 +36,10 @@ const Toolbar=(props)=>{
 
             <Divider type="vertical" className='divider'/>
             <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowEditMapDlg} title='编辑' />
+            <Button shape='circle' icon={<LinkOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCopyMapLink} title='复制导图链接' />
             
+            
+
             {/* {
                 props.showRestore &&      
                     <Button shape='circle' icon={<CompressOutlined />} className='toolbtn' type='primary' size='large' onClick={props.onRestore} title='恢复默认节点状态' />

@@ -258,6 +258,7 @@ const MapsViewer=(props)=>{
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
                                 onExpImage={onExpImage}
+                                onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
                             />
                             <GraphTabs
                                 editing={editMapDlgVisible}
