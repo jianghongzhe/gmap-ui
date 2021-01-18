@@ -3,14 +3,12 @@ import ganttSvc from './ganttSvc';
 import api from './api';
 
 
-//是否启用虚拟节点，启用后样式会好些，但占用空间变大，空间利用率低
-const useVisualNode=false;
 
 /**
  * 根据指定文本格式，解析为table方式显示的思维导数的数据格式
  * 
  * 层级式节点的格式 nd
- * {
+ *  {
         id:     uuid,
         lev:    lev,        //层级
         str:    txt,        //文本
@@ -271,16 +269,6 @@ class MindmapSvc {
 
 
     parseMindMapDataInner = (nd) => {
-        if(useVisualNode){
-            //清除所有虚拟节点
-            this.removeVisualNds(nd);
-
-            //在根极节点的子树下设置虚拟节点
-            nd.childs.forEach(nd=>{
-                this.convertTwoSub2ThreeSub(nd);
-            });
-        }
-
         //计算根节点子树的方向，同时在其中设置虚拟节点（如果需要）
         let leftAndRightLeafCnt = this.setDirection(nd);
 
@@ -711,22 +699,6 @@ class MindmapSvc {
         });
 
 
-        if(useVisualNode){
-            //
-            if(2===rtreeCnt && 1===this.getLeafCnt(root.childs[ltreeCnt+0]) && 1===this.getLeafCnt(root.childs[ltreeCnt+1])){
-                let insNd=this.getVisualND(root,1,false);
-                root.childs.push(root.childs[ltreeCnt+1]);
-                root.childs[ltreeCnt+1]=insNd;
-                ++rightLeafCnt;
-            }
-            if(2===ltreeCnt && 1===this.getLeafCnt(root.childs[0]) && 1===this.getLeafCnt(root.childs[1])){
-                let insNd=this.getVisualND(root,1,true)
-                root.childs.unshift(root.childs[0]);
-                root.childs[1]=insNd;
-                ++leftLeafCnt;
-            }
-        }
-
 
         return [leftLeafCnt, rightLeafCnt];
     }
@@ -1088,16 +1060,6 @@ class MindmapSvc {
     convertTwoSub2ThreeSub=(nd)=>{
         if(nd.leaf || !nd.expand){
             return;
-        }
-        if(useVisualNode){
-            //只有两棵子树并且每个子树最多只有一个叶节点的节点
-            if(2===nd.childs.length && 2===this.getLeafCnt(nd)){
-                nd.childs=[nd.childs[0],this.getVisualND(nd,nd.lev+1),nd.childs[1]];
-                return;
-            }
-            nd.childs.forEach(sub=>{
-                this.convertTwoSub2ThreeSub(sub);
-            });
         }
     }
 
