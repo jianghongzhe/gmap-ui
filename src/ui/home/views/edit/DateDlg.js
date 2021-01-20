@@ -68,12 +68,11 @@ const DateDlg=(props)=>{
         };
         
         return <div css={calendarHeaderStyle}>
-            <Button className="btn" size='small' type='text' title="前一年" icon={<DoubleLeftOutlined className='icon'/>} onClick={changeYear.bind(this,-1)}></Button>
-            <Button className="btn" size='small' type='text' title="上月" icon={<LeftOutlined className='icon'/>} onClick={changeMonth.bind(this,-1)}></Button>
-            <span className='currYM'>{date.format("YYYY-MM-DD")}</span>
-            <Button className="btn" size='small' type='text' title="下月" icon={<RightOutlined className='icon'/>} onClick={changeMonth.bind(this,1)}></Button>
-            <Button className="btn" size='small' type='text' title="后一年" icon={<DoubleRightOutlined className='icon'/>} onClick={changeYear.bind(this,1)}></Button>
-
+            <Button size='small' type='text' title="前一年" icon={<DoubleLeftOutlined className='icon'/>} onClick={changeYear.bind(this,-1)}></Button>
+            <Button size='small' type='text' title="上月" icon={<LeftOutlined className='icon'/>} onClick={changeMonth.bind(this,-1)}></Button>
+            <span>{date.format("YYYY-MM-DD")}</span>
+            <Button size='small' type='text' title="下月" icon={<RightOutlined className='icon'/>} onClick={changeMonth.bind(this,1)}></Button>
+            <Button size='small' type='text' title="后一年" icon={<DoubleRightOutlined className='icon'/>} onClick={changeYear.bind(this,1)}></Button>
         </div>
     },[date]);
 
@@ -86,32 +85,6 @@ const DateDlg=(props)=>{
                 onOk={onOk}
                 size={{...dlgScale, fixh:true}}
                 bodyStyle={{paddingTop:5}}>
-
-            {/* <Global styles={getDatePickerPopoverStyle(datePickPopoverClassname)}/>
-            <DatePicker  
-                bordered={false} 
-                allowClear={false} 
-                value={date} 
-                inputReadOnly={true}
-                size='large '
-                open={props.visible} 
-                dropdownClassName={datePickPopoverClassname}
-                onChange={setDate}                
-                renderExtraFooter={(mode)=>{
-                    return <div css={commonDaysStyle}>
-                        
-                            <Button type='link' className='day' onClick={onSelCommonDays.bind(this,1)}>明天</Button>
-                            <Button type='link' className='day' onClick={onSelCommonDays.bind(this,2)}>后天</Button>
-                            <Button type='link' className='day' onClick={onSelCommonDays.bind(this,3)}>大后天</Button>
-                        
-                            <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-1)}>昨天</Button>
-                            <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-2)}>前天</Button>
-                            <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-3)}>大前天</Button>
-                        
-                    </div>;
-                }}
-            /> */}
-
             <Calendar
                 fullscreen={false}
                 value={date}
@@ -119,16 +92,13 @@ const DateDlg=(props)=>{
                 headerRender={headerRender}/>
             <Divider css={{margin:0,padding:0,paddingBottom:5,}}/>
             <div css={commonDaysStyle}>
+                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-3)}><span css={getSpecialDateStyle(date,-3)}>大前天</span></Button>
+                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-2)}><span css={getSpecialDateStyle(date,-2)}>前天</span></Button>
+                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-1)}><span css={getSpecialDateStyle(date,-1)}>昨天</span></Button>
+                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,0)}><span css={getSpecialDateStyle(date,0)}>今天</span></Button>
                 <Button type='link' className='day' onClick={onSelCommonDays.bind(this,1)}><span css={getSpecialDateStyle(date,1)}>明天</span></Button>
                 <Button type='link' className='day' onClick={onSelCommonDays.bind(this,2)}><span css={getSpecialDateStyle(date,2)}>后天</span></Button>
                 <Button type='link' className='day' onClick={onSelCommonDays.bind(this,3)}><span css={getSpecialDateStyle(date,3)}>大后天</span></Button>
-            
-                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-1)}><span css={getSpecialDateStyle(date,-1)}>昨天</span></Button>
-                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-2)}><span css={getSpecialDateStyle(date,-2)}>前天</span></Button>
-                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,-3)}><span css={getSpecialDateStyle(date,-3)}>大前天</span></Button>
-            </div>
-            <div css={commonDaysStyle}>    
-                <Button type='link' className='day' onClick={onSelCommonDays.bind(this,0)}><span css={getSpecialDateStyle(date,0)}>今天</span></Button>
             </div>
         </EnhDlg>
     );
@@ -151,28 +121,22 @@ const getSpecialDateStyle=(date, deltaDays)=>{
 
 const calendarHeaderStyle={
     textAlign:"center",
+    marginTop:10,
     marginBottom:10,
-    marginTop:10, 
+    marginLeft:'auto',
+    marginRight:'auto',
+    width:'96%',
+    display:'grid',
+    gridTemplateColumns: '25px 25px auto 25px 25px',
+
     '& .icon':{
         color:'#BBB',
     },
-    '& .iconWrapper':{
-        width:'25px',
-        display:'inline-block',
-        cursor:'pointer',
-    },
-    '& .btn':{
-        padding:0,
-    },
-    '& .currYM':{
-        display:'inline-block',
-        width:'calc(100% - 120px)',
-    }
 };
 
 const dlgScale={
-    w:330,
-    h:390,
+    w:360,
+    h:360,
 };
 
 const getDatePickerPopoverStyle=(parCls)=>{
@@ -188,18 +152,12 @@ const getDatePickerPopoverStyle=(parCls)=>{
 const commonDaysStyle={
     marginTop:0,
     marginBottom:0,
-    textAlign:'center',
-    border:'0px solid blue',
+    display:'flex',
+
     '& .day':{
-        padding:2,
-        // paddingLeft:20,
-        // paddingRight:20,
-        // margin:0,
-        // border:'0px solid blue'
+        flex:1,
+        padding:0,
     },
-    '& .day:nth-child(n+2)':{
-        marginLeft:5,
-    }
 };
 
 export default React.memo(DateDlg);
