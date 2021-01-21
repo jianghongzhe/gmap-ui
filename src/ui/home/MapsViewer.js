@@ -19,6 +19,7 @@ import {connect,dispatcher} from '../../common/gflow';
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
 import { useSelector } from 'react-redux';
+import keyDetector from '../../common/keyDetector';
 
 
 const { Content } = Layout;
@@ -116,8 +117,43 @@ const MapsViewer=(props)=>{
 
 
 
+    /**
+     * 初始化查找快捷键，并在组件销毁时移除
+     */
+    useEffect(()=>{
+        const keyHandle=(e)=>{
+            //当编辑窗口或新建窗口打开时，不支持查找功能
+            const excludeStates=[editMapDlgVisible, newMapDlgVisible];
+            const isExclude=excludeStates.some(each=>true===each);
+
+            keyDetector.on(e,{
+                //ctrl+f 网页内查找
+                'ctrl+f':(e)=>{
+                    if(isExclude){return;}
+                    api.showFindInPageDlg();
+                },
+
+                //esc 关闭网页内查找
+                'esc':(e)=>{
+                    if(isExclude){return;}
+                    api.closeFindInPageDlg();
+                },
+            });
+        }
+
+        document.addEventListener('keydown', keyHandle);
+        return ()=>document.removeEventListener('keydown',keyHandle);
+    },[editMapDlgVisible, newMapDlgVisible]);
+
+    useEffect(()=>{
+        api.closeFindInPageDlg();
+    },[hasPane]);
+
+
+
     //------------新建图表操作----------------------------------------------------------------------
     const onShowNewMapDlg =useCallback(() => {
+        api.closeFindInPageDlg();
         setNewMapDlgVisible(true);
     },[setNewMapDlgVisible]);
 
@@ -134,6 +170,7 @@ const MapsViewer=(props)=>{
     //------------修改导图----------------------------------------------------------------------
     const onShowEditMapDlg =useCallback(async () => {
         try {
+            api.closeFindInPageDlg();
             let currPane=await dispatcher.tabs.selectCurrPanePromise();
             setEditDlgState({
                 editMapDlgVisible: true,
@@ -261,6 +298,8 @@ const MapsViewer=(props)=>{
                             />
                             <GraphTabs
                                 editing={editMapDlgVisible}
+                                newing={newMapDlgVisible}
+                                opening={selMapDlgVisible}
                                 onOpenLink={api.openUrl}
                                 onOpenRef={openRef}
                                 onShowTimeline={onShowTimeline}

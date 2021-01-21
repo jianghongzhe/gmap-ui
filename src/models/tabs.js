@@ -53,13 +53,6 @@ const model={
         },
     },
     effects:{
-        *removeTabCheckShouldStopFindInPage(payload,{creater,sel,res,rej}){
-            const {panes}=yield sel();
-            if(1===panes.length){
-                api.closeFindInPageDlg();
-            }
-            yield put(creater.removeTab(payload));
-        },
 
         /**
          * 切换到前一个选项卡，支持循环滚动

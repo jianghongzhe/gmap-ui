@@ -71,7 +71,7 @@ const GraphTabs=(props)=>{
      */
     const onEditTab =useCallback((targetKey, action) => {
         if ("remove" === action) {
-            dispatcher.tabs.removeTabCheckShouldStopFindInPage(targetKey);
+            dispatcher.tabs.removeTab(targetKey);
         }
     },[]);
 
@@ -81,70 +81,62 @@ const GraphTabs=(props)=>{
      */
     useEffect(()=>{
         const keyHandle=(e)=>{
+            //当编辑窗口、新建窗口、选择图表窗口打开时，不支持选项卡操作
+            const excludeStates=[props.editing, props.newing, props.opening];
+            const isExclude=excludeStates.some(each=>true===each);
+
             keyDetector.on(e,{
-                //ctrl+f 网页内查找
-                'ctrl+f':(e)=>{
-                    if(true===props.editing){return;}
-                    api.showFindInPageDlg();
-                },
-
-                //esc 关闭网页内查找
-                'esc':(e)=>{
-                    if(true===props.editing){return;}
-                    api.closeFindInPageDlg();
-                },
-
                 //alt+w 关闭当前选项卡（未使用ctrl+w，因为快捷键已被chrome使用，程序不能捕获到事件）
                 'alt+w':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     onEditTab(activeKey,"remove");
                 },
 
                 //alt+shift+w 关闭全部选项卡
                 'alt+shift+w':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.removeAllTabs();
                 },
 
                 //alt+o 关闭其他选项卡
                 'alt+o':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.removeOtherTabs();
                 },
 
                 //alt+p 关闭右侧选项卡
                 'alt+p':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.removeRightTabs();
                 },
 
                 //alt+i 关闭左侧选项卡
                 'alt+i':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.removeLeftTabs();
                 },
 
                 //ctrl+PageUp 前一个选项卡
                 'ctrl+pgup':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.togglePreTab();
                 },
 
                 //ctrl+PageDown 后一个选项卡
                 'ctrl+pgdn':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.toggleNextTab();
                 },
 
                 //ctrl+Shift+PageUp 选项卡前移
                 'ctrl+shift+pgup':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.movePreTab();
                 },
 
                 //ctrl+Shift+PageDown 选项卡后移
                 'ctrl+shift+pgdn':(e)=>{
-                    if(true===props.editing){return;}
+                    if(isExclude){return;}
                     dispatcher.tabs.moveNextTab();
                 },
             });
@@ -152,7 +144,7 @@ const GraphTabs=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[props.editing, activeKey, onEditTab]);
+    },[props.editing, props.newing, props.opening, activeKey, onEditTab]);
 
     
     

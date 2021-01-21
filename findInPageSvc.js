@@ -78,7 +78,7 @@ const init=(_app, _mainWindow)=>{
      * 隐藏查找窗口
      */
     const hideFindInPage=()=>{
-        if(null!=findWin){
+        if(null!=findWin && findWin.isVisible()){
             findWin.webContents.send("clear-find",{});
             findWin.setBounds({ x:-9999, y:-9999});
             findWin.hide();
