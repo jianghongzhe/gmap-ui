@@ -1140,7 +1140,7 @@ class MindmapSvc {
     loadParts = (alltxts) => {
         let refs = {};
         let trefs = {};
-        let lrefs = {};
+        let graphs = {};
         let ndLines = [];
         let currRefName = null;
         let alreadyHandleRefs = false;
@@ -1166,7 +1166,8 @@ class MindmapSvc {
             let trimLine = line.trim();
             if (    
                     (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
-                    (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length) 
+                    (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length) ||
+                    (trimLine.startsWith("# graph:") && trimLine.length > "# graph:".length)
             ){
                 currRefName = trimLine.substring("# ".length);
                 return;
@@ -1200,12 +1201,44 @@ class MindmapSvc {
                 //是新引用
                 trefs[currRefName] = trimLine;
                 return;
+            }else if(currRefName.startsWith("graph:")){
+                if(""===trimLine){
+                    return;
+                }
+                if(!trimLine.startsWith("- ")){
+                    return;
+                }
+                let items=trimLine.substring("- ".length)
+                    .replaceAll("，",",")
+                    .replaceAll("、",",")
+                    .replaceAll("|",",")
+                    .replaceAll("｜",",")                    
+                    .replaceAll("/",",")
+                    .replaceAll("／",",")
+                    .replaceAll("\\",",")
+                    .replaceAll("＼",",")
+                    .split(",")
+                    .filter(each=>null!==each && ""!==each.trim())
+                    .map(each=>each.trim())
+                    .filter((each,ind)=>ind<3);
+                if(items.length<3){
+                    return;
+                }
+
+                //是已记录过的引用
+                if ("undefined" !== typeof (graphs[currRefName])) {
+                    graphs[currRefName].push(items);
+                    return;
+                }
+                //是新引用
+                graphs[currRefName] = [items];
+                return;
             }
         });
 
 
 
-        // 
+        // 文字引用直接替换到原文中
         ndLines=ndLines.map(line=>{
             let splitPos=line.indexOf("- ")+2;
             let front=line.substring(0,splitPos);
@@ -1223,7 +1256,10 @@ class MindmapSvc {
             return front+unescapeVLineRestore(end.trim());
         });
 
-        return { ndLines, refs};
+        
+
+        console.debug("关系图",graphs);
+        return { ndLines, refs, graphs};
     }
 
     setLeaf = (nd) => {
