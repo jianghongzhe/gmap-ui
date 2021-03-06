@@ -76,7 +76,7 @@ const getOption=(sumOpts)=>{
     const links=sumOpts.map(line=>({
         source: line[0],
         target: line[1],
-        symbolSize: [5, 20],
+        //symbolSize: [4, 10],
         label: {
             show: true,
             formatter:line[2]
@@ -131,8 +131,8 @@ const baseOption= {
                 show: true,
                 formatter:"{b}",
             },
-            edgeSymbol: ['none', 'none'],
-            edgeSymbolSize: [10],
+            edgeSymbol: ['none', 'arrow',/*'none', 'none'*/],
+            edgeSymbolSize: [0,10,/*10*/],
             edgeLabel: {
                 fontSize: 12
             },
