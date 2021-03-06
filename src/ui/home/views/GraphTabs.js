@@ -82,9 +82,8 @@ const GraphTabs=(props)=>{
      */
     useEffect(()=>{
         const keyHandle=(e)=>{
-            //当编辑窗口、新建窗口、选择图表窗口打开时，不支持选项卡操作
-            const excludeStates=[props.editing, props.newing, props.opening];
-            const isExclude=excludeStates.some(each=>true===each);
+            //当有对话框窗口打开时，不支持选项卡操作
+            const isExclude=props.hasOpenDlg;// excludeStates.some(each=>true===each);
 
             keyDetector.on(e,{
                 //alt+w 关闭当前选项卡（未使用ctrl+w，因为快捷键已被chrome使用，程序不能捕获到事件）
@@ -145,7 +144,7 @@ const GraphTabs=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[props.editing, props.newing, props.opening, activeKey, onEditTab]);
+    },[props.hasOpenDlg, activeKey, onEditTab]);
 
     
     

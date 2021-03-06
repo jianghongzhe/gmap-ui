@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Layout, message,Modal } from 'antd';
 
 import Welcome from './views/Welcome';
@@ -294,6 +294,28 @@ const MapsViewer=(props)=>{
         });
     },[activeKey, panes]);
 
+    /***
+     * 是否有已打开的对话框
+     */
+    const hasOpenDlg=useMemo(()=>(
+        newMapDlgVisible ||
+        editMapDlgVisible ||
+        selMapDlgVisible ||
+        refViewerDlgVisible ||
+        timelineDlgVisible ||
+        progsDlgVisible ||
+        gantdlgVisible ||
+        relaChartDlgVisible
+    ),[
+        newMapDlgVisible,
+        editMapDlgVisible,
+        selMapDlgVisible,
+        refViewerDlgVisible,
+        timelineDlgVisible,
+        progsDlgVisible,
+        gantdlgVisible,
+        relaChartDlgVisible
+    ]);
     
     return (
         <React.Fragment>
@@ -313,9 +335,7 @@ const MapsViewer=(props)=>{
                                 onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
                             />
                             <GraphTabs
-                                editing={editMapDlgVisible}
-                                newing={newMapDlgVisible}
-                                opening={selMapDlgVisible}
+                                hasOpenDlg={hasOpenDlg}
                                 onOpenLink={api.openUrl}
                                 onOpenRef={openRef}
                                 onShowTimeline={onShowTimeline}
