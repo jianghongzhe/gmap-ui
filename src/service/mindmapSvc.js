@@ -767,10 +767,195 @@ class MindmapSvc {
         return cnt;
     }
 
-    splitLineItems=(line)=>{
+    
+    /**
+     * 获得节点行中的特殊部分的处理器
+     * @returns [
+     *      (item, ...)=>[boolean, boolean, value]
+     *      //参数：该行文本、其他依赖的对象等 
+     *      //返回：是否已处理、是否有有效的结果值、结果值内容
+     * ]
+     * 
+     */
+    linePartHandlers={
+       
+        /**
+         * 节点默认是折叠状态
+         * @param {*} item 
+         * @returns 
+         */
+        handleZip: (item)=>{
+            if ('zip:' !== item) {
+                return [false,false,null];
+            }
 
-    }
+            return [true,true,false];
+        },
 
+
+        handleRef: (item, refs)=>{
+            let refPrefixLen = 'ref:'.length;
+            if (!item.startsWith("ref:") || item.length <= refPrefixLen) {
+                return [false,false,null];
+            }
+
+            if ('undefined' !== typeof (refs[item])) {
+                let ref = {
+                    name: item,
+                    showname: item.substring(refPrefixLen).trim(),
+                    txt: refs[item],
+                    parsedTxt: null,
+                };
+                return [true,true,ref];
+            }
+            return [true,false,null];
+        },
+
+        handleGraph:(item, graphs)=>{
+            let graphfPrefixLen = 'graph:'.length;
+            if (!item.startsWith("graph:") || item.length <= graphfPrefixLen) {
+                return [false,false,null];
+            }
+
+            if ('undefined' !== typeof (graphs[item])) {
+                let graph = {
+                    name: item,
+                    showname: item.substring(graphfPrefixLen).trim(),
+                    items: graphs[item],
+                }
+                return [true,true,graph];
+            }
+            return [true,false,null];
+        },
+
+        handleLineColor:(item)=>{
+            if (!item.startsWith("c:")) {
+                return [false,false,null];
+            }
+
+            if(item.length > 20){
+                return [true,false,null];
+            }
+            let lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
+            return [true,true,lineColor];
+        },
+        
+        handleMemo:(item)=>{
+            if (!item.startsWith("m:")) {
+                return [false,false,null];
+            }
+            let memo=item.substring("m:".length).trim();//备注可以出现多个，最终加入数组中
+            if(null==memo || ''===memo.trim()){
+                return [true,false,null];
+            }
+            return [true,true,memo];
+        },
+
+        handleCommonLink:(item, isUrlPattern)=>{
+            let urlPattern = isUrlPattern(item);
+            if (false === urlPattern) {
+                return [false,false,null];
+            }
+
+            let link={
+                name: null,
+                addr: urlPattern
+            };
+            return [true,true,link];
+        },
+
+        handleMarkdownLink:(item, hasUrlPrefix)=>{
+            //是markdown链接 [文字](地址)
+            if (!(/^\[.*?\]\(.+?\)$/.test(item))) {
+                return [false,false,null];
+            }
+
+            let txt = item.substring(1, item.lastIndexOf("]")).trim();
+            let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
+            if(null===txt || ''===txt || ""===txt.trim()){
+                if(url.startsWith("cmd://")){
+                    txt='执行命令';
+                }else if(url.startsWith("cp://")){
+                    txt='复制';
+                }else if(url.startsWith("dir://")){
+                    txt='打开目录并选择';
+                }else{
+                    txt='打开';
+                }
+            }
+
+            if (hasUrlPrefix(url)) {
+                url=url+"";
+            }else if(url.startsWith("./")){
+                url=api.calcAttUrl("",url);
+            }else{
+                url = "http://" + url;
+            }
+
+            let link={
+                name: txt,
+                addr: url
+            };
+            return [true,true,link];
+        },
+
+        handleGant:(item)=>{
+            let gantItem=ganttSvc.parseGantItem(item);
+            if(false===gantItem){
+                return [false,false,null];
+            }
+            return [true,true,gantItem];
+        },
+
+        handleProg:(item, progs)=>{
+            let progMatchItems=/^p[:]([-]?)([0-9]{1,3})$/.exec(item);
+            if(!(item.startsWith("p:") && progMatchItems)){
+                return [false,false,null];
+            }
+
+            let isErr=(progMatchItems[1]?true:false);
+            let num=parseInt(progMatchItems[2]);
+            num=(num>100?100:num);
+            let msg=(isErr?"完成到 "+num+"% 时出现错误":(100===num?"已完成":"已完成 "+num+"%"));
+
+            let prog={
+                num: num,
+                txt: null,//稍后加入
+                st: isErr?'exception':(100===num?'success':'normal'),
+                allProgs: progs,
+                msg: msg,
+                err : isErr,
+                done: !isErr && 100===num,
+                doing: !isErr && 100>num,
+            };
+            return [true,true,prog];
+        },
+
+        handleDate:(item, timeline, parseDateInfo)=>{
+            //匹配规则：[0]整串  [1]日期部分  [2],purple  [3]purple
+            let dateMatchItems = /^d[:]([0-9]{2}[-/.][0-9]{1,2}[-/.][0-9]{1,2})(,(.{0,25}))?$/.exec(item);
+            if (!(item.startsWith("d:") && dateMatchItems && dateMatchItems[1])) {
+                return [false,false,null];
+            }
+
+            let dateItem = {
+                fullDate: '', //2020-05-23 五
+                msg: '', //昨天、前天、大前天，过期x天，今天、明天、后天、大后天，还差x天
+                abbrDate: '', //是当年： 5/23   不是当年 22/3/20,
+                timeline: timeline, //时间线对象
+                color: null,
+                txt: null,//稍后加入
+                expired:false,
+                near:false,
+                future:false,
+            };
+            dateItem=parseDateInfo(dateItem,dateMatchItems[1],dateMatchItems[3]);
+            return [true,true,dateItem];
+        },
+    };
+
+
+    
 
     /**
      * 根据指定文本，加载节点信息（树型结构）
@@ -824,143 +1009,96 @@ class MindmapSvc {
                     if (null == item || "" === item) { return; }
 
                     //节点默认是折叠状态
-                    if ('zip:' === item) {
-                        expand = false;
-                        return
+                    let [handled,hasVal,val]=this.linePartHandlers.handleZip(item);
+                    if(handled){
+                        if(hasVal){
+                            expand = val;
+                        }
+                        return;
                     }
 
                     //是引用
-                    let refPrefixLen = 'ref:'.length;
-                    if (item.startsWith("ref:") && item.length > refPrefixLen) {
-                        if ('undefined' !== typeof (refs[item])) {
-                            ref = {
-                                name: item,
-                                showname: item.substring(refPrefixLen).trim(),
-                                txt: refs[item],
-                                parsedTxt: null,
-                            }
+                    [handled,hasVal,val]=this.linePartHandlers.handleRef(item, refs);
+                    if(handled){
+                        if(hasVal){
+                            ref=val;
                         }
                         return;
                     }
-
+                    
                     //是关系图引用
-                    let graphfPrefixLen = 'graph:'.length;
-                    if (item.startsWith("graph:") && item.length > graphfPrefixLen) {
-                        if ('undefined' !== typeof (graphs[item])) {
-                            graph = {
-                                name: item,
-                                showname: item.substring(graphfPrefixLen).trim(),
-                                items: graphs[item],
-                            }
+                    [handled,hasVal,val]=this.linePartHandlers.handleGraph(item, graphs);
+                    if(handled){
+                        if(hasVal){
+                            graph=val;
                         }
-                        return;
-                    }
-
-
-
-
-
-                    //进度   p:10   p:-20   
-                    let progMatchItems=/^p[:]([-]?)([0-9]{1,3})$/.exec(item);
-                    if(item.startsWith("p:") && progMatchItems){
-                        let isErr=(progMatchItems[1]?true:false);
-                        let num=parseInt(progMatchItems[2]);
-                        num=(num>100?100:num);
-                        let msg=(isErr?"完成到 "+num+"% 时出现错误":(100===num?"已完成":"已完成 "+num+"%"));
-
-                        prog={
-                            num: num,
-                            txt: null,//稍后加入
-                            st: isErr?'exception':(100===num?'success':'normal'),
-                            allProgs: progs,
-                            msg: msg,
-                            err : isErr,
-                            done: !isErr && 100===num,
-                            doing: !isErr && 100>num,
-                        };
-                        progs.push(prog);//保持加入的顺序不变，后面不用排序
                         return;
                     }
 
                     //是颜色标记  c:red  c:#fcfcfc 
-                    if (item.startsWith("c:") && item.length <= 20) {
-                        lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
+                    [handled,hasVal,val]=this.linePartHandlers.handleLineColor(item);
+                    if(handled){
+                        if(hasVal){
+                            lineColor=val;
+                        }
                         return;
                     }
 
                     //是备注标记  m:说明
-                    if (item.startsWith("m:")) {
-                        memo.push(item.substring("m:".length).trim());//备注可以出现多个，最终加入数组中
-                        return;
-                    }
-
-                    //日期类型 d:20.1.8、d:20.1.8,purple
-                    //匹配规则：[0]整串  [1]日期部分  [2],purple  [3]purple
-                    let dateMatchItems = /^d[:]([0-9]{2}[-/.][0-9]{1,2}[-/.][0-9]{1,2})(,(.{0,25}))?$/.exec(item);
-                    if (item.startsWith("d:") && dateMatchItems && dateMatchItems[1]) {
-                        dateItem = {
-                            fullDate: '', //2020-05-23 五
-                            msg: '', //昨天、前天、大前天，过期x天，今天、明天、后天、大后天，还差x天
-                            abbrDate: '', //是当年： 5/23   不是当年 22/3/20,
-                            timeline: timeline, //时间线对象
-                            color: null,
-                            txt: null,//稍后加入
-                            expired:false,
-                            near:false,
-                            future:false,
-                        };
-                        dateItem=this.parseDateInfo(dateItem,dateMatchItems[1],dateMatchItems[3]);
-                        timeline.push(dateItem);//后面需要根据日期来排序
-                        return;
-                    }
-
-                    //是markdown链接 [文字](地址)
-                    if (/^\[.*?\]\(.+?\)$/.test(item)) {
-                        let txt = item.substring(1, item.lastIndexOf("]")).trim();
-                        let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
-                        if(null===txt || ''===txt || ""===txt.trim()){
-                            if(url.startsWith("cmd://")){
-                                txt='执行命令';
-                            }else if(url.startsWith("cp://")){
-                                txt='复制';
-                            }else if(url.startsWith("dir://")){
-                                txt='打开目录并选择';
-                            }else{
-                                txt='打开';
-                            }
+                    [handled,hasVal,val]=this.linePartHandlers.handleMemo(item);
+                    if(handled){
+                        if(hasVal){
+                            memo.push(val);
                         }
-
-                        if (this.hasUrlPrefix(url)) {
-                            url=url+"";
-                        }else if(url.startsWith("./")){
-                            url=api.calcAttUrl("",url);
-                        }else{
-                            url = "http://" + url;
-                        }
-
-                        links.push({
-                            name: txt,
-                            addr: url
-                        });
                         return;
                     }
 
                     //是普通链接  http://www.xxx.com
-                    let urlPattern = this.isUrlPattern(item);
-                    if (false !== urlPattern) {
-                        links.push({
-                            name: null,
-                            addr: urlPattern
-                        });
+                    [handled,hasVal,val]=this.linePartHandlers.handleCommonLink(item, this.isUrlPattern);
+                    if(handled){
+                        if(hasVal){
+                            links.push(val);
+                        }
                         return;
                     }
 
 
                     //是甘特图标识
-                    let gantItem=ganttSvc.parseGantItem(item)
-                    if(false!==gantItem){
-                        gantData.gantItems.push(gantItem);
-                        gant=gantData;
+                    [handled,hasVal,val]=this.linePartHandlers.handleGant(item);
+                    if(handled){
+                        if(hasVal){
+                            gantData.gantItems.push(val);
+                            gant=gantData;
+                        }
+                        return;
+                    }
+
+                    //进度   p:10   p:-20   
+                    [handled,hasVal,val]=this.linePartHandlers.handleProg(item, progs);
+                    if(handled){
+                        if(hasVal){
+                            prog=val;
+                            progs.push(prog);//保持加入的顺序不变，后面不用排序
+                        }
+                        return;
+                    }
+
+                    //日期类型 d:20.1.8、d:20.1.8,purple
+                    [handled,hasVal,val]=this.linePartHandlers.handleDate(item,timeline,this.parseDateInfo);
+                    if(handled){
+                        if(hasVal){
+                            dateItem=val;
+                            timeline.push(dateItem);//保持加入的顺序不变，后面不用排序
+                        }
+                        return;
+                    }
+
+                    //是markdown链接 [文字](地址)
+                    [handled,hasVal,val]=this.linePartHandlers.handleMarkdownLink(item,this.hasUrlPrefix);
+                    if(handled){
+                        if(hasVal){
+                            links.push(val);
+                        }
                         return;
                     }
 
