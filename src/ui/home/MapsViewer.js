@@ -6,6 +6,7 @@ import Welcome from './views/Welcome';
 import OpenGraphDlg from './views/OpenGraphDlg';
 import NewGraphDlg from './views/NewGraphDlg';
 import EditGraphDlg from './views/EditGraphDlg';
+import RelaChartDlg from './views/RelaChartDlg';
 import Toolbar from './views/Toolbar';
 import GraphTabs from './views/GraphTabs';
 import RefViewer from './views/RefViewer';
@@ -57,6 +58,11 @@ const MapsViewer=(props)=>{
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
     const [selMapDlgVisible, setSelMapDlgVisible]=useState(false);
 
+    const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false);
+
+    const [graphObj, setGraphObj]=useState([]);
+    
+
     const [{currMapName,editTmpTxt,editMapDlgVisible}, setEditDlgState]= useState({
         currMapName: '',
         editTmpTxt: '',
@@ -105,6 +111,7 @@ const MapsViewer=(props)=>{
         setTimelineDlgState((state)=>({...state, timelineDlgVisible:false}));
         setProgsDlgState((state)=>({...state, progsDlgVisible:false}));
         setGantdlgState((state)=>({...state, gantdlgVisible:false}));
+        setRelaChartDlgVisible(false);
     },[
         setNewMapDlgVisible,
         setSelMapDlgVisible,
@@ -112,7 +119,8 @@ const MapsViewer=(props)=>{
         setRefViewerDlgState,
         setTimelineDlgState,
         setProgsDlgState,
-        setGantdlgState
+        setGantdlgState,
+        setRelaChartDlgVisible
     ]);
 
 
@@ -238,6 +246,14 @@ const MapsViewer=(props)=>{
         });
     },[setGantdlgState]);
 
+    const onShowGraph=(graph)=>{
+        console.log("显示关系图",graph);
+        setGraphObj(graph);
+        setRelaChartDlgVisible(true);
+
+        
+    };
+
     const openRef =useCallback((refObj) => {
         setRefViewerDlgState({
             currRefObj: refObj,
@@ -305,6 +321,7 @@ const MapsViewer=(props)=>{
                                 onShowTimeline={onShowTimeline}
                                 onShowProgs={onShowProgs}
                                 onShowGant={onShowGant}
+                                onShowGraph={onShowGraph}
                             />
                         </>
 
@@ -366,6 +383,13 @@ const MapsViewer=(props)=>{
                 visible={gantdlgVisible}
                 gantObj={gantObj}
                 onCancel={closeAllDlg}
+            />
+
+            <RelaChartDlg
+                visible={relaChartDlgVisible}
+                onCancel={closeAllDlg}
+                name={graphObj.showname}
+                opts={graphObj.items}
             />
         </React.Fragment>
     );

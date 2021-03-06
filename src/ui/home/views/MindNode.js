@@ -3,6 +3,7 @@ import React from 'react';
 import { Button,Tooltip, Progress,Avatar  } from 'antd';
 import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
+import relaPic from '../../../assets/relachart.png';
 import {createSelector} from 'reselect';
 import marked from 'marked';
 import './markdown-node.css';
@@ -72,6 +73,13 @@ const MindNode=(props)=>{
                 />
             </Tooltip>
         )}  
+
+        {/* 关系图 */}
+        {(nd && nd.graph) && (
+            <Avatar size={18} src={relaPic} css={gantStyle} title='查看关系图' onClick={props.onShowGraph.bind(this,nd.graph)}/>
+        )}
+        
+
 
         {/* 甘特图  */}
         {(nd && nd.gant) && (

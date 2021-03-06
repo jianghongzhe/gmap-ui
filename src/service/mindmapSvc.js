@@ -788,7 +788,7 @@ class MindmapSvc {
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
 
-        let { ndLines, refs} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, graphs} = this.loadParts(arrayOrTxt);
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -804,6 +804,7 @@ class MindmapSvc {
             let dateItem = null;
             let prog=null;
             let gant=null;
+            let graph=null;//关系图
 
 
             //内容是简单类型，把转换的竖线再恢复回来
@@ -841,6 +842,23 @@ class MindmapSvc {
                         }
                         return;
                     }
+
+                    //是关系图引用
+                    let graphfPrefixLen = 'graph:'.length;
+                    if (item.startsWith("graph:") && item.length > graphfPrefixLen) {
+                        if ('undefined' !== typeof (graphs[item])) {
+                            graph = {
+                                name: item,
+                                showname: item.substring(graphfPrefixLen).trim(),
+                                items: graphs[item],
+                            }
+                        }
+                        return;
+                    }
+
+
+
+
 
                     //进度   p:10   p:-20   
                     let progMatchItems=/^p[:]([-]?)([0-9]{1,3})$/.exec(item);
@@ -983,7 +1001,10 @@ class MindmapSvc {
                 dateItem: dateItem,
                 prog: prog,
                 gant:gant,
+                graph:graph,
             };
+
+            console.log("关系图2",nd.graph);
 
 
             //还没有第一个节点，以第一个节点为根节点
@@ -1258,7 +1279,7 @@ class MindmapSvc {
 
         
 
-        console.debug("关系图",graphs);
+        console.log("关系图",graphs);
         return { ndLines, refs, graphs};
     }
 

@@ -41,7 +41,8 @@ const GraphTabs=(props)=>{
             onOpenRef={props.onOpenRef}
             onShowTimeline={props.onShowTimeline}
             onShowProgs={props.onShowProgs}
-            onShowGant={props.onShowGant}/>;
+            onShowGant={props.onShowGant}
+            onShowGraph={props.onShowGraph}/>;
     }
 
     /**
