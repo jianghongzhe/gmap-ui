@@ -55,6 +55,13 @@ class NewMindmapSvc {
         });
         let dist = rightH;
 
+
+        //如果设置了强制所有节点都在右侧，则直接返回
+        if(ndsSet.tree.forceRight){
+            return [leftH, rightH];
+        }
+            
+
         //依次计算如果把节点放到左侧，是否两边高度差比之前小，如果是就移动，否则结束
         let end = false;
         let leftNdCnt=0;

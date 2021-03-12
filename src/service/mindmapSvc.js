@@ -10,6 +10,7 @@ import api from './api';
  * 层级式节点的格式 nd
  *  {
         id:     uuid,
+        forceRight: true/false  //是否强制所有子树都在右侧，只对根节点有效
         lev:    lev,        //层级
         str:    txt,        //文本
         left:   false,      //方向，true-根节点左侧 false-根节点右侧
@@ -645,6 +646,9 @@ class MindmapSvc {
      * @returns {[lcnt,rcnt]} 左右子树的叶子节点数量
      */
     setDirection = (root) => {
+        console.log("所有节点都在右",root.forceRight);
+
+
         let childCnt = root.childs.length;
         if (0 === childCnt || !root.expand) {
             return [0, 0];
@@ -658,7 +662,7 @@ class MindmapSvc {
         }
 
 
-        //根节点有多个子节点，则按左右侧叶节点数相差最小为准
+        //根节点有多个子节点
         //先假设所有子树都在右侧，同时计算总叶节点数
         let rightLeafCnt = 0;
         let leftLeafCnt = 0;
@@ -669,7 +673,14 @@ class MindmapSvc {
         });
         dist = rightLeafCnt;
 
-        //再依次计算如果把某个节点放到左侧，侧左右侧叶节点数差值是否比当前小，如果小，就移到左侧
+        
+        //如果设置了强制所有节点都在右侧，则直接返回
+        if(root.forceRight){
+            return [0, rightLeafCnt];
+        }
+
+        //否则，以左右侧叶节点数相差最小为准
+        //依次计算如果把某个节点放到左侧，侧左右侧叶节点数差值是否比当前小，如果小，就移到左侧
         let loopFin = false;
         root.childs.forEach(child => {
             if (loopFin) {
@@ -778,7 +789,14 @@ class MindmapSvc {
      * 
      */
     linePartHandlers={
-       
+        handleForceRight: (item)=>{
+            if ('right:' !== item) {
+                return [false,false,null];
+            }
+
+            return [true,true,true];
+        },
+
         /**
          * 节点默认是折叠状态
          * @param {*} item 
@@ -990,6 +1008,7 @@ class MindmapSvc {
             let prog=null;
             let gant=null;
             let graph=null;//关系图
+            let forceRight=false;
 
 
             //内容是简单类型，把转换的竖线再恢复回来
@@ -1008,8 +1027,17 @@ class MindmapSvc {
                     let item = tmp.trim();
                     if (null == item || "" === item) { return; }
 
+                    //forceRight
+                    let [handled,hasVal,val]=this.linePartHandlers.handleForceRight(item);
+                    if(handled){
+                        if(hasVal){
+                            forceRight = val;
+                        }
+                        return;
+                    }
+
                     //节点默认是折叠状态
-                    let [handled,hasVal,val]=this.linePartHandlers.handleZip(item);
+                    [handled,hasVal,val]=this.linePartHandlers.handleZip(item);
                     if(handled){
                         if(hasVal){
                             expand = val;
@@ -1140,9 +1168,10 @@ class MindmapSvc {
                 prog: prog,
                 gant:gant,
                 graph:graph,
+                forceRight: (0===lev?forceRight:false), //只有根节点才有可能设置forceRight，其他节点一律为false
             };
 
-            console.log("关系图2",nd.graph);
+            // console.log("关系图2",nd);
 
 
             //还没有第一个节点，以第一个节点为根节点
