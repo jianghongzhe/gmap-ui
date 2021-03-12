@@ -1,7 +1,7 @@
 {
   "name": "gmap",
   "showname": "GMap - 思维导图",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "homepage": "./",
   "main": "main.js",
