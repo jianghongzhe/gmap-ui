@@ -127,6 +127,10 @@ const baseOption= {
             },
             symbolSize: 60,
             roam: true,
+            draggable:true,
+            emphasis:{
+                focus: 'adjacency',
+            },
             label: {
                 show: true,
                 formatter:"{b}",
