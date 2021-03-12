@@ -137,8 +137,11 @@ const EditGraphDlg=(props)=>{
     useEffect(()=>{
         if(props.visible){
             setEditorForceRefresh(Symbol());
+            setTimeout(() => {
+                setEditorForceRefresh(Symbol());
+            }, 500);
         }
-    },[props.visible]);
+    },[props.visible, setEditorForceRefresh]);
 
 
     return (
