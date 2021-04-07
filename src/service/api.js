@@ -121,8 +121,8 @@ class Api{
         return app.isMaximized();
     }
 
-    openSaveFileDlg=()=>{
-        return app.openSaveFileDlg();
+    openSaveFileDlg=(ext)=>{
+        return app.openSaveFileDlg(ext);
     }
 
     selAttFile=()=>{

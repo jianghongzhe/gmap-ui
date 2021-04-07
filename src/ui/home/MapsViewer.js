@@ -21,7 +21,8 @@ import api from '../../service/api';
 import screenShot from '../../service/screenShot';
 import { useSelector } from 'react-redux';
 import keyDetector from '../../common/keyDetector';
-
+import expSvc from '../../service/expSvc';
+import marked from 'marked';
 
 const { Content } = Layout;
 
@@ -261,6 +262,25 @@ const MapsViewer=(props)=>{
         });
     },[setRefViewerDlgState]);
 
+
+
+    const onExpHtml=useCallback(()=>{
+        panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
+            const fromInd=item.key.lastIndexOf("\\")+1;
+            const name=item.key.substring(fromInd,item.key.length-3);
+            console.log(name);
+            expSvc.expHtml(name,marked(item.mapTxts));
+        });
+    },[activeKey, panes]);
+
+    
+    const onExpMarkdown=useCallback(()=>{
+        panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
+            expSvc.expMarkdown(item.mapTxts);
+        });
+    },[activeKey, panes]);
+
+
     const onExpImage=useCallback(()=>{
         panes.forEach((item,ind)=>{
             if(activeKey!==item.key){
@@ -332,6 +352,8 @@ const MapsViewer=(props)=>{
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
                                 onExpImage={onExpImage}
+                                onExpMarkdown={onExpMarkdown}
+                                onExpHtml={onExpHtml}
                                 onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
                             />
                             <GraphTabs

@@ -649,19 +649,32 @@ const selPicFile = (mainWindow) => {
 }
 
 
-const openSaveFileDlg = (mainWindow) => {
+const openSaveFileDlg = (mainWindow,ext) => {
+    let filters= [
+        { name: 'JPG图片', extensions: ['jpg'] },
+        { name: 'PNG图片', extensions: ['png'] },
+        { name: 'GIF图片', extensions: ['gif'] },
+        { name: 'BMP图片', extensions: ['bmp'] },
+        { name: 'JPEG图片', extensions: ['jpeg'] },
+        { name: 'SVG图片', extensions: ['svg'] },
+        { name: 'WEBP图片', extensions: ['webp'] },
+        { name: '所有', extensions: ['*'] }
+    ];
+    if('md'===ext){
+        filters= [
+            { name: 'markdown', extensions: ['md'] },
+            { name: '所有', extensions: ['*'] }
+        ];
+    }
+    if('html'===ext){
+        filters= [
+            { name: 'html文件', extensions: ['html'] },
+            { name: '所有', extensions: ['*'] }
+        ];
+    }
     return dialog.showSaveDialogSync(mainWindow, { 
         properties: [/*'saveFile'*/],
-        filters: [
-            { name: 'JPG图片', extensions: ['jpg'] },
-            { name: 'PNG图片', extensions: ['png'] },
-            { name: 'GIF图片', extensions: ['gif'] },
-            { name: 'BMP图片', extensions: ['bmp'] },
-            { name: 'JPEG图片', extensions: ['jpeg'] },
-            { name: 'SVG图片', extensions: ['svg'] },
-            { name: 'WEBP图片', extensions: ['webp'] },
-            { name: '所有', extensions: ['*'] }
-        ]
+        filters
     });
 }
 

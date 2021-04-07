@@ -1,1 +1,5 @@
-cp://aabbc
+shotCombine://1583,680,C:\Users\dell\Desktop\pp.jpg
+0_0.jpg,0,0|0_1.jpg,1174,0
+1_0.jpg,0,0|1_1.jpg,1174,0
+2_0.jpg,0,0|2_1.jpg,1174,0
+3_0.jpg,0,175|3_1.jpg,1174,175

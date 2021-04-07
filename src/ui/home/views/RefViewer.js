@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,FilePdfOutlined,FileWordOutlined,Html5Outlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
@@ -13,6 +14,7 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';
 import { useSelector } from 'react-redux';
+import expSvc from '../../../service/expSvc';
 
 const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
@@ -73,15 +75,35 @@ const RefViewer=(props)=>{
 
     const getScrollTarget=useCallback(()=>document.getElementById(wrapperId),[wrapperId]);
     let result=dataSelector(props);
+    let {refname, refCont, txt}=(result || {refname:'', refCont:'', txt:''});
+
+    
+    const onExpHtml=useCallback(()=>{
+        expSvc.expHtml(refname, marked(txt));
+    },[refname, txt]);
+
+    
+    const onExpMarkdown=useCallback(()=>{
+        expSvc.expMarkdown(txt);
+    },[txt]);
+    
+    
+    
     if(null===result){
         return null;
     }
-    let {refname,refCont}=result;
+    
     
 
     return (
         <EnhDlg noFooter
-                title={"查看引用 - " + refname}
+                title={
+                    <div>
+                        {"查看引用 - " + refname}
+                        <Button shape='circle' icon={<FileMarkdownOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpMarkdown} title='导出markdown' />
+                        <Button shape='circle' icon={<Html5Outlined />} css={{marginLeft:'6px'}} type='default' size='default' onClick={onExpHtml} title='导出html' />
+                    </div>
+                }
                 size={{w:winW-200, h:winH-300, fixh:true, wrapperId:wrapperId}}                
                 visible={props.visible}
                 maskClosable={true}               
@@ -117,7 +139,7 @@ const dataSelector=createSelector(
         }
         let refname=refObj.showname;
         let refCont=refObj.parsedTxt;
-        return {refname,refCont};
+        return {refname,refCont, txt:refObj.txt};
     }
 );
 
