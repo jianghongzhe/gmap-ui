@@ -15,6 +15,7 @@ import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';
 import { useSelector } from 'react-redux';
 import expSvc from '../../../service/expSvc';
+import mermaid from 'mermaid';
 
 const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
@@ -66,6 +67,9 @@ const RefViewer=(props)=>{
             setTimeout(() => {
                 markedHighlightUtil.bindLinkClickEvent(api.openUrl);
                 markedHighlightUtil.bindImgClickEvent(api.openUrl);
+                markedHighlightUtil.mermaidInit();
+                mermaid.contentLoaded();
+                console.log("after mermaid.mermaidAPI.reinitialize");
             }, 100);//迟
         }
     },[props.visible]);

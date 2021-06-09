@@ -1,6 +1,7 @@
 import { cleanUrl, escape as doEscape } from 'marked/src/helpers';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import mermaid from 'mermaid';
 
 /**
  * marked结合hljs实现语法高亮与点击事件处理等功能
@@ -10,6 +11,19 @@ class MarkedHighlightUtil {
     constructor(){
         this.mdLinkCls="gmap_mk_link_"+new Date().getTime();
         this.mdImgCls="gmap_mk_img_"+new Date().getTime();
+        this.mermaidInited=false;
+
+        console.log("mermaid", mermaid);
+    }
+
+    mermaidInit=()=>{
+        if(true===this.mermaidInited){
+            return;
+        }
+        // mermaid.initialize({
+        //     theme: 'dark',//default, forest, dark or neutral
+        // });
+        this.mermaidInited=true;
     }
 
     /**
@@ -29,6 +43,16 @@ class MarkedHighlightUtil {
             if('latex'===language){
                 let expStr=katex.renderToString(code,{throwOnError: false});
                 return `<div style='font-size:30px;'>${expStr}</div>`;
+            }
+            if('chart'===language){
+                console.log("chart---->");
+                
+                // console.log(mermaid.parse);
+                console.log(mermaid.mermaidAPI.reinitialize);
+                // console.log(mermaid.parse(code));
+                // console.log(mermaid.parse(code).parse());
+                mermaid.parse(code);
+                return `<div class="mermaid">${code}</div>`
             }
 
             let tmp = hljs.getLanguage(language);

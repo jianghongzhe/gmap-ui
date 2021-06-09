@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8"/>
+  <title>markdown in the browser</title>
+  
+  <script src="./node_modules/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+	<div class="mermaid">
+graph TD
+	A -- haha --> B
+	B -->C
+</div>
+	
+	<script>
+		//mermaid.initialize({startOnLoad:true});
+		function changeTxt(){
+		//	alert(1);
+			let str=document.getElementById("txt").value;
+			document.querySelector(".mermaid").innerHTML=str;
+			document.querySelector(".mermaid").removeAttribute("data-processed");
+			mermaid.contentLoaded();
+		}
+	</script>
+
+	<textarea id="txt" style="width:80%;height:100px;"></textarea>
+	<input type="button" onclick="changeTxt();" value="change txt"/>
+</body>
+</html>
