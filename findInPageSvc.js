@@ -38,6 +38,7 @@ const init=(_app, _mainWindow)=>{
             webPreferences:     {
                 nodeIntegration:    true,
                 enableRemoteModule: true,
+                contextIsolation: false,
             }
         });
 

@@ -126,7 +126,7 @@ const bindElesEvents=()=>{
  */
 window.onload=()=>{
     // 变量初始化
-    app = window.require('electron').remote.app;
+    app =window.require('@electron/remote').app;  //window.require('electron').remote.app;
     ipcRenderer = window.require('electron').ipcRenderer;
     eleIpt=document.querySelector("#ipt");
     elePercent=document.querySelector("#percent");

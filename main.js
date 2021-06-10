@@ -4,6 +4,8 @@ const mainSvc = require('./mainSvc');
 const findInPageSvc= require('./findInPageSvc');
 const fs = require('fs');
 
+require('@electron/remote/main').initialize();
+
 let mainWindow = null;
 
 app.commandLine.appendSwitch("--disable-http-cache");
@@ -26,6 +28,7 @@ const createWindow=()=>{
             //preload: path.join(__dirname, 'preload.js')
             nodeIntegration: true,
             enableRemoteModule: true,
+            contextIsolation: false,
         }
     });
     mainWindow.maximize();
