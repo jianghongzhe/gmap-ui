@@ -69,8 +69,7 @@ const RefViewer=(props)=>{
                 markedHighlightUtil.bindImgClickEvent(api.openUrl);
                 markedHighlightUtil.mermaidInit();
                 mermaid.contentLoaded();
-                console.log("after mermaid.mermaidAPI.reinitialize");
-            }, 100);//迟
+            }, 400);
         }
     },[props.visible]);
     

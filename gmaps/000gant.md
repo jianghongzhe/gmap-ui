@@ -6,12 +6,13 @@
 # ref:haha
 sss
 
-<div class="mermaid">
-graph LR
-	a --> b --> cdddd
-</div>
 
-```chart
-graph TD
-	A --> B --> C
+
+```mermaid
+graph LR
+节点sss --> aaa
+```
+
+```javascript
+let a=5;
 ```

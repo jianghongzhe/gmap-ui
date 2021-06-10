@@ -20,9 +20,9 @@ class MarkedHighlightUtil {
         if(true===this.mermaidInited){
             return;
         }
-        // mermaid.initialize({
-        //     theme: 'dark',//default, forest, dark or neutral
-        // });
+        mermaid.initialize({
+            theme: 'neutral',//default, forest, dark or neutral
+        });
         this.mermaidInited=true;
     }
 
@@ -44,14 +44,7 @@ class MarkedHighlightUtil {
                 let expStr=katex.renderToString(code,{throwOnError: false});
                 return `<div style='font-size:30px;'>${expStr}</div>`;
             }
-            if('chart'===language){
-                console.log("chart---->");
-                
-                // console.log(mermaid.parse);
-                console.log(mermaid.mermaidAPI.reinitialize);
-                // console.log(mermaid.parse(code));
-                // console.log(mermaid.parse(code).parse());
-                mermaid.parse(code);
+            if('mermaid'===language){
                 return `<div class="mermaid">${code}</div>`
             }
 
@@ -68,6 +61,10 @@ class MarkedHighlightUtil {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理
                 const lang = (infostring || '').match(/\S*/)[0];
+                if('mermaid'===lang){
+                    return this.options.highlight(code, lang);
+                }
+
                 if (this.options.highlight) {
                     const out = this.options.highlight(code, lang);
                     if (out != null && out !== code) {
