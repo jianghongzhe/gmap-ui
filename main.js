@@ -4,7 +4,7 @@ const mainSvc = require('./mainSvc');
 const findInPageSvc= require('./findInPageSvc');
 const fs = require('fs');
 
-require('@electron/remote/main').initialize();
+//require('@electron/remote/main').initialize();
 
 let mainWindow = null;
 
