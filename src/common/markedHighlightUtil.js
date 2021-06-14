@@ -22,6 +22,11 @@ class MarkedHighlightUtil {
         }
         mermaid.initialize({
             theme: 'neutral',//default, forest, dark or neutral
+            flowchart:{
+                htmlLabels: true,
+                curve: 'basis', // basis, linear, cardinal
+                defaultRenderer: 'dagre-d3', // dagre-d3, dagre-wrapper
+            }
         });
         this.mermaidInited=true;
     }
@@ -45,7 +50,9 @@ class MarkedHighlightUtil {
                 return `<div style='font-size:30px;'>${expStr}</div>`;
             }
             if('mermaid'===language){
-                return `<div class="mermaid">${code}</div>`
+                return `<div style="display:none;">
+                    <div class="mermaid" >${code}</div>
+                </div>`;
             }
 
             let tmp = hljs.getLanguage(language);

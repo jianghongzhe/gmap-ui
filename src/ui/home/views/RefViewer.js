@@ -67,9 +67,12 @@ const RefViewer=(props)=>{
             setTimeout(() => {
                 markedHighlightUtil.bindLinkClickEvent(api.openUrl);
                 markedHighlightUtil.bindImgClickEvent(api.openUrl);
-                markedHighlightUtil.mermaidInit();
+                markedHighlightUtil.mermaidInit();                
+                document.querySelectorAll(".mermaid").forEach((ele)=>{
+                    ele.parentNode.style.display=null;
+                });
                 mermaid.contentLoaded();
-            }, 400);
+            }, 500);
         }
     },[props.visible]);
     
