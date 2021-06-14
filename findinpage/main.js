@@ -10,6 +10,8 @@ let eleBtnNext=null;
 let eleBtnClose=null;
 
 
+
+
 /**
  * 基本查找函数：当内容为空时，停止查找，并隐藏比值
  * @param {*} fun 具体的查找函数
@@ -126,8 +128,30 @@ const bindElesEvents=()=>{
  */
 window.onload=()=>{
     // 变量初始化
-    app =window.require('electron').remote.app; //window.require('@electron/remote').app;  //window.require('electron').remote.app;
+    //app =window.require('electron').remote.app; //window.require('@electron/remote').app;  //window.require('electron').remote.app;
+
+
     ipcRenderer = window.require('electron').ipcRenderer;
+
+
+    app={
+        stopFind: (...args)=>{
+            ipcRenderer.send('stopFind', ...args);
+        },
+        hideFindInPage: (...args)=>{
+            ipcRenderer.send('hideFindInPage', ...args);
+        },
+        find: (...args)=>{
+            ipcRenderer.send('find', ...args);
+        },
+        findNext: (...args)=>{
+            ipcRenderer.send('findNext', ...args);
+        },
+        findPre: (...args)=>{
+            ipcRenderer.send('findPre', ...args);
+        },
+    };
+
     eleIpt=document.querySelector("#ipt");
     elePercent=document.querySelector("#percent");
     eleBtnPre=document.querySelector("#btnPre");

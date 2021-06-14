@@ -1,4 +1,4 @@
-const {BrowserWindow} = require('electron');
+const {BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
 
 /**
@@ -155,7 +155,25 @@ const init=(_app, _mainWindow)=>{
     app.findNext=findNext;
     app.findPre=findPre;
     app.stopFind=stopFind;
+
+    const handlerMap={
+        initFindInPage: initWin,
+        showFindInPage: showFindInPage,
+        hideFindInPage: hideFindInPage,
+        find: find,
+        findNext: findNext,
+        findPre: findPre,
+        stopFind: stopFind,
+    };
+
+    for(let key in handlerMap){
+        ipcMain.on(key,fun.bind(this,handlerMap[key]));
+    }
 }
+
+const fun=(fun, event, ...args)=>{
+    fun(...args);
+};
 
 module.exports={
     init, //初始化

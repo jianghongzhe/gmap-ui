@@ -2,7 +2,7 @@ import {message} from 'antd';
 import {dispatcher} from '../common/gflow';
 
 const {app,getCurrentWebContents} = window.require('electron').remote; //window.require('@electron/remote');// window.require('electron').remote;
-
+const { ipcRenderer } = window.require('electron');
 
 class Api{
 
@@ -11,15 +11,18 @@ class Api{
      * 初始化查找对话框，需要在页面加载完之后调用
      */
     initFindInPageDlg=()=>{
-        app.initFindInPage(300);
+        //app.initFindInPage(300);
+        ipcRenderer.send('initFindInPage', 300);
     }
 
     showFindInPageDlg=()=>{
-        app.showFindInPage(300,140);
+        //app.showFindInPage(300,140);
+        ipcRenderer.send('showFindInPage', 300,140);
     }
 
     closeFindInPageDlg=()=>{
-        app.hideFindInPage();
+        // app.hideFindInPage();
+        ipcRenderer.send('hideFindInPage');
     }
 
     getInnerModuleVersions=()=>{
