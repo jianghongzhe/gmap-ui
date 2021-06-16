@@ -12,6 +12,7 @@ class MarkedHighlightUtil {
         this.mdLinkCls="gmap_mk_link_"+new Date().getTime();
         this.mdImgCls="gmap_mk_img_"+new Date().getTime();
         this.mermaidInited=false;
+        this.index=0;
 
         console.log("mermaid", mermaid);
     }
@@ -31,6 +32,10 @@ class MarkedHighlightUtil {
         this.mermaidInited=true;
     }
 
+    getNewId=()=>{
+        return ++this.index;
+    }   
+
     /**
      * 初始化
      * @param {*} marked
@@ -48,6 +53,12 @@ class MarkedHighlightUtil {
             if('latex'===language){
                 let expStr=katex.renderToString(code,{throwOnError: false});
                 return `<div style='font-size:30px;'>${expStr}</div>`;
+            }
+            if('flow'===language){
+                //console.log("this.init",this.init);
+                return `<div id='flowchart-${this.getNewId()}'>
+                    <div class="flowchart" style='display:none;'>${code}</div>
+                </div>`;
             }
             if('mermaid'===language){
                 return `<div style="display:none;">
@@ -68,7 +79,7 @@ class MarkedHighlightUtil {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理
                 const lang = (infostring || '').match(/\S*/)[0];
-                if('mermaid'===lang){
+                if('mermaid'===lang || 'flow'===lang){
                     return this.options.highlight(code, lang);
                 }
 

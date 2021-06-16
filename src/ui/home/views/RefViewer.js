@@ -16,6 +16,7 @@ import 'github-markdown-css/github-markdown.css';
 import { useSelector } from 'react-redux';
 import expSvc from '../../../service/expSvc';
 import mermaid from 'mermaid';
+import flowchart from 'flowchart.js';
 
 const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
@@ -72,6 +73,25 @@ const RefViewer=(props)=>{
                     ele.parentNode.style.display=null;
                 });
                 mermaid.contentLoaded();
+
+                console.log("flowchart", flowchart);
+                
+
+                document.querySelectorAll(".flowchart").forEach((ele)=>{
+                    let nd=null;
+                    try{
+                        let txt=ele.innerText;//此处不能使用innerHTML，因为会把符号转义，eg. > 变为 &gt;
+                        nd=ele.parentNode;
+                        let eleId=nd.id;
+                        nd.innerHTML="";
+                        flowchart.parse(txt).drawSVG(eleId);
+                    }catch(e){
+                        if(nd){
+                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>流程图格式有误 !!!</div>`;
+                        }
+                    }
+                });
+                
             }, 500);
         }
     },[props.visible]);
@@ -120,6 +140,7 @@ const RefViewer=(props)=>{
                 overflowX:'hidden'}}
                 dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
+            <div id='demo111'></div>
             {
                 (props.backtopLoc && 2===props.backtopLoc.length) && (   
                     <BackTop  target={getScrollTarget} css={{
