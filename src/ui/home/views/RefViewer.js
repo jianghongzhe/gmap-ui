@@ -17,6 +17,26 @@ import { useSelector } from 'react-redux';
 import expSvc from '../../../service/expSvc';
 import mermaid from 'mermaid';
 import flowchart from 'flowchart.js';
+// import lodash from 'lodash';
+//import snap from 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js'
+// import seqdiagram from 'js-sequence-diagram';
+
+//import lod from 'lodash';
+// import snap from 'snapsvg';
+import webfontloader from 'webfontloader';
+// import seqDiagram from '../../../common/sequence-diagram';
+//import seqDiagram from 'js-sequence-diagram';
+
+
+// console.log("wf",window.WebFont);
+//window._=lod;
+window.WebFont=webfontloader;
+//window.Diagram=seqDiagram;
+//window.Snap=snap;
+// console.log("wf",window.WebFont);
+
+
+// const Snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 
 const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
@@ -68,30 +88,47 @@ const RefViewer=(props)=>{
             setTimeout(() => {
                 markedHighlightUtil.bindLinkClickEvent(api.openUrl);
                 markedHighlightUtil.bindImgClickEvent(api.openUrl);
+
+                //绘制mermaid图表
                 markedHighlightUtil.mermaidInit();                
                 document.querySelectorAll(".mermaid").forEach((ele)=>{
                     ele.parentNode.style.display=null;
                 });
                 mermaid.contentLoaded();
-
-                console.log("flowchart", flowchart);
-                
-
-                document.querySelectorAll(".flowchart").forEach((ele)=>{
+               
+                //绘制flowchart流程图
+                document.querySelectorAll(".flowchart[handled='false']").forEach((ele)=>{
                     let nd=null;
                     try{
                         let txt=ele.innerText;//此处不能使用innerHTML，因为会把符号转义，eg. > 变为 &gt;
-                        nd=ele.parentNode;
-                        let eleId=nd.id;
+                        let eleId=ele.getAttribute('targetid');
+                        nd=document.querySelector(`#${eleId}`);
                         nd.innerHTML="";
                         flowchart.parse(txt).drawSVG(eleId);
+                        ele.setAttribute("handled",'true');//置标识，表示已处理过，下次渲染不再重复绘制
                     }catch(e){
                         if(nd){
                             nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>流程图格式有误 !!!</div>`;
                         }
                     }
                 });
-                
+
+                //绘制sequence时序图
+                document.querySelectorAll(".sequence[handled='false']").forEach((ele)=>{
+                    let nd=null;
+                    try{
+                        let txt=ele.innerText;//此处不能使用innerHTML，因为会把符号转义，eg. > 变为 &gt;
+                        let eleId=ele.getAttribute('targetid');
+                        nd=document.querySelector(`#${eleId}`);
+                        nd.innerHTML="";
+                        window.Diagram.parse(txt).drawSVG(eleId ,{theme: 'simple'});
+                        ele.setAttribute("handled",'true');//置标识，表示已处理过，下次渲染不再重复绘制
+                    }catch(e){
+                        if(nd){
+                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>时序图格式有误 !!!</div>`;
+                        }
+                    }
+                });
             }, 500);
         }
     },[props.visible]);

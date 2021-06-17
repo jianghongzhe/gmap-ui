@@ -54,10 +54,18 @@ class MarkedHighlightUtil {
                 let expStr=katex.renderToString(code,{throwOnError: false});
                 return `<div style='font-size:30px;'>${expStr}</div>`;
             }
+            if('sequence'===language){
+                const tmpId=`seqdiagram-${this.getNewId()}`;
+                return `<div>
+                    <div class="sequence" style='display:none;' targetid='${tmpId}' handled='false'>${code}</div>
+                    <div id='${tmpId}'></div>
+                </div>`;
+            }
             if('flow'===language){
-                //console.log("this.init",this.init);
-                return `<div id='flowchart-${this.getNewId()}'>
-                    <div class="flowchart" style='display:none;'>${code}</div>
+                const tmpId=`flowchart-${this.getNewId()}`;
+                return `<div>
+                    <div class="flowchart" style='display:none;' targetid='${tmpId}' handled='false'>${code}</div>
+                    <div id='${tmpId}'></div>
                 </div>`;
             }
             if('mermaid'===language){
@@ -79,7 +87,7 @@ class MarkedHighlightUtil {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理
                 const lang = (infostring || '').match(/\S*/)[0];
-                if('mermaid'===lang || 'flow'===lang){
+                if('mermaid'===lang || 'flow'===lang || 'sequence'===lang){
                     return this.options.highlight(code, lang);
                 }
 
