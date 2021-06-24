@@ -5,6 +5,27 @@
 ***
 
 # ref:haha
+
+```echart
+pie
+title 哈哈
+w 50%
+h 500px
+"a": 155
+"d": 222
+```
+
+```mermaid
+pie
+title 你好
+"a": 30
+"b": 20
+"c": 50
+"d": 40
+"e": 10
+```
+
+
 aaabb
 ```flow
 st=>start: begin
@@ -45,3 +66,5 @@ graph LR
 	a --> b
 	b ==> c
 ```
+
+## aaaaa

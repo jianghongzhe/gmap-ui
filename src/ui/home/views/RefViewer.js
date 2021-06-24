@@ -17,6 +17,8 @@ import { useSelector } from 'react-redux';
 import expSvc from '../../../service/expSvc';
 import mermaid from 'mermaid';
 import flowchart from 'flowchart.js';
+import * as echarts from 'echarts';
+import echartParser from '../../../common/echartParser';
 // import lodash from 'lodash';
 //import snap from 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js'
 // import seqdiagram from 'js-sequence-diagram';
@@ -129,6 +131,84 @@ const RefViewer=(props)=>{
                         }
                     }
                 });
+
+                //echart图
+                document.querySelectorAll(".echart-graph[handled='false']").forEach((ele)=>{
+                    let nd=null;
+                    try{
+                        let txt=ele.innerText;//此处不能使用innerHTML，因为会把符号转义，eg. > 变为 &gt;
+                        let eleId=ele.getAttribute('targetid');
+                        nd=document.querySelector(`#${eleId}`);
+                        nd.innerHTML="";
+
+                        const conf=echartParser.parse(txt);
+                        console.log(conf);
+                        nd.style.width=conf.w;
+                        nd.style.height=conf.h;
+                        echarts.init(nd).setOption(conf.opt);
+                        
+                        console.log(echarts.getInstanceByDom(nd));
+
+                        ele.setAttribute("handled",'true');//置标识，表示已处理过，下次渲染不再重复绘制
+                    }catch(e){
+                        console.log(e);
+                        if(nd){
+                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>Echart图表格式有误 !!!</div>`;
+                        }
+                    }
+                });
+
+
+
+                
+
+                // // _echarts_instance_
+                // const elee=document.querySelector("#demo111");
+                // const instId=elee.getAttribute("_echarts_instance_");
+
+                // console.log(instId ? "有实例" : "无实例");
+                
+                // const chart=(instId ? echarts.getInstanceById(instId) : echarts.init(elee));
+                // console.log("实例", chart);
+
+
+                // console.log(echarts);
+                // // echarts.getInstanceById();
+                // chart.setOption({
+                //     title: {
+                //         text: '某站点用户访问来源',
+                //         subtext: '纯属虚构',
+                //         left: 'center'
+                //     },
+                //     tooltip: {
+                //         trigger: 'item'
+                //     },
+                //     legend: {
+                //         orient: 'vertical',
+                //         left: 'left',
+                //     },
+                //     series: [
+                //         {
+                //             name: '访问来源',
+                //             type: 'pie',
+                //             radius: '50%',
+                //             data: [
+                //                 {value: 1048, name: '搜索引擎'},
+                //                 {value: 735, name: '直接访问'},
+                //                 {value: 580, name: '邮件营销'},
+                //                 {value: 484, name: '联盟广告'},
+                //                 {value: 300, name: '视频广告'}
+                //             ],
+                //             emphasis: {
+                //                 itemStyle: {
+                //                     shadowBlur: 10,
+                //                     shadowOffsetX: 0,
+                //                     shadowColor: 'rgba(0, 0, 0, 0.5)'
+                //                 }
+                //             }
+                //         }
+                //     ]
+                // });
             }, 500);
         }
     },[props.visible]);
@@ -177,7 +257,7 @@ const RefViewer=(props)=>{
                 overflowX:'hidden'}}
                 dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
-            <div id='demo111'></div>
+            <div id='demo111' css={{width:'500px',height:'500px'}}></div>
             {
                 (props.backtopLoc && 2===props.backtopLoc.length) && (   
                     <BackTop  target={getScrollTarget} css={{

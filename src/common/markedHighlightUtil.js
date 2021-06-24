@@ -22,7 +22,7 @@ class MarkedHighlightUtil {
             return;
         }
         mermaid.initialize({
-            theme: 'neutral',//default, forest, dark or neutral
+            theme: 'default',//default, forest, dark or neutral
             flowchart:{
                 htmlLabels: true,
                 curve: 'basis', // basis, linear, cardinal
@@ -68,6 +68,13 @@ class MarkedHighlightUtil {
                     <div id='${tmpId}'></div>
                 </div>`;
             }
+            if('echart'===language){
+                const tmpId=`echart-${this.getNewId()}`;
+                return `<div>
+                    <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>${code}</div>
+                    <div id='${tmpId}'></div>
+                </div>`;
+            }
             if('mermaid'===language){
                 return `<div style="display:none;">
                     <div class="mermaid" >${code}</div>
@@ -87,7 +94,7 @@ class MarkedHighlightUtil {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理
                 const lang = (infostring || '').match(/\S*/)[0];
-                if('mermaid'===lang || 'flow'===lang || 'sequence'===lang){
+                if(['mermaid', 'flow', 'sequence', 'echart'].includes(lang)){
                     return this.options.highlight(code, lang);
                 }
 
