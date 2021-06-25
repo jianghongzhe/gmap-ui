@@ -32,13 +32,6 @@ class EchartParser{
                 throw "未知的配置行："+line;
             });;
 
-            // let tmp= lines.filter(line=>line.startsWith("title ") || line.startsWith("title　"));
-            // let title=(tmp && tmp.length>0 ? tmp[0].substring("title ".length).trim() : "未知标题");
-            console.log(title);
-            console.log(w);
-            console.log(h);
-
-
             const opt={
                 title: {
                     text: title,
@@ -47,11 +40,33 @@ class EchartParser{
                 },
                 tooltip: {
                     trigger: 'item',
-                    // formatter: '{b} {c}  ({d}%)',
+                    /**
+                     * tooltip格式化方法
+                     * @param {*} param {
+                     *  marker: 小圆点
+                     *  name: 项名
+                     *  value: 值
+                     *  percent: 百分比
+                     * }
+                     * @returns 
+                     */
+                    formatter: (param)=>{
+                        return `
+                            ${param.marker}
+                            <span style="display:inline-block;margin-left:0px;">${param.name}</span>
+                            <span style="display:inline-block;margin-left:4px;">${param.value}</span>
+                            <span style="display:inline-block;margin-left:4px;">(${param.percent}%)</span>
+                        `;
+                    },
                 },
                 legend: {
+                    // orient: 'vertical',
+                    // left: 'left',
+
+                    right:'0%',
+                    top:'middle',
                     orient: 'vertical',
-                    left: 'left',
+                    align:'right',
                 },
                 series: [
                     {
@@ -59,15 +74,14 @@ class EchartParser{
                         type: 'pie',
                         radius: '50%',
                         label : {
-                            　　　　normal : {
-                            // 　　　　　　formatter: '{b} {c}  ({d}%)',
-                            　　　　　　textStyle : {
-                            　　　　　　　　fontWeight : 'normal',
-                            　　　　　　　　fontSize : 15
-                            　　　　　　}
-                            　　　　}
-                            　　},
-                            
+                    　　　　normal : {
+                               // formatter: '{b} {c}  ({d}%)',
+                    　　　　    textStyle : {
+                    　　　　　　　　fontWeight : 'normal',
+                    　　　　　　　　fontSize : 15
+                    　　　　　　}
+                    　　　　}
+                    　　},
                         data: data,
                         emphasis: {
                             itemStyle: {
@@ -80,6 +94,82 @@ class EchartParser{
                 ]
             };
 
+            return {w, h, opt};
+        }
+
+        if("bar"===lines[0] || "line"===lines[0]){
+            const graphType=lines[0];
+            let title= "未知标题";
+            let w="100%";
+            let h="400px";
+            let xLabs=[];
+            let serItems=[];
+
+            lines.filter((line,ind)=>ind>0).forEach(line => {
+                if(line.startsWith("title ")){
+                    title=line.substring("title ".length).trim();
+                    return;
+                }
+                if(line.startsWith("w ")){
+                    w=line.substring("w ".length).trim();
+                    return;
+                }
+                if(line.startsWith("h ")){
+                    h=line.substring("h ".length).trim();
+                    return;
+                }
+                if(line.startsWith(",")){
+                    xLabs=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                    return;
+                }
+                if(/^[^,]+([,][ ]*[0-9]+([.][0-9]+)?[ ]*)+$/.test(line)){
+                    const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                    serItems.push({
+                        name: parts[0],
+                        type: graphType,
+                        barGap: 0,
+                        //label: {show:true,},
+                        emphasis: {focus: 'series'},
+                        data: parts.filter((each,ind)=>ind>0).map(each=>parseFloat(each))
+                    });
+                    return;
+                }
+                throw "未知的配置行："+line;
+            });
+
+
+            let opt={
+                title: {
+                                text: title,
+                                left: 'center',
+                            },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    right:'0%',
+                    top:'middle',
+                    orient: 'vertical',
+                    align:'right',
+                },
+                
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {show: false},
+                        data: xLabs
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: serItems
+            };
             return {w, h, opt};
         }
 
