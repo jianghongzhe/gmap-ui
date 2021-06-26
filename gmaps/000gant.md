@@ -39,6 +39,17 @@ gantt
 
 
 ```echart
+bar-line
+w 50%
+title 对比图哈哈
+,2018,2019,2020
+bar,小李,1,2,3
+line,小张,4,5,6
+line,小郑,1,4,2
+```
+
+
+```echart
 line
 w 50%
 title 对比图哈哈
@@ -49,7 +60,7 @@ title 对比图哈哈
 ```
 
 ```echart
-bar
+stack
 w 50%
 title 对比图哈哈
 ,2018,2019,2020

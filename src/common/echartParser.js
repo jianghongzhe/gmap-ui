@@ -173,6 +173,157 @@ class EchartParser{
             return {w, h, opt};
         }
 
+        if("stack"===lines[0]){
+            let title= "未知标题";
+            let w="100%";
+            let h="400px";
+            let xLabs=[];
+            let serItems=[];
+
+            lines.filter((line,ind)=>ind>0).forEach(line => {
+                if(line.startsWith("title ")){
+                    title=line.substring("title ".length).trim();
+                    return;
+                }
+                if(line.startsWith("w ")){
+                    w=line.substring("w ".length).trim();
+                    return;
+                }
+                if(line.startsWith("h ")){
+                    h=line.substring("h ".length).trim();
+                    return;
+                }
+                if(line.startsWith(",")){
+                    xLabs=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                    return;
+                }
+                if(/^[^,]+([,][ ]*[0-9]+([.][0-9]+)?[ ]*)+$/.test(line)){
+                    const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                    serItems.push({
+                        name: parts[0],
+                        type: 'bar',
+                        stack:'__stack__',
+                        barGap: 0,
+                        //label: {show:true,},
+                        emphasis: {focus: 'series'},
+                        data: parts.filter((each,ind)=>ind>0).map(each=>parseFloat(each))
+                    });
+                    return;
+                }
+                throw "未知的配置行："+line;
+            });
+
+
+            let opt={
+                title: {
+                                text: title,
+                                left: 'center',
+                            },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    right:'0%',
+                    top:'middle',
+                    orient: 'vertical',
+                    align:'right',
+                },
+                
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {show: false},
+                        data: xLabs
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: serItems
+            };
+            return {w, h, opt};
+        }
+
+        if("bar-line"===lines[0] || "bar_line"===lines[0]){
+            let title= "未知标题";
+            let w="100%";
+            let h="400px";
+            let xLabs=[];
+            let serItems=[];
+
+            lines.filter((line,ind)=>ind>0).forEach(line => {
+                if(line.startsWith("title ")){
+                    title=line.substring("title ".length).trim();
+                    return;
+                }
+                if(line.startsWith("w ")){
+                    w=line.substring("w ".length).trim();
+                    return;
+                }
+                if(line.startsWith("h ")){
+                    h=line.substring("h ".length).trim();
+                    return;
+                }
+                if(line.startsWith(",")){
+                    xLabs=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                    return;
+                }
+                if(/^[^,]+[ ]*[,][ ]*[^,]+([ ]*[,][ ]*[0-9]+([.][0-9]+)?[ ]*)+$/.test(line)){
+                    const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                    serItems.push({
+                        name: parts[1],
+                        type: parts[0],
+                        barGap: 0,
+                        //label: {show:true,},
+                        emphasis: {focus: 'series'},
+                        data: parts.filter((each,ind)=>ind>1).map(each=>parseFloat(each))
+                    });
+                    return;
+                }
+                throw "未知的配置行："+line;
+            });
+
+
+            let opt={
+                title: {
+                                text: title,
+                                left: 'center',
+                            },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    right:'0%',
+                    top:'middle',
+                    orient: 'vertical',
+                    align:'right',
+                },
+                
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {show: false},
+                        data: xLabs
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: serItems
+            };
+            return {w, h, opt};
+        }
+
         throw `不支持的图表类型 [${lines[0]}]`;
     };
 }
