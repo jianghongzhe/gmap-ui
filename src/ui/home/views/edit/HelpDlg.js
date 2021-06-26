@@ -101,7 +101,97 @@ const HelpDlg=(props)=>{
                         
                     </div>
                 </TabPane>
-                <TabPane tab="快捷键" key="3" className='tabitem'>
+                <TabPane tab="Echart图" key="3" className='tabitem'>
+                    <div className='wrapper'>
+                        <div>
+                            <div className='chartTitle'>饼图</div>
+                            <div className='chartItem'> 
+                                ```echart<br/>
+                                pie<br/>
+                                title 饼图<br/>
+                                w 50%<br/>
+                                h 200px<br/>
+                                "食品": 500<br/>
+                                "娱乐": 600<br/>
+                                "医疗": 500<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
+                            <div className='chartTitle'>柱状图</div>
+                            <div className='chartItem'>
+                                ```echart<br/>
+                                bar<br/>
+                                title 柱状图<br/>
+                                w 50%<br/>
+                                h 200px<br/>
+                                ,2018,2019,2020<br/>
+                                食品,500,400,300<br/>
+                                娱乐,600,400,600<br/>
+                                医疗,500,200,300<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
+                            <div className='chartTitle'>拆线图</div>
+                            <div className='chartItem'>
+                                ```echart<br/>
+                                line<br/>
+                                title 拆线图<br/>
+                                w 50%<br/>
+                                h 200px<br/>
+                                ,2018,2019,2020<br/>
+                                食品,500,400,300<br/>
+                                娱乐,600,400,600<br/>
+                                医疗,500,200,300<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
+                            <div className='chartTitle'>堆积图</div>
+                            <div className='chartItem'>
+                                ```echart<br/>
+                                stack<br/>
+                                title 堆积图<br/>
+                                w 50%<br/>
+                                h 200px<br/>
+                                ,2018,2019,2020<br/>
+                                食品,500,400,300<br/>
+                                娱乐,600,400,600<br/>
+                                医疗,500,200,300<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
+                            <div className='chartTitle'>柱线混合图</div>
+                            <div className='chartItem'>
+                                ```echart<br/>
+                                bar-line<br/>
+                                title 柱线混合图<br/>
+                                w 50%<br/>
+                                h 200px<br/>
+                                ,2018,2019,2020<br/>
+                                stack 食品<br/>
+                                - bar,三餐,500,400,300<br/>
+                                - bar,食品,500,400,300<br/>
+                                bar,娱乐,600,400,600<br/>
+                                line,参考值,500,200,300<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
+                            <div className='chartTitle'>使用json配置</div>
+                            <div className='chartItem'>
+                                {'{'}<br/>
+                                    <div css={{marginLeft:'20px'}}>w: '50%',</div>
+                                    <div css={{marginLeft:'20px'}}>h: '200px',</div>
+                                    <div css={{marginLeft:'20px'}}>// echart官方配置项</div>
+                                {'}'}
+                            </div>
+                        </div>
+                    </div>
+                </TabPane>
+                <TabPane tab="快捷键" key="4" className='tabitem'>
                     <div className='wrapper'>
                         <table css={helpTableStyle}>
                             <tbody>
@@ -274,8 +364,17 @@ const getTabsStyle=(maxH)=>{
             overflowY: 'auto',
             overflowX: 'hidden',
         },
+        '& .tabitem div.wrapper .chartTitle': {
+            fontSize:'20px',
+            fontWeight:'bold',
+        },
+        '& .tabitem div.wrapper .chartItem': {
+            color:'grey'
+        },
     }
 };
+
+
 
 
 const helpTableStyle = {

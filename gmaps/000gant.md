@@ -5,6 +5,47 @@
 ***
 
 # ref:haha
+
+```echart
+{
+	w:'50%',
+	h:'300px',
+    title: {
+        text: '某站点用户访问来源',
+        subtext: '纯属虚构',
+        left: 'center'
+    },
+    tooltip: {
+        trigger: 'item'
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'left',
+    },
+    series: [
+        {
+            name: '访问来源',
+            type: 'pie',
+            radius: '50%',
+            data: [
+                {value: 1048, name: '搜索引擎'},
+                {value: 735, name: '直接访问'},
+                {value: 580, name: '邮件营销'},
+                {value: 484, name: '联盟广告'},
+                {value: 300, name: '视频广告'}
+            ],
+            emphasis: {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+}
+```
+
 ```mermaid
 gantt
     dateFormat  YYYY-MM-DD
@@ -41,11 +82,15 @@ gantt
 ```echart
 bar-line
 w 50%
-title 对比图哈哈
+title 柱线图。。。
 ,2018,2019,2020
-bar,小李,1,2,3
-line,小张,4,5,6
-line,小郑,1,4,2
+
+
+
+
+- bar,小李,1,2,30
+- bar,小张,4,5,6
+bar,小郑,1,40,2
 ```
 
 
