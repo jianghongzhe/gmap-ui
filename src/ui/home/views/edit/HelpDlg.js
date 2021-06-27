@@ -125,6 +125,8 @@ const HelpDlg=(props)=>{
                                 title 柱状图<br/>
                                 w 50%<br/>
                                 h 200px<br/>
+                                x 横轴名称<br/>
+                                y 纵轴名称<br/>
                                 ,2018,2019,2020<br/>
                                 食品,500,400,300<br/>
                                 娱乐,600,400,600<br/>
@@ -133,13 +135,15 @@ const HelpDlg=(props)=>{
                             </div>
                         </div>
                         <div>
-                            <div className='chartTitle'>拆线图</div>
+                            <div className='chartTitle'>折线图</div>
                             <div className='chartItem'>
                                 ```echart<br/>
                                 line<br/>
-                                title 拆线图<br/>
+                                title 折线图<br/>
                                 w 50%<br/>
                                 h 200px<br/>
+                                x 横轴名称<br/>
+                                y 纵轴名称<br/>
                                 ,2018,2019,2020<br/>
                                 食品,500,400,300<br/>
                                 娱乐,600,400,600<br/>
@@ -155,6 +159,8 @@ const HelpDlg=(props)=>{
                                 title 堆积图<br/>
                                 w 50%<br/>
                                 h 200px<br/>
+                                x 横轴名称<br/>
+                                y 纵轴名称<br/>
                                 ,2018,2019,2020<br/>
                                 食品,500,400,300<br/>
                                 娱乐,600,400,600<br/>
@@ -170,12 +176,29 @@ const HelpDlg=(props)=>{
                                 title 柱线混合图<br/>
                                 w 50%<br/>
                                 h 200px<br/>
+                                x 横轴名称<br/>
+                                y 纵轴名称<br/>
                                 ,2018,2019,2020<br/>
                                 stack 食品<br/>
                                 - bar,三餐,500,400,300<br/>
                                 - bar,食品,500,400,300<br/>
                                 bar,娱乐,600,400,600<br/>
                                 line,参考值,500,200,300<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
+                            <div className='chartTitle'>散点图</div>
+                            <div className='chartItem'>
+                                ```echart<br/>
+                                scatter<br/>
+                                title 散点图<br/>
+                                w 50%<br/>
+                                h 200px<br/>
+                                x 横轴名称<br/>
+                                y 纵轴名称<br/>
+                                第一类, 15.0 8.04, 8.07 7.97, 13.0 7.58<br/>
+                                第二类, 9.05 8.81, 11.0 8.33, 14.0 7.96<br/>
                                 ```
                             </div>
                         </div>
