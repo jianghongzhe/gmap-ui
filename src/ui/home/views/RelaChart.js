@@ -79,11 +79,11 @@ const getOption=(sumOpts)=>{
         //symbolSize: [4, 10],
         label: {
             show: true,
-            formatter:line[2]
+            formatter:line[2] ? line[2] : "",
         },
         tooltip:{
-            show:true,
-            formatter:line[2]
+            show:line[2] ? true : false,
+            formatter:line[2] ? line[2] : "",
         },
     }));
 

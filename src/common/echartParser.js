@@ -8,6 +8,7 @@ class EchartParser{
             "scatter": this.loadScatterConfig,
             "bar-line": this.loadBarLineStackCustomOption,
             "bar_line": this.loadBarLineStackCustomOption,
+            "graph": this.loadGraphConfig,
         };
     }
 
@@ -29,28 +30,6 @@ class EchartParser{
             throw `不支持的图表类型 [${lines[0]}]`;
         }
         return this.typeHandlerMap[graphType](lines);
-
-
-        // // 饼图的配置
-        // if("pie"===lines[0]){
-        //     return this.loadPieConfig(lines);
-        // }
-
-        // // 简单的柱状图、简单的拆线图、简单的堆积图的配置
-        // if(["bar","line","stack"].includes(lines[0])){
-        //     return this.loadBarOrLineOrStackConfig(lines);
-        // }
-
-        // if("scatter"===lines[0]){
-        //     return this.loadScatterConfig(lines);
-        // }
-
-        // // 柱状图、拆线图、堆积图的组合
-        // if("bar-line"===lines[0] || "bar_line"===lines[0]){
-        //     return this.loadBarLineStackCustomOption(lines);
-        // }
-
-        // throw `不支持的图表类型 [${lines[0]}]`;
     };
 
     /**
@@ -72,8 +51,125 @@ class EchartParser{
         return {w,h,opt};
     };
 
+    loadGraphConfig=(lines)=>{
+        let title= null;
+        let w="100%";
+        let h="400px";
+        let sumOpts=[];
+        lines.filter((line,ind)=>ind>0).forEach(line => {
+            if(line.startsWith("title ")){
+                title=line.substring("title ".length).trim();
+                return;
+            }
+            if(line.startsWith("w ")){
+                w=line.substring("w ".length).trim();
+                return;
+            }
+            if(line.startsWith("h ")){
+                h=line.substring("h ".length).trim();
+                return;
+            }
+            if(/^[^,]+[,][^,]+[,][^,]+$/.test(line)){
+                const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                if(3!==parts.length){
+                    throw "无效的配置行："+line;
+                }
+                sumOpts.push(parts);
+                return;
+            }
+            if(/^[^,]+[,][^,]+$/.test(line)){
+                const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
+                if(2!==parts.length){
+                    throw "无效的配置行："+line;
+                }
+                sumOpts.push([...parts,""]);
+                return;
+            }
+            throw "未知的配置行："+line;
+        });
+
+        let names=[];
+        sumOpts.forEach(line=>{
+            names.push(line[0]);
+            names.push(line[1]);
+        });
+        names=Array.from(new Set(names));
+        
+        const data=names.map(item=>({name:item}));
+        const links=sumOpts.map(line=>({
+            source: line[0],
+            target: line[1],
+            //symbolSize: [4, 10],
+            label: {
+                show: true,
+                formatter:line[2] ? line[2] : "",
+            },
+            tooltip:{
+                show:line[2] ? true : false,
+                formatter:line[2] ? line[2] : "",
+            },
+        }));
+    
+        const opt={
+            title: {
+                text: title ? title.trim() : "",
+                left: 'center',
+            },
+            tooltip: {
+                show:true,
+                trigger:'item',
+            },
+            animationDurationUpdate: 1500,
+            animationEasingUpdate: 'quinticInOut',
+            color:['#5470c6','#91cc75','#fac858','#ee6666','#73c0de','#3ba272', '#fc8452','#9a60b4','#ea7ccc',],
+            textStyle:{
+                width:600,
+                overflow:'truncate',
+                ellipsis:'...',
+            },
+            series: [
+                {
+                    type: 'graph',
+                    layout: 'force',
+                    force: {
+                        repulsion: 4000
+                    },
+                    symbolSize: 60,
+                    roam: true,
+                    draggable:true,
+                    emphasis:{
+                        focus: 'adjacency',
+                    },
+                    label: {
+                        show: true,
+                        formatter:"{b}",
+                    },
+                    edgeSymbol: ['none', 'arrow',/*'none', 'none'*/],
+                    edgeSymbolSize: [0,10,/*10*/],
+                    edgeLabel: {
+                        fontSize: 12
+                    },
+                    tooltip:{
+                        show:true,
+                        formatter:"{b}",
+                    },
+                    lineStyle: {
+                        opacity: 0.9,
+                        width: 1,
+                        curveness: 0
+                    },
+        
+                    data: data,                  
+                    links: links,
+                }
+            ]
+        };
+
+        return {w,h,opt};
+    };
+
     loadPieConfig=(lines)=>{
-        let title= "未知标题";
+        let title= null;
         let w="100%";
         let h="400px";
         let data=[];
@@ -101,7 +197,7 @@ class EchartParser{
 
         const opt={
             title: {
-                text: title,
+                text: title ? title.trim() : "",
                 //subtext: '纯属虚构',
                 left: 'center'
             },
@@ -165,7 +261,7 @@ class EchartParser{
     };
 
     loadScatterConfig=(lines)=>{
-        let title= "未知标题";
+        let title= null;
         let w="100%";
         let h="400px";
         let xName=null;
@@ -213,7 +309,7 @@ class EchartParser{
 
         const opt={
             title: {
-                text: title,
+                text: title ? title.trim() : "",
                 //subtext:'qqq',
                 left: 'center',
             },
@@ -255,7 +351,7 @@ class EchartParser{
 
     loadBarOrLineOrStackConfig=(lines)=>{
         const graphType=lines[0];
-        let title= "未知标题";
+        let title= null;
         let w="100%";
         let h="400px";
         let xName=null;
@@ -310,9 +406,9 @@ class EchartParser{
 
         let opt={
             title: {
-                            text: title,
-                            left: 'center',
-                        },
+                text: title ? title.trim() : "",
+                left: 'center',
+            },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: {
@@ -356,7 +452,7 @@ class EchartParser{
     };
 
     loadBarLineStackCustomOption=(lines)=>{
-        let title= "未知标题";
+        let title= null;
         let w="100%";
         let h="400px";
         let xName=null;
@@ -429,7 +525,7 @@ class EchartParser{
 
         let opt={
             title: {
-                text: title,
+                text: title ? title.trim() : "",
                 left: 'center',
             },
             tooltip: {

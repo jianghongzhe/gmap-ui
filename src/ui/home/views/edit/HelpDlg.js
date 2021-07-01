@@ -203,13 +203,31 @@ const HelpDlg=(props)=>{
                             </div>
                         </div>
                         <div>
+                            <div className='chartTitle'>关系图</div>
+                            <div className='chartItem'>     
+                                ```echart<br/>
+                                graph<br/>
+                                title 关系图<br/>
+                                w 100%<br/>
+                                h 400px<br/>
+                                张三,李四,同学<br/>
+                                李四,王五,夫妻<br/>
+                                张三,王五,发小<br/>
+                                张三,小明<br/>
+                                张三,小华<br/>
+                                ```
+                            </div>
+                        </div>
+                        <div>
                             <div className='chartTitle'>使用json配置</div>
                             <div className='chartItem'>
+                                ```echart<br/>
                                 {'{'}<br/>
                                     <div css={{marginLeft:'20px'}}>w: '50%',</div>
                                     <div css={{marginLeft:'20px'}}>h: '200px',</div>
                                     <div css={{marginLeft:'20px'}}>// echart官方配置项</div>
-                                {'}'}
+                                {'}'}<br/>
+                                ```
                             </div>
                         </div>
                     </div>
