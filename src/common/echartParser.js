@@ -40,9 +40,7 @@ class EchartParser{
     loadJsonConfig=(txt)=>{
         let json=eval(`(${txt})`);
         let {w,h,...opt}=json;
-        console.log("opt",opt);
         if(!w){
-            console.log("www",w);
             w="100%";
         }
         if(!h){
@@ -440,13 +438,11 @@ class EchartParser{
             opt.xAxis[0].show=true;
             opt.xAxis[0].name=xName;
             opt.xAxis[0].nameTextStyle={fontSize :15};
-            console.log("loadBarOrLineOrStackConfig", opt.xAxis[0]);
         }
         if(yName){
             opt.yAxis[0].show=true;
             opt.yAxis[0].name=yName;
             opt.yAxis[0].nameTextStyle={fontSize :15};
-            console.log("loadBarOrLineOrStackConfig", opt.yAxis[0]);
         }
         return {w, h, opt};
     };
@@ -521,7 +517,6 @@ class EchartParser{
             
             throw "未知的配置行："+line;
         });
-        console.log("serItems", serItems);
 
         let opt={
             title: {

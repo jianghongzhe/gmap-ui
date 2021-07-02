@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,FilePdfOutlined,FileWordOutlined,Html5Outlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
@@ -54,6 +54,20 @@ const RefViewer=(props)=>{
         winH:       state.common.winH,
         activeKey:  state.tabs.activeKey,
     }));
+    const stateHolderRef=useRef({
+        winW,
+        winH,
+        visible: props.visible,
+    });
+
+    useEffect(()=>{
+        stateHolderRef.current={
+            winW,
+            winH,
+            visible: props.visible,
+        };
+    },[winW,winH,props.visible]);
+
 
     const [wrapperId]=useState(()=>"refviewercontainer"+new Date().getTime());
 
@@ -84,7 +98,19 @@ const RefViewer=(props)=>{
         });
     },[activeKey]);
 
+
     
+
+    /**
+     * 当窗口显示时初始化以下组件：
+     * 1、链接点击事件
+     * 2、图片点击事件
+     * 3、对未初始化的mermaid图初始化
+     * 4、对未初始化的flowchart图初始化
+     * 5、对未初始化的sequence图初始化
+     * 6、对未初始化的echart图初始化
+     * 7、对所有echart图设置自适应：以防止改变窗口大小后再次打开引用窗口后无法检测到窗口大小已改变
+     */
     useEffect(()=>{
         if(props.visible){
             setTimeout(() => {
@@ -142,78 +168,79 @@ const RefViewer=(props)=>{
                         nd.innerHTML="";
 
                         const conf=echartParser.parse(txt);
-                        console.log(conf);
                         nd.style.width=conf.w;
-                        nd.style.height=conf.h;
+                        if(conf.h.endsWith("%")){
+                            const percent=conf.h.substring(0,conf.h.length-1).trim();
+                            nd.style.height=parseInt((stateHolderRef.current.winH-300)*parseFloat(percent)/100)+"px";
+                        }else{
+                            nd.style.height=conf.h;
+                        }
                         echarts.init(nd).setOption(conf.opt);
                         
-                        console.log(echarts.getInstanceByDom(nd));
-
+                        // console.log(echarts.getInstanceByDom(nd));
+                        ele.setAttribute("w",conf.w);
+                        ele.setAttribute("h",conf.h);
                         ele.setAttribute("handled",'true');//置标识，表示已处理过，下次渲染不再重复绘制
                     }catch(e){
                         console.log(e);
+                        let msg='Echart图表格式有误 !!!';
+                        if("string"===typeof(e)){
+                            msg=`Echart图表格式有误：${e}`;
+                        }
                         if(nd){
-                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>Echart图表格式有误 !!!</div>`;
+                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>${msg}</div>`;
                         }
                     }
                 });
-
-
-
-                
-
-                // // _echarts_instance_
-                // const elee=document.querySelector("#demo111");
-                // const instId=elee.getAttribute("_echarts_instance_");
-
-                // console.log(instId ? "有实例" : "无实例");
-                
-                // const chart=(instId ? echarts.getInstanceById(instId) : echarts.init(elee));
-                // console.log("实例", chart);
-
-
-                // console.log(echarts);
-                // // echarts.getInstanceById();
-                // chart.setOption({
-                //     title: {
-                //         text: '某站点用户访问来源',
-                //         subtext: '纯属虚构',
-                //         left: 'center'
-                //     },
-                //     tooltip: {
-                //         trigger: 'item'
-                //     },
-                //     legend: {
-                //         orient: 'vertical',
-                //         left: 'left',
-                //     },
-                //     series: [
-                //         {
-                //             name: '访问来源',
-                //             type: 'pie',
-                //             radius: '50%',
-                //             data: [
-                //                 {value: 1048, name: '搜索引擎'},
-                //                 {value: 735, name: '直接访问'},
-                //                 {value: 580, name: '邮件营销'},
-                //                 {value: 484, name: '联盟广告'},
-                //                 {value: 300, name: '视频广告'}
-                //             ],
-                //             emphasis: {
-                //                 itemStyle: {
-                //                     shadowBlur: 10,
-                //                     shadowOffsetX: 0,
-                //                     shadowColor: 'rgba(0, 0, 0, 0.5)'
-                //                 }
-                //             }
-                //         }
-                //     ]
-                // });
+                resizeEchartGraphs();
             }, 500);
         }
-    },[props.visible]);
+    },[props.visible, stateHolderRef]);
     
 
+    /**
+     * 调整echart图的大小，使其对容器自适应
+     */
+    const resizeEchartGraphs=useCallback(()=>{
+        document.querySelectorAll(".echart-graph[handled='true']").forEach((ele)=>{
+            let eleId=ele.getAttribute('targetid');
+            let nd=document.querySelector(`#${eleId}`);
+            let w=ele.getAttribute("w");
+            let h=ele.getAttribute("h");
+            const isRelaW=w.endsWith("%");
+            const isRelaH=h.endsWith("%");
+
+            //如果宽高都是绝对像素值，则不随窗口大小改变而改变，不需要重绘
+            if(!isRelaW && !isRelaH){
+                return;
+            }
+
+            if(isRelaH){
+                const percent=h.substring(0,h.length-1).trim();
+                h=parseInt((stateHolderRef.current.winH-300)*parseFloat(percent)/100)+"px";
+            }
+            nd.style.height=h;
+            nd.style.width=w;
+            echarts.getInstanceByDom(nd).resize({
+                width:'auto',
+                height:'auto',
+                silent:true,
+            });
+        });
+    },[stateHolderRef]);
+
+
+    /**
+     * 当窗口大小改变时，使echart图自适应，仅当引用窗口显示时有效
+     */
+    useEffect(()=>{
+        if(!stateHolderRef.current.visible){
+            return;
+        }
+        setTimeout(() => {
+            resizeEchartGraphs();
+        }, 500);
+    },[winW,winH,stateHolderRef]);
     
 
     const getScrollTarget=useCallback(()=>document.getElementById(wrapperId),[wrapperId]);
