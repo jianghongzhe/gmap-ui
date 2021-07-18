@@ -90,6 +90,13 @@ class MarkedHighlightUtil {
         //1、解决marked生成的html中没有hljs样式的问题
         //2、解决hljs中背景颜色样式没有github-markdown-css优先级高的问题
         const renderer = new marked.Renderer({ highlight: highlightFun });
+
+        // 增加文字高亮的功能：==文字==
+        renderer.text=function(txt){
+            const newTxt=txt.replace(/(==)([^=\r\n]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>");
+            return newTxt;
+        };
+
         if (codeConfig) {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理
