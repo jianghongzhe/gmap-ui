@@ -93,17 +93,27 @@ class MarkedHighlightUtil {
 
         /**
          * 拦截文本块，增加如下功能：
+         * 行内latex表示式：$a_{1}+b_{1}=c$
          * 文字高亮：==文字==
          * 上标：x^2^
-         * 下标：H_2_O
+         * 下标：H--2--O
          * @param {*} txt 
          * @returns 
          */
         renderer.text=function(txt){
+            const latexItems=txt.match(/[$][^\$\r\n\t]+?[$]/g);
+            if(latexItems && latexItems.length){
+                for(let i=0; i<latexItems.length; ++i){
+                    const item=latexItems[i].substring(1, latexItems[i].length-1);
+                    const latexStr=katex.renderToString(item,{throwOnError: false});
+                    txt=txt.replace(latexItems[i], latexStr);
+                }
+            }
+
             const newTxt=txt.replace(/(==)([^=\r\n\t]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>")
                 .replace(/(\^)([^\^\r\n\t]{1,20})(\^)/g, "<sup>$2</sup>")
                 .replace(/(--)([^\-\r\n\t]{1,20})(--)/g, "<sub>$2</sub>");
-            // console.log('前 '+txt, '后 '+newTxt);
+             console.log('前 '+txt, '后 '+newTxt);
             return newTxt;
         };
 

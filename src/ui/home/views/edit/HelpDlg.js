@@ -17,7 +17,7 @@ const HelpDlg=(props)=>{
         <EnhDlg noFooter
                 title="帮助"
                 closable={true}
-                size={{w: 900}}
+                size={{w: 960}}
                 visible={props.visible}
                 onCancel={props.onCancel}>
             
@@ -424,6 +424,7 @@ const nodes=[
                          
                           
 const markdownExts=[
+    ['行内latex','$a_{1}^{2}+b_{1}=c$',''],
     ['文字高亮','==高亮==',''],
     ['上标','a^2^=9',''],
     ['下标','H--2--O',''],
