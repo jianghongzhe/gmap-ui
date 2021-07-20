@@ -102,7 +102,8 @@ class MarkedHighlightUtil {
         renderer.text=function(txt){
             const newTxt=txt.replace(/(==)([^=\r\n\t]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>")
                 .replace(/(\^)([^\^\r\n\t]{1,20})(\^)/g, "<sup>$2</sup>")
-                .replace(/(_)([^_\r\n\t]{1,20})(_)/g, "<sub>$2</sub>");
+                .replace(/(--)([^\-\r\n\t]{1,20})(--)/g, "<sub>$2</sub>");
+            // console.log('前 '+txt, '后 '+newTxt);
             return newTxt;
         };
 
