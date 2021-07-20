@@ -91,9 +91,18 @@ class MarkedHighlightUtil {
         //2、解决hljs中背景颜色样式没有github-markdown-css优先级高的问题
         const renderer = new marked.Renderer({ highlight: highlightFun });
 
-        // 增加文字高亮的功能：==文字==
+        /**
+         * 拦截文本块，增加如下功能：
+         * 文字高亮：==文字==
+         * 上标：x^2^
+         * 下标：H_2_O
+         * @param {*} txt 
+         * @returns 
+         */
         renderer.text=function(txt){
-            const newTxt=txt.replace(/(==)([^=\r\n]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>");
+            const newTxt=txt.replace(/(==)([^=\r\n\t]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>")
+                .replace(/(\^)([^\^\r\n\t]{1,20})(\^)/g, "<sup>$2</sup>")
+                .replace(/(_)([^_\r\n\t]{1,20})(_)/g, "<sub>$2</sub>");
             return newTxt;
         };
 

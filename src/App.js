@@ -16,6 +16,9 @@ function App() {
                 body: {
                     margin: 0,
                     backgroundColor: '#f0f2f5',
+                },
+                '.markdown-body blockquote': {
+                    borderLeft: '.25em solid lightgreen !important',
                 }
             }}/>
             <ConfigProvider locale={zhCN}>

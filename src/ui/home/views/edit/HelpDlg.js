@@ -17,7 +17,7 @@ const HelpDlg=(props)=>{
         <EnhDlg noFooter
                 title="帮助"
                 closable={true}
-                size={{w: 800}}
+                size={{w: 900}}
                 visible={props.visible}
                 onCancel={props.onCancel}>
             
@@ -101,138 +101,221 @@ const HelpDlg=(props)=>{
                         
                     </div>
                 </TabPane>
-                <TabPane tab="Echart图" key="3" className='tabitem'>
+                <TabPane tab="markdown扩展" key="3" className='tabitem'>
                     <div className='wrapper'>
-                        <div>
-                            <div className='chartTitle'>饼图</div>
-                            <div className='chartItem'> 
-                                ```echart<br/>
-                                pie<br/>
-                                title 饼图<br/>
-                                w 50%<br/>
-                                h 200px<br/>
-                                "食品": 500<br/>
-                                "娱乐": 600<br/>
-                                "医疗": 500<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>柱状图</div>
-                            <div className='chartItem'>
-                                ```echart<br/>
-                                bar<br/>
-                                title 柱状图<br/>
-                                w 50%<br/>
-                                h 200px<br/>
-                                x 横轴名称<br/>
-                                y 纵轴名称<br/>
-                                ,2018,2019,2020<br/>
-                                食品,500,400,300<br/>
-                                娱乐,600,400,600<br/>
-                                医疗,500,200,300<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>折线图</div>
-                            <div className='chartItem'>
-                                ```echart<br/>
-                                line<br/>
-                                title 折线图<br/>
-                                w 50%<br/>
-                                h 200px<br/>
-                                x 横轴名称<br/>
-                                y 纵轴名称<br/>
-                                ,2018,2019,2020<br/>
-                                食品,500,400,300<br/>
-                                娱乐,600,400,600<br/>
-                                医疗,500,200,300<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>堆积图</div>
-                            <div className='chartItem'>
-                                ```echart<br/>
-                                stack<br/>
-                                title 堆积图<br/>
-                                w 50%<br/>
-                                h 200px<br/>
-                                x 横轴名称<br/>
-                                y 纵轴名称<br/>
-                                ,2018,2019,2020<br/>
-                                食品,500,400,300<br/>
-                                娱乐,600,400,600<br/>
-                                医疗,500,200,300<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>柱线混合图</div>
-                            <div className='chartItem'>
-                                ```echart<br/>
-                                bar-line<br/>
-                                title 柱线混合图<br/>
-                                w 50%<br/>
-                                h 200px<br/>
-                                x 横轴名称<br/>
-                                y 纵轴名称<br/>
-                                ,2018,2019,2020<br/>
-                                stack 食品<br/>
-                                - bar,三餐,500,400,300<br/>
-                                - bar,食品,500,400,300<br/>
-                                bar,娱乐,600,400,600<br/>
-                                line,参考值,500,200,300<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>散点图</div>
-                            <div className='chartItem'>
-                                ```echart<br/>
-                                scatter<br/>
-                                title 散点图<br/>
-                                w 50%<br/>
-                                h 200px<br/>
-                                x 横轴名称<br/>
-                                y 纵轴名称<br/>
-                                第一类, 15.0 8.04, 8.07 7.97, 13.0 7.58<br/>
-                                第二类, 9.05 8.81, 11.0 8.33, 14.0 7.96<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>关系图</div>
-                            <div className='chartItem'>     
-                                ```echart<br/>
-                                graph<br/>
-                                title 关系图<br/>
-                                w 100%<br/>
-                                h 400px<br/>
-                                张三,李四,同学<br/>
-                                李四,王五,夫妻<br/>
-                                张三,王五,发小<br/>
-                                张三,小明<br/>
-                                张三,小华<br/>
-                                ```
-                            </div>
-                        </div>
-                        <div>
-                            <div className='chartTitle'>使用json配置</div>
-                            <div className='chartItem'>
-                                ```echart<br/>
-                                {'{'}<br/>
-                                    <div css={{marginLeft:'20px'}}>w: '50%',</div>
-                                    <div css={{marginLeft:'20px'}}>h: '200px',</div>
-                                    <div css={{marginLeft:'20px'}}>// echart官方配置项</div>
-                                {'}'}<br/>
-                                ```
-                            </div>
-                        </div>
+                        <table css={helpTableStyle}>
+                            <tbody>
+                            <tr>
+                                <th>名称</th>
+                                <th>用法示例</th>
+                            </tr>
+                            {
+                                markdownExts.map((item,ind)=>(
+                                    <tr key={ind}>
+                                        <td>{item[0]}</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div>{item[1]}</div>
+                                                    <div>{item[2]}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                            </tbody>
+                        </table>
                     </div>
                 </TabPane>
-                <TabPane tab="快捷键" key="4" className='tabitem'>
+                <TabPane tab="Echart图" key="4" className='tabitem'>
+                    <div className='wrapper'>
+                    <table css={helpTableStyle}>
+                            <tbody>
+                            <tr>
+                                <th>图表名称</th>
+                                <th>用法示例</th>
+                            </tr>
+                            <tr>
+                                <td>饼图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'> 
+                                                ```echart<br/>
+                                                pie<br/>
+                                                title 饼图<br/>
+                                                w 50%<br/>
+                                                h 200px<br/>
+                                                "食品": 500<br/>
+                                                "娱乐": 600<br/>
+                                                "医疗": 500<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>柱状图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>
+                                                ```echart<br/>
+                                                bar<br/>
+                                                title 柱状图<br/>
+                                                w 50%<br/>
+                                                h 200px<br/>
+                                                x 横轴名称<br/>
+                                                y 纵轴名称<br/>
+                                                ,2018,2019,2020<br/>
+                                                食品,500,400,300<br/>
+                                                娱乐,600,400,600<br/>
+                                                医疗,500,200,300<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>折线图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>
+                                                ```echart<br/>
+                                                line<br/>
+                                                title 折线图<br/>
+                                                w 50%<br/>
+                                                h 200px<br/>
+                                                x 横轴名称<br/>
+                                                y 纵轴名称<br/>
+                                                ,2018,2019,2020<br/>
+                                                食品,500,400,300<br/>
+                                                娱乐,600,400,600<br/>
+                                                医疗,500,200,300<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>堆积图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>
+                                                ```echart<br/>
+                                                stack<br/>
+                                                title 堆积图<br/>
+                                                w 50%<br/>
+                                                h 200px<br/>
+                                                x 横轴名称<br/>
+                                                y 纵轴名称<br/>
+                                                ,2018,2019,2020<br/>
+                                                食品,500,400,300<br/>
+                                                娱乐,600,400,600<br/>
+                                                医疗,500,200,300<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>柱线混合图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>
+                                                ```echart<br/>
+                                                bar-line<br/>
+                                                title 柱线混合图<br/>
+                                                w 50%<br/>
+                                                h 200px<br/>
+                                                x 横轴名称<br/>
+                                                y 纵轴名称<br/>
+                                                ,2018,2019,2020<br/>
+                                                stack 食品<br/>
+                                                - bar,三餐,500,400,300<br/>
+                                                - bar,食品,500,400,300<br/>
+                                                bar,娱乐,600,400,600<br/>
+                                                line,参考值,500,200,300<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>散点图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>
+                                                ```echart<br/>
+                                                scatter<br/>
+                                                title 散点图<br/>
+                                                w 50%<br/>
+                                                h 200px<br/>
+                                                x 横轴名称<br/>
+                                                y 纵轴名称<br/>
+                                                第一类, 15.0 8.04, 8.07 7.97, 13.0 7.58<br/>
+                                                第二类, 9.05 8.81, 11.0 8.33, 14.0 7.96<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>关系图</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>     
+                                                ```echart<br/>
+                                                graph<br/>
+                                                title 关系图<br/>
+                                                w 100%<br/>
+                                                h 400px<br/>
+                                                张三,李四,同学<br/>
+                                                李四,王五,夫妻<br/>
+                                                张三,王五,发小<br/>
+                                                张三,小明<br/>
+                                                张三,小华<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>使用json配置</td>
+                                <td>
+                                    <div>
+                                        <div>
+                                            <div className='chartItem'>
+                                                ```echart<br/>
+                                                {'{'}<br/>
+                                                    <div css={{marginLeft:'20px'}}>w: '50%',</div>
+                                                    <div css={{marginLeft:'20px'}}>h: '200px',</div>
+                                                    <div css={{marginLeft:'20px'}}>// echart官方配置项</div>
+                                                {'}'}<br/>
+                                                ```
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </TabPane>
+                <TabPane tab="快捷键" key="5" className='tabitem'>
                     <div className='wrapper'>
                         <table css={helpTableStyle}>
                             <tbody>
@@ -340,7 +423,11 @@ const nodes=[
                        
                          
                           
-
+const markdownExts=[
+    ['文字高亮','==高亮==',''],
+    ['上标','a^2^=9',''],
+    ['下标','H_2_O',''],
+];
 
 
 const refs=[

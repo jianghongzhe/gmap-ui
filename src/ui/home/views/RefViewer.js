@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
+import { Global, css } from '@emotion/react'
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,FilePdfOutlined,FileWordOutlined,Html5Outlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import {connect} from '../../../common/gflow';
@@ -265,7 +266,7 @@ const RefViewer=(props)=>{
     
     
 
-    return (
+    return (<React.Fragment>
         <EnhDlg noFooter
                 title={
                     <div>
@@ -295,7 +296,7 @@ const RefViewer=(props)=>{
                 )
             }
         </EnhDlg>
-    );
+    </React.Fragment>);
     
 }
 
