@@ -13,8 +13,8 @@ class EchartParser{
     }
 
     parse=(txt)=>{
-        if(null==txt || ""==txt.trim()){
-            throw "格式有误";
+        if(null===txt || ""===txt.trim()){
+            throw new Error("格式有误");
         }
         txt=txt.trim();
 
@@ -27,7 +27,7 @@ class EchartParser{
         const lines=txt.split("\n").map(each=>each.trim()).filter(each=>""!==each);
         const graphType=lines[0];
         if(!this.typeHandlerMap[graphType]){
-            throw `不支持的图表类型 [${lines[0]}]`;
+            throw new Error(`不支持的图表类型 [${lines[0]}]`);
         }
         return this.typeHandlerMap[graphType](lines);
     };
@@ -38,7 +38,7 @@ class EchartParser{
      * @returns 
      */
     loadJsonConfig=(txt)=>{
-        let json=eval(`(${txt})`);
+        let json=new Function(`return (${txt});`)(); //eval(`(${txt})`);
         let {w,h,...opt}=json;
         if(!w){
             w="100%";
@@ -70,7 +70,7 @@ class EchartParser{
             if(/^[^,]+[,][^,]+[,][^,]+$/.test(line)){
                 const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
                 if(3!==parts.length){
-                    throw "无效的配置行："+line;
+                    throw new Error("无效的配置行："+line);
                 }
                 sumOpts.push(parts);
                 return;
@@ -78,12 +78,12 @@ class EchartParser{
             if(/^[^,]+[,][^,]+$/.test(line)){
                 const parts=line.split(",").map(each=>each.trim()).filter(each=>""!==each);
                 if(2!==parts.length){
-                    throw "无效的配置行："+line;
+                    throw new Error("无效的配置行："+line);
                 }
                 sumOpts.push([...parts,""]);
                 return;
             }
-            throw "未知的配置行："+line;
+            throw new Error("未知的配置行："+line);
         });
 
         let names=[];
@@ -184,13 +184,13 @@ class EchartParser{
                 h=line.substring("h ".length).trim();
                 return;
             }
-            if(/^\"[^:\"]+\"[ ]*:[ ]*[^ ]+$/.test(line)){
+            if(/^"[^:"]+"[ ]*:[ ]*[^ ]+$/.test(line)){
                 const name=line.substring(1,line.indexOf('"',1)).trim();
                 const value=parseFloat(line.substring(line.indexOf(":")+1).trim());
                 data.push({value, name});
                 return;
             }
-            throw "未知的配置行："+line;
+            throw new Error("未知的配置行："+line);
         });
 
         const opt={
@@ -301,7 +301,7 @@ class EchartParser{
                 });
                 return;
             }
-            throw "未知的配置行："+line;
+            throw new Error("未知的配置行："+line);
         });
 
 
@@ -398,7 +398,7 @@ class EchartParser{
                 serItems.push(item);
                 return;
             }
-            throw "未知的配置行："+line;
+            throw new Error("未知的配置行："+line);
         });
 
 
@@ -488,7 +488,7 @@ class EchartParser{
             }
             if(/^[-] [^,]+[ ]*[,][ ]*[^,]+([ ]*[,][ ]*[0-9]+([.][0-9]+)?[ ]*)+$/.test(line)){
                 if(!currStack){
-                    throw "还未设置堆积系列的组名";
+                    throw new Error("还未设置堆积系列的组名");
                 }
                 const parts=line.substring(2).split(",").map(each=>each.trim()).filter(each=>""!==each);
                 serItems.push({
@@ -515,7 +515,7 @@ class EchartParser{
                 return;
             }
             
-            throw "未知的配置行："+line;
+            throw new Error("未知的配置行："+line);
         });
 
         let opt={

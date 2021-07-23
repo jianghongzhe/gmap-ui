@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import {Global } from '@emotion/react';
 import React from 'react';
-import logo from './logo.svg';
 import { view as MapsViewer } from './ui/home';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';

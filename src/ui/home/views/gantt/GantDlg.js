@@ -4,7 +4,6 @@ import { Modal } from 'antd';
 import {  } from '@ant-design/icons';
 import GantChart from './GantChart';
 import {withEnh} from '../../../common/specialDlg';
-import {connect} from '../../../../common/gflow';
 import { createSelector } from 'reselect';
 import { useSelector } from 'react-redux';
 
@@ -44,7 +43,7 @@ const GantDlg=(props)=>{
                 delayRelayoutArrows();
             }
         }
-    },[props.visible]);
+    },[props.visible, delayRelayoutArrows]);
 
     /**
      * 窗口大小调整，引发重绘
@@ -52,7 +51,7 @@ const GantDlg=(props)=>{
     useEffect(()=>{
         console.log("gant - 窗口大小调整，引发重绘");
         delayRelayoutArrows();
-    },[resizeSymbol]);
+    },[resizeSymbol, delayRelayoutArrows]);
 
 
     let {ds, colKeys, relas}=getParts(props);

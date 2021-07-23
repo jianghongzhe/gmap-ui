@@ -1,10 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import React, {  useCallback, useEffect, useRef, useState } from 'react';
 import { Progress, Table,Popover } from 'antd';
 import { RightOutlined } from '@ant-design/icons';
 
 import {createSelector} from 'reselect';
-import userEvent from '@testing-library/user-event';
 
 /**
  * 甘特图组件
@@ -187,7 +186,7 @@ const GantChart=(props)=>{
         });
 
         setArrows(arrows);
-    },[props.arrows, setArrows]);
+    },[props.arrows, setArrows, gantEleId]);
 
 
     /**
@@ -226,7 +225,7 @@ const GantChart=(props)=>{
                 ele.removeEventListener("scroll",debouncePutArrows);
             }
         }
-    },[debouncePutArrows]);
+    },[debouncePutArrows, gantEleId]);
 
     useEffect(()=>{
         debouncePutArrows();
@@ -276,19 +275,6 @@ const GantChart=(props)=>{
     
 }
 
-const getDynaCols2=()=>{
-    return [
-        {
-            title:'aaaa',
-            key:'task',
-            dataIndex:'task',
-        },
-        {
-            title:'aaaa',
-            key:'d1',
-        }
-    ];
-}
 
 /**
  * 根据数据和列名，动态生成columns对象

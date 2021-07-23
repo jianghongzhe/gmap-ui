@@ -1,9 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
-import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
-import moment  from 'moment';
-import { CirclePicker,PhotoshopPicker } from 'react-color';
+import React from 'react';
+import { Modal } from 'antd';
+import { CirclePicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
 
 const EnhDlg=withEnh(Modal);

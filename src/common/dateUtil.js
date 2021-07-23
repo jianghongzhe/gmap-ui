@@ -56,4 +56,6 @@ const getWeekday=(ymd)=>{
     return ["日","一","二","三","四","五","六"][date.getDay()];
 }
 
-export default {addDays,distDays,dateSmallThan,dateLargeThan,isDayEq,getWeekday,isHoliday,currDayYMD,isLeapYear};
+const expObj={addDays,distDays,dateSmallThan,dateLargeThan,isDayEq,getWeekday,isHoliday,currDayYMD,isLeapYear};
+
+export default expObj;

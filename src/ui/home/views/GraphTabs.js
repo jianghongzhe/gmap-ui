@@ -1,14 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Layout,   Tabs, Modal, Input, message, Button, Divider,Spin  } from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FormOutlined,LinkOutlined,FileMarkdownOutlined,PictureOutlined,FileTextOutlined,FileOutlined,BookOutlined,FileImageOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
-import {createSelector} from 'reselect';
+import React, { useCallback, useEffect} from 'react';
+import {Tabs,  Button} from 'antd';
+import { PlusCircleOutlined,MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
 
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
-import {connect,dispatcher} from '../../../common/gflow';
+import {dispatcher} from '../../../common/gflow';
 
-import api from '../../../service/api';
 import { useSelector } from 'react-redux';
 import keyDetector from '../../../common/keyDetector';
 
@@ -21,7 +19,7 @@ const { TabPane } = Tabs;
  * @param {*} props 
  */
 const GraphTabs=(props)=>{
-    const {winW,winH,activeKey,panes}= useSelector((state)=>({
+    const {winH,activeKey,panes}= useSelector((state)=>({
         winW:       state.common.winW,
         winH:       state.common.winH,
         activeKey:  state.tabs.activeKey,

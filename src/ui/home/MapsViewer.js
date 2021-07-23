@@ -15,8 +15,7 @@ import ProgsViewer from './views/ProgsViewer';
 import GantDlg from './views/gantt/GantDlg';
 
 
-import * as uiUtil from '../../common/uiUtil';
-import {connect,dispatcher} from '../../common/gflow';
+import {dispatcher} from '../../common/gflow';
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
 import { useSelector } from 'react-redux';
@@ -173,7 +172,7 @@ const MapsViewer=(props)=>{
             setNewMapDlgVisible(false);
         } catch (error) {
         }
-    },[dispatcher, setNewMapDlgVisible]);
+    },[ setNewMapDlgVisible]);
 
 
     //------------修改导图----------------------------------------------------------------------
@@ -188,7 +187,7 @@ const MapsViewer=(props)=>{
             });
         } catch (error) {
         }
-    },[dispatcher, setEditDlgState]);
+    },[ setEditDlgState]);
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));
@@ -204,7 +203,7 @@ const MapsViewer=(props)=>{
             }
         } catch (error) {
         }
-    },[dispatcher, setEditDlgState, editTmpTxt]);
+    },[ setEditDlgState, editTmpTxt]);
 
 
 
@@ -215,7 +214,7 @@ const MapsViewer=(props)=>{
             setSelMapDlgVisible(false);
         }catch(e){
         }
-    },[dispatcher, setSelMapDlgVisible]);
+    },[ setSelMapDlgVisible]);
 
 
     const showSelMapDlg =useCallback(() => {

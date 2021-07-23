@@ -3,7 +3,6 @@ import React from 'react';
 import {  Modal, Timeline } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
-import {connect} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);

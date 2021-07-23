@@ -1,10 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
-import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Input, Modal, message, Button } from 'antd';
+import { FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import {withEnh} from '../../../common/specialDlg';
 import api from '../../../../service/api';
-import * as uiUtil from '../../../../common/uiUtil';
 import {useSelector} from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
@@ -26,17 +25,7 @@ const InsertImgDlg=(props)=>{
     let elePicPath=useRef();
     let elePicName=useRef();
 
-    //显示时清空输入框并选中第一个输入框 
-    useEffect(()=>{
-       if(props.visible) {
-            setPicPath('');
-            setPicName('');
-            setTimeout(() => {
-                onFocusEle(elePicPath);
-            }, 300);
-       }
-    },[props.visible]);
-
+    
     /**
      * 修改事件
      * @param {*} fun 
@@ -62,6 +51,18 @@ const InsertImgDlg=(props)=>{
             nextRef.current.focus();
         }
     },[]);
+
+    //显示时清空输入框并选中第一个输入框 
+    useEffect(()=>{
+        if(props.visible) {
+             setPicPath('');
+             setPicName('');
+             setTimeout(() => {
+                 onFocusEle(elePicPath);
+             }, 300);
+        }
+     },[props.visible, onFocusEle]);
+ 
 
     /**
      * 选择图片或附件文件，选择后更新输入框，并使第二个输入框获得焦点

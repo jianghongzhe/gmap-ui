@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
-import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Modal, message, Button } from 'antd';
+import { PictureOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
 import {useSelector} from 'react-redux';
 
 import {withEnh} from '../../common/specialDlg';
@@ -246,16 +246,6 @@ const commonColors=[
     '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'
 ];
 
-
-const getCodeEditorStyle = (height) => ({
-    '& .CodeMirror': {
-        border: '1px solid lightgrey',
-        fontSize: 16,
-        height: height,
-        maxHeight: height,
-        minHeight: height,
-    }
-});
 
 
 

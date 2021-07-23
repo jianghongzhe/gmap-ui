@@ -1,9 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Layout,   Tabs, Modal, Input, message, Button, Divider } from 'antd';
-import PathSelect from './PathSelect';
+import { Modal} from 'antd';
 import {withEnh} from '../../common/specialDlg';
-import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
 import {createSelector} from 'reselect';
 import { useSelector } from 'react-redux';

@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
-import {Global } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover,DatePicker, Calendar  } from 'antd';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Modal, Button, Divider, Calendar  } from 'antd';
 import { DoubleLeftOutlined,LeftOutlined,RightOutlined,DoubleRightOutlined } from '@ant-design/icons';
 import moment  from 'moment';
 import {withEnh} from '../../../common/specialDlg';
@@ -14,7 +13,6 @@ const EnhDlg=withEnh(Modal);
  * @param {*} props 
  */
 const DateDlg=(props)=>{
-    const [datePickPopoverClassname]=useState(()=>'edigdlg-datepopup-container-'+new Date().getTime());
     const [date, setDate]=useState(moment());
 
     //每次显示都重置为当前日期
@@ -39,7 +37,7 @@ const DateDlg=(props)=>{
     //确定按钮事件
     const onOk=useCallback(()=>{
         props.onOk(date.format("YYYY-MM-DD"));
-    },[props.onOk, date]);
+    },[props, date]);
 
 
 
@@ -139,15 +137,6 @@ const dlgScale={
     h:360,
 };
 
-const getDatePickerPopoverStyle=(parCls)=>{
-    let result={};
-    let key=`.${parCls} .ant-picker-panel-container`;
-    result[key]={
-        boxShadow:'0px 0px 0px gray',
-        border:'1px solid #DDD',//#DDD
-    }
-    return result;
-}
 
 const commonDaysStyle={
     marginTop:0,

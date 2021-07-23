@@ -1,13 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect, useRef, useState } from 'react';
+import React, {  useState } from 'react';
 import { Button,Row, Col, Avatar   } from 'antd';
 import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 
-import PathSelect from './PathSelect';
 import logourl from '../../../assets/logo.jpg';
 import { createSelector } from 'reselect';
 import api from '../../../service/api';
-import {connect} from '../../../common/gflow';
 import ConnectedPathSelect from './ConnectedPathSelect';
 import { useSelector } from 'react-redux';
 

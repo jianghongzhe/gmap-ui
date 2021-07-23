@@ -1,9 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
-import { PictureOutlined, FolderOpenOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
-import moment  from 'moment';
-import { CirclePicker,PhotoshopPicker } from 'react-color';
+import React, { useCallback, useState } from 'react';
+import {  Modal } from 'antd';
+import { PhotoshopPicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
 
 const EnhDlg=withEnh(Modal);
@@ -17,7 +15,7 @@ const AdvColorPickerDlg=(props)=>{
 
     const onOk=useCallback(()=>{
         props.onOk(color);
-    },[props.onOk, color]);
+    },[props,  color]);
 
     return <EnhDlg noTitle noFooter closable={false}
             size={{w: dlgW}}

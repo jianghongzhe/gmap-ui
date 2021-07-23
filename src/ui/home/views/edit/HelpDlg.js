@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Layout, Input, Tabs, Modal, Form, message, Button, Divider, Popover } from 'antd';
+import { Tabs, Modal, Button } from 'antd';
 import {withEnh} from '../../../common/specialDlg';
 import api from '../../../../service/api';
 
@@ -303,7 +303,7 @@ const HelpDlg=(props)=>{
                                                 {'{'}<br/>
                                                     <div css={{marginLeft:'20px'}}>w: '50%',</div>
                                                     <div css={{marginLeft:'20px'}}>h: '200px',</div>
-                                                    <div css={{marginLeft:'20px'}}>// echart官方配置项</div>
+                                                    <div css={{marginLeft:'20px'}}>{'//'} echart官方配置项</div>
                                                 {'}'}<br/>
                                                 ```
                                             </div>

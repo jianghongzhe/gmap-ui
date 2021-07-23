@@ -699,17 +699,7 @@ class MindmapSvc {
             loopFin = true;
         });
 
-        let ltreeCnt=0;
-        let rtreeCnt=0;
-        root.childs.forEach(child => {
-            if(child.left){
-                ++ltreeCnt;
-                return;
-            }
-            ++rtreeCnt;
-        });
-
-
+        
 
         return [leftLeafCnt, rightLeafCnt];
     }
@@ -1516,7 +1506,7 @@ let themeStyles = [null, null, null];
 
 const inst=new MindmapSvc();
 
-export default {
+const expObj={
     hasUrlPrefix:       inst.hasUrlPrefix,
     toggleExpandNode:   inst.toggleExpandNode,
     parseMindMapData:   inst.parseMindMapData,
@@ -1532,3 +1522,5 @@ export default {
     expandNode:inst.expandNode,
     restoreNode:inst.restoreNode,
 };
+
+export default expObj;

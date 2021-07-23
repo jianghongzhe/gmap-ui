@@ -1,12 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {  Modal, Input,AutoComplete,Button,TreeSelect } from 'antd';
-import * as uiUtil from '../../../common/uiUtil';
-import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
-import api from '../../../service/api';
-import {connect,dispatcher} from '../../../common/gflow';
+import {Modal, Input,Button,TreeSelect } from 'antd';
+import {ReloadOutlined } from '@ant-design/icons';
+import {dispatcher} from '../../../common/gflow';
 import {createSelector} from 'reselect';
-import { useSelector } from 'react-redux';
+import {useSelector } from 'react-redux';
 
 /**
  * 新建图表对话框
@@ -35,7 +33,7 @@ const NewGraphDlg=(props)=>{
     //加载所有目录层次
     const reloadAllDirs=useCallback(()=>{
         dispatcher.common.reloadAllDirs();
-    },[dispatcher]);
+    },[]);
 
     /**
      * 修改事件

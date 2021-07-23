@@ -28,7 +28,6 @@ class Gflow{
      */
     sumReducer=(state,action)=>{
         //action type没有指定命名空间，不计算
-        const reg=/^[^/]+[/][^/]+$/;// eg. user/add
         if(!gflowUtil.isModelActionType(action.type)){
             return state;
         }
@@ -417,7 +416,8 @@ const DEFAULT_NAMESPACE="def";
 
 
 const inst=new Gflow();
-export default {run: inst.run};//程序入口
+const entryPoint={run: inst.run};//程序入口
+export default entryPoint;
 export const dispatcher=inst.actionDispatcher;//action dispatcher，一般在容器组件里用
 export const creater=inst.actionCreater;//action creater，一般在saga里用
 export const connect=inst.connect;//对react-redux的connect方法的包装

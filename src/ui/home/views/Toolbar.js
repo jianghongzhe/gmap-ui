@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Button, Divider } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,FilePdfOutlined,FileWordOutlined,Html5Outlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
-import {connect,dispatcher} from '../../../common/gflow';
+import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
 
-const { Header, Content } = Layout;
+const { Header } = Layout;
 
 /**
  * 工具栏

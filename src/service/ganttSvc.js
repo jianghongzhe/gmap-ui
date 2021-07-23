@@ -141,10 +141,10 @@ class GanttSvc{
                 // });
 
                 if(!refItem){
-                    throw "甘特图中未找到依赖的任务项，请确保被依赖项必须出现在依赖项之前。任务名称："+gant.task;
+                    throw new Error(`甘特图中未找到依赖的任务项，请确保被依赖项必须出现在依赖项之前。任务名称：${gant.task}`);
                 }
                 if(!refItem.end){
-                    throw "甘特图的被依赖项的时间无法计算得到。任务名称："+gant.task;
+                    throw new Error(`甘特图的被依赖项的时间无法计算得到。任务名称：${gant.task}`);
                 }
                 let tmpDate=dateUtil.addDays(refItem.end,1+daysAdjust);               
                 gant.start=tmpDate;
@@ -162,7 +162,7 @@ class GanttSvc{
             //结束日期是天数
             if(gant.endObj.isDays){
                 if(!gant.start){
-                    throw "甘特图的起始时间无法计算得到";
+                    throw new Error("甘特图的起始时间无法计算得到");
                 }
                 
                 let tmpDate=dateUtil.addDays(gant.start,gant.endObj.days-1);                
@@ -177,7 +177,7 @@ class GanttSvc{
 
 
             if(dateUtil.dateLargeThan(gant.start,gant.end)){
-                throw "甘特图的初始日期不能在结束日期之后。任务名称："+gant.task;
+                throw new Error(`甘特图的初始日期不能在结束日期之后。任务名称：${gant.task}`);
             }
 
 
@@ -474,7 +474,9 @@ class GanttSvc{
 const inst=new GanttSvc();
 
 // loadGanttData: inst.loadGanttData,
-export default {
+const expObj={
     parseGantData : inst.parseGantData,    
     parseGantItem:inst.parseGantItem,
 };
+
+export default expObj;

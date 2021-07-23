@@ -9,11 +9,11 @@ import {createSelector} from 'reselect';
  * 路径选择
  */
 const PathSelect=(props)=>{
-    const [listWrapperId]=useState(()=>'fileselectlist'+new Date().getTime());
+    const [listWrapperId]=useState(()=>`fileselectlist${new Date().getTime()}`);
 
     const getScrollTarget=useCallback(()=>{
         return document.getElementById(listWrapperId);
-    },[]);
+    },[listWrapperId]);
 
     const onSelectMapItem=(item)=>{
         if (!item.isfile) {

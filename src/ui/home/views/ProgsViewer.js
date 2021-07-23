@@ -1,9 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Modal, Timeline, Table,Progress,Tooltip } from 'antd';
+import { Modal,  Table,Progress,Tooltip } from 'antd';
 import {createSelector} from 'reselect';
 import {withEnh} from '../../common/specialDlg';
-import {connect} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);

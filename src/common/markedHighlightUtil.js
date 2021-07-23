@@ -101,7 +101,7 @@ class MarkedHighlightUtil {
          * @returns 
          */
         renderer.text=function(txt){
-            const latexItems=txt.match(/[$][^\$\r\n\t]+?[$]/g);
+            const latexItems=txt.match(/[$][^$\r\n\t]+?[$]/g);
             if(latexItems && latexItems.length){
                 for(let i=0; i<latexItems.length; ++i){
                     const item=latexItems[i].substring(1, latexItems[i].length-1);
@@ -111,7 +111,7 @@ class MarkedHighlightUtil {
             }
 
             const newTxt=txt.replace(/(==)([^=\r\n\t]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>")
-                .replace(/(\^)([^\^\r\n\t]{1,20})(\^)/g, "<sup>$2</sup>")
+                .replace(/(\^)([^^\r\n\t]{1,20})(\^)/g, "<sup>$2</sup>")
                 .replace(/(--)([^\-\r\n\t]{1,20})(--)/g, "<sub>$2</sub>");
              console.log('前 '+txt, '后 '+newTxt);
             return newTxt;

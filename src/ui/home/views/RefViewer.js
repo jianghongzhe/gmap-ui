@@ -1,10 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Layout,   Tabs, Modal, Input, message, Button, Divider,Popover,BackTop,Avatar } from 'antd';
-import { Global, css } from '@emotion/react'
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,ExportOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,FilePdfOutlined,FileWordOutlined,Html5Outlined } from '@ant-design/icons';
+import {  Modal,Button,BackTop } from 'antd';
+import { FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
-import {connect} from '../../../common/gflow';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import mindmapSvc from '../../../service/mindmapSvc';
 import api from '../../../service/api';
@@ -100,7 +98,36 @@ const RefViewer=(props)=>{
     },[activeKey]);
 
 
-    
+    /**
+     * 调整echart图的大小，使其对容器自适应
+     */
+     const resizeEchartGraphs=useCallback(()=>{
+        document.querySelectorAll(".echart-graph[handled='true']").forEach((ele)=>{
+            let eleId=ele.getAttribute('targetid');
+            let nd=document.querySelector(`#${eleId}`);
+            let w=ele.getAttribute("w");
+            let h=ele.getAttribute("h");
+            const isRelaW=w.endsWith("%");
+            const isRelaH=h.endsWith("%");
+
+            //如果宽高都是绝对像素值，则不随窗口大小改变而改变，不需要重绘
+            if(!isRelaW && !isRelaH){
+                return;
+            }
+
+            if(isRelaH){
+                const percent=h.substring(0,h.length-1).trim();
+                h=parseInt((stateHolderRef.current.winH-300)*parseFloat(percent)/100)+"px";
+            }
+            nd.style.height=h;
+            nd.style.width=w;
+            echarts.getInstanceByDom(nd).resize({
+                width:'auto',
+                height:'auto',
+                silent:true,
+            });
+        });
+    },[stateHolderRef]);
 
     /**
      * 当窗口显示时初始化以下组件：
@@ -187,6 +214,8 @@ const RefViewer=(props)=>{
                         let msg='Echart图表格式有误 !!!';
                         if("string"===typeof(e)){
                             msg=`Echart图表格式有误：${e}`;
+                        }else if("object"===typeof(e) && e instanceof Error){
+                            msg=`Echart图表格式有误：${e.message}`;
                         }
                         if(nd){
                             nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>${msg}</div>`;
@@ -196,39 +225,10 @@ const RefViewer=(props)=>{
                 resizeEchartGraphs();
             }, 500);
         }
-    },[props.visible, stateHolderRef]);
+    },[props.visible, stateHolderRef, resizeEchartGraphs]);
     
 
-    /**
-     * 调整echart图的大小，使其对容器自适应
-     */
-    const resizeEchartGraphs=useCallback(()=>{
-        document.querySelectorAll(".echart-graph[handled='true']").forEach((ele)=>{
-            let eleId=ele.getAttribute('targetid');
-            let nd=document.querySelector(`#${eleId}`);
-            let w=ele.getAttribute("w");
-            let h=ele.getAttribute("h");
-            const isRelaW=w.endsWith("%");
-            const isRelaH=h.endsWith("%");
-
-            //如果宽高都是绝对像素值，则不随窗口大小改变而改变，不需要重绘
-            if(!isRelaW && !isRelaH){
-                return;
-            }
-
-            if(isRelaH){
-                const percent=h.substring(0,h.length-1).trim();
-                h=parseInt((stateHolderRef.current.winH-300)*parseFloat(percent)/100)+"px";
-            }
-            nd.style.height=h;
-            nd.style.width=w;
-            echarts.getInstanceByDom(nd).resize({
-                width:'auto',
-                height:'auto',
-                silent:true,
-            });
-        });
-    },[stateHolderRef]);
+    
 
 
     /**
@@ -241,7 +241,7 @@ const RefViewer=(props)=>{
         setTimeout(() => {
             resizeEchartGraphs();
         }, 500);
-    },[winW,winH,stateHolderRef]);
+    },[winW,winH,stateHolderRef,resizeEchartGraphs]);
     
 
     const getScrollTarget=useCallback(()=>document.getElementById(wrapperId),[wrapperId]);

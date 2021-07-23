@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Button,Tooltip, Progress,Avatar, Popover  } from 'antd';
+import { Button,Tooltip, Progress,Avatar  } from 'antd';
 import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
 import relaPic from '../../../assets/relachart.png';

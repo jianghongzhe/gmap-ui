@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {Button,Modal} from 'antd';
+import React from 'react';
+import {Modal} from 'antd';
 import RelaChart from './RelaChart';
 import { useSelector } from 'react-redux';
 
