@@ -103,17 +103,19 @@ const MindNode=(props)=>{
 
         {/* 长引用按钮 */}
         {
-            (nd && nd.ref) && (
-                <Tooltip color='cyan' placement="bottomLeft" title={'查看引用 - '+nd.ref.showname}>
-                    <span css={themeBtnWrapperStyle}>
-                        <Button 
-                            type="link" 
-                            size='small' 
-                            className='themebtn'
-                            icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
-                            onClick={props.onOpenRef.bind(this,nd.ref)}/>
-                    </span>
-                </Tooltip>
+            (nd && nd.refs && 0<nd.refs.length) && (
+                nd.refs.map((refItem,refInd)=>(                
+                    <Tooltip key={refInd} color='cyan' placement="bottomLeft" title={'查看引用 - '+refItem.showname}>
+                        <span css={themeBtnWrapperStyle}>
+                            <Button 
+                                type="link" 
+                                size='small' 
+                                className='themebtn'
+                                icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
+                                onClick={props.onOpenRef.bind(this,refItem)}/>
+                        </span>
+                    </Tooltip>
+                ))
             )
         }
 

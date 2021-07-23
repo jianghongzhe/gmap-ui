@@ -1003,7 +1003,7 @@ class MindmapSvc {
             let memo = [];
             let links = [];
             let expand = true;
-            let ref = null;
+            let ref = [];
             let dateItem = null;
             let prog=null;
             let gant=null;
@@ -1049,7 +1049,7 @@ class MindmapSvc {
                     [handled,hasVal,val]=this.linePartHandlers.handleRef(item, refs);
                     if(handled){
                         if(hasVal){
-                            ref=val;
+                            ref.push(val);
                         }
                         return;
                     }
@@ -1163,7 +1163,7 @@ class MindmapSvc {
                 leaf: false,         //是否为叶节点
                 expand: expand,      //展开状态
                 defExp: expand,      //默认展开状态
-                ref: ref,
+                refs: ref,
                 dateItem: dateItem,
                 prog: prog,
                 gant:gant,
