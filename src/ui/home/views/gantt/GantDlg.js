@@ -49,7 +49,6 @@ const GantDlg=(props)=>{
      * 窗口大小调整，引发重绘
      */
     useEffect(()=>{
-        console.log("gant - 窗口大小调整，引发重绘");
         delayRelayoutArrows();
     },[resizeSymbol, delayRelayoutArrows]);
 

@@ -26,8 +26,6 @@ const GraphTabs=(props)=>{
         panes:      state.tabs.panes,
     }));
 
-
-    let beginTime=new Date().getTime();
     
     
     /**
@@ -176,8 +174,7 @@ const GraphTabs=(props)=>{
         </Tabs>
     </React.Fragment>;
 
-    let endTime=new Date().getTime();
-    console.log(`tab渲染时间：${(endTime-beginTime)} ms`);
+    
     return result;
 }
 

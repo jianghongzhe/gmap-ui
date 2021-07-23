@@ -1434,9 +1434,7 @@ class MindmapSvc {
             return front+unescapeVLineRestore(end.trim());
         });
 
-        
 
-        console.log("关系图",graphs);
         return { ndLines, refs, graphs};
     }
 

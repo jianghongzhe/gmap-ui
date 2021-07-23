@@ -9,7 +9,6 @@ import newMindmapSvc from '../../../service/newMindmapSvc';
  * @param {*} props 
  */
 const NewMindmap=(props)=>{
-    let beginTime=new Date().getTime();
 
     const [{ndStyles, lineStyles, expBtnStyles, wrapperStyle},setAllStyles]=useState({
         ndStyles:{}, 
@@ -45,8 +44,6 @@ const NewMindmap=(props)=>{
         }
     },[props.ds, arrangeNdPositions]);
 
-
-    let middleTime=new Date().getTime();
 
     
     //校验
@@ -125,8 +122,6 @@ const NewMindmap=(props)=>{
     );
 
 
-    let endTime=new Date().getTime();
-    console.log(`导图渲染时间：${(endTime-beginTime)} ms，其中渲染前执行闭包的时间： ${(middleTime-beginTime)} ms`);
     return result;
     
 }

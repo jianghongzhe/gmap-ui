@@ -154,7 +154,6 @@ const Editor=(props)=>{
                 if(codeMirrorInstRef.current){
                     codeMirrorInstRef.current.focus();
                     codeMirrorInstRef.current.refresh();
-                    console.log("codemirror刷新 "+new Date().getTime());
                     return true;
                 }
                 return false;

@@ -40,7 +40,6 @@ const model={
         },
         *reloadAllDirs(payload,{creater,put}){
             let dirs=api.listAllDirs();
-            console.log('dirs',dirs);
             yield put(creater.setAllDirs(dirs));
         }
     },
@@ -55,7 +54,6 @@ const model={
             //设置标题、加载窗口大小、文件列表加载、目录列表加载
             let titleTxt=api.loadAppNameAndVersionTxt();
             const vers=api.getInnerModuleVersions();
-            console.log(vers);
             
             document.querySelector("head > title").innerHTML = titleTxt+`　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
             
