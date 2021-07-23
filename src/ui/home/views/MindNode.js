@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Button,Tooltip, Progress,Avatar  } from 'antd';
+import { Button,Tooltip, Progress,Avatar, Popover  } from 'antd';
 import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
 import relaPic from '../../../assets/relachart.png';
@@ -74,14 +74,14 @@ const MindNode=(props)=>{
             </Tooltip>
         )}  
 
-        {/* 关系图 */}
+        {/* deprecated 关系图 */}
         {(nd && nd.graph) && (
             <Avatar size={18} src={relaPic} css={gantStyle} title='查看关系图' onClick={props.onShowGraph.bind(this,nd.graph)}/>
         )}
         
 
 
-        {/* 甘特图  */}
+        {/* deprecated 甘特图  */}
         {(nd && nd.gant) && (
             <Avatar size={18} src={gantPic} css={gantStyle} title='查看甘特图' onClick={props.onShowGant.bind(this,nd.gant)}/>
         )}
@@ -89,7 +89,7 @@ const MindNode=(props)=>{
         {/* 短备注，多个用div叠起来 */}
         {
             (nd && nd.memo && 0<nd.memo.length) && (
-                <Tooltip title={
+                <Tooltip color='cyan' title={
                     <div>
                         {
                             nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
@@ -104,15 +104,16 @@ const MindNode=(props)=>{
         {/* 长引用按钮 */}
         {
             (nd && nd.ref) && (
-                <span css={themeBtnWrapperStyle}>
-                    <Button 
-                        type="link" 
-                        size='small' 
-                        title={'查看引用 - '+nd.ref.showname} 
-                        className='themebtn'
-                        icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
-                        onClick={props.onOpenRef.bind(this,nd.ref)}/>
-                </span>
+                <Tooltip color='cyan' placement="bottomLeft" title={'查看引用 - '+nd.ref.showname}>
+                    <span css={themeBtnWrapperStyle}>
+                        <Button 
+                            type="link" 
+                            size='small' 
+                            className='themebtn'
+                            icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
+                            onClick={props.onOpenRef.bind(this,nd.ref)}/>
+                    </span>
+                </Tooltip>
             )
         }
 
@@ -120,16 +121,17 @@ const MindNode=(props)=>{
         {
             (nd && nd.links && 0<nd.links.length) && <>{
                 nd.links.map((link,linkInd)=>(
-                    <span css={themeBtnWrapperStyle} key={'link-'+linkInd}>
-                        <Button 
-                            key={linkInd} 
-                            type="link" 
-                            size='small' 
-                            title={link.name ? link.name+"  "+link.addr:link.addr} 
-                            className='themebtn'
-                            icon={getLinkIcon(link.addr)}  
-                            onClick={props.onOpenLink.bind(this,link.addr)}/>
-                    </span>
+                    <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
+                        <span css={themeBtnWrapperStyle} >
+                            <Button 
+                                key={linkInd} 
+                                type="link" 
+                                size='small' 
+                                className='themebtn'
+                                icon={getLinkIcon(link.addr)}  
+                                onClick={props.onOpenLink.bind(this,link.addr)}/>
+                        </span>
+                    </Tooltip>
                 ))
             }</>
         }
