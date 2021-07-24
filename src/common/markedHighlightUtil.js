@@ -81,7 +81,7 @@ class MarkedHighlightUtil {
 
             let tmp = hljs.getLanguage(language);
             const validLanguage = tmp ? language : 'plaintext';
-            return hljs.highlight(validLanguage, code).value;
+            return hljs.highlight(code, {language:validLanguage}).value;
         };
 
         //渲染器实现，对原代码做如下修改：

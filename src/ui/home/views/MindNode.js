@@ -36,7 +36,7 @@ const MindNode=(props)=>{
         {/* 日期部分 */}
         {
             (nd && nd.dateItem) && (
-                <Tooltip title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
+                <Tooltip color='cyan' title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
                     <div css={dateStyle} onClick={props.onShowTimeline.bind(this,nd.dateItem.timeline)}>
                         <ClockCircleOutlined className='themeicon' css={{color:nd.dateItem.color}}/>
                         <span className='themedatetxt' css={{color:nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
@@ -61,7 +61,7 @@ const MindNode=(props)=>{
 
         {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}
         {(nd && nd.prog) && (
-            <Tooltip title={nd.prog.msg}>
+            <Tooltip color='cyan' title={nd.prog.msg}>
                 <Progress type="circle" 
                     trailColor={progStyle.trailColor}
                     format={progressFormater.bind(this,nd.prog.st)}

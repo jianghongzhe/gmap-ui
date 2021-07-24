@@ -8,4 +8,8 @@
 
 ***
 # ref:长段文字
-这里可以放长段内容，支持markdown格式
+```xml
+<abc>
+	<dd id='123'>sdf</dd>
+</abc>
+```
