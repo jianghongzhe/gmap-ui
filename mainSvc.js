@@ -3,7 +3,7 @@ const fs = require('fs');
 const Url = require('url');
 const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
-
+const net2 = require('net');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
@@ -15,6 +15,9 @@ const workPath=path.join(__dirname,'work');
 const packageJsonPath=path.join(__dirname,'package.json');
 const SLASH='/';
 const BACK_SLASH='\\';
+
+//
+let assist_url=null;
 
 
 
@@ -699,6 +702,9 @@ const openMapsDir = () => {
     openUrl(url);
 }
 
+
+
+
 /**
  * 在图表目录打开bash，以方便git提交
  */
@@ -712,6 +718,21 @@ const openGitBash = () => {
             cwd: getMapsPath()   //当前目录为图表文件目录
         }
     );
+
+    console.log("assist_url", assist_url);
+    const request = net.request(assist_url)
+    request.on('response', (response) => {
+        console.log(`STATUS: ${response.statusCode}`)
+        console.log(`HEADERS: ${JSON.stringify(response.headers)}`)
+        response.on('data', (chunk) => {
+            console.log(`BODY: ${chunk}`);
+            fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
+        })
+        response.on('end', () => {
+            console.log('No more data in response.')
+        })
+    })
+    request.end();
 }
 
 
@@ -883,6 +904,18 @@ const getDevToolExtensionUrl=()=>{
     }
     return '';
 }
+
+
+
+/**
+ * 启动助手子程序，并在过一会后获得访问地址url的前缀
+ */
+spawn(fileRunnerPath);
+setTimeout(() => {
+    assist_url= fs.readFileSync(path.join(workPath,'url_prefix'),'utf-8');
+    console.log(`gmap assist listen on url ${assist_url}`);
+}, 3000);
+
 
 
 module.exports={
