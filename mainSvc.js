@@ -3,7 +3,7 @@ const fs = require('fs');
 const Url = require('url');
 const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
-const net2 = require('net');
+const nodeNet = require('net');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
@@ -16,10 +16,24 @@ const packageJsonPath=path.join(__dirname,'package.json');
 const SLASH='/';
 const BACK_SLASH='\\';
 
-//
-let assist_url=null;
+/**
+ * {    
+ *  "ip":"127.0.0.1",
+ *  "port":56789,
+ *  "pid":8056
+ * }
+ */
+let server_info=null;
 
+/**
+ * 
+ */
+let nodeTcpClient=null;
 
+/**
+ * 请求id与回调的对应关系
+ */
+let reqCallbackMap={};
 
 
 
@@ -564,6 +578,11 @@ const existsGraph = (fn) => {
  * @param {*} url 
  */
 const openUrl=(url)=>{
+    if(url.startsWith("cp://")){
+        sendCmdToServer("cp", url);
+        return;
+    }
+
     if(["file://","dir://","cmd://","cp://","data:image/"].some(item=>url.startsWith(item))){
         let indexPath= path.join(workPath,"tmp.txt");
         fs.writeFileSync(indexPath, url, 'utf-8');
@@ -704,6 +723,18 @@ const openMapsDir = () => {
 
 
 
+const sendCmdToServer=(action, data)=>{
+    // reqCallbackMap
+    const id=new Date().getTime();
+    const req=`${id}|${action}|${"string"===typeof(data) ? data: JSON.stringify(data)}`;
+    return new Promise((res, rej)=>{
+        reqCallbackMap[id]=(respData)=>{
+            res(respData);
+        };
+        nodeTcpClient.write(req);
+    });
+};
+
 
 /**
  * 在图表目录打开bash，以方便git提交
@@ -719,20 +750,35 @@ const openGitBash = () => {
         }
     );
 
-    console.log("assist_url", assist_url);
-    const request = net.request(assist_url)
-    request.on('response', (response) => {
-        console.log(`STATUS: ${response.statusCode}`)
-        console.log(`HEADERS: ${JSON.stringify(response.headers)}`)
-        response.on('data', (chunk) => {
-            console.log(`BODY: ${chunk}`);
-            fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
-        })
-        response.on('end', () => {
-            console.log('No more data in response.')
-        })
-    })
-    request.end();
+    sendCmdToServer("test", "abcc你好").then(data=>{
+        console.log(`data: ${data}`);
+    });
+
+    // nodeTcpClient=nodeNet.Socket();
+    // client.connect(server_info.port,server_info.ip);
+    // client.setEncoding('utf8');
+    // client.on('data',(chunk)=>{
+    //     console.log(`BODY: ${chunk}`);
+    //     fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
+    // });
+
+    // client.write("abcc你好");
+
+
+    // console.log("assist_url", assist_url);
+    // const request = net.request(assist_url)
+    // request.on('response', (response) => {
+    //     console.log(`STATUS: ${response.statusCode}`)
+    //     console.log(`HEADERS: ${JSON.stringify(response.headers)}`)
+    //     response.on('data', (chunk) => {
+    //         console.log(`BODY: ${chunk}`);
+    //         fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
+    //     })
+    //     response.on('end', () => {
+    //         console.log('No more data in response.')
+    //     })
+    // })
+    // request.end();
 }
 
 
@@ -910,10 +956,23 @@ const getDevToolExtensionUrl=()=>{
 /**
  * 启动助手子程序，并在过一会后获得访问地址url的前缀
  */
-spawn(fileRunnerPath);
+//spawn(fileRunnerPath);
 setTimeout(() => {
-    assist_url= fs.readFileSync(path.join(workPath,'url_prefix'),'utf-8');
-    console.log(`gmap assist listen on url ${assist_url}`);
+    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
+    console.log(`gmap assist listen on url ${server_info.ip}:${server_info.port}`);
+
+    nodeTcpClient=nodeNet.Socket();
+    nodeTcpClient.connect(server_info.port, server_info.ip);
+    nodeTcpClient.setEncoding('utf8');
+    nodeTcpClient.on('data',(chunk)=>{
+        console.log(`BODY: ${chunk}`);
+        fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
+        const obj= JSON.parse(""+chunk);
+        if(obj.reqId && reqCallbackMap[obj.reqId]){
+            reqCallbackMap[obj.reqId](obj.data);
+        }
+
+    });
 }, 3000);
 
 
