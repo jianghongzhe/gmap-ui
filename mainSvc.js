@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net   } = require('electron');
+const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net, ipcMain   } = require('electron');
 const fs = require('fs');
 const Url = require('url');
 const { exec, spawn, execFile,execFileSync } = require('child_process');
@@ -7,7 +7,7 @@ const nodeNet = require('net');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
-const fileRunnerPath=path.join(__dirname,'file_runner.exe');
+const fileRunnerPath=path.join(__dirname,'externals','file_runner.exe');
 const mapsPath=path.join(__dirname,'gmaps');
 const imgsPath=path.join(__dirname,'gmaps','imgs');
 const attsPath=path.join(__dirname,'gmaps','atts');
@@ -17,10 +17,9 @@ const SLASH='/';
 const BACK_SLASH='\\';
 
 /**
- * {    
- *  "ip":"127.0.0.1",
- *  "port":56789,
- *  "pid":8056
+ * {
+ *  "url": "http://localhost:56789/",
+ *  "pid": 16120
  * }
  */
 let server_info=null;
@@ -573,17 +572,51 @@ const existsGraph = (fn) => {
     return [toSlash(fn),themeName, fullpath];
 }
 
+
+/**
+ * 进行屏幕截图
+ * @param {*} opt  {left,top,width,height,fileName}
+ */
+const takeScreenShot=(opt)=>{
+    return sendCmdToServer("shot", opt);
+};
+
+
 /**
  * 打开指定url，如果是本地file://协议的资源，则使用fileRunner执行，否则使用默认的方式执行
  * @param {*} url 
  */
 const openUrl=(url)=>{
     if(url.startsWith("cp://")){
-        sendCmdToServer("cp", url);
-        return;
+        return sendCmdToServer("cp", {url});
+    }
+    if(url.startsWith("file://")){
+        return sendCmdToServer("file", {url});
+    }
+    if(url.startsWith("dir://")){
+        return sendCmdToServer("dir", {url});
+    }
+    if(url.startsWith("cmd://")){
+        return sendCmdToServer("cmd", {url});
+    }
+    if(url.startsWith("shot://")){
+        
+
+        // left = Convert.ToInt32(strs[0]);
+        //     int top = Convert.ToInt32(strs[1]);
+        //     int width = Convert.ToInt32(strs[2]);
+        //     int height = Convert.ToInt32(strs[3]);
+        //     String fileName = strs[4].Trim();
+
+        return sendCmdToServer("shot", {url});
+    }
+    if(url.startsWith("shotCombine://")){
+        console.log({url});
+        return sendCmdToServer("shotCombine", {url});
     }
 
-    if(["file://","dir://","cmd://","cp://","data:image/"].some(item=>url.startsWith(item))){
+
+    if(["data:image/"].some(item=>url.startsWith(item))){
         let indexPath= path.join(workPath,"tmp.txt");
         fs.writeFileSync(indexPath, url, 'utf-8');
         execFile(fileRunnerPath,["tmp.txt"]);
@@ -723,17 +756,7 @@ const openMapsDir = () => {
 
 
 
-const sendCmdToServer=(action, data)=>{
-    // reqCallbackMap
-    const id=new Date().getTime();
-    const req=`${id}|${action}|${"string"===typeof(data) ? data: JSON.stringify(data)}`;
-    return new Promise((res, rej)=>{
-        reqCallbackMap[id]=(respData)=>{
-            res(respData);
-        };
-        nodeTcpClient.write(req);
-    });
-};
+
 
 
 /**
@@ -750,9 +773,9 @@ const openGitBash = () => {
         }
     );
 
-    sendCmdToServer("test", "abcc你好").then(data=>{
-        console.log(`data: ${data}`);
-    });
+    // sendCmdToServer("test", "abcc你好").then(data=>{
+    //     console.log(`data: ${data}`);
+    // });
 
     // nodeTcpClient=nodeNet.Socket();
     // client.connect(server_info.port,server_info.ip);
@@ -952,29 +975,51 @@ const getDevToolExtensionUrl=()=>{
 }
 
 
+const sendCmdToServer=(action, data)=>{
+    return new Promise((res, rej)=>{
+        const request = net.request(`${server_info.url}${action}`);
+        request.on('response', (response) => {
+            response.on('data', (chunk) => {
+                res(chunk);
+            });
+            response.on('error',(errObj)=>{
+                rej(errObj);
+            });
+        });
+        request.on('error',(errObj)=>{
+            rej(errObj);
+        });
+        request.write("string"===typeof(data) ? data : JSON.stringify(data), 'utf-8');
+        request.end();
+    });
+};
+
+
 
 /**
- * 启动助手子程序，并在过一会后获得访问地址url的前缀
+ * 启动助手子程序，并在过一会后获得服务器信息（访问地址url前缀、进程id等）
  */
-//spawn(fileRunnerPath);
+spawn(fileRunnerPath);
 setTimeout(() => {
-    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-    console.log(`gmap assist listen on url ${server_info.ip}:${server_info.port}`);
-
-    nodeTcpClient=nodeNet.Socket();
-    nodeTcpClient.connect(server_info.port, server_info.ip);
-    nodeTcpClient.setEncoding('utf8');
-    nodeTcpClient.on('data',(chunk)=>{
-        console.log(`BODY: ${chunk}`);
-        fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
-        const obj= JSON.parse(""+chunk);
-        if(obj.reqId && reqCallbackMap[obj.reqId]){
-            reqCallbackMap[obj.reqId](obj.data);
-        }
-
-    });
+    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));    
 }, 3000);
 
+
+
+
+
+const ipcHandlers={
+    takeScreenShot
+};
+
+const delegateHandler=async (handler, evt, arg)=>{
+    const result = await handler(arg);
+    return result;
+};
+
+for(key in ipcHandlers){
+    ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
+}
 
 
 module.exports={

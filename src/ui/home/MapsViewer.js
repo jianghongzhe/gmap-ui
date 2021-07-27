@@ -303,7 +303,8 @@ const MapsViewer=(props)=>{
             
             screenShot(
                 api.openSaveFileDlg,    //保存文件对话框函数
-                api.openUrl,            //执行截屏的函数
+                api.takeScreenShot, //openUrl,            //执行截屏的函数
+                api.openUrl,
                 containerEle,           //容器元素
                 ele,                    //内容元素
                 Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离

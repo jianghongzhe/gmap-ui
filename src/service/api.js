@@ -140,6 +140,15 @@ class Api{
         return app.calcAttUrl(graphFileFullpath,picRelaPath);
     }
 
+    /**
+     * 
+     * @param {*} opt  {left,top,width,height,fileName}
+     * @returns 
+     */
+    takeScreenShot=(opt)=>{
+        return ipcRenderer.invoke('takeScreenShot', opt);
+    };
+
     openUrl=(url)=>{
         if(url.startsWith("gmap://")){
             let fn=url.substring("gmap://".length);
@@ -155,7 +164,7 @@ class Api{
             return;
         }
 
-        app.openUrl(url);
+        return app.openUrl(url);
     }
 
 

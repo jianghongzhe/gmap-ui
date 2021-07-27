@@ -14,7 +14,7 @@ class ScreenShotSvc{
      * @param {*} offsetX           要开始截取的部分相对于浏览器主内容区域左端的偏移
      * @param {*} offsetY           要开始截取的部分相对于浏览器主内容区域上端的偏移
      */
-    doScreenShot=(selFileFun, takeScrenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true)=>{       
+    doScreenShot=(selFileFun, takeScrenShotFun, combineScreenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true)=>{       
         //当前截屏任务未完成时不允许进行操作
         if(this.doing){
             return;
@@ -41,6 +41,7 @@ class ScreenShotSvc{
         this.doing=true;
         this.resultImgPath=resultImgPath;
         this.takeScrenShotFun=takeScrenShotFun;
+        this.combineScreenShotFun=combineScreenShotFun;
         setTimeout(() => {    
             this.prepareScreenShot(eleContainer, eleContent);
         }, 200);
@@ -143,24 +144,34 @@ class ScreenShotSvc{
 
         //等滚动完后，延迟一段时间再进行截屏操作
         setTimeout(() => {
-            //截取当前索引处的图片
-            let startTop=(this.hasBrowserMenu ? startTopWithTitleAndMenu : startTopWithOnlyTitle);//浏览器有菜单栏和无菜单栏所占的高度不同
-            this.takeScrenShotFun(`shot://${window.screenLeft+startLeft+this.offsetX},${window.screenTop+startTop+this.offsetY},${allPos[y][x].width},${allPos[y][x].height},${allPos[y][x].filename}`);    
-            
-            //未到一行最后，移到下一个图片继续截取
-            if(x<maxX){
-                this.startShot(allPos,x+1,y,maxX,maxY);
-                return;
-            }
+            const fun=async ()=>{
+                //截取当前索引处的图片
+                let startTop=(this.hasBrowserMenu ? startTopWithTitleAndMenu : startTopWithOnlyTitle);//浏览器有菜单栏和无菜单栏所占的高度不同
+                //await this.takeScrenShotFun(`shot://${window.screenLeft+startLeft+this.offsetX},${window.screenTop+startTop+this.offsetY},${allPos[y][x].width},${allPos[y][x].height},${allPos[y][x].filename}`);    
+                await this.takeScrenShotFun({
+                    left:window.screenLeft+startLeft+this.offsetX,
+                    top:window.screenTop+startTop+this.offsetY,
+                    width:allPos[y][x].width,
+                    height:allPos[y][x].height,
+                    fileName:allPos[y][x].filename
+                });
+                
+                //未到一行最后，移到下一个图片继续截取
+                if(x<maxX){
+                    this.startShot(allPos,x+1,y,maxX,maxY);
+                    return;
+                }
 
-            //到一行的最后，未到最后一行，移到下一行继续截取
-            if(y<maxY){
-                this.startShot(allPos,0,y+1,maxX,maxY);
-                return;
-            }
-            
-            //所有部分的图片截取完成，进行合并
-            this.combineShots(allPos);
+                //到一行的最后，未到最后一行，移到下一行继续截取
+                if(y<maxY){
+                    this.startShot(allPos,0,y+1,maxX,maxY);
+                    return;
+                }
+                
+                //所有部分的图片截取完成，进行合并
+                this.combineShots(allPos);
+            };
+            fun();
         }, 50);
     }
 
@@ -183,12 +194,11 @@ class ScreenShotSvc{
             cmd+=lineStr;
         });
 
-        this.takeScrenShotFun(cmd);
-        
-
-        this.eleContainer.scrollTop= this.oldPos.y;
-        this.eleContainer.scrollLeft=this.oldPos.x;
-        this.doing=false;
+        this.combineScreenShotFun(cmd).then(()=>{
+            this.eleContainer.scrollTop= this.oldPos.y;
+            this.eleContainer.scrollLeft=this.oldPos.x;
+            this.doing=false;
+        });   
     }
 }
 

@@ -1,5 +1,5 @@
 - 常用内容
-	- aaa|ref:haha|[](cp://aabbc你)
+	- aaa|ref:haha|[](dir://c:\Windows\System32\notepad.exe)
 	
 	
 ***
