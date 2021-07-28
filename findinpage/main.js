@@ -67,10 +67,10 @@ const closeWin=()=>{
  * 2、清空事件：清空输入框和匹配位置，停止查找
  */
 const initIpcEvent=()=>{
-    ipcRenderer.on("findinpage-places",(e, result)=>{
-        console.log("查找结果",result);
-        setRate(result.activeMatchOrdinal, result.matches);
-    });
+    // ipcRenderer.on("findinpage-places",(e, result)=>{
+    //     console.log("查找结果",result);
+    //     setRate(result.activeMatchOrdinal, result.matches);
+    // });
     ipcRenderer.on("clear-find",(e, result)=>{
         eleIpt.value='';
         setRate(0,0);
@@ -136,19 +136,28 @@ window.onload=()=>{
 
     app={
         stopFind: (...args)=>{
-            ipcRenderer.send('stopFind', ...args);
+            ipcRenderer.invoke('stopFind', ...args);
         },
         hideFindInPage: (...args)=>{
-            ipcRenderer.send('hideFindInPage', ...args);
+            ipcRenderer.invoke('hideFindInPage', ...args);
         },
         find: (...args)=>{
-            ipcRenderer.send('find', ...args);
+            ipcRenderer.invoke('find', ...args).then(result=>{
+                setRate(result.activeMatchOrdinal, result.matches);
+                console.log(result);
+            });
         },
         findNext: (...args)=>{
-            ipcRenderer.send('findNext', ...args);
+            ipcRenderer.invoke('findNext', ...args).then(result=>{
+                setRate(result.activeMatchOrdinal, result.matches);
+                console.log(result);
+            });
         },
         findPre: (...args)=>{
-            ipcRenderer.send('findPre', ...args);
+            ipcRenderer.invoke('findPre', ...args).then(result=>{
+                setRate(result.activeMatchOrdinal, result.matches);
+                console.log(result);
+            });
         },
     };
 

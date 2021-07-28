@@ -1,6 +1,14 @@
 const {BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
 
+
+/*
+ * 总体说明：
+ * 原来使用send/on的方式，发送事件和订阅事件的代码逻辑很分散，无法顺序写逻辑；
+ * 现改为invoke/handle的调用方式，让前端程序代码可以使用then或async/await的方式来顺序写
+ */
+
+
 /**
  * 初始化
  * @param {*} _app 
@@ -11,7 +19,12 @@ const init=(_app, _mainWindow)=>{
     const mainWindow=_mainWindow;
     let findWin=null; //网页内查找窗口
 
-    
+    /**
+     * 网页查找的requestId与promise中resolve对应关系。
+     * 由于findInPage不能直接返回结果，需要另外订阅一个found-in-page事件来获取，因此用此映射关系来关联
+     */
+    const findCallbackMap={};
+
     
     /**
      * 初始化查找窗口，但不显示
@@ -53,7 +66,10 @@ const init=(_app, _mainWindow)=>{
         // 主窗口渲染进程收到查找事件后，转发到查找窗口渲染进程
         mainWindow.webContents.on("found-in-page",(e, result)=>{
             if(findWin && findWin.webContents){
-                findWin.webContents.send("findinpage-places",result);
+                if(findCallbackMap[result.requestId]){
+                    findCallbackMap[result.requestId](result);
+                }
+                //findWin.webContents.send("findinpage-places",result);
             }
         });
     };
@@ -105,36 +121,59 @@ const init=(_app, _mainWindow)=>{
     };
 
     /**
-     * 查找：如果未查到结果，则触发空事件
+     * 网页查找：
+     * 如果未查到结果，则返回一个默认的promise对象，其中值为默认值0。
+     * 如果查找到，则返回一个promise，把其中的resolve函数注册到requestId-callback映射关系中，
+     * 待收到found-in-page事件时，从映射关系找到requestId对应的回调函数并执行
      * @param {*} txt 
      * @param {*} opts 
      */
     const baseFind=(txt, opts)=>{
-        let result=mainWindow.webContents.findInPage(txt,opts);
-        if(!result){
-            findWin.webContents.send("findinpage-places",{
-                activeMatchOrdinal: 0,
-                matches:            0,
+        let requestId=mainWindow.webContents.findInPage(txt,opts);
+        if(!requestId){
+            return new Promise((res, rej)=>{
+                res({
+                    activeMatchOrdinal: 0,
+                    matches:            0,
+                });
             });
         }
+        return new Promise((res, rej)=>{
+            findCallbackMap[requestId]=res;
+        });
     };
 
+    /**
+     * 开始查找
+     * @param {*} txt 
+     * @returns 
+     */
     const find=(txt)=>{
-        baseFind(txt,{
+        return baseFind(txt,{
             forward:true,
             findNext:false,
         });
     }
     
+    /**
+     * 查找下一个
+     * @param {*} txt 
+     * @returns 
+     */
     const findNext=(txt)=>{
-        baseFind(txt,{
+        return baseFind(txt,{
             forward:true,
             findNext:true,
         });
     }
     
+    /**
+     * 查找上一个
+     * @param {*} txt 
+     * @returns 
+     */
     const findPre=(txt)=>{
-        baseFind(txt,{
+        return baseFind(txt,{
             forward:false,
             findNext:true,
         });
@@ -169,6 +208,26 @@ const init=(_app, _mainWindow)=>{
     for(let key in handlerMap){
         ipcMain.on(key,fun.bind(this,handlerMap[key]));
     }
+
+
+    const handlersMap={
+        stopFind,
+        hideFindInPage,
+        find,
+        findNext,
+        findPre
+    };
+
+    const baseHandler=async (handler, evt, ...args)=>{
+        const result=await handler(...args);
+        return result;
+    };
+
+    for(let key in handlersMap){
+        ipcMain.handle(key, baseHandler.bind(this, handlersMap[key]));
+    }
+
+    
 }
 
 const fun=(fun, event, ...args)=>{
