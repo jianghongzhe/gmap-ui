@@ -238,7 +238,9 @@ class MarkedHighlightUtil {
             ele.setAttribute("hasBindEvent","yes");
             ele.style.cursor='pointer';//绑定点击事件要把光标设为手形
             let addr=ele.getAttribute('src');
-            ele.addEventListener("click",()=>{cb(addr,ele);});//本地打开时使用不带随机参数的url
+            ele.addEventListener("click",()=>{
+                cb(addr,ele);
+            });//本地打开时使用不带随机参数的url
         });
     }
 }

@@ -149,6 +149,10 @@ class Api{
         return ipcRenderer.invoke('takeScreenShot', opt);
     };
 
+    screenShotCombine=(opt)=>{
+        return ipcRenderer.invoke('screenShotCombine', opt);
+    };
+
     openUrl=(url)=>{
         if(url.startsWith("gmap://")){
             let fn=url.substring("gmap://".length);

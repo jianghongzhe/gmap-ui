@@ -181,20 +181,19 @@ class ScreenShotSvc{
      * @param {*} allPos 
      */
     combineShots=(allPos)=>{
-        let cmd=`shotCombine://${allPos[0][0].width},${allPos[0][0].height},${this.resultImgPath}`;
-        allPos.forEach((line,lineInd)=>{
-            let lineStr=`
-`;
-            line.forEach((item,itemInd)=>{
-                if(itemInd>0){
-                    lineStr+='|';
-                }
-                lineStr+=`${item.filename},${item.cutLeft},${item.cutTop}`;
-            });
-            cmd+=lineStr;
-        });
-
-        this.combineScreenShotFun(cmd).then(()=>{
+        const opt={
+            itemWidth:      allPos[0][0].width,
+            itemHeight:     allPos[0][0].height,
+            resultFullPath: this.resultImgPath,
+            lines:          allPos.map((line)=>(
+                line.map((item)=>({
+                    picName:    item.filename,
+                    cutLeft:    item.cutLeft,
+                    cutTop:     item.cutTop
+                }))
+            ))
+        };
+        this.combineScreenShotFun(opt).then(()=>{
             this.eleContainer.scrollTop= this.oldPos.y;
             this.eleContainer.scrollLeft=this.oldPos.x;
             this.doing=false;

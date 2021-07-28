@@ -581,6 +581,27 @@ const takeScreenShot=(opt)=>{
     return sendCmdToServer("shot", opt);
 };
 
+/**
+ * 屏幕截图的合并
+ * @param {*} opt {
+ *  itemWidth: 1000,
+    itemHeight: 1000,
+    resultFullPath: 'd:/aaa.jpg',
+    lines: [
+        [
+            {
+                picName:    '01.jpg',
+                cutLeft:    20,
+                cutTop:     30
+            }
+        ]
+    ]
+ * }
+ */
+const screenShotCombine=(opt)=>{
+    return sendCmdToServer("shotCombine", opt);
+};
+
 
 /**
  * 打开指定url，如果是本地file://协议的资源，则使用fileRunner执行，否则使用默认的方式执行
@@ -599,34 +620,9 @@ const openUrl=(url)=>{
     if(url.startsWith("cmd://")){
         return sendCmdToServer("cmd", {url});
     }
-    if(url.startsWith("shot://")){
-        
-
-        // left = Convert.ToInt32(strs[0]);
-        //     int top = Convert.ToInt32(strs[1]);
-        //     int width = Convert.ToInt32(strs[2]);
-        //     int height = Convert.ToInt32(strs[3]);
-        //     String fileName = strs[4].Trim();
-
-        return sendCmdToServer("shot", {url});
-    }
-    if(url.startsWith("shotCombine://")){
-        console.log({url});
-        return sendCmdToServer("shotCombine", {url});
-    }
-
-
-    if(["data:image/"].some(item=>url.startsWith(item))){
-        let indexPath= path.join(workPath,"tmp.txt");
-        fs.writeFileSync(indexPath, url, 'utf-8');
-        execFile(fileRunnerPath,["tmp.txt"]);
-        return;
-    }
-    if(["shot://","shotCombine://"].some(item=>url.startsWith(item))){
-        let indexPath= path.join(workPath,"tmp.txt");
-        fs.writeFileSync(indexPath, url, 'utf-8');
-        execFileSync(fileRunnerPath,["tmp.txt"]);
-        return;
+    if(url.startsWith("data:image/")){
+        console.log(url);
+        return sendCmdToServer("saveImgBase64", {url});
     }
     shell.openExternal(url);
 }
@@ -1004,12 +1000,14 @@ setTimeout(() => {
     server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));    
 }, 3000);
 
+console.log(`app pid is: ${process.pid}`);
 
 
 
 
 const ipcHandlers={
-    takeScreenShot
+    takeScreenShot,
+    screenShotCombine
 };
 
 const delegateHandler=async (handler, evt, arg)=>{
@@ -1020,6 +1018,8 @@ const delegateHandler=async (handler, evt, arg)=>{
 for(key in ipcHandlers){
     ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
 }
+
+
 
 
 module.exports={
