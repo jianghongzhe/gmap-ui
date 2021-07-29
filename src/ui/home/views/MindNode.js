@@ -6,6 +6,7 @@ import gantPic from '../../../assets/gantt.png';
 import relaPic from '../../../assets/relachart.png';
 import {createSelector} from 'reselect';
 import marked from 'marked';
+import NodeLinkIcon from './NodeLinkIcon';
 import './markdown-node.css';
 
 /**
@@ -23,7 +24,7 @@ const MindNode=(props)=>{
         nd.prog ||
         nd.gant ||
         (nd.memo && 0<nd.memo.length) ||
-        nd.ref ||
+        (nd.refs && 0<nd.refs.length) ||
         (nd.links && 0<nd.links.length)
     );
 
@@ -125,12 +126,15 @@ const MindNode=(props)=>{
                 nd.links.map((link,linkInd)=>(
                     <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
                         <span css={themeBtnWrapperStyle} >
-                            <Button 
+                            {/* <Button 
                                 key={linkInd} 
                                 type="link" 
                                 size='small' 
                                 className='themebtn'
                                 icon={getLinkIcon(link.addr)}  
+                                onClick={props.onOpenLink.bind(this,link.addr)}/> */}
+                            <NodeLinkIcon 
+                                lindAddr={link.addr}
                                 onClick={props.onOpenLink.bind(this,link.addr)}/>
                         </span>
                     </Tooltip>
