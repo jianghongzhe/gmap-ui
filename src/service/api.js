@@ -25,6 +25,10 @@ class Api{
         ipcRenderer.send('hideFindInPage');
     }
 
+    loadIcon=(url)=>{
+        return ipcRenderer.invoke('loadIcon', url);
+    };
+
     getInnerModuleVersions=()=>{
         return app.getInnerModuleVersions();
     }

@@ -2,19 +2,24 @@
 import React, { useEffect, useState } from 'react';
 import { Button,Tooltip, Progress,Avatar  } from 'antd';
 import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
+import api from '../../../service/api';
 
 const NodeLinkIcon=(props)=>{
     const [localIcon, setLocalIcon]=useState(null);
 
     useEffect(()=>{
         if(["file:///", "http://", "https://"].some(pref=>props.lindAddr.startsWith(pref))){
-            console.log("获取icon", props.lindAddr);
-            setTimeout(() => {
-                setLocalIcon('http://localhost:3000/favicon.ico');
-            }, 2000);
+            const fun=async ()=>{
+                try{
+                    const resp= await api.loadIcon(props.lindAddr);
+                    if(resp.succ && resp.data){
+                        setLocalIcon(resp.data);
+                    }
+                }catch(e){
+                }
+            };
+            fun();
         }
-
-        
     },[props.lindAddr, setLocalIcon]);
 
     if(!localIcon){

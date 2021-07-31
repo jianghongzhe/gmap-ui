@@ -1,0 +1,12 @@
+﻿[file_runner.service.Server] [2021-07-31 11:31:15.512] 请求处理线程 4
+[file_runner.service.LoadIconHandler] [2021-07-31 11:31:15.617] 准备加载网页上的图标 http://baidu.com
+[file_runner.service.LoadIconHandler] [2021-07-31 11:31:15.619] 图标文件存在，直接返回 D:\ws\web\gmap-ui\cache\baidu.com.png
+[file_runner.service.Server] [2021-07-31 11:32:14.173] 请求处理线程 5
+[file_runner.service.LoadIconHandler] [2021-07-31 11:32:14.174] 准备加载网页上的图标 http://baidu.com
+[file_runner.service.LoadIconHandler] [2021-07-31 11:32:14.176] 图标文件存在，直接返回 D:\ws\web\gmap-ui\cache\baidu.com.png
+[file_runner.service.Server] [2021-07-31 11:32:18.888] 请求处理线程 6
+[file_runner.service.LoadIconHandler] [2021-07-31 11:32:18.889] 准备加载网页上的图标 http://baidu.com
+[file_runner.service.LoadIconHandler] [2021-07-31 11:32:18.890] 图标文件存在，直接返回 D:\ws\web\gmap-ui\cache\baidu.com.png
+[file_runner.service.Server] [2021-07-31 11:32:38.221] 请求处理线程 5
+[file_runner.service.LoadIconHandler] [2021-07-31 11:32:38.221] 准备加载网页上的图标 http://baidu.com
+[file_runner.service.LoadIconHandler] [2021-07-31 11:32:38.222] 图标文件存在，直接返回 D:\ws\web\gmap-ui\cache\baidu.com.png

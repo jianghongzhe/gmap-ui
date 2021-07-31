@@ -7,14 +7,18 @@ const nodeNet = require('net');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
-const fileRunnerPath=path.join(__dirname,'externals','file_runner.exe');
+const externalPath=path.join(__dirname,'externals');
+const fileRunnerPath=path.join(externalPath,'file_runner.exe');
 const mapsPath=path.join(__dirname,'gmaps');
 const imgsPath=path.join(__dirname,'gmaps','imgs');
 const attsPath=path.join(__dirname,'gmaps','atts');
 const workPath=path.join(__dirname,'work');
+const cachePath=path.join(__dirname,'cache');
 const packageJsonPath=path.join(__dirname,'package.json');
 const SLASH='/';
 const BACK_SLASH='\\';
+
+const url_localicon_map={};
 
 /**
  * {
@@ -582,6 +586,39 @@ const takeScreenShot=(opt)=>{
 };
 
 /**
+ * 加载指定Url的图标：
+ * 1、如果是开发模式，直接返回开发服务器url+/favicon.ico
+ * 2、如果缓存中有，直接返回
+ * 3、如果缓存没有，向后台查询。
+ *      如果查询成功，则放入缓冲以备下次访问，同时返回结果；
+ *      如果查找失败，直接返回结果
+ * @param {*} url 
+ * @returns 
+ */
+const loadIcon=(url)=>{
+    if(isDevMode()){
+        return new Promise((res,rej)=>{
+           res({
+                succ: true,
+                msg: "",
+                data: getDevServerUrl().trim()+"/favicon.ico"
+           }); 
+        });
+    }
+    if(url_localicon_map[url]){
+        return new Promise((res,rej)=>{
+            res(url_localicon_map[url]); 
+        });
+    }
+    return sendCmdToServer("loadIcon",{url}).then(resp=>{
+        if(resp.succ){
+            url_localicon_map[url]=resp;
+        }
+        return resp;
+    });
+};
+
+/**
  * 屏幕截图的合并
  * @param {*} opt {
  *  itemWidth: 1000,
@@ -601,6 +638,8 @@ const takeScreenShot=(opt)=>{
 const screenShotCombine=(opt)=>{
     return sendCmdToServer("shotCombine", opt);
 };
+
+
 
 
 /**
@@ -829,7 +868,7 @@ const openDevTool=(mainWindow)=>{
  * 创建工作目录与图片目录
  */
 const init=()=>{
-    [imgsPath,attsPath,workPath].forEach(eachWorkdir=>{
+    [imgsPath,attsPath,workPath, cachePath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
@@ -976,7 +1015,7 @@ const sendCmdToServer=(action, data)=>{
         const request = net.request(`${server_info.url}${action}`);
         request.on('response', (response) => {
             response.on('data', (chunk) => {
-                res(chunk);
+                res(JSON.parse(chunk.toString("utf-8")));
             });
             response.on('error',(errObj)=>{
                 rej(errObj);
@@ -995,7 +1034,7 @@ const sendCmdToServer=(action, data)=>{
 /**
  * 启动助手子程序，并在过一会后获得服务器信息（访问地址url前缀、进程id等）
  */
-spawn(fileRunnerPath);
+spawn(fileRunnerPath, [], {cwd: externalPath});
 setTimeout(() => {
     server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));    
 }, 3000);
@@ -1007,7 +1046,8 @@ console.log(`app pid is: ${process.pid}`);
 
 const ipcHandlers={
     takeScreenShot,
-    screenShotCombine
+    screenShotCombine,
+    loadIcon,
 };
 
 const delegateHandler=async (handler, evt, arg)=>{
