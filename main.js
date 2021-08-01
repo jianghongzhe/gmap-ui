@@ -1,21 +1,24 @@
-
 const { app, BrowserWindow, Menu} = require('electron');
 const mainSvc = require('./mainSvc');
 const findInPageSvc= require('./findInPageSvc');
 const fs = require('fs');
 
-//require('@electron/remote/main').initialize();
-
+/**
+ * 主窗口
+ */
 let mainWindow = null;
+
 
 app.commandLine.appendSwitch("--disable-http-cache");
 
 
 
-
+/**
+ * 创建主窗口但不加载首页
+ */
 const createWindow=()=>{
     //在非开发模式禁用系统菜单；开发模式则显示默认菜单，方面调试
-    if (!app.isDevMode()) {
+    if (!mainSvc.isDevMode()) {
         Menu.setApplicationMenu(null);
     }
 
@@ -31,15 +34,18 @@ const createWindow=()=>{
             contextIsolation: false,
         }
     });
+
     mainWindow.maximize();
     mainWindow.show();
 
     mainWindow.on('closed', function () {
         mainWindow = null;
-    })
+    });
 }
 
-
+/**
+ * 加载首页
+ */
 const loadFirstPage=()=>{
     if (app.isDevMode()) {
         mainWindow.loadURL(app.getDevServerUrl());
@@ -49,9 +55,19 @@ const loadFirstPage=()=>{
 }
 
 
+/**
+ * 程序初始化：
+ * 1、启动主窗口（不加载首页）
+ * 2、初始化主服务和查找窗口服务
+ * 3、加载首页
+ */
 app.on('ready', () => {    
-    //初始化：即创建工作目录等
-    mainSvc.init();
+
+    //创建主窗口
+    createWindow();
+
+    //初始化：即创建必须的目录、启动助手监听程序等
+    mainSvc.init(mainWindow);
 
     // 把业务类暴露的接口附加到app对象上，让渲染进程调用
     for (let key in mainSvc) {
@@ -61,8 +77,7 @@ app.on('ready', () => {
         app[key] = mainSvc[key];
     }
     
-    //创建主窗口
-    createWindow();
+    
 
     //依赖主窗口的服务进行初始化
     app.selPicFile = app.selPicFile.bind(app,mainWindow);

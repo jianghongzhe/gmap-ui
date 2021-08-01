@@ -4,3 +4,24 @@ Exception origin: uncaughtException
 Caught exception: Error: read ECONNRESET
 Exception origin: uncaughtException
 
+Caught exception: TypeError: app.isDevMode is not a function
+Exception origin: uncaughtException
+
+Caught exception: TypeError: app.isDevMode is not a function
+Exception origin: uncaughtException
+
+Caught exception: TypeError: app.isDevMode is not a function
+Exception origin: uncaughtException
+
+Caught exception: TypeError: app.isDevMode is not a function
+Exception origin: uncaughtException
+
+Caught exception: TypeError: app.isDevMode is not a function
+Exception origin: uncaughtException
+
+Caught exception: TypeError: mainSvc.isDevMode is not a function
+Exception origin: uncaughtException
+
+Caught exception: TypeError: mainSvc.isDevMode is not a function
+Exception origin: uncaughtException
+

@@ -20,6 +20,8 @@ const BACK_SLASH='\\';
 
 const url_localicon_map={};
 
+let mainWindow=null;
+
 /**
  * {
  *  "url": "http://localhost:56789/",
@@ -660,8 +662,23 @@ const openUrl=(url)=>{
         return sendCmdToServer("cmd", {url});
     }
     if(url.startsWith("data:image/")){
-        console.log(url);
-        return sendCmdToServer("saveImgBase64", {url});
+        const savePath=dialog.showSaveDialogSync(mainWindow, { 
+            properties: ['showHiddenFiles'],
+            filters: [
+                { name: 'png', extensions: ['png'] },
+                { name: 'jpg', extensions: ['jpg'] },
+                { name: 'jpeg', extensions: ['jpeg'] },
+                { name: 'bmp', extensions: ['bmp'] },
+                { name: 'gif', extensions: ['gif'] },
+                { name: 'svg', extensions: ['svg'] },
+                { name: 'webp', extensions: ['webp'] },
+                { name: '所有', extensions: ['*'] }
+            ]
+        });
+        if(!savePath){
+            return new Promise((res, rej)=>rej(new Error("用户已取消")));
+        }
+        return sendCmdToServer("saveImgBase64", {url, savePath});
     }
     shell.openExternal(url);
 }
@@ -865,14 +882,25 @@ const openDevTool=(mainWindow)=>{
 
 /**
  * 初始化工作：
- * 创建工作目录与图片目录
+ * 1、持有主窗口对象
+ * 2、创建初始目录：图片目录、附件目录、工作目录、缓存目录等
+ * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url前缀、进程id等）
  */
-const init=()=>{
+const init=(_mainWindow)=>{
+    mainWindow=_mainWindow;
+
     [imgsPath,attsPath,workPath, cachePath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
     });
+
+    spawn(fileRunnerPath, [], {cwd: externalPath});
+    setTimeout(() => {
+        server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
+        console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.url}`);
+    }, 3000);
+    console.log(`app started, pid is: ${process.pid}`);
 }
 
 
@@ -1031,15 +1059,7 @@ const sendCmdToServer=(action, data)=>{
 
 
 
-/**
- * 启动助手子程序，并在过一会后获得服务器信息（访问地址url前缀、进程id等）
- */
-spawn(fileRunnerPath, [], {cwd: externalPath});
-setTimeout(() => {
-    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));    
-}, 3000);
 
-console.log(`app pid is: ${process.pid}`);
 
 
 

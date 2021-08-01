@@ -7,19 +7,31 @@ import api from '../../../service/api';
 const NodeLinkIcon=(props)=>{
     const [localIcon, setLocalIcon]=useState(null);
 
+    /**
+     * 异常加载url对应的图标，如果状态为已取消，则停止操作
+     */
     useEffect(()=>{
-        if(["file:///", "http://", "https://"].some(pref=>props.lindAddr.startsWith(pref))){
+        let canceled=false;
+        if(["file://", "http://", "https://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
                     if(resp.succ && resp.data){
-                        setLocalIcon(resp.data);
+                        if(!canceled){
+                            try{
+                                setLocalIcon(resp.data);
+                            }catch(e){
+                            }
+                        }
                     }
                 }catch(e){
                 }
             };
             fun();
         }
+        return ()=>{
+            canceled=true;
+        };
     },[props.lindAddr, setLocalIcon]);
 
     if(!localIcon){
