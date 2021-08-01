@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net, ipcMain   } = require('electron');
+const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net, ipcMain,Notification   } = require('electron');
 const fs = require('fs');
 const Url = require('url');
 const { exec, spawn, execFile,execFileSync } = require('child_process');
@@ -579,13 +579,7 @@ const existsGraph = (fn) => {
 }
 
 
-/**
- * 进行屏幕截图
- * @param {*} opt  {left,top,width,height,fileName}
- */
-const takeScreenShot=(opt)=>{
-    return sendCmdToServer("shot", opt);
-};
+
 
 /**
  * 加载指定Url的图标：
@@ -620,6 +614,16 @@ const loadIcon=(url)=>{
     });
 };
 
+
+
+/**
+ * 进行屏幕截图
+ * @param {*} opt  {left,top,width,height,fileName}
+ */
+ const takeScreenShot=(opt)=>{
+    return sendCmdToServer("shot", opt);
+};
+
 /**
  * 屏幕截图的合并
  * @param {*} opt {
@@ -638,7 +642,12 @@ const loadIcon=(url)=>{
  * }
  */
 const screenShotCombine=(opt)=>{
-    return sendCmdToServer("shotCombine", opt);
+    return sendCmdToServer("shotCombine", opt).then(resp=>{
+        if(resp && resp.succ){
+            showNotification(resp.data.title, resp.data.body);
+        }
+        return resp;
+    });
 };
 
 
@@ -649,9 +658,9 @@ const screenShotCombine=(opt)=>{
  * @param {*} url 
  */
 const openUrl=(url)=>{
-    if(url.startsWith("cp://")){
-        return sendCmdToServer("cp", {url});
-    }
+    /**
+     * 不需要反馈
+     */
     if(url.startsWith("file://")){
         return sendCmdToServer("file", {url});
     }
@@ -660,6 +669,18 @@ const openUrl=(url)=>{
     }
     if(url.startsWith("cmd://")){
         return sendCmdToServer("cmd", {url});
+    }
+
+    /**
+     * 需要反馈
+     */
+    if(url.startsWith("cp://")){
+        return sendCmdToServer("cp", {url}).then(resp=>{
+            if(resp && resp.succ){
+                showNotification(resp.data.title, resp.data.body);
+            }
+            return resp;
+        });
     }
     if(url.startsWith("data:image/")){
         const savePath=dialog.showSaveDialogSync(mainWindow, { 
@@ -678,10 +699,16 @@ const openUrl=(url)=>{
         if(!savePath){
             return new Promise((res, rej)=>rej(new Error("用户已取消")));
         }
-        return sendCmdToServer("saveImgBase64", {url, savePath});
+        return sendCmdToServer("saveImgBase64", {url, savePath}).then(resp=>{
+            if(resp && resp.succ){
+                showNotification(resp.data.title, resp.data.body);
+            }
+            return resp;
+        });
     }
     shell.openExternal(url);
 }
+
 
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
@@ -1006,7 +1033,21 @@ const downFile=(url,savePath)=>{
 
 
 
-
+const showNotification=(...args)=>{
+    let title="信息";
+    let body="";
+    if(1==args.length){
+        body=args[0];
+    }else if(2<=args.length){
+        title=args[0];
+        body=args[1];
+    }
+    const n=new Notification({ title, body });
+    n.show();
+    setTimeout(() => {
+        n.close();
+    }, 4000);
+};
 
 /**
  * 通过环境变量判断当前是否为开发模式
@@ -1068,6 +1109,7 @@ const ipcHandlers={
     takeScreenShot,
     screenShotCombine,
     loadIcon,
+    showNotification,
 };
 
 const delegateHandler=async (handler, evt, arg)=>{

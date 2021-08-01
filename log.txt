@@ -25,3 +25,6 @@ Exception origin: uncaughtException
 Caught exception: TypeError: mainSvc.isDevMode is not a function
 Exception origin: uncaughtException
 
+Caught exception: ReferenceError: Notification is not defined
+Exception origin: uncaughtException
+

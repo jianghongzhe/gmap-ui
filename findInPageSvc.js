@@ -1,5 +1,4 @@
 const {BrowserWindow, ipcMain } = require('electron');
-const fs = require('fs');
 
 
 /*
@@ -11,19 +10,19 @@ const fs = require('fs');
 
 /**
  * 初始化
- * @param {*} _app 
- * @param {*} _mainWindow 
+ * @param {*} _mainWindow  主窗口
+ * @param {*} _devMode     是否为开发模式
  */
-const init=(_app, _mainWindow)=>{
-    const app=_app;
+const init=(_mainWindow, _devMode)=>{
     const mainWindow=_mainWindow;
+    const devMode=_devMode;
     let findWin=null; //网页内查找窗口
 
     /**
      * 网页查找的requestId与promise中resolve对应关系。
      * 由于findInPage不能直接返回结果，需要另外订阅一个found-in-page事件来获取，因此用此映射关系来关联
      */
-    const findCallbackMap={};
+    let findCallbackMap={};
 
     
     /**
@@ -59,7 +58,7 @@ const init=(_app, _mainWindow)=>{
         findWin.loadFile(__dirname + '\\findinpage\\index.html');
 
         //如果是开发模式，打开控制台
-        if(app.isDevMode()){
+        if(devMode){
             findWin.webContents.toggleDevTools();
         }
 
@@ -87,19 +86,26 @@ const init=(_app, _mainWindow)=>{
             mainWinY=0;
         }
         const x=(w-winW-30)+mainWinX; //水平位置：居右
-        const y=(winTop+(app.isDevMode()?20:0))+mainWinY; //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
+        const y=(winTop+(devMode?20:0))+mainWinY; //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
         return {x,y};
     };
 
     /**
-     * 隐藏查找窗口
+     * 隐藏查找窗口：
+     * 1、清除主窗口上的查找痕迹
+     * 2、向查找窗口发事件，让其清空输入内容和状态
+     * 3、隐藏查找窗口
+     * 4、主窗口重新获得焦点
+     * 5、清空requestId与promise中resolve对应关系
      */
     const hideFindInPage=()=>{
         if(null!=findWin && findWin.isVisible()){
+            stopFind();
             findWin.webContents.send("clear-find",{});
             findWin.setBounds({ x:-9999, y:-9999});
             findWin.hide();
             mainWindow.focus();
+            findCallbackMap={};
         }
     };
 
@@ -118,6 +124,7 @@ const init=(_app, _mainWindow)=>{
         }
         findWin.setBounds({x,y});
         findWin.focus();
+        findWin.webContents.send("focus-input", {});
     };
 
     /**
@@ -179,38 +186,21 @@ const init=(_app, _mainWindow)=>{
         });
     }
     
+    /**
+     * 清除主页上的查找痕迹
+     */
     const stopFind=()=>{
         mainWindow.webContents.stopFindInPage("clearSelection");
     }
 
 
-    /**
-     * 方法绑定到app
-     */
-    app.initFindInPage=initWin;
-    app.showFindInPage=showFindInPage;
-    app.hideFindInPage=hideFindInPage;
-    app.find=find;
-    app.findNext=findNext;
-    app.findPre=findPre;
-    app.stopFind=stopFind;
 
-    const handlerMap={
+    /**
+     * 注册ipc事件
+     */
+    const handlersMap={
         initFindInPage: initWin,
         showFindInPage: showFindInPage,
-        hideFindInPage: hideFindInPage,
-        find: find,
-        findNext: findNext,
-        findPre: findPre,
-        stopFind: stopFind,
-    };
-
-    for(let key in handlerMap){
-        ipcMain.on(key,fun.bind(this,handlerMap[key]));
-    }
-
-
-    const handlersMap={
         stopFind,
         hideFindInPage,
         find,
@@ -226,13 +216,7 @@ const init=(_app, _mainWindow)=>{
     for(let key in handlersMap){
         ipcMain.handle(key, baseHandler.bind(this, handlersMap[key]));
     }
-
-    
 }
-
-const fun=(fun, event, ...args)=>{
-    fun(...args);
-};
 
 module.exports={
     init, //初始化

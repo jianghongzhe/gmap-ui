@@ -13,7 +13,8 @@ let eleBtnClose=null;
 
 
 /**
- * 基本查找函数：当内容为空时，停止查找，并隐藏比值
+ * 基本查找函数：
+ * 当内容为空时，清除页面查找痕迹，并隐藏比值；否则调用对应查找函数
  * @param {*} fun 具体的查找函数
  */
 const baseFind=(fun)=>{
@@ -28,7 +29,7 @@ const baseFind=(fun)=>{
 
 /**
  * 查找：
- * 由于第一次查找时收不到当前查找位置的事件，因此再分别执行查找下一个与查找上一个
+ * 由于第一次查找时收不到当前查找位置的事件，因此再分别执行一次查找下一个与查找上一个
  */
 const find=()=>{
     baseFind(app.find);
@@ -51,30 +52,25 @@ const findPre=()=>{
 };
 
 /**
- * 关闭窗口：使用隐藏的方式，不真正关闭
+ * 关闭窗口：调用ipcMain来总体控制，因为需要操作主窗口相关内容
  */
 const closeWin=()=>{
-    eleIpt.value='';
-    setRate(0,0);
-    app.stopFind();
     app.hideFindInPage();
 }
 
 
 /**
- * 初始化ipc交互事件：
- * 1、查找位置变更事件：如果没有匹配则隐藏分数部分
- * 2、清空事件：清空输入框和匹配位置，停止查找
+ * 初始化ipc事件：
+ * 1、清空事件：清空输入框和匹配位置
+ * 2、获得焦点事件：每次打开对话框时使输入框获得焦点
  */
 const initIpcEvent=()=>{
-    // ipcRenderer.on("findinpage-places",(e, result)=>{
-    //     console.log("查找结果",result);
-    //     setRate(result.activeMatchOrdinal, result.matches);
-    // });
     ipcRenderer.on("clear-find",(e, result)=>{
         eleIpt.value='';
         setRate(0,0);
-        app.stopFind();
+    });
+    ipcRenderer.on("focus-input",(e, result)=>{
+        eleIpt.focus();
     });
 };
 
@@ -127,12 +123,7 @@ const bindElesEvents=()=>{
  * 窗口加载事件
  */
 window.onload=()=>{
-    // 变量初始化
-    //app =window.require('electron').remote.app; //window.require('@electron/remote').app;  //window.require('electron').remote.app;
-
-
     ipcRenderer = window.require('electron').ipcRenderer;
-
 
     app={
         stopFind: (...args)=>{
@@ -144,19 +135,16 @@ window.onload=()=>{
         find: (...args)=>{
             ipcRenderer.invoke('find', ...args).then(result=>{
                 setRate(result.activeMatchOrdinal, result.matches);
-                console.log(result);
             });
         },
         findNext: (...args)=>{
             ipcRenderer.invoke('findNext', ...args).then(result=>{
                 setRate(result.activeMatchOrdinal, result.matches);
-                console.log(result);
             });
         },
         findPre: (...args)=>{
             ipcRenderer.invoke('findPre', ...args).then(result=>{
                 setRate(result.activeMatchOrdinal, result.matches);
-                console.log(result);
             });
         },
     };
@@ -172,6 +160,6 @@ window.onload=()=>{
     initKeyEvent();
     bindElesEvents();
 
-    // 初始化
+    // 获得焦点
     eleIpt.focus();
 };

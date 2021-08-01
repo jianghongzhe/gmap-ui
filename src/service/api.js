@@ -12,17 +12,17 @@ class Api{
      */
     initFindInPageDlg=()=>{
         //app.initFindInPage(300);
-        ipcRenderer.send('initFindInPage', 300);
+        ipcRenderer.invoke('initFindInPage', 300);
     }
 
     showFindInPageDlg=()=>{
         //app.showFindInPage(300,140);
-        ipcRenderer.send('showFindInPage', 300,140);
+        ipcRenderer.invoke('showFindInPage', 300,140);
     }
 
     closeFindInPageDlg=()=>{
         // app.hideFindInPage();
-        ipcRenderer.send('hideFindInPage');
+        ipcRenderer.invoke('hideFindInPage');
     }
 
     loadIcon=(url)=>{
@@ -171,7 +171,7 @@ class Api{
             // console.log("笔记链接跳转：",url,item);
             return;
         }
-
+        //new Notification('标题', { body: '内容\n内容第2行' });
         return app.openUrl(url);
     }
 

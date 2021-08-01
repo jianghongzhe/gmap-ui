@@ -87,7 +87,7 @@ app.on('ready', () => {
     app.isMaximized=app.isMaximized.bind(app,mainWindow);
 
 
-    findInPageSvc.init(app, mainWindow)
+    findInPageSvc.init(mainWindow, mainSvc.isDevMode());
 
     
     
