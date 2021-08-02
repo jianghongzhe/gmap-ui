@@ -1,6 +1,8 @@
 - 常用内容
 	- aaa|ref:haha|[](file:///D:\games\TombRaider\开始游戏.exe)|ref:haha
 	- 222|[](cp:///dfas)
+	- file|[](file:///d:\a.txt)|[](file:///d:\aaaaa.txt)
+	- dir|[](dir:///d:\a.txt)|[](dir:///d:\aaaaa.txt)
 	
 	
 ***

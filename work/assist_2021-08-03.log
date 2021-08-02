@@ -1,0 +1,58 @@
+﻿[file_runner.service.Server] [thread-4] [2021-08-03 12:48:48.211]  请求处理线程 4
+[file_runner.service.Server] [thread-5] [2021-08-03 12:48:52.356]  请求处理线程 5
+[file_runner.service.Server] [thread-4] [2021-08-03 12:48:59.308]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:48:59.341]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 12:49:06.588]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:49:06.588]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-6] [2021-08-03 12:49:17.075]  请求处理线程 6
+[file_runner.service.Server] [thread-9] [2021-08-03 12:49:28.886]  请求处理线程 9
+[file_runner.service.Server] [thread-9] [2021-08-03 12:49:28.886]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 12:50:32.010]  请求处理线程 4
+[file_runner.service.Server] [thread-6] [2021-08-03 12:50:35.510]  请求处理线程 6
+[file_runner.service.Server] [thread-4] [2021-08-03 12:50:51.307]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:50:51.345]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 12:50:53.372]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:50:53.372]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 12:51:04.574]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:51:04.574]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-5] [2021-08-03 12:51:11.476]  请求处理线程 5
+[file_runner.service.Server] [thread-5] [2021-08-03 12:51:11.477]  指定的路径不存在：d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 12:57:52.340]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:57:52.430]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-7] [2021-08-03 12:58:43.781]  请求处理线程 7
+[file_runner.service.Server] [thread-7] [2021-08-03 12:58:43.781]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-10] [2021-08-03 12:58:52.373]  请求处理线程 10
+[file_runner.service.Server] [thread-10] [2021-08-03 12:58:52.374]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 12:59:17.377]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 12:59:17.462]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-6] [2021-08-03 12:59:24.011]  请求处理线程 6
+[file_runner.service.Server] [thread-6] [2021-08-03 12:59:24.012]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)

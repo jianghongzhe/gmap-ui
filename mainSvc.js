@@ -658,22 +658,29 @@ const screenShotCombine=(opt)=>{
  * @param {*} url 
  */
 const openUrl=(url)=>{
-    /**
-     * 不需要反馈
-     */
-    if(url.startsWith("file://")){
-        return sendCmdToServer("file", {url});
-    }
-    if(url.startsWith("dir://")){
-        return sendCmdToServer("dir", {url});
-    }
+    // 执行命令
     if(url.startsWith("cmd://")){
         return sendCmdToServer("cmd", {url});
     }
-
-    /**
-     * 需要反馈
-     */
+    // 执行文件或打开目录
+    if(url.startsWith("file://")){
+        return sendCmdToServer("file", {url}).then(resp=>{
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg);
+            }
+            return resp;
+        });
+    }
+    // 打开目录并选择文件
+    if(url.startsWith("dir://")){
+        return sendCmdToServer("dir", {url}).then(resp=>{
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg);
+            }
+            return resp;
+        });
+    }
+    // 复制内容
     if(url.startsWith("cp://")){
         return sendCmdToServer("cp", {url}).then(resp=>{
             if(resp && resp.succ){
@@ -682,6 +689,7 @@ const openUrl=(url)=>{
             return resp;
         });
     }
+    // 保存base64内容到图片文件
     if(url.startsWith("data:image/")){
         const savePath=dialog.showSaveDialogSync(mainWindow, { 
             properties: ['showHiddenFiles'],
@@ -706,6 +714,7 @@ const openUrl=(url)=>{
             return resp;
         });
     }
+    // 其他情况，直接用shell执行
     shell.openExternal(url);
 }
 
@@ -1042,11 +1051,11 @@ const showNotification=(...args)=>{
         title=args[0];
         body=args[1];
     }
-    const n=new Notification({ title, body });
+    const n=new Notification({ title, body/*, icon: 'C:\\Users\\Administrator\\Desktop\\2\\1.jpg'*/ });
     n.show();
     setTimeout(() => {
         n.close();
-    }, 4000);
+    }, 5000);
 };
 
 /**
@@ -1078,7 +1087,12 @@ const getDevToolExtensionUrl=()=>{
     return '';
 }
 
-
+/**
+ * 向助手程序发送内容并得到结果
+ * @param {*} action 
+ * @param {*} data 
+ * @returns 
+ */
 const sendCmdToServer=(action, data)=>{
     return new Promise((res, rej)=>{
         const request = net.request(`${server_info.url}${action}`);
