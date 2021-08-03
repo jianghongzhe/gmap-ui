@@ -4,7 +4,7 @@
   "showname": "GMap - 思维导图",
   "private": true,
   "homepage": "./",
-  "main": "main.js",
+  "main": "./main/main.js",
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
     "@emotion/react": "^11.4.0",

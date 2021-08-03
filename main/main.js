@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu} = require('electron');
 const mainSvc = require('./mainSvc');
 const findInPageSvc= require('./findInPageSvc');
+const path = require('path');
 const fs = require('fs');
 
 /**
@@ -28,7 +29,6 @@ const createWindow=()=>{
         height: 900 - 100,
         show: false,
         webPreferences: {
-            //preload: path.join(__dirname, 'preload.js')
             nodeIntegration: true,
             enableRemoteModule: true,
             contextIsolation: false,
@@ -50,7 +50,8 @@ const loadFirstPage=()=>{
     if (app.isDevMode()) {
         mainWindow.loadURL(app.getDevServerUrl());
     } else {
-        mainWindow.loadFile(__dirname + '\\build\\index.html');
+        const localFirstPath=path.join(__dirname, "../", "build", "index.html");
+        mainWindow.loadFile(localFirstPath);
     }
 }
 
@@ -118,8 +119,14 @@ app.on('activate', function () {
 });
 
 process.on('uncaughtException', (err, origin) => {
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
+
+    const localpath=path.join(__dirname, "../", "work", `main_${ymd}.log`);
     fs.appendFileSync(
-        __dirname+"\\log.txt",
+        localpath,
         `Caught exception: ${err}\nException origin: ${origin}\n\n`,
         'utf-8'
     );

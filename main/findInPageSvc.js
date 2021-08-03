@@ -1,4 +1,5 @@
 const {BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
 
 
 /*
@@ -55,7 +56,8 @@ const init=(_mainWindow, _devMode)=>{
         });
 
         //加载文件
-        findWin.loadFile(__dirname + '\\findinpage\\index.html');
+        const localpath=path.join(__dirname, "../" , "findinpage", "index.html");
+        findWin.loadFile(localpath);
 
         //如果是开发模式，打开控制台
         if(devMode){

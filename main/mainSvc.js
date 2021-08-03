@@ -7,14 +7,28 @@ const nodeNet = require('net');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
-const externalPath=path.join(__dirname,'externals');
-const fileRunnerPath=path.join(externalPath,'file_runner.exe');
-const mapsPath=path.join(__dirname,'gmaps');
-const imgsPath=path.join(__dirname,'gmaps','imgs');
-const attsPath=path.join(__dirname,'gmaps','atts');
-const workPath=path.join(__dirname,'work');
-const cachePath=path.join(__dirname,'cache');
-const packageJsonPath=path.join(__dirname,'package.json');
+const externalPath=path.join(__dirname, '../', 'externals');
+const fileRunnerPath=path.join(__dirname, '../', 'externals', 'file_runner.exe');
+const mapsPath=path.join(__dirname, '../', 'gmaps');
+const imgsPath=path.join(__dirname, '../', 'gmaps','imgs');
+const attsPath=path.join(__dirname, '../', 'gmaps','atts');
+const workPath=path.join(__dirname, '../', 'work');
+const cachePath=path.join(__dirname, '../', 'cache');
+const packageJsonPath=path.join(__dirname, '../', 'package.json');
+
+const iconSuccPath=path.join(__dirname, 'imgs', 'succ.png');
+const iconFailPath=path.join(__dirname, 'imgs', 'fail.png');
+const iconWarnPath=path.join(__dirname, 'imgs', 'warn.png');
+const iconInfoPath=path.join(__dirname, 'imgs', 'info.png');
+const icons={
+    succ: iconSuccPath,
+    fail: iconFailPath,
+    err: iconFailPath,
+    info: iconInfoPath,
+    warn: iconWarnPath,
+};
+
+
 const SLASH='/';
 const BACK_SLASH='\\';
 
@@ -51,7 +65,7 @@ let appInfoCache=null;
  * 获取基路径
  */
 const getBasePath=()=>{
-    return __dirname;
+    return path.join(__dirname, '../');
 }
 
 
@@ -644,7 +658,7 @@ const loadIcon=(url)=>{
 const screenShotCombine=(opt)=>{
     return sendCmdToServer("shotCombine", opt).then(resp=>{
         if(resp && resp.succ){
-            showNotification(resp.data.title, resp.data.body);
+            showNotification(resp.data.title, resp.data.body, 'succ');
         }
         return resp;
     });
@@ -666,7 +680,7 @@ const openUrl=(url)=>{
     if(url.startsWith("file://")){
         return sendCmdToServer("file", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg);
+                showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -675,7 +689,7 @@ const openUrl=(url)=>{
     if(url.startsWith("dir://")){
         return sendCmdToServer("dir", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg);
+                showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -684,7 +698,7 @@ const openUrl=(url)=>{
     if(url.startsWith("cp://")){
         return sendCmdToServer("cp", {url}).then(resp=>{
             if(resp && resp.succ){
-                showNotification(resp.data.title, resp.data.body);
+                showNotification(resp.data.title, resp.data.body, 'succ');
             }
             return resp;
         });
@@ -709,7 +723,7 @@ const openUrl=(url)=>{
         }
         return sendCmdToServer("saveImgBase64", {url, savePath}).then(resp=>{
             if(resp && resp.succ){
-                showNotification(resp.data.title, resp.data.body);
+                showNotification(resp.data.title, resp.data.body, 'succ');
             }
             return resp;
         });
@@ -1041,17 +1055,36 @@ const downFile=(url,savePath)=>{
 }
 
 
-
+/**
+ * 
+ * @param  {...any} args 
+ * 1个值：消息内容
+ * 2个值：标题、内容
+ * 3个值：标题、内容、图标类型（succ、err、info、warn）
+ */
 const showNotification=(...args)=>{
+    if(!args || 0==args.length){
+        return;
+    }
+
     let title="信息";
     let body="";
+    let icon="info";
+    
     if(1==args.length){
         body=args[0];
-    }else if(2<=args.length){
+    }else if(2==args.length){
         title=args[0];
         body=args[1];
+    }else if(3<=args.length){
+        title=args[0];
+        body=args[1];
+        icon=args[2];
+        if(!icons[icon]){
+            icon="info";
+        }
     }
-    const n=new Notification({ title, body/*, icon: 'C:\\Users\\Administrator\\Desktop\\2\\1.jpg'*/ });
+    const n=new Notification({ title, body, icon: icons[icon]/*, icon: 'C:\\Users\\Administrator\\Desktop\\2\\1.jpg'*/ });
     n.show();
     setTimeout(() => {
         n.close();
