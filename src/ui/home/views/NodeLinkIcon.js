@@ -1,14 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
-import { Button,Tooltip, Progress,Avatar  } from 'antd';
-import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
+import { Button, Avatar  } from 'antd';
+import { LinkOutlined,CodeOutlined,FolderOpenOutlined,CopyOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
 
 const NodeLinkIcon=(props)=>{
     const [localIcon, setLocalIcon]=useState(null);
 
     /**
-     * 异常加载url对应的图标，如果状态为已取消，则停止操作
+     * 异步加载url对应的图标，如果状态为已取消，则停止操作
      */
     useEffect(()=>{
         let canceled=false;

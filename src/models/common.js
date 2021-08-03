@@ -52,21 +52,24 @@ const model={
         },
         init:({dispatcher,gdispatcher})=>{
             //设置标题、加载窗口大小、文件列表加载、目录列表加载
-            let titleTxt=api.loadAppNameAndVersionTxt();
-            const vers=api.getInnerModuleVersions();
-            
-            document.querySelector("head > title").innerHTML = titleTxt+`　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
-            
+            const loadAppInfoFun=async ()=>{
+                let titleTxt=await api.loadAppNameAndVersionTxt();
+                const vers=await api.getInnerModuleVersions();
+                document.querySelector("head > title").innerHTML = `${titleTxt}　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
+            };
+            loadAppInfoFun();
+
 
             dispatcher.loadWinSize(null);
             gdispatcher.filesel.load();
             dispatcher.reloadAllDirs(null);
 
             // 检测安装路径合理性
-            let installPath=api.getBasePath();
-            if(!generalSvc.isPathValid(installPath)){
-                dispatcher.setInstallPathInvalid(null);
-            }
+            api.getBasePath().then(installPath=>{
+                if(!generalSvc.isPathValid(installPath)){
+                    dispatcher.setInstallPathInvalid(null);
+                }
+            });
 
             api.initFindInPageDlg();
         },

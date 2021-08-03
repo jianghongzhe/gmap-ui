@@ -7,10 +7,12 @@ class ExpSvc{
         if(!path){
             return;
         }
-        let txt=api.load(`${api.getBasePath()}\\tmpl_exp_html.html`).replace('#title#',title).replace('#cont#',content);
-        api.save(path, txt);
-        message.success("导出html完成");
-        console.log("导出html完成");
+        api.getBasePath().then(basePath=>{
+            let txt=api.load(`${basePath}\\tmpl_exp_html.html`).replace('#title#',title).replace('#cont#',content);
+            api.save(path, txt);
+            message.success("导出html完成");
+            console.log("导出html完成");
+        });
     };
 
     expMarkdown=(content='')=>{

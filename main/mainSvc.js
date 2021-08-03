@@ -7,6 +7,7 @@ const nodeNet = require('net');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
+const appBasePath=path.join(__dirname, '../');;
 const externalPath=path.join(__dirname, '../', 'externals');
 const fileRunnerPath=path.join(__dirname, '../', 'externals', 'file_runner.exe');
 const mapsPath=path.join(__dirname, '../', 'gmaps');
@@ -65,7 +66,7 @@ let appInfoCache=null;
  * 获取基路径
  */
 const getBasePath=()=>{
-    return path.join(__dirname, '../');
+    return appBasePath;
 }
 
 
@@ -865,45 +866,19 @@ const openMapsDir = () => {
  * 在图表目录打开bash，以方便git提交
  */
 const openGitBash = () => {
-    let time = ""+new Date().getTime();
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
+
     spawn(
         'cmd.exe',
-        ['/c', `start "GMap_${time}" cmd`],
+        ['/c', `start "GMap_${ymd}" cmd`],
         {
             shell: true,           //使用shell运行
             cwd: getMapsPath()   //当前目录为图表文件目录
         }
     );
-
-    // sendCmdToServer("test", "abcc你好").then(data=>{
-    //     console.log(`data: ${data}`);
-    // });
-
-    // nodeTcpClient=nodeNet.Socket();
-    // client.connect(server_info.port,server_info.ip);
-    // client.setEncoding('utf8');
-    // client.on('data',(chunk)=>{
-    //     console.log(`BODY: ${chunk}`);
-    //     fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
-    // });
-
-    // client.write("abcc你好");
-
-
-    // console.log("assist_url", assist_url);
-    // const request = net.request(assist_url)
-    // request.on('response', (response) => {
-    //     console.log(`STATUS: ${response.statusCode}`)
-    //     console.log(`HEADERS: ${JSON.stringify(response.headers)}`)
-    //     response.on('data', (chunk) => {
-    //         console.log(`BODY: ${chunk}`);
-    //         fs.writeFileSync(path.join(__dirname, "haha.txt"), chunk, 'utf-8');
-    //     })
-    //     response.on('end', () => {
-    //         console.log('No more data in response.')
-    //     })
-    // })
-    // request.end();
 }
 
 
@@ -919,13 +894,12 @@ const loadAppInfo=()=>{
     return appInfoCache;
 }
 
-const reloadAppPage=(mainWindow)=>{
-    //mainWindow.reload();
+const reloadAppPage=()=>{
     mainWindow.webContents.reloadIgnoringCache();
 }
 
 
-const openDevTool=(mainWindow)=>{
+const openDevTool=()=>{
     mainWindow.webContents.openDevTools({detach:true});
 }
 
@@ -1056,7 +1030,7 @@ const downFile=(url,savePath)=>{
 
 
 /**
- * 
+ * 显示系统通知并在一会后自动关闭
  * @param  {...any} args 
  * 1个值：消息内容
  * 2个值：标题、内容
@@ -1084,11 +1058,11 @@ const showNotification=(...args)=>{
             icon="info";
         }
     }
-    const n=new Notification({ title, body, icon: icons[icon]/*, icon: 'C:\\Users\\Administrator\\Desktop\\2\\1.jpg'*/ });
+    const n=new Notification({ title, body, icon: icons[icon] });
     n.show();
     setTimeout(() => {
         n.close();
-    }, 5000);
+    }, 6*1000);
 };
 
 /**
@@ -1098,7 +1072,7 @@ const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? 
 
 const hasDevToolExtension=()=>(process && process.env && process.env.DEV_TOOL_EXTENSION_URL ? true : false);
 
-const isMaximized=(mainWindow)=>(mainWindow.isMaximized());
+const isMaximized=()=>(mainWindow.isMaximized());
 
 const getInnerModuleVersions=()=>(process.versions);
 
@@ -1157,10 +1131,19 @@ const ipcHandlers={
     screenShotCombine,
     loadIcon,
     showNotification,
+    getInnerModuleVersions,
+    loadAppInfo,
+    openGitBash,
+    openMapsDir,
+    reloadAppPage,
+    openDevTool,
+    isDevMode,
+    isMaximized,
+    getBasePath,
 };
 
-const delegateHandler=async (handler, evt, arg)=>{
-    const result = await handler(arg);
+const delegateHandler=async (handler, evt, ...arg)=>{
+    const result = await handler(...arg);
     return result;
 };
 

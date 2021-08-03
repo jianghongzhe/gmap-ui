@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, {  useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { Button,Row, Col, Avatar   } from 'antd';
 import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 
@@ -18,8 +18,16 @@ const Welcome=(props)=>{
         winW:state.common.winW,
         winH:state.common.winH,
     }));
+    const [appInfo, setAppInfo]=useState(()=>({}));
 
-    const [appInfo]=useState(()=>appInfoSelector(undefined));
+
+    useEffect(()=>{
+        api.loadAppInfo().then(info=>{
+            setAppInfo(info);
+        });
+    }, [setAppInfo]);
+
+    
     const fileselectRight= calcBackTopRight({winW,winH});
 
     return (
@@ -63,10 +71,7 @@ const calcBackTopRight= createSelector(
 );
 
 
-const appInfoSelector=createSelector(
-    noUse=>noUse,
-    noUse=>api.loadAppInfo()
-);
+
 
 
 

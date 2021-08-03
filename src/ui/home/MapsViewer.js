@@ -91,10 +91,7 @@ const MapsViewer=(props)=>{
 
     useEffect(()=>{
         if(!installPathValid){
-            Modal.warning({
-                title: '警告',
-                content: '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常',
-            });
+            api.showNotification('警告', '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常', 'warn');
             return;
         }
     },[installPathValid]);
@@ -293,24 +290,25 @@ const MapsViewer=(props)=>{
             let containerEle=ele.parentNode;
             let {x,y}=containerEle.getBoundingClientRect();
 
-
-            if(!api.isMaximized()){
-                message.warn("请先点击最大化按钮后再导出图片");
-                return;
-            }
-
-
-            
-            screenShot(
-                api.openSaveFileDlg,    //保存文件对话框函数
-                api.takeScreenShot,     //openUrl,            //执行截屏的函数
-                api.screenShotCombine,  //openUrl,
-                containerEle,           //容器元素
-                ele,                    //内容元素
-                Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
-                Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-                api.isDevMode()         //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
-            );
+            api.isMaximized().then(maximized=>{
+                if(!maximized){
+                    api.showNotification("警告","窗口只有在最大化时才能导出图片","warn");
+                    return;
+                }
+    
+                api.isDevMode().then(devMode=>{
+                    screenShot(
+                        api.openSaveFileDlg,    //保存文件对话框函数
+                        api.takeScreenShot,     //openUrl,            //执行截屏的函数
+                        api.screenShotCombine,  //openUrl,
+                        containerEle,           //容器元素
+                        ele,                    //内容元素
+                        Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
+                        Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
+                        devMode                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                    );
+                });
+            });
         });
     },[activeKey, panes]);
 

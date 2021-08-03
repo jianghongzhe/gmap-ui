@@ -103,3 +103,36 @@ d:\aaaaa.txt
    在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
 [file_runner.service.Server] [thread-4] [2021-08-03 06:32:10.380]  请求处理线程 4
 [file_runner.service.Server] [thread-6] [2021-08-03 06:32:22.091]  请求处理线程 6
+[file_runner.service.Server] [thread-4] [2021-08-03 10:48:26.933]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 10:48:27.154]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-6] [2021-08-03 10:48:36.495]  请求处理线程 6
+[file_runner.service.Server] [thread-6] [2021-08-03 10:48:36.497]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-7] [2021-08-03 10:49:24.376]  请求处理线程 7
+[file_runner.service.Server] [thread-10] [2021-08-03 10:49:27.896]  请求处理线程 10
+[file_runner.service.Server] [thread-10] [2021-08-03 10:49:27.897]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-7] [2021-08-03 10:49:36.530]  请求处理线程 7
+[file_runner.service.Server] [thread-12] [2021-08-03 10:50:37.544]  请求处理线程 12
+[file_runner.service.Server] [thread-14] [2021-08-03 10:50:55.000]  请求处理线程 14
+[file_runner.service.Server] [thread-14] [2021-08-03 10:50:55.000]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-4] [2021-08-03 11:21:59.348]  请求处理线程 4
+[file_runner.service.Server] [thread-5] [2021-08-03 11:22:09.310]  请求处理线程 5
+[file_runner.service.Server] [thread-4] [2021-08-03 11:22:14.670]  请求处理线程 4
+[file_runner.service.Server] [thread-4] [2021-08-03 11:33:44.835]  请求处理线程 4
+[file_runner.service.Server] [thread-5] [2021-08-03 11:33:45.034]  请求处理线程 5
+[file_runner.service.Server] [thread-4] [2021-08-03 11:33:45.134]  请求处理线程 4
+[file_runner.service.Server] [thread-6] [2021-08-03 11:33:45.733]  请求处理线程 6
+[file_runner.service.Server] [thread-7] [2021-08-03 11:33:45.837]  请求处理线程 7
+[file_runner.service.Server] [thread-6] [2021-08-03 11:33:45.951]  请求处理线程 6
+[file_runner.service.Server] [thread-5] [2021-08-03 11:33:46.004]  请求处理线程 5

@@ -8,6 +8,10 @@ const path = require('path');
  * 现改为invoke/handle的调用方式，让前端程序代码可以使用then或async/await的方式来顺序写
  */
 
+/**
+ * 网页内查找功能主页地址
+ */
+const findInPageIndexPath= path.join(__dirname, "../" , "findinpage", "index.html");
 
 /**
  * 初始化
@@ -56,8 +60,7 @@ const init=(_mainWindow, _devMode)=>{
         });
 
         //加载文件
-        const localpath=path.join(__dirname, "../" , "findinpage", "index.html");
-        findWin.loadFile(localpath);
+        findWin.loadFile(findInPageIndexPath);
 
         //如果是开发模式，打开控制台
         if(devMode){

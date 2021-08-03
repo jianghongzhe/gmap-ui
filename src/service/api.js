@@ -6,40 +6,146 @@ const { ipcRenderer } = window.require('electron');
 
 class Api{
 
-
     /**
      * 初始化查找对话框，需要在页面加载完之后调用
      */
     initFindInPageDlg=()=>{
-        //app.initFindInPage(300);
         ipcRenderer.invoke('initFindInPage', 300);
     }
 
+    /**
+     * 显示查找对话框
+     */
     showFindInPageDlg=()=>{
-        //app.showFindInPage(300,140);
         ipcRenderer.invoke('showFindInPage', 300,140);
     }
 
+    /**
+     * 关闭查找对话框
+     */
     closeFindInPageDlg=()=>{
-        // app.hideFindInPage();
         ipcRenderer.invoke('hideFindInPage');
     }
 
+    /**
+     * 获取url对应的图标
+     * @param {*} url 
+     * @returns 
+     */
     loadIcon=(url)=>{
         return ipcRenderer.invoke('loadIcon', url);
     };
 
+    /**
+     * 获取内部组件的版本号
+     * @returns 
+     */
     getInnerModuleVersions=()=>{
-        return app.getInnerModuleVersions();
+        return ipcRenderer.invoke('getInnerModuleVersions');
     }
 
+    /**
+     * 获取应用信息对象
+     * @returns 
+     */
+    loadAppInfo=()=>{
+        return ipcRenderer.invoke("loadAppInfo");
+    }
+
+    /**
+     * 获取应用名称与版本的字符串
+     * @returns 
+     */
+    loadAppNameAndVersionTxt=()=>{
+        return this.loadAppInfo().then(({showname,version})=>showname+"　V"+version);
+    }
+
+    /**
+     * 打开命令行窗口
+     * @returns 
+     */
     openBash=()=>{
-        app.openGitBash();
+        return ipcRenderer.invoke('openGitBash');
     }
 
+    /**
+     * 打开导图文件目录
+     * @returns 
+     */
     openMapsDir=()=>{
-        app.openMapsDir();
+        return ipcRenderer.invoke('openMapsDir');
     }
+
+    /**
+     * 重新加载应用页
+     * @returns 
+     */
+    reloadAppPage=()=>{
+        return ipcRenderer.invoke('reloadAppPage');
+    }
+
+    /**
+     * 显示chrome控制台
+     * @returns 
+     */
+    showDevTool=()=>{
+        return ipcRenderer.invoke('openDevTool');
+    }
+
+    /**
+     * 判断当前是否为开发模式（有些功能在开发模式和生产模式行为不同）
+     * @returns 
+     */
+    isDevMode=()=>{
+        return ipcRenderer.invoke('isDevMode');
+    }
+
+    /**
+     * 进行屏幕截图 
+     * @param {*} opt  {left,top,width,height,fileName}
+     * @returns 
+     */
+     takeScreenShot=(opt)=>{
+        return ipcRenderer.invoke('takeScreenShot', opt);
+    };
+
+    /**
+     * 图片合并
+     * @param {*} opt 
+     * @returns 
+     */
+    screenShotCombine=(opt)=>{
+        return ipcRenderer.invoke('screenShotCombine', opt);
+    };
+
+    /**
+     * 获取主窗口是否为最大化
+     * @returns 
+     */
+    isMaximized=()=>{
+        return ipcRenderer.invoke('isMaximized');
+    }
+
+    /**
+     * 显示系统通知
+     * @param  {...any} args 
+     * 1个值：消息内容
+     * 2个值：标题、内容
+     * 3个值：标题、内容、图标类型（succ、err、info、warn）
+     * @returns 
+     */
+    showNotification=(...args)=>{
+        return ipcRenderer.invoke('showNotification', ...args);
+    }
+
+    /**
+     * 获取应用的根目录，即package.json所在目录
+     * @returns 
+     */
+    getBasePath=()=>{
+        return ipcRenderer.invoke('getBasePath');
+    }
+
 
     existsFullpath=(fullpath)=>{
         return app.existsFullpath(fullpath);
@@ -65,22 +171,15 @@ class Api{
 
 
     
-    loadAppInfo=()=>{
-        return app.loadAppInfo();
-    }
+    
 
-    reloadAppPage=()=>{
-        app.reloadAppPage();
-    }
+    
 
     isUrlFormat=(txt)=>{
         return app.isUrlFormat(txt);
     }
 
-    loadAppNameAndVersionTxt=()=>{
-        let {showname,version}=this.loadAppInfo();
-        return showname+"　V"+version;
-    }
+    
 
     existsGraph=(fn)=>{
         return app.existsGraph(fn);
@@ -111,9 +210,7 @@ class Api{
         // });
     }
 
-    isDevMode=()=>{
-        return app.isDevMode();
-    }
+    
 
 
     hasDevToolExtension=()=>{
@@ -124,9 +221,7 @@ class Api{
         return app.getDevToolExtensionUrl();
     }
 
-    isMaximized=()=>{
-        return app.isMaximized();
-    }
+    
 
     openSaveFileDlg=(ext)=>{
         return app.openSaveFileDlg(ext);
@@ -144,18 +239,7 @@ class Api{
         return app.calcAttUrl(graphFileFullpath,picRelaPath);
     }
 
-    /**
-     * 
-     * @param {*} opt  {left,top,width,height,fileName}
-     * @returns 
-     */
-    takeScreenShot=(opt)=>{
-        return ipcRenderer.invoke('takeScreenShot', opt);
-    };
-
-    screenShotCombine=(opt)=>{
-        return ipcRenderer.invoke('screenShotCombine', opt);
-    };
+    
 
     openUrl=(url)=>{
         if(url.startsWith("gmap://")){
@@ -180,9 +264,7 @@ class Api{
         return app.getPathItems(dir);
     }
 
-    showDevTool=()=>{
-        app.openDevTool();
-    }
+    
 
     /**
      * 列出所有文件
@@ -224,9 +306,7 @@ class Api{
         return ret;
     }
 
-    getBasePath=()=>{
-        return app.getBasePath();
-    }
+    
 
     listAllDirs=()=>{
         return app.listAllDirs();

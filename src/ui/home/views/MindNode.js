@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Button,Tooltip, Progress,Avatar  } from 'antd';
-import { FormOutlined,LinkOutlined,ReadOutlined,ClockCircleOutlined,CodeOutlined,FolderOpenOutlined,CloseOutlined,CopyOutlined,CheckOutlined } from '@ant-design/icons';
+import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
 import relaPic from '../../../assets/relachart.png';
 import {createSelector} from 'reselect';
@@ -126,13 +126,6 @@ const MindNode=(props)=>{
                 nd.links.map((link,linkInd)=>(
                     <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
                         <span css={themeBtnWrapperStyle} >
-                            {/* <Button 
-                                key={linkInd} 
-                                type="link" 
-                                size='small' 
-                                className='themebtn'
-                                icon={getLinkIcon(link.addr)}  
-                                onClick={props.onOpenLink.bind(this,link.addr)}/> */}
                             <NodeLinkIcon 
                                 lindAddr={link.addr}
                                 onClick={props.onOpenLink.bind(this,link.addr)}/>
@@ -156,23 +149,6 @@ const progressFormater=(st,percent)=>{
 }
 
 
-
-/**
- * 根据链接的不同协议显示不同图标
- * @param {*} addr 
- */
-const getLinkIcon=(addr)=>{
-    if(addr.startsWith("cp://")){
-        return <CopyOutlined className='themebtnicon' css={colors.copy}/>;
-    }
-    if(addr.startsWith("dir://")){
-        return <FolderOpenOutlined className='themebtnicon' css={colors.dir}/>;
-    }
-    if(addr.startsWith("cmd://")){
-        return <CodeOutlined className='themebtnicon' css={colors.cmd}/>;
-    }
-    return <LinkOutlined className='themebtnicon' css={colors.link}/>;
-}
 
 const handleSingleLine=(str)=>{
     let tmp=marked(str).trim();

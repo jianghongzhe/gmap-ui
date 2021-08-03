@@ -12,7 +12,15 @@ let mainWindow = null;
 
 app.commandLine.appendSwitch("--disable-http-cache");
 
+/**
+ * 主体功能主页的地址
+ */
+const mainPageIndexPath=path.join(__dirname, "../", "build", "index.html");;
 
+/**
+ * 工作目录
+ */
+const mainWorkDir=path.join(__dirname, "../", "work");
 
 /**
  * 创建主窗口但不加载首页
@@ -50,8 +58,7 @@ const loadFirstPage=()=>{
     if (app.isDevMode()) {
         mainWindow.loadURL(app.getDevServerUrl());
     } else {
-        const localFirstPath=path.join(__dirname, "../", "build", "index.html");
-        mainWindow.loadFile(localFirstPath);
+        mainWindow.loadFile(mainPageIndexPath);
     }
 }
 
@@ -124,7 +131,7 @@ process.on('uncaughtException', (err, origin) => {
     const d=now.getDate();
     const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
 
-    const localpath=path.join(__dirname, "../", "work", `main_${ymd}.log`);
+    const localpath=path.join(mainWorkDir, `main_${ymd}.log`);
     fs.appendFileSync(
         localpath,
         `Caught exception: ${err}\nException origin: ${origin}\n\n`,
