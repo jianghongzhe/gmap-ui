@@ -38,9 +38,15 @@ const url_localicon_map={};
 let mainWindow=null;
 
 /**
+ * 辅助程序相关信息
  * {
- *  "url": "http://localhost:56789/",
- *  "pid": 16120
+ *  "pid":19896,
+ *  "fullUrl":"http://localhost:56789/",
+ *  "method":"POST",
+ *  "protocol":"http:",
+ *  "hostname":"localhost",
+ *  "port":56789,
+ *  "basePath":"/"
  * }
  */
 let server_info=null;
@@ -1102,10 +1108,24 @@ const getDevToolExtensionUrl=()=>{
  */
 const sendCmdToServer=(action, data)=>{
     return new Promise((res, rej)=>{
-        const request = net.request(`${server_info.url}${action}`);
+        let sumBuffer=null;
+        const request = net.request({
+            method:     server_info.method,
+            protocol:   server_info.protocol,
+            hostname:   server_info.hostname,
+            port:       server_info.port,
+            path:       `${server_info.basePath}${action}`
+        });
         request.on('response', (response) => {
+            response.on('end', ()=>{
+                res(JSON.parse(sumBuffer.toString("utf-8")));
+            });
             response.on('data', (chunk) => {
-                res(JSON.parse(chunk.toString("utf-8")));
+                if(null===sumBuffer){
+                    sumBuffer=chunk;
+                    return;
+                }
+                sumBuffer=Buffer.concat([sumBuffer, chunk]);
             });
             response.on('error',(errObj)=>{
                 rej(errObj);

@@ -1,31 +1,24 @@
-﻿[file_runner.service.Server] [thread-4] [2021-08-04 12:13:56.334]  请求处理线程 4
-[file_runner.service.Server] [thread-4] [2021-08-04 12:15:46.432]  请求处理线程 4
-[file_runner.service.Server] [thread-4] [2021-08-04 12:17:11.289]  请求处理线程 4
-[file_runner.service.Server] [thread-4] [2021-08-04 12:18:05.985]  请求处理线程 4
-[file_runner.service.Server] [thread-6] [2021-08-04 12:18:30.300]  请求处理线程 6
-[file_runner.service.Server] [thread-8] [2021-08-04 12:20:29.715]  请求处理线程 8
-[file_runner.service.Server] [thread-11] [2021-08-04 12:20:49.171]  请求处理线程 11
-[file_runner.service.Server] [thread-4] [2021-08-04 12:23:43.976]  请求处理线程 4
-[file_runner.service.Server] [thread-5] [2021-08-04 12:23:59.236]  请求处理线程 5
-[file_runner.service.Server] [thread-6] [2021-08-04 12:24:49.971]  请求处理线程 6
-[file_runner.service.Server] [thread-9] [2021-08-04 12:25:08.970]  请求处理线程 9
-[file_runner.service.Server] [thread-6] [2021-08-04 12:25:27.090]  请求处理线程 6
-[file_runner.service.Server] [thread-9] [2021-08-04 12:25:40.186]  请求处理线程 9
-[file_runner.service.Server] [thread-6] [2021-08-04 12:25:51.538]  请求处理线程 6
-[file_runner.service.Server] [thread-9] [2021-08-04 12:26:04.698]  请求处理线程 9
-[file_runner.service.Server] [thread-8] [2021-08-04 12:26:18.098]  请求处理线程 8
-[file_runner.service.Server] [thread-4] [2021-08-04 12:27:11.569]  请求处理线程 4
-[file_runner.service.Server] [thread-5] [2021-08-04 12:27:23.370]  请求处理线程 5
-[file_runner.service.Server] [thread-6] [2021-08-04 12:27:37.513]  请求处理线程 6
-[file_runner.service.Server] [thread-4] [2021-08-04 12:30:47.769]  请求处理线程 4
-[file_runner.service.Server] [thread-4] [2021-08-04 12:30:47.857]  指定的路径不存在：
+﻿[file_runner.service.Server] [thread-4] [2021-08-04 11:30:27.138]  开始请求处理 POST http://localhost:56789/cp
+[file_runner.service.Server] [thread-6] [2021-08-04 11:31:16.077]  开始请求处理 POST http://localhost:56789/dir
+[file_runner.service.Server] [thread-6] [2021-08-04 11:31:16.116]  指定的路径不存在：
 d:\aaaaa.txt
    在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
    在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
-[file_runner.service.Server] [thread-6] [2021-08-04 12:30:55.881]  请求处理线程 6
-[file_runner.service.Server] [thread-6] [2021-08-04 12:30:55.882]  指定的路径不存在：
+[file_runner.service.Server] [thread-9] [2021-08-04 11:31:20.483]  开始请求处理 POST http://localhost:56789/dir
+[file_runner.service.Server] [thread-8] [2021-08-04 11:31:31.194]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-6] [2021-08-04 11:31:35.349]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-8] [2021-08-04 11:31:38.317]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-8] [2021-08-04 11:31:38.317]  指定的路径不存在：
 d:\aaaaa.txt
    在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
    在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
-[file_runner.service.Server] [thread-4] [2021-08-04 12:31:59.885]  请求处理线程 4
-[file_runner.service.Server] [thread-5] [2021-08-04 12:32:07.564]  请求处理线程 5
+[file_runner.service.Server] [thread-6] [2021-08-04 11:31:46.059]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-6] [2021-08-04 11:31:46.060]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-13] [2021-08-04 11:32:06.812]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-13] [2021-08-04 11:32:06.812]  指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
