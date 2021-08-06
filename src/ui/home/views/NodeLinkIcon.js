@@ -8,11 +8,11 @@ const NodeLinkIcon=(props)=>{
     const [localIcon, setLocalIcon]=useState(null);
 
     /**
-     * 异步加载url对应的图标，如果状态为已取消，则停止操作
+     * 异步加载指定协议url（file、http、https、dir）对应的图标，如果状态为已取消，则停止操作
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
