@@ -105,7 +105,7 @@ class Api{
      * @param {*} opt  {left,top,width,height,fileName}
      * @returns 
      */
-     takeScreenShot=(opt)=>{
+    takeScreenShot=(opt)=>{
         return ipcRenderer.invoke('takeScreenShot', opt);
     };
 
@@ -144,6 +144,53 @@ class Api{
      */
     getBasePath=()=>{
         return ipcRenderer.invoke('getBasePath');
+    }
+
+
+    openUrl=(url)=>{
+        if(url.startsWith("gmap://")){
+            (async ()=>{
+                let fn=url.substring("gmap://".length);
+                let flag=await ipcRenderer.invoke('existsGraph', fn);
+                if(true!==flag){
+                    message.warning("链接已经失效，请修改后重试");
+                    return;
+                }
+
+                let item=await ipcRenderer.invoke('getFileItem', fn);
+                dispatcher.tabs.onSelItemPromise(item).then();
+                // console.log("笔记链接跳转：",url,item);
+            })();
+            return;
+        }
+        return ipcRenderer.invoke('openUrl', url);
+    }
+
+    openSaveFileDlg=(ext)=>{
+        return ipcRenderer.invoke('openSaveFileDlg', ext);
+    }
+
+    listAllDirs=()=>{
+        return ipcRenderer.invoke('listAllDirs');
+    }
+
+    /**
+     * 读取文件内容
+     */
+    load=(fullpath)=>{
+        return ipcRenderer.invoke('readFile', fullpath).then(ret=>{
+            if('string'===typeof(ret)){
+                return ret.replace(/\r/g,'').trim();//\r\n全部换为\n
+            }
+            return ret;
+        });
+    }
+
+    /**
+     * 保存文件
+     */
+    save=(fullpath,content)=>{
+        return ipcRenderer.invoke('saveFile', fullpath, content.replace(/\r/g,'').trim());
     }
 
 
@@ -213,19 +260,11 @@ class Api{
     
 
 
-    hasDevToolExtension=()=>{
-        return app.hasDevToolExtension();
-    }
-
-    getDevToolExtensionUrl=()=>{
-        return app.getDevToolExtensionUrl();
-    }
+    
 
     
 
-    openSaveFileDlg=(ext)=>{
-        return app.openSaveFileDlg(ext);
-    }
+    
 
     selAttFile=()=>{
         let rs=app.selAttFile();
@@ -241,23 +280,7 @@ class Api{
 
     
 
-    openUrl=(url)=>{
-        if(url.startsWith("gmap://")){
-            let fn=url.substring("gmap://".length);
-            let flag=app.existsGraph(fn);
-            if(true!==flag){
-                message.warning("链接已经失效，请修改后重试");
-                return;
-            }
-
-            let item=app.getFileItem(fn);
-            dispatcher.tabs.onSelItemPromise(item).then();
-            // console.log("笔记链接跳转：",url,item);
-            return;
-        }
-        //new Notification('标题', { body: '内容\n内容第2行' });
-        return app.openUrl(url);
-    }
+    
 
 
     getPathItems=(dir=null)=>{
@@ -288,29 +311,13 @@ class Api{
                 
     }
 
-    /**
-     * 保存文件
-     */
-    save=(fullpath,content)=>{
-        app.saveFile(fullpath,content.replace(/\r/g,'').trim());//\r\n全部换为\n
-    }
-
-    /**
-     * 读取文件内容
-     */
-    load=(fullpath)=>{
-        let ret=app.readFile(fullpath);
-        if('string'===typeof(ret)){
-            return ret.replace(/\r/g,'').trim();//\r\n全部换为\n
-        }
-        return ret;
-    }
+    
 
     
 
-    listAllDirs=()=>{
-        return app.listAllDirs();
-    }
+    
+
+    
 }
 
 

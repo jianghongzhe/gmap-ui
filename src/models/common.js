@@ -38,8 +38,8 @@ const model={
         *refreshResizeSymbol(payload,{creater,put}){
             yield put(creater.setResizeSymbol(Symbol()));
         },
-        *reloadAllDirs(payload,{creater,put}){
-            let dirs=api.listAllDirs();
+        *reloadAllDirs(payload,{creater,put,call}){
+            let dirs=yield call(api.listAllDirs);
             yield put(creater.setAllDirs(dirs));
         }
     },

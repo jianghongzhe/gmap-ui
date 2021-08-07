@@ -209,7 +209,7 @@ const model={
             res(item[0]);
         },
 
-        *onSaveMapPromise(txt,{sel,res,rej,put,gcreater,creater}){
+        *onSaveMapPromise(txt,{call,sel,res,rej,put,gcreater,creater}){
             //校验
             let valiResult = mindMapValidateSvc.validate(txt);
             if (true !== valiResult) {
@@ -227,7 +227,7 @@ const model={
             }
 
             //保存并修改状态
-            let ret = api.save(currState.activeKey, txt);
+            let ret = yield call(api.save, currState.activeKey, txt);
             if (ret && false === ret.succ) {
                 message.error(ret.msg);
                 rej();
@@ -243,7 +243,7 @@ const model={
             res();
         },
 
-        *onNewMapPromise({dir,name},{sel,res,rej,put,gcreater,creater}){
+        *onNewMapPromise({dir,name},{call,sel,res,rej,put,gcreater,creater}){
             //验证名称为空和文件是否存在
             if (!name || '' === name) {
                 message.warning('请输入图表名称');
@@ -267,7 +267,7 @@ const model={
 
             //保存文件
             let defMapTxt = getDefMapTxt(themeName);
-            let ret = api.save(fullpath, defMapTxt);
+            let ret = yield call(api.save, fullpath, defMapTxt);
             if (ret && false === ret.succ) {
                 message.error(ret.msg);
                 rej();
@@ -297,7 +297,7 @@ const model={
             res();
         },
 
-        *onSelItemPromise(item,{put,gcreater,select,creater,sel,res,rej}){
+        *onSelItemPromise(item,{call, put,gcreater,select,creater,sel,res,rej}){
             //如果点击了目录，则显示目录下的内容
             if (!item.isfile) {
                 yield put(gcreater.filesel.load(item.fullpath));
@@ -314,7 +314,7 @@ const model={
             }
 
             //加载文件内容并计算导图表格的数据
-            let origintxts = api.load(item.fullpath);
+            let origintxts = yield call(api.load, item.fullpath);
             if (origintxts && false === origintxts.succ) {
                 message.error(origintxts.msg);
                 rej();

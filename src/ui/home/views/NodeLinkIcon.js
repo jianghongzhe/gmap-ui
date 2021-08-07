@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
 import { LinkOutlined,CodeOutlined,FolderOpenOutlined,CopyOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
+import relaPic from '../../../assets/relachart.png';
 
 const NodeLinkIcon=(props)=>{
     const [localIcon, setLocalIcon]=useState(null);
@@ -35,30 +36,37 @@ const NodeLinkIcon=(props)=>{
     },[props.lindAddr, setLocalIcon]);
 
     if(!localIcon){
-        return <Button 
-            type="link" 
-            size='small' 
-            className='themebtn'
-            icon={getLinkIcon(props.lindAddr)}  
-            onClick={props.onClick}/>;
+        return getLinkIcon(props.lindAddr, props.onClick);
     }
     return <Avatar size={18} src={localIcon} css={avatarStyle} onClick={props.onClick}/>;
 };
 
 
 
-const getLinkIcon=(addr)=>{
+const getLinkIcon=(addr ,onClick)=>{
+    if(addr.startsWith("gmap://")){
+        return <Avatar size={18} src={relaPic} css={avatarStyle} onClick={onClick}/>;
+    }
     if(addr.startsWith("cp://")){
-        return <CopyOutlined className='themebtnicon' css={colors.copy}/>;
+        return getBtn(<CopyOutlined className='themebtnicon' css={colors.copy}/>, onClick);
     }
     if(addr.startsWith("dir://")){
-        return <FolderOpenOutlined className='themebtnicon' css={colors.dir}/>;
+        return getBtn(<FolderOpenOutlined className='themebtnicon' css={colors.dir}/>, onClick);
     }
     if(addr.startsWith("cmd://")){
-        return <CodeOutlined className='themebtnicon' css={colors.cmd}/>;
+        return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
     }
-    return <LinkOutlined className='themebtnicon' css={colors.link}/>;
+    return getBtn(<LinkOutlined className='themebtnicon' css={colors.link}/>, onClick);
 }
+
+const getBtn=(icon, onClick)=>{
+    return <Button 
+        type="link" 
+        size='small' 
+        className='themebtn'
+        icon={icon}  
+        onClick={onClick}/>;
+};
 
 const avatarStyle={
     marginLeft:3,

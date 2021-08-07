@@ -1,0 +1,27 @@
+﻿[file_runner.service.Server] [thread-5] [2021-08-07 05:41:15.630]  开始请求处理 POST http://localhost:56789/cp
+[file_runner.service.Server] [thread-6] [2021-08-07 05:41:26.567]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-6] [2021-08-07 05:41:33.792]  开始请求处理 POST http://localhost:56789/dir
+[file_runner.service.Server] [thread-6] [2021-08-07 05:41:33.823]  System.Exception: 指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-6] [2021-08-07 05:41:40.488]  开始请求处理 POST http://localhost:56789/cp
+[file_runner.service.Server] [thread-5] [2021-08-07 05:41:41.911]  开始请求处理 POST http://localhost:56789/dir
+[file_runner.service.Server] [thread-5] [2021-08-07 05:41:41.911]  System.Exception: 指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.DirProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-6] [2021-08-07 05:41:52.959]  开始请求处理 POST http://localhost:56789/file
+[file_runner.service.Server] [thread-6] [2021-08-07 05:41:52.959]  System.Exception: 指定的路径不存在：
+d:\aaaaa.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.handleRequest(HttpListenerContext ctx)
+[file_runner.service.Server] [thread-5] [2021-08-07 05:42:01.344]  开始请求处理 POST http://localhost:56789/cp
+[file_runner.service.Server] [thread-5] [2021-08-07 05:47:00.314]  开始请求处理 POST http://localhost:56789/cp
+[file_runner.service.Server] [thread-5] [2021-08-07 06:04:48.110]  开始请求处理 POST http://localhost:56789/shot
+[file_runner.service.Server] [thread-5] [2021-08-07 06:04:48.296]  开始请求处理 POST http://localhost:56789/shot
+[file_runner.service.Server] [thread-6] [2021-08-07 06:04:48.404]  开始请求处理 POST http://localhost:56789/shot
+[file_runner.service.Server] [thread-5] [2021-08-07 06:04:48.507]  开始请求处理 POST http://localhost:56789/shot
+[file_runner.service.Server] [thread-6] [2021-08-07 06:04:48.609]  开始请求处理 POST http://localhost:56789/shot
+[file_runner.service.Server] [thread-5] [2021-08-07 06:04:48.703]  开始请求处理 POST http://localhost:56789/shot
+[file_runner.service.Server] [thread-6] [2021-08-07 06:04:48.758]  开始请求处理 POST http://localhost:56789/shotCombine

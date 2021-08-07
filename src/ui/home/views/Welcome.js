@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React, {  useEffect, useState } from 'react';
-import { Button,Row, Col, Avatar   } from 'antd';
+import { Button,Row, Col, Avatar,Tooltip   } from 'antd';
 import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
 
 import logourl from '../../../assets/logo.jpg';
@@ -50,10 +50,18 @@ const Welcome=(props)=>{
                             <p className='appname'>{appInfo.showname}<span className='ver'>V{appInfo.version}</span></p>
                             <div className='btns'>
                                 <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={props.onAddMap}>新建</Button>
-                                <Button type="default" className='r2btn' title='打开目录' shape='circle'  icon={<FolderOutlined />} size='large' onClick={props.onOpenMapsDir}></Button>
-                                <Button type="default" className='rbtn' title='打开控制台' shape='circle' icon={<CodeOutlined/>} size='large' onClick={props.onOpenBash}></Button>
-                                <Button type="default" className='rbtn' title='开发者工具' shape='circle' icon={<ControlOutlined/>} size='large' onClick={props.onShowDevTool}></Button>
-                                <Button type="default" className='rbtn' title='重新载入应用' shape='circle' icon={<ReloadOutlined/>} size='large' onClick={props.onReloadApp}></Button>
+                                <Tooltip color='cyan' placement="bottomLeft" title='打开目录'>
+                                    <Button type="default" className='r2btn' shape='circle'  icon={<FolderOutlined />} size='large' onClick={props.onOpenMapsDir}></Button>
+                                </Tooltip>
+                                <Tooltip color='cyan' placement="bottomLeft" title='打开控制台'>
+                                    <Button type="default" className='rbtn' shape='circle' icon={<CodeOutlined/>} size='large' onClick={props.onOpenBash}></Button>
+                                </Tooltip>
+                                <Tooltip color='cyan' placement="bottomLeft" title='开发者工具'>
+                                    <Button type="default" className='rbtn' shape='circle' icon={<ControlOutlined/>} size='large' onClick={props.onShowDevTool}></Button>
+                                </Tooltip>
+                                <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
+                                    <Button type="default" className='rbtn' shape='circle' icon={<ReloadOutlined/>} size='large' onClick={props.onReloadApp}></Button>
+                                </Tooltip>
                             </div>                               
                         </div>
                     </Col>

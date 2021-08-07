@@ -22,29 +22,25 @@ class ScreenShotSvc{
 
 
         //保存文件对话框点击取消后不进行操作
-        let resultImgPath=selFileFun();
-        if('undefined'===typeof(resultImgPath)){
-            return;
-        }
-
-
-        //记录原来的滚动位置
-        this.oldPos={
-            y: eleContainer.scrollTop,
-            x: eleContainer.scrollLeft
-        };
-        
-        //等对话框关闭后再开始截取
-        this.hasBrowserMenu=hasBrowserMenu;
-        this.offsetX=offsetX;
-        this.offsetY=offsetY;
-        this.doing=true;
-        this.resultImgPath=resultImgPath;
-        this.takeScrenShotFun=takeScrenShotFun;
-        this.combineScreenShotFun=combineScreenShotFun;
-        setTimeout(() => {    
-            this.prepareScreenShot(eleContainer, eleContent);
-        }, 200);
+        selFileFun().then(resultImgPath=>{
+            //记录原来的滚动位置
+            this.oldPos={
+                y: eleContainer.scrollTop,
+                x: eleContainer.scrollLeft
+            };
+            
+            //等对话框关闭后再开始截取
+            this.hasBrowserMenu=hasBrowserMenu;
+            this.offsetX=offsetX;
+            this.offsetY=offsetY;
+            this.doing=true;
+            this.resultImgPath=resultImgPath;
+            this.takeScrenShotFun=takeScrenShotFun;
+            this.combineScreenShotFun=combineScreenShotFun;
+            setTimeout(() => {    
+                this.prepareScreenShot(eleContainer, eleContent);
+            }, 200);
+        });
     }
 
 

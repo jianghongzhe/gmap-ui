@@ -813,32 +813,39 @@ const selPicFile = (mainWindow) => {
 }
 
 
-const openSaveFileDlg = (mainWindow,ext) => {
-    let filters= [
-        { name: 'JPG图片', extensions: ['jpg'] },
-        { name: 'PNG图片', extensions: ['png'] },
-        { name: 'GIF图片', extensions: ['gif'] },
-        { name: 'BMP图片', extensions: ['bmp'] },
-        { name: 'JPEG图片', extensions: ['jpeg'] },
-        { name: 'SVG图片', extensions: ['svg'] },
-        { name: 'WEBP图片', extensions: ['webp'] },
-        { name: '所有', extensions: ['*'] }
-    ];
-    if('md'===ext){
-        filters= [
-            { name: 'markdown', extensions: ['md'] },
+const openSaveFileDlg = (ext) => {
+    return new Promise((res, rej)=>{
+        let filters= [
+            { name: 'JPG图片', extensions: ['jpg'] },
+            { name: 'PNG图片', extensions: ['png'] },
+            { name: 'GIF图片', extensions: ['gif'] },
+            { name: 'BMP图片', extensions: ['bmp'] },
+            { name: 'JPEG图片', extensions: ['jpeg'] },
+            { name: 'SVG图片', extensions: ['svg'] },
+            { name: 'WEBP图片', extensions: ['webp'] },
             { name: '所有', extensions: ['*'] }
         ];
-    }
-    if('html'===ext){
-        filters= [
-            { name: 'html文件', extensions: ['html'] },
-            { name: '所有', extensions: ['*'] }
-        ];
-    }
-    return dialog.showSaveDialogSync(mainWindow, { 
-        properties: [/*'saveFile'*/],
-        filters
+        if('md'===ext){
+            filters= [
+                { name: 'markdown', extensions: ['md'] },
+                { name: '所有', extensions: ['*'] }
+            ];
+        }
+        if('html'===ext){
+            filters= [
+                { name: 'html文件', extensions: ['html'] },
+                { name: '所有', extensions: ['*'] }
+            ];
+        }
+        const result=dialog.showSaveDialogSync(mainWindow, { 
+            properties: [/*'saveFile'*/],
+            filters
+        });
+        if(result){
+            res(result);
+            return;
+        }
+        rej("用户已取消");
     });
 }
 
@@ -929,7 +936,7 @@ const init=(_mainWindow)=>{
     setTimeout(() => {
         server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
         console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.url}`);
-    }, 3000);
+    }, 2000);
     console.log(`app started, pid is: ${process.pid}`);
 }
 
@@ -1160,6 +1167,13 @@ const ipcHandlers={
     isDevMode,
     isMaximized,
     getBasePath,
+    openUrl,
+    existsGraph,
+    getFileItem,
+    openSaveFileDlg,
+    listAllDirs,
+    readFile,
+    saveFile,
 };
 
 const delegateHandler=async (handler, evt, ...arg)=>{

@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Layout,   Button, Divider } from 'antd';
+import { Layout,   Button, Divider,Tooltip } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
@@ -24,46 +24,50 @@ const Toolbar=(props)=>{
 
     return (
         <Header css={headerStyle}>
-            <Button shape='circle' icon={<PlusOutlined />} className='toolbtnFirst' type='default' size='large' onClick={props.onShowNewMapDlg} title='新建' />
-            <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowSelMapDlg} title='打开' />
-
+            <Tooltip color='cyan' placement="bottomLeft" title='新建'>
+                <Button shape='circle' icon={<PlusOutlined />} className='toolbtnFirst' type='default' size='large' onClick={props.onShowNewMapDlg} />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='打开'>
+                <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowSelMapDlg} />
+            </Tooltip>
             <Divider type="vertical" className='divider'/>
-            <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDir}  title='打开目录' />                                   
-            <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowCmd}  title='打开控制台' />
-            <Button shape='circle' icon={<ControlOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDevTool}  title='开发者工具' />
-            <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={props.onReloadApp}  title='重新载入应用' />
-
-            <Divider type="vertical" className='divider'/>
-            <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowEditMapDlg} title='编辑' />
-            <Button shape='circle' icon={<LinkOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCopyMapLink} title='复制导图链接' />
-            
-            
-
-            {/* {
-                props.showRestore &&      
-                    <Button shape='circle' icon={<CompressOutlined />} className='toolbtn' type='primary' size='large' onClick={props.onRestore} title='恢复默认节点状态' />
-            }
-            {
-                props.showExpandAll &&      
-                    <Button shape='circle' icon={<ExpandOutlined />} className='toolbtn' type='primary' size='large' onClick={props.onExpandAll} title='展开全部节点' />
-            } */}
-            
-
-                
-            <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.restoreAll} title='恢复节点默认状态' />
-            <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.expandAll} title='展开全部节点' />
-            
+            <Tooltip color='cyan' placement="bottomLeft" title='打开目录'>
+                <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDir} />                                   
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='打开控制台'>
+                <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowCmd} />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='开发者工具'>
+                <Button shape='circle' icon={<ControlOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDevTool} />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
+                <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={props.onReloadApp}  />
+            </Tooltip>
             
             <Divider type="vertical" className='divider'/>
-            <Button shape='circle' icon={<FileImageOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} title='导出图片' />
-            <Button shape='circle' icon={<FileMarkdownOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpMarkdown} title='导出markdown' />
+            <Tooltip color='cyan' placement="bottomLeft" title='编辑'>
+                <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowEditMapDlg}/>
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='复制导图链接'>
+                <Button shape='circle' icon={<LinkOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCopyMapLink} />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='恢复节点默认状态'>
+                <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.restoreAll}  />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='展开全部节点'>
+                <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.expandAll}  />
+            </Tooltip>
+                      
+            <Divider type="vertical" className='divider'/>
+            <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
+                <Button shape='circle' icon={<FileImageOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
+                <Button shape='circle' icon={<FileMarkdownOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpMarkdown} />
+            </Tooltip>
             {/* <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={notSupported} title='导出pdf' />
             <Button shape='circle' icon={<FileWordOutlined />} className='toolbtn' type='default' size='large' onClick={notSupported} title='导出word' /> */}
-            <Button shape='circle' icon={<Html5Outlined />} className='toolbtn' type='default' size='large' onClick={props.onExpHtml} title='导出html' />
-            
-            
-
-            
+            {/* <Button shape='circle' icon={<Html5Outlined />} className='toolbtn' type='default' size='large' onClick={props.onExpHtml} title='导出html' /> */}
         </Header>
     );
     
