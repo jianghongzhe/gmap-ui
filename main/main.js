@@ -1,8 +1,10 @@
 const { app, BrowserWindow, Menu} = require('electron');
-const mainSvc = require('./mainSvc');
-const findInPageSvc= require('./findInPageSvc');
 const path = require('path');
 const fs = require('fs');
+
+const mainSvc = require('./mainSvc');
+const findInPageSvc= require('./findInPageSvc');
+const common=require('./common');
 
 /**
  * 主窗口
@@ -126,16 +128,7 @@ app.on('activate', function () {
 });
 
 process.on('uncaughtException', (err, origin) => {
-    const now=new Date();
-    const m=now.getMonth()+1;
-    const d=now.getDate();
-    const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
-
-    const localpath=path.join(mainWorkDir, `main_${ymd}.log`);
-    fs.appendFileSync(
-        localpath,
-        `Caught exception: ${err}\nException origin: ${origin}\n\n`,
-        'utf-8'
-    );
+    const msg=`Caught exception: ${err}\nException origin: ${origin}`;
+    common.log(msg);
 });
 

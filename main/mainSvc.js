@@ -6,6 +6,7 @@ const path = require('path');
 const nodeNet = require('net');
 
 const ws=require('./ws');
+const common=require('./common');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
@@ -936,29 +937,7 @@ const init=(_mainWindow)=>{
     });
 
 
-    console.log('------ init --------');
-    console.log(ws) ;
-    console.log(ws.Sender) ;
-
-    const w = new ws('ws://localhost:56789/');
-                      
-    w.on('open', function open() {
-        w.send(JSON.stringify({
-            reqId: 1,
-            action: 'file',
-            data: JSON.stringify({
-                url:'file:///d:\\a.txt'
-            })
-        }));
-        // w.send("ping");
-    });
-
-    w.on('message', function incoming(message) {
-        console.log("- msg -----------------");
-        console.log(`received: ${message instanceof Buffer}`);
-        console.log(`received: ${message.toString('utf-8')}`);
-        console.log(`received: ${typeof(message)}`);
-    });
+    
 
 
 
@@ -969,7 +948,63 @@ const init=(_mainWindow)=>{
     spawn(fileRunnerPath, [], {cwd: externalPath});
     setTimeout(() => {
         server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-        console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.url}`);
+        console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`);
+
+
+        // console.log('------ init --------');
+        // console.log(ws) ;
+        // console.log(ws.Sender) ;
+
+        // const w = new ws('ws://localhost:56789/');
+                
+        common.connWs(server_info.connectUrl);
+
+        // setTimeout(() => {
+        //     common.send('file', {
+        //         url:'file:///d:\\a.txt'
+        //     }).then(result=>{
+        //         console.log("- msg -----------------");
+        //         console.log(`received: ${JSON.stringify(result)}`);
+        //     });
+
+
+        //     common.send('cp', {
+        //         url:'cp:///haha'
+        //     }).then(result=>{
+        //         console.log("- msg2 -----------------");
+        //         console.log(`received: ${JSON.stringify(result)}`);
+        //     });
+        // }, 3000);
+
+
+        // w.on('open', function open() {
+        //     w.send(JSON.stringify({
+        //         reqId: 1,
+        //         action: 'file',
+        //         data: JSON.stringify({
+        //             url:'file:///d:\\a.txt'
+        //         })
+        //     }));
+
+        //     w.send(JSON.stringify({
+        //         reqId: 2,
+        //         action: 'cp',
+        //         data: JSON.stringify({
+        //             url:'cp:///haha'
+        //         })
+        //     }));
+        //     // w.send("ping");
+        // });
+
+        // w.on('message', function incoming(message) {
+        //     console.log("- msg -----------------");
+        //     console.log(`received: ${message instanceof Buffer}`);
+        //     console.log(`received: ${message.toString('utf-8')}`);
+        //     console.log(`received: ${typeof(message)}`);
+        // });
+
+
+
     }, 2000);
     console.log(`app started, pid is: ${process.pid}`);
 }
@@ -1165,36 +1200,38 @@ const getDevToolExtensionUrl=()=>{
  * @returns 
  */
 const sendCmdToServer=(action, data)=>{
-    return new Promise((res, rej)=>{
-        let sumBuffer=null;
-        const request = net.request({
-            method:     server_info.method,
-            protocol:   server_info.protocol,
-            hostname:   server_info.hostname,
-            port:       server_info.port,
-            path:       `${server_info.basePath}${action}`
-        });
-        request.on('response', (response) => {
-            response.on('end', ()=>{
-                res(JSON.parse(sumBuffer.toString("utf-8")));
-            });
-            response.on('data', (chunk) => {
-                if(null===sumBuffer){
-                    sumBuffer=chunk;
-                    return;
-                }
-                sumBuffer=Buffer.concat([sumBuffer, chunk]);
-            });
-            response.on('error',(errObj)=>{
-                rej(errObj);
-            });
-        });
-        request.on('error',(errObj)=>{
-            rej(errObj);
-        });
-        request.write("string"===typeof(data) ? data : JSON.stringify(data), 'utf-8');
-        request.end();
-    });
+    return common.send(action, data);
+
+    // return new Promise((res, rej)=>{
+    //     let sumBuffer=null;
+    //     const request = net.request({
+    //         method:     server_info.method,
+    //         protocol:   server_info.protocol,
+    //         hostname:   server_info.hostname,
+    //         port:       server_info.port,
+    //         path:       `${server_info.basePath}${action}`
+    //     });
+    //     request.on('response', (response) => {
+    //         response.on('end', ()=>{
+    //             res(JSON.parse(sumBuffer.toString("utf-8")));
+    //         });
+    //         response.on('data', (chunk) => {
+    //             if(null===sumBuffer){
+    //                 sumBuffer=chunk;
+    //                 return;
+    //             }
+    //             sumBuffer=Buffer.concat([sumBuffer, chunk]);
+    //         });
+    //         response.on('error',(errObj)=>{
+    //             rej(errObj);
+    //         });
+    //     });
+    //     request.on('error',(errObj)=>{
+    //         rej(errObj);
+    //     });
+    //     request.write("string"===typeof(data) ? data : JSON.stringify(data), 'utf-8');
+    //     request.end();
+    // });
 };
 
 
