@@ -5,6 +5,8 @@ const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
 const nodeNet = require('net');
 
+const ws=require('./ws');
+
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
 const appBasePath=path.join(__dirname, '../');;
@@ -926,11 +928,43 @@ const openDevTool=()=>{
 const init=(_mainWindow)=>{
     mainWindow=_mainWindow;
 
+
     [imgsPath,attsPath,workPath, cachePath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
     });
+
+
+    console.log('------ init --------');
+    console.log(ws) ;
+    console.log(ws.Sender) ;
+
+    const w = new ws('ws://localhost:56789/');
+                      
+    w.on('open', function open() {
+        w.send(JSON.stringify({
+            reqId: 1,
+            action: 'file',
+            data: JSON.stringify({
+                url:'file:///d:\\a.txt'
+            })
+        }));
+        // w.send("ping");
+    });
+
+    w.on('message', function incoming(message) {
+        console.log("- msg -----------------");
+        console.log(`received: ${message instanceof Buffer}`);
+        console.log(`received: ${message.toString('utf-8')}`);
+        console.log(`received: ${typeof(message)}`);
+    });
+
+
+
+
+
+
 
     spawn(fileRunnerPath, [], {cwd: externalPath});
     setTimeout(() => {
@@ -939,6 +973,23 @@ const init=(_mainWindow)=>{
     }, 2000);
     console.log(`app started, pid is: ${process.pid}`);
 }
+
+
+
+const log=(info)=>{
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
+    const localpath=path.join(workPath, `main_${ymd}.log`);
+
+    fs.appendFileSync(
+        localpath,
+        `${info}\r\n`,
+        'utf-8'
+    );
+};
+
 
 
 
