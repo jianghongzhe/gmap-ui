@@ -4,6 +4,17 @@ const fs = require('fs');
 const ws=require('./ws');
 
 
+
+/**
+ * 从连接websocket服务后指定毫秒数开始发送心跳
+ */
+const wsHeartBeatDelayMs=5000;
+
+/**
+ * 发送心跳的间隔毫秒数
+ */
+const wsHeartBeatIntervalMs=30000;
+
 /**
  * 是否已连接websocket服务
  */
@@ -35,6 +46,7 @@ const connWs=(url)=>{
     wsClient.on('open', ()=>{
         log(`后台websocket服务已连接：${url}`);
         wsConnected=true;
+        setTimeout(beginHeartbeat, wsHeartBeatDelayMs);
     });
     wsClient.on('message', function incoming(message) {
         if(message instanceof Buffer){
@@ -45,11 +57,12 @@ const connWs=(url)=>{
             }
             const resp=JSON.parse(str);
             if(reqIdCallbackMap[resp.reqId]){
-                reqIdCallbackMap[resp.reqId](resp);
+                const func=reqIdCallbackMap[resp.reqId];
+                func(resp);
+                delete reqIdCallbackMap[resp.reqId];
             }
         }
     });
-    setTimeout(beginHeartbeat, 5000);
 };
 
 
@@ -68,7 +81,7 @@ const beginHeartbeat=()=>{
     }
     log("向服务端发送心跳");
     wsClient.send("ping");
-    setTimeout(beginHeartbeat, 30000);
+    setTimeout(beginHeartbeat, wsHeartBeatIntervalMs);
 };
 
 

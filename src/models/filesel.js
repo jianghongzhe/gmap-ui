@@ -13,10 +13,24 @@ const model={
         }
     },
     effects:{
-        *load(dir,{put,creater}){
+        *load(dir,{put,creater, call}){
+            let filelist=null;
+            if(dir){
+                filelist=yield call(api.list, dir);
+            }else{
+                filelist=yield call(api.list);
+            }
+
+            let dirs=null;
+            if(dir){
+                dirs=yield call(api.getPathItems, dir);
+            }else{
+                dirs=yield call(api.getPathItems);
+            }
+
             yield put(creater.setFilelistAndDirs({
-                filelist:   dir ? api.list(dir) : api.list(),
-                dirs:       dir ? api.getPathItems(dir): api.getPathItems(),
+                filelist,
+                dirs,
             }));
         },
 

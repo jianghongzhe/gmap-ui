@@ -146,30 +146,42 @@ class Api{
         return ipcRenderer.invoke('getBasePath');
     }
 
-
+    /**
+     * 打开指定url
+     * @param {*} url 
+     * @returns 
+     */
     openUrl=(url)=>{
         if(url.startsWith("gmap://")){
             (async ()=>{
                 let fn=url.substring("gmap://".length);
                 let flag=await ipcRenderer.invoke('existsGraph', fn);
                 if(true!==flag){
-                    message.warning("链接已经失效，请修改后重试");
+                    this.showNotification('操作有误','链接已经失效，请修改后重试','err');
                     return;
                 }
 
                 let item=await ipcRenderer.invoke('getFileItem', fn);
                 dispatcher.tabs.onSelItemPromise(item).then();
-                // console.log("笔记链接跳转：",url,item);
             })();
             return;
         }
         return ipcRenderer.invoke('openUrl', url);
     }
 
+    /**
+     * 打开保存文件对话框
+     * @param {*} ext 
+     * @returns 
+     */
     openSaveFileDlg=(ext)=>{
         return ipcRenderer.invoke('openSaveFileDlg', ext);
     }
 
+    /**
+     * 列出所有层次的目录（不包含文件）
+     * @returns 
+     */
     listAllDirs=()=>{
         return ipcRenderer.invoke('listAllDirs');
     }
@@ -194,37 +206,94 @@ class Api{
     }
 
 
+    /**
+     * 列出所有文件
+     */
+    list=(basedir=null)=>{
+        return ipcRenderer.invoke('listFiles', basedir).then(list=>{
+            return list.map(item=>({
+                showname: item.name,
+                itemsName:item.itemsName,
+                fullpath: item.fullpath,
+                isfile:   item.isfile,
+                size:     item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
+                pic:      item.pic,
+            }));
+        });
+    }
+
+    /**
+     * 路径是否存在
+     * @param {*} fullpath 
+     * @returns 
+     */
     existsFullpath=(fullpath)=>{
-        return app.existsFullpath(fullpath);
+        return ipcRenderer.invoke('existsFullpath', fullpath);
     }
 
-    existsPic=(picName)=>{
-        return app.existsPic(picName);
-    }
-
-    existsAtt=(picName)=>{
-        return app.existsAtt(picName);
-    }
-
-    openPicByName=(name)=>{
-        return app.openPicByName(name);
-    }
-
-    openAttByName=(name)=>{
-        return app.openAttByName(name);
-    }
-
-    
-
-
-    
-    
-
-    
-
+    /**
+     * 是否是url格式
+     * @param {*} txt 
+     * @returns 
+     */
     isUrlFormat=(txt)=>{
-        return app.isUrlFormat(txt);
+        return ipcRenderer.invoke('isUrlFormat', txt);
     }
+
+    /**
+     * 指定名称的图片是否存在
+     * @param {*} picName 
+     * @returns 
+     */
+    existsPic=(picName)=>{
+        return ipcRenderer.invoke('existsPic', picName);
+    }
+
+    /**
+     * 指定名称的附件是否存在
+     * @param {*} picName 
+     * @returns 
+     */
+    existsAtt=(picName)=>{
+        return ipcRenderer.invoke('existsAtt', picName);
+    }
+
+    /**
+     * 打开指定名称的图片
+     * @param {*} name 
+     * @returns 
+     */
+    openPicByName=(name)=>{
+        return ipcRenderer.invoke('openPicByName', name);
+    }
+
+    /**
+     * 打开指定名称的附件
+     * @param {*} name 
+     * @returns 
+     */
+    openAttByName=(name)=>{
+        return ipcRenderer.invoke('openAttByName', name);
+    }
+
+    /**
+     * 获得路径的每个部分
+     * @param {*} dir 
+     * @returns 
+     */
+    getPathItems=(dir=null)=>{
+        return ipcRenderer.invoke('getPathItems', dir);
+    }
+
+    
+
+
+    
+    
+
+    
+
+    
 
     
 
@@ -283,33 +352,11 @@ class Api{
     
 
 
-    getPathItems=(dir=null)=>{
-        return app.getPathItems(dir);
-    }
+    
 
     
 
-    /**
-     * 列出所有文件
-     */
-    list=(basedir=null)=>{
-        return app.listFiles(basedir).map(item=>({
-            showname: item.name,
-            itemsName:item.itemsName,
-            fullpath: item.fullpath,
-            isfile:   item.isfile,
-            size:     item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
-            pic:      item.pic,
-        }));
-
-        
-        
-        
-        
-        
-        
-                
-    }
+    
 
     
 

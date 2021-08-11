@@ -101,39 +101,47 @@ const InsertImgDlg=(props)=>{
      */
     const onValidateAddPic = ({insertPicPath, insertPicName}) => {
         const pathAndName={insertPicPath, insertPicName};
+        (async()=>{
+            try{
+                if (null != insertPicPath && 
+                        "" !== insertPicPath.trim() && 
+                        !await api.existsFullpath(insertPicPath) &&
+                        !await api.isUrlFormat(insertPicPath)) {
+                    api.showNotification("警告", "图片路径或url格式有误", "warn");
+                    return;
+                }
+                if (null == insertPicName || "" ===insertPicName.trim()) {
+                    api.showNotification("警告", "图片显示名称不能为空", "warn");
+                    return;
+                }
+                if (insertPicName.includes("/") || insertPicName.includes("\\")) {
+                    api.showNotification("警告", '图片显示名称格式有误，不能包含 "/" 或 "\\" ', "warn");
+                    return;
+                }
+                if (true ===await api.existsPic(insertPicName)) {
+                    Modal.confirm({
+                        title: '是否覆盖',
+                        content: <>
+                            <div css={{ marginBottom: 10 }}>图片显示名称已存在，是否要覆盖 ？</div>
+                            <Button type="link" title='查看已有同名图片' css={{ margin: 0, padding: 0 }} onClick={api.openPicByName.bind(this,insertPicName)}>查看已有同名图片</Button>
+                        </>,
+                        icon: <QuestionCircleOutlined />,
+                        onOk: copyPicAndAddTxt.bind(this,pathAndName),
+                        okText:'确定',
+                        cancelText:'取消',
+                    });
+                    return;
+                }
 
-        if (null != insertPicPath && 
-                "" !== insertPicPath.trim() && 
-                !api.existsFullpath(insertPicPath) &&
-                !api.isUrlFormat(insertPicPath)) {
-            message.warn("图片路径或url格式有误");
-            return;
-        }
-        if (null == insertPicName || "" ===insertPicName.trim()) {
-            message.warn("图片显示名称不能为空");
-            return;
-        }
-        if (insertPicName.includes("/") || insertPicName.includes("\\")) {
-            message.warn('图片显示名称格式有误，不能包含 "/" 或 "\\" ');
-            return;
-        }
-        if (true === api.existsPic(insertPicName)) {
-            Modal.confirm({
-                title: '是否覆盖',
-                content: <>
-                    <div css={{ marginBottom: 10 }}>图片显示名称已存在，是否要覆盖 ？</div>
-                    <Button type="link" title='查看已有同名图片' css={{ margin: 0, padding: 0 }} onClick={api.openPicByName.bind(this,insertPicName)}>查看已有同名图片</Button>
-                </>,
-                icon: <QuestionCircleOutlined />,
-                onOk: copyPicAndAddTxt.bind(this,pathAndName),
-                okText:'确定',
-                cancelText:'取消',
-            });
-            return;
-        }
+                copyPicAndAddTxt(pathAndName);
 
-        copyPicAndAddTxt(pathAndName);
-        return;
+
+
+
+            }catch(e){
+                console.log(e);
+            }
+        })();
     }
 
     /**
@@ -142,44 +150,48 @@ const InsertImgDlg=(props)=>{
      */
     const onValidateAddAtt = ({insertPicPath, insertPicName}) => {
         const pathAndName={insertPicPath, insertPicName};
-
-        if (null == insertPicPath && 
-                "" === insertPicPath.trim()) {
-            message.warn("附件路径或url不能为空");
-            return;
-        }
-        if (null != insertPicPath && 
-                "" !== insertPicPath.trim() && 
-                !api.existsFullpath(insertPicPath) &&
-                !api.isUrlFormat(insertPicPath)) {
-            message.warn("附件路径或url格式有误");
-            return;
-        }
-        if (null == insertPicName || "" === insertPicName.trim()) {
-            message.warn("附件显示名称不能为空");
-            return;
-        }
-        if (insertPicName.includes("/") || insertPicName.includes("\\")) {
-            message.warn('附件显示名称格式有误，不能包含 "/" 或 "\\" ');
-            return;
-        }
-        if (true === api.existsAtt(insertPicName)) {
-            Modal.confirm({
-                title: '是否覆盖',
-                content: <>
-                    <div css={{ marginBottom: 10 }}>附件显示名称已存在，是否要覆盖 ？</div>
-                    <Button type="link" title='查看已有同名附件' css={{ margin: 0, padding: 0 }} onClick={api.openAttByName.bind(this,insertPicName)}>查看已有同名附件</Button>
-                </>,
-                icon: <QuestionCircleOutlined />,
-                onOk: copyAttAndAddTxt.bind(this,pathAndName),
-                okText:'确定',
-                cancelText:'取消',
-            });
-            return;
-        }
-
-        copyAttAndAddTxt(pathAndName);
-        return;
+        (async()=>{
+            try{
+                if (null == insertPicPath && 
+                        "" === insertPicPath.trim()) {
+                    api.showNotification("警告", "附件路径或url不能为空", "warn");
+                    return;
+                }
+                if (null != insertPicPath && 
+                        "" !== insertPicPath.trim() && 
+                        !await api.existsFullpath(insertPicPath) &&
+                        !await api.isUrlFormat(insertPicPath)) {
+                    api.showNotification("警告", "附件路径或url格式有误", "warn");
+                    return;
+                }
+                if (null == insertPicName || "" === insertPicName.trim()) {
+                    api.showNotification("警告", "附件显示名称不能为空", "warn");
+                    return;
+                }
+                if (insertPicName.includes("/") || insertPicName.includes("\\")) {
+                    api.showNotification("警告", '附件显示名称格式有误，不能包含 "/" 或 "\\" ', "warn");
+                    return;
+                }
+                if (true ===await api.existsAtt(insertPicName)) {
+                    Modal.confirm({
+                        title: '是否覆盖',
+                        content: <>
+                            <div css={{ marginBottom: 10 }}>附件显示名称已存在，是否要覆盖 ？</div>
+                            <Button type="link" title='查看已有同名附件' css={{ margin: 0, padding: 0 }} onClick={api.openAttByName.bind(this,insertPicName)}>查看已有同名附件</Button>
+                        </>,
+                        icon: <QuestionCircleOutlined />,
+                        onOk: copyAttAndAddTxt.bind(this,pathAndName),
+                        okText:'确定',
+                        cancelText:'取消',
+                    });
+                    return;
+                }
+                copyAttAndAddTxt(pathAndName);
+                return;
+            }catch(e){
+                console.log(e);
+            }
+        })();
     }
 
     /**

@@ -924,11 +924,10 @@ const openDevTool=()=>{
  * 初始化工作：
  * 1、持有主窗口对象
  * 2、创建初始目录：图片目录、附件目录、工作目录、缓存目录等
- * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url前缀、进程id等）
+ * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url前缀、进程id等），然后连接后台服务websocket
  */
 const init=(_mainWindow)=>{
     mainWindow=_mainWindow;
-
 
     [imgsPath,attsPath,workPath, cachePath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
@@ -936,94 +935,18 @@ const init=(_mainWindow)=>{
         }
     });
 
-
-    
-
-
-
-
-
-
-
     spawn(fileRunnerPath, [], {cwd: externalPath});
     setTimeout(() => {
         server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
         console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`);
-
-
-        // console.log('------ init --------');
-        // console.log(ws) ;
-        // console.log(ws.Sender) ;
-
-        // const w = new ws('ws://localhost:56789/');
-                
         common.connWs(server_info.connectUrl);
-
-        // setTimeout(() => {
-        //     common.send('file', {
-        //         url:'file:///d:\\a.txt'
-        //     }).then(result=>{
-        //         console.log("- msg -----------------");
-        //         console.log(`received: ${JSON.stringify(result)}`);
-        //     });
-
-
-        //     common.send('cp', {
-        //         url:'cp:///haha'
-        //     }).then(result=>{
-        //         console.log("- msg2 -----------------");
-        //         console.log(`received: ${JSON.stringify(result)}`);
-        //     });
-        // }, 3000);
-
-
-        // w.on('open', function open() {
-        //     w.send(JSON.stringify({
-        //         reqId: 1,
-        //         action: 'file',
-        //         data: JSON.stringify({
-        //             url:'file:///d:\\a.txt'
-        //         })
-        //     }));
-
-        //     w.send(JSON.stringify({
-        //         reqId: 2,
-        //         action: 'cp',
-        //         data: JSON.stringify({
-        //             url:'cp:///haha'
-        //         })
-        //     }));
-        //     // w.send("ping");
-        // });
-
-        // w.on('message', function incoming(message) {
-        //     console.log("- msg -----------------");
-        //     console.log(`received: ${message instanceof Buffer}`);
-        //     console.log(`received: ${message.toString('utf-8')}`);
-        //     console.log(`received: ${typeof(message)}`);
-        // });
-
-
-
     }, 2000);
     console.log(`app started, pid is: ${process.pid}`);
 }
 
 
 
-const log=(info)=>{
-    const now=new Date();
-    const m=now.getMonth()+1;
-    const d=now.getDate();
-    const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
-    const localpath=path.join(workPath, `main_${ymd}.log`);
 
-    fs.appendFileSync(
-        localpath,
-        `${info}\r\n`,
-        'utf-8'
-    );
-};
 
 
 
@@ -1262,6 +1185,14 @@ const ipcHandlers={
     listAllDirs,
     readFile,
     saveFile,
+    listFiles,
+    existsFullpath,
+    isUrlFormat,
+    existsPic, 
+    existsAtt,
+    openPicByName,
+    openAttByName,
+    getPathItems,
 };
 
 const delegateHandler=async (handler, evt, ...arg)=>{
