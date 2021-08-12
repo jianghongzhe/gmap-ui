@@ -257,7 +257,7 @@ const model={
                 return;
             }
             let joinName=(dir? dir+"/"+name : name);
-            let fnAndFullpath = api.existsGraph(joinName);//如果存在返回true，如果不存在返回 [文件名, 全路径]
+            let fnAndFullpath =yield call(api.existsGraph, joinName);//如果存在返回true，如果不存在返回 [文件名, 全路径]
             if (true === fnAndFullpath) {
                 message.warning('该图表名称已存在，请更换另一名称');
                 rej();

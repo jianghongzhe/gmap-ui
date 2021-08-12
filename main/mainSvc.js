@@ -1193,6 +1193,11 @@ const ipcHandlers={
     openPicByName,
     openAttByName,
     getPathItems,
+    existsGraph,
+    selPicFile,
+    selAttFile,
+    copyPicToImgsDir,
+    copyClipboardPicToImgsDir,
 };
 
 const delegateHandler=async (handler, evt, ...arg)=>{

@@ -285,60 +285,60 @@ class Api{
         return ipcRenderer.invoke('getPathItems', dir);
     }
 
-    
-
-
-    
-    
-
-    
-
-    
-
-    
-
+    /**
+     * 判断导图是否存在
+     * @param {*} fn 相对于导图文件根路径的相对路径
+     * @returns 
+     */
     existsGraph=(fn)=>{
-        return app.existsGraph(fn);
+        return ipcRenderer.invoke('existsGraph', fn);
     }
 
+    /**
+     * 选择图片文件
+     * @returns 图片全路径
+     */
+    selPicFile=()=>{
+        return ipcRenderer.invoke('selPicFile');
+    }
+
+    /**
+     * 选择附件文件
+     * @returns 附件全路径
+     */
+    selAttFile=()=>{
+        return ipcRenderer.invoke('selAttFile');
+    }
+
+    /**
+     * 复制剪切版中的图片到图片目录
+     * @param {*} showName 
+     * @param {*} currGraphFullpath 
+     * @returns 
+     */
     copyClipboardPicToImgsDir=(showName,currGraphFullpath)=>{
-        return app.copyClipboardPicToImgsDir(showName,currGraphFullpath);
+        return ipcRenderer.invoke('copyClipboardPicToImgsDir', showName,currGraphFullpath);
     }
 
+    /**
+     * 复制指定路径的图片到图片目录
+     * @param {*} picFullpath 
+     * @param {*} showName 
+     * @param {*} currGraphFullpath 
+     * @returns 
+     */
     copyPicToImgsDir=(picFullpath,showName,currGraphFullpath)=>{
-        return app.copyPicToImgsDir(picFullpath,showName,currGraphFullpath);
+        return ipcRenderer.invoke('copyPicToImgsDir', picFullpath,showName,currGraphFullpath);
     }
+
+
+
+
+    
     copyAttToAttsDir=(picFullpath,showName,currGraphFullpath)=>{
         return app.copyAttToAttsDir(picFullpath,showName,currGraphFullpath);
     }
-
-    selPicFile=()=>{
-        let rs=app.selPicFile();
-        // // console.log("选择目录结果",rs);
-        return rs;
-
-        // dialog.showOpenDialog({properties: ['openFile']}, (files)=>{
-        //     if (files){
-        //         console.log("选",files);
-        //         return;
-        //     }
-        //     console.log("未选");
-        // });
-    }
-
     
-
-
-    
-
-    
-
-    
-
-    selAttFile=()=>{
-        let rs=app.selAttFile();
-        return rs;
-    }
 
     calcPicUrl=(graphFileFullpath,picRelaPath)=>{
         return app.calcPicUrl(graphFileFullpath,picRelaPath);
@@ -346,24 +346,6 @@ class Api{
     calcAttUrl=(graphFileFullpath,picRelaPath)=>{
         return app.calcAttUrl(graphFileFullpath,picRelaPath);
     }
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     
 }
 

@@ -68,15 +68,17 @@ const InsertImgDlg=(props)=>{
      * 选择图片或附件文件，选择后更新输入框，并使第二个输入框获得焦点
      */
     const onSelPicFile = () => {
-        let selFilePaths = (props.isImg ? api.selPicFile() : api.selAttFile());
-        if (selFilePaths && selFilePaths[0]) {
-            let fullpath = selFilePaths[0];
-            let fn = fullpath.substring(Math.max(fullpath.lastIndexOf("\\"), fullpath.lastIndexOf("/")) + 1);
-            
-            setPicPath(fullpath);
-            setPicName((oldName)=>(''===oldName.trim() ? fn : oldName.trim()));
-            onFocusEle(elePicName);
-        }
+        (async()=>{
+            let selFilePaths = (props.isImg ?await api.selPicFile() :await api.selAttFile());
+            if (selFilePaths && selFilePaths[0]) {
+                let fullpath = selFilePaths[0];
+                let fn = fullpath.substring(Math.max(fullpath.lastIndexOf("\\"), fullpath.lastIndexOf("/")) + 1);
+                
+                setPicPath(fullpath);
+                setPicName((oldName)=>(''===oldName.trim() ? fn : oldName.trim()));
+                onFocusEle(elePicName);
+            }
+        })();   
     }
 
     /**
