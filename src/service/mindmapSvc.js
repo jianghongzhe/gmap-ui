@@ -895,7 +895,7 @@ class MindmapSvc {
             if (hasUrlPrefix(url)) {
                 url=url+"";
             }else if(url.startsWith("./")){
-                url=api.calcAttUrl("",url);
+                url=api.calcAttUrlSync("",url);
             }else{
                 url = "http://" + url;
             }

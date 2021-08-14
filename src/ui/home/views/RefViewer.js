@@ -83,7 +83,11 @@ const RefViewer=(props)=>{
                         return addr;
                     }
                     if(addr.startsWith("./")){
-                        return api.calcAttUrl(activeKey, oldurl);
+                        let a=new Date().getTime();
+                        console.log("link url before ", oldurl);
+                        const ret=api.calcAttUrlSync(activeKey, oldurl);
+                        console.log("link url after"+(new Date().getTime()-a), ret);
+                        return ret;
                     }
                     return addr;
                 }
@@ -91,7 +95,12 @@ const RefViewer=(props)=>{
             imgConfig: {
                 convertUrl: (oldurl) => {
                     if (!(oldurl.startsWith("./") || oldurl.startsWith("../"))) { return oldurl; }//跳过不是本地相对路径的
-                    return api.calcPicUrl(activeKey, oldurl);
+                    let a=new Date().getTime();
+                    console.log("img url before ", oldurl);
+                    const ret=api.calcPicUrlSync(activeKey, oldurl);
+                    console.log("img url after"+(new Date().getTime()-a), ret);
+                    return ret;
+
                 }
             }
         });

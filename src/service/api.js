@@ -1,9 +1,15 @@
-import {message} from 'antd';
+//import {message} from 'antd';
 import {dispatcher} from '../common/gflow';
 
-const {app} = window.require('electron').remote; //window.require('@electron/remote');// window.require('electron').remote;
+//const {app} = window.require('electron').remote; //window.require('@electron/remote');// window.require('electron').remote;
 const { ipcRenderer } = window.require('electron');
 
+
+/**
+ * 与主线程交互的接口层：
+ * 1、其中尽量采用异步的方式通信，即invoke/handle；
+ * 2、但有些三方组件的接口（marked）是使用同步方式调用，因此，增加了一部分同步的调用方式，即sendSync/on，方法名以Sync结尾以区分
+ */
 class Api{
 
     /**
@@ -331,22 +337,36 @@ class Api{
         return ipcRenderer.invoke('copyPicToImgsDir', picFullpath,showName,currGraphFullpath);
     }
 
-
-
-
-    
+    /**
+     * 复制附件文件到附件目录
+     * @param {*} picFullpath 
+     * @param {*} showName 
+     * @param {*} currGraphFullpath 
+     * @returns 
+     */
     copyAttToAttsDir=(picFullpath,showName,currGraphFullpath)=>{
-        return app.copyAttToAttsDir(picFullpath,showName,currGraphFullpath);
+        return ipcRenderer.invoke('copyAttToAttsDir', picFullpath, showName, currGraphFullpath);
     }
     
+    /**
+     * （同步）获取图片的真实url地址
+     * @param {*} graphFileFullpath 
+     * @param {*} picRelaPath 相对于图片目录的相对路径  ./aaa.jpg
+     * @returns 
+     */
+    calcPicUrlSync=(graphFileFullpath,picRelaPath)=>{
+        return ipcRenderer.sendSync('calcPicUrlSync', graphFileFullpath, picRelaPath);
+    }
 
-    calcPicUrl=(graphFileFullpath,picRelaPath)=>{
-        return app.calcPicUrl(graphFileFullpath,picRelaPath);
+    /**
+     * （同步）获取附件的真实url地址
+     * @param {*} graphFileFullpath 
+     * @param {*} picRelaPath 相对于附件目录的相对路径  ./bbb.txt
+     * @returns 
+     */
+    calcAttUrlSync=(graphFileFullpath,picRelaPath)=>{
+        return ipcRenderer.sendSync('calcAttUrlSync', graphFileFullpath, picRelaPath);
     }
-    calcAttUrl=(graphFileFullpath,picRelaPath)=>{
-        return app.calcAttUrl(graphFileFullpath,picRelaPath);
-    }
-    
 }
 
 

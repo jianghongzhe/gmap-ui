@@ -1163,7 +1163,9 @@ const sendCmdToServer=(action, data)=>{
 
 
 
-
+/**
+ * 进程通信暴露的方法
+ */
 const ipcHandlers={
     takeScreenShot,
     screenShotCombine,
@@ -1198,15 +1200,48 @@ const ipcHandlers={
     selAttFile,
     copyPicToImgsDir,
     copyClipboardPicToImgsDir,
+    copyAttToAttsDir,
+    calcPicUrl,
+    calcAttUrl,
 };
 
-const delegateHandler=async (handler, evt, ...arg)=>{
-    const result = await handler(...arg);
+/**
+ * 异步方法的代理
+ * @param {*} handler 
+ * @param {*} evt 
+ * @param  {...any} args 
+ * @returns 
+ */
+const delegateHandler=async (handler, evt, ...args)=>{
+    const result = await handler(...args);
     return result;
 };
 
+/**
+ * 同步方法的代理
+ * @param {*} handler 
+ * @param {*} evt 
+ * @param  {...any} args 
+ */
+const delegateHandlerSync=(handler, evt, ...args)=>{
+    (async()=>{
+        const result=await handler(...args);
+        evt.returnValue=result;
+    })();    
+};
+
+/**
+ * 接收异步调用并返回promise
+ */
 for(key in ipcHandlers){
     ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
+}
+
+/**
+ * 接收同步调用并返回实际结果
+ */
+for(key in ipcHandlers){
+    ipcMain.on(key+"Sync", delegateHandlerSync.bind(this, ipcHandlers[key]));
 }
 
 

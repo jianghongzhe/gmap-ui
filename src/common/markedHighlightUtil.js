@@ -220,7 +220,11 @@ class MarkedHighlightUtil {
 
             //绑定事件
             ele.setAttribute("hasBindEvent","yes");
-            ele.addEventListener("click",()=>{cb(addr,ele);});//增加点击事件，点击时使用外部浏览器打开
+            ele.addEventListener("click",()=>{
+                console.log("link cb", cb);
+                console.log("link addr", addr);
+                cb(addr,ele);
+            });//增加点击事件，点击时使用外部浏览器打开
         });
     }
 
@@ -239,6 +243,8 @@ class MarkedHighlightUtil {
             ele.style.cursor='pointer';//绑定点击事件要把光标设为手形
             let addr=ele.getAttribute('src');
             ele.addEventListener("click",()=>{
+                console.log("img cb", cb);
+                console.log("img addr", addr);
                 cb(addr,ele);
             });//本地打开时使用不带随机参数的url
         });
