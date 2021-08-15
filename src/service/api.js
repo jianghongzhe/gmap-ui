@@ -218,12 +218,14 @@ class Api{
     list=(basedir=null)=>{
         return ipcRenderer.invoke('listFiles', basedir).then(list=>{
             return list.map(item=>({
-                showname: item.name,
-                itemsName:item.itemsName,
-                fullpath: item.fullpath,
-                isfile:   item.isfile,
-                size:     item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
-                pic:      item.pic,
+                showname:       item.name,
+                itemsName:      item.itemsName,
+                fullpath:       item.fullpath,
+                isfile:         item.isfile,
+                size:           item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
+                pic:            item.pic,
+                mdFullpath:     item.mdFullpath,
+                attDir:         item.attDir,
             }));
         });
     }

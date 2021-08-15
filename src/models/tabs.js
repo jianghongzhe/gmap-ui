@@ -298,23 +298,29 @@ const model={
         },
 
         *onSelItemPromise(item,{call, put,gcreater,select,creater,sel,res,rej}){
-            //如果点击了目录，则显示目录下的内容
             if (!item.isfile) {
-                yield put(gcreater.filesel.load(item.fullpath));
-                rej();
                 return;
             }
 
+            // //如果点击了目录，则显示目录下的内容
+            // if (!item.isfile) {
+            //     yield put(gcreater.filesel.load(item.fullpath));
+            //     rej();
+            //     return;
+            // }
+
+            const mdFullpath=item.mdFullpath;
+
             //如果选项卡中已经有该项，则激活该tab
             let currState=yield sel();
-            if (currState.panes.some(pane => pane.key === item.fullpath)) {
-                yield put(creater.changeActiveKey(item.fullpath));
+            if (currState.panes.some(pane => pane.key === mdFullpath)) {
+                yield put(creater.changeActiveKey(mdFullpath));
                 res();
                 return;
             }
 
             //加载文件内容并计算导图表格的数据
-            let origintxts = yield call(api.load, item.fullpath);
+            let origintxts = yield call(api.load, mdFullpath);
             if (origintxts && false === origintxts.succ) {
                 message.error(origintxts.msg);
                 rej();
@@ -331,7 +337,7 @@ const model={
                 ...currState.panes,
                 {
                     title: item.itemsName,// item.showname,
-                    key: item.fullpath,
+                    key: mdFullpath,
                     mapTxts: origintxts,
                     //mapCells: cells,
                     ds: ndsSet,
@@ -340,7 +346,7 @@ const model={
 
             yield put(creater.setPanesAndActiveKey({
                 panes:newPanes, 
-                activeKey:item.fullpath,
+                activeKey: mdFullpath,
             }));
             res();
         },

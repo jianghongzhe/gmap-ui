@@ -483,44 +483,76 @@ const listFiles = (assignedDir = null) => {
 
     try{
         ret= fs.readdirSync(currDir, { withFileTypes: true }).filter(ent => {
-            let handledFN = ent.name.toLowerCase().trim();
-            return ('readme.md' !== handledFN && ".git" !== handledFN) && ((ent.isFile() && handledFN.endsWith(".md")) || !ent.isFile());//不是readme文件，且不是git目录，且是目录或是md文件
+            //let handledFN = ent.name.toLowerCase().trim();
+            //return ('readme.md' !== handledFN && ".git" !== handledFN) && ((ent.isFile() && handledFN.endsWith(".md")) || !ent.isFile());//不是readme文件，且不是git目录，且是目录或是md文件
+            return !ent.isFile();
         }).sort((item1,item2)=>{
-            let ord1= item1.isFile()?1:0;
-            let ord2= item2.isFile()?1:0;
-            //目录在文件前
+            // 排序：目录在文件之前，如果同为目录或文件，则按文件名排序
+            let ord1=item1.name.endsWith(".textbundle") ? 1 : 0;
+            let ord2=item2.name.endsWith(".textbundle") ? 1 : 0;
             if(ord1!==ord2){
                 return ord1-ord2;
             }
-            //眼前类型则按文件名比较
             if(item1.name!==item2.name){
                 return item1.name.toLowerCase().trim()<item2.name.toLowerCase().trim() ? -1 : 1;
             }
             return 0;
         }).map(ent => {
+            // 是否为文件：如果以.textbundle结尾，则认为是导图的包，看作是一个文件；否则认为是普通目录
+            const mapExt=".textbundle";
+            const mapExtLen=mapExt.length;
+            let isfile =ent.name.endsWith(".textbundle");// ent.isFile();
+
+            // 全路径、列表显示的名称、tab头显示的名称
             let fullpath =path.resolve(currDir,ent.name);
-            let isfile = ent.isFile();
-            let isEmptyDir=false;
+            const showName= (isfile ? ent.name.substring(0, ent.name.length-mapExtLen) : ent.name);
+            let itemsName=toSlash(path.relative(basepath,fullpath));
+            itemsName=(isfile ? itemsName.substring(0, itemsName.length-mapExtLen) : itemsName);
+
+
+            // 文件类型的特殊属性：包内导图的全路径、包内附件的目录路径（只对文件类型有效）、附件中第一个图片的全路径
+            let mdFullpath=null;
+            let attDir=null;
             let pic=null;
-            if(!isfile){
-                isEmptyDir=(0===fs.readdirSync(fullpath, { withFileTypes: true }).length);//如果是目录则看是否为空目录
-            }
             if(isfile){
-                pic=extractPic(fullpath);
+                mdFullpath=path.join(fullpath,'text.md');
+                attDir=path.join(fullpath,'assets');
+                const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
+                    const tmpFn=ent.name.toLowerCase().trim();
+                    return ['.png','.jpg','.jpeg','.gif','.bmp'].some(eachExt=>tmpFn.endsWith(eachExt));
+                });
+                if(0<imgItems.length){
+                    if(isDevMode()){
+                        pic= getDevServerUrl().trim()+"/favicon.ico";
+                    }else{
+                        pic=getFileProtocalUrl(path.join(attDir, imgItems[0].name));
+                        pic=encodeURI(pic);
+                    }
+                }
             }
+            
+            // 目录类型的特殊属性：是否为空目录（其中有子目录则非空）
+            let isEmptyDir=false;
+            if(!isfile){
+                isEmptyDir=(0===fs.readdirSync(fullpath, { withFileTypes: true }).filter(ent => !ent.isFile()).length);//如果是目录则看是否为空目录
+            }
+
             return {
-                name:       ent.name,
-                itemsName:  toSlash(path.relative(basepath,fullpath)),//显示在选项卡上的名称：eg. front/css3.md
+                name:       showName,
+                itemsName:  itemsName,//显示在选项卡上的名称：eg. front/css3.md
                 fullpath:   fullpath,
+                mdFullpath,
+                attDir,
                 isfile:     isfile,
                 emptyDir:   isEmptyDir,
-                size:       (isfile ? fs.statSync(fullpath).size : 0),
+                size:       (isfile ? fs.statSync(mdFullpath).size : 0),
                 pic:        pic,
             };
-        }).filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir);//不包括图片目录
+        });//.filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir);//不包括图片目录
     }catch(e){
         console.error(e);
     }
+    //console.log(ret);
     return ret;
 };
 
