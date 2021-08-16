@@ -76,7 +76,7 @@ const RefViewer=(props)=>{
                 bg: codeBg
             },
             linkConfig: {
-                disableDefault: true,
+                
 
                 /**
                  * 转换url：

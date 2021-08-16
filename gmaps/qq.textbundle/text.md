@@ -9,6 +9,6 @@
 # ref:长段文字
 这里可以放长段内容，支持markdown格式
 
-![haha.png](assets/ha图ha.png)
+![haha呵呵.png](assets/ha图ha.png)
 
 [新建Text.txt](assets/新建Text.txt)

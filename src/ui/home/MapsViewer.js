@@ -312,6 +312,16 @@ const MapsViewer=(props)=>{
         });
     },[activeKey, panes]);
 
+
+    /**
+     * 打开当前导图文件的目录
+     */
+    const onShowCurrMapDir=useCallback(()=>{
+        api.openCurrMapDir(activeKey);
+    },[activeKey]);
+    // api.openMapsDir
+
+
     /***
      * 是否有已打开的对话框
      */
@@ -345,7 +355,7 @@ const MapsViewer=(props)=>{
                                 onShowNewMapDlg={onShowNewMapDlg}
                                 onShowSelMapDlg={showSelMapDlg}
                                 onShowEditMapDlg={onShowEditMapDlg}
-                                onShowDir={api.openMapsDir}
+                                onShowDir={onShowCurrMapDir}
                                 onShowCmd={api.openBash}
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}

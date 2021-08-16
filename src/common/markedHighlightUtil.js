@@ -145,10 +145,15 @@ class MarkedHighlightUtil {
 
         //-----------链接----------------------------
         if (linkConfig) {
+            /**
+             * markdown中链接的处理：
+             * 生成的a标签中hrefex为附件实际的路径，用于点击后打开处理
+             * @param {*} href 
+             * @param {*} title 
+             * @param {*} text 
+             * @returns 
+             */
             renderer.link = function (href, title, text) {
-                //console.log("00", href);
-                //href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
-                //console.log("01", href);
                 if (href === null) {
                     return text;
                 }
@@ -157,16 +162,7 @@ class MarkedHighlightUtil {
                 if(linkConfig.convertUrl){
                     newHref=linkConfig.convertUrl(newHref);
                 }
-                console.log("newHref", newHref);
-                // doEscape(newHref)
-                let out = `<a class="${mdLinkCls}" href="${newHref}" `;
-                if(linkConfig.disableDefault){
-                    out = `<a class="${mdLinkCls}" href="javascript:void(0);" hrefex="${newHref}" `;
-                }                
-                //if (title) {
-                    out += `title="${text}" `;
-                //}
-                out =out.trim()+ `>${text}</a>`;
+                const out = `<a class="${mdLinkCls}" href="javascript:void(0);" hrefex="${newHref}" title="${text}">${text}</a>`;
                 return out;
             };
         }
@@ -174,32 +170,28 @@ class MarkedHighlightUtil {
 
         //-----------图片----------------------------
         if(imgConfig){
+            /**
+             * markdown中图片的处理：
+             * 生成的img标签中：src为显示用，已进行urlencode的url；srcex为点击时打开用，未进行urlencode，即明文url
+             * @param {*} href 
+             * @param {*} title 
+             * @param {*} text 
+             * @returns 
+             */
             renderer.image=function(href, title, text) {
-                //href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
                 if (href === null) {
                   return text;
                 }
 
-                /**
-                 * src：显示用，需要urlencode
-                 * srcex：点击时打开用，不需要urlencode，即明文
-                 */
-            
                 let newHref=href;
                 let newHrefEx=href;
-
-
 
                 if(imgConfig.convertUrl){
                     const tmp=imgConfig.convertUrl(newHref);
                     newHrefEx=tmp[0];
                     newHref=tmp[1];
                 }
-                let out = `<img class="${mdImgCls}" style="display:block;" src="${newHref}" srcex="${newHrefEx}" alt="${text}" `;
-                //if (title) {
-                  out += ` title="${text}"`;
-                //}
-                out += '/>';
+                const out = `<img class="${mdImgCls}" style="display:block;" src="${newHref}" srcex="${newHrefEx}" alt="${text}" title="${text}"/>`;
                 return out;
             }
         }

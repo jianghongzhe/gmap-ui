@@ -83,6 +83,15 @@ class Api{
     }
 
     /**
+     * 
+     * @param {*} mdFullpath 
+     * @returns 
+     */
+    openCurrMapDir=(mdFullpath)=>{
+        return ipcRenderer.invoke('openCurrMapDir', mdFullpath);
+    };
+
+    /**
      * 重新加载应用页
      * @returns 
      */

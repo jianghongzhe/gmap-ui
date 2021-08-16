@@ -325,52 +325,38 @@ const getTmpAttSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+".da
 /**
  * 计算图片实际的本地url路径
  * 计算指定导图文件按某相对路径解析后的绝对路径，返回file协议的字符串
- * @param {*} graphFileFullpath 
- * @param {*} picRelaPath 
+ * @param {*} mdFullpath 导图markdown文件的全路径
+ * @param {*} picRelaPath 图片的相对路径
  * @returns [0]显示用的url [1]打开用的url
  */
-const calcPicUrl=(graphFileFullpath,picRelaPath)=>{
+const calcPicUrl=(mdFullpath,picRelaPath)=>{
     if(!picRelaPath.startsWith("assets/")){
         return [picRelaPath, picRelaPath];
     }
 
     const faviconUrl=getDevServerFaviconUrl();
-    const attFullpath=path.join(path.dirname(graphFileFullpath), picRelaPath);
+    const attFullpath=path.join(path.dirname(mdFullpath), picRelaPath);
     const factUrl=getFileProtocalUrl(attFullpath);
 
     if(isDevMode()){
         return [faviconUrl, factUrl];
     }
     return [factUrl, factUrl];
-
-
-
-    // //部署模式计算真实本地url
-    // let currGraphDir=path.dirname(graphFileFullpath);//当前图表文件的目录
-    // let picFullpath=path.resolve(currGraphDir,picRelaPath);
-    // return getFileProtocalUrl(picFullpath);
 }
 
-const calcAttUrl=(graphFileFullpath,picRelaPath)=>{
-    //开发模式返回favicon图标
-    // if(isDevMode()){
-    //     return getDevServerUrl().trim()+"/favicon.ico";
-    // }
-
+/**
+ * 计算附件实际的本地路径
+ * @param {*} mdFullpath  导图markdown文件的全路径
+ * @param {*} picRelaPath  附件的相对路径
+ * @returns 
+ */
+const calcAttUrl=(mdFullpath,picRelaPath)=>{
     if(!picRelaPath.startsWith("assets/")){
         return picRelaPath;
     }
 
-    //const bundleDir=path.dirname(graphFileFullpath);
-    const attFullpath=path.join(path.dirname(graphFileFullpath), picRelaPath);
+    const attFullpath=path.join(path.dirname(mdFullpath), picRelaPath);
     return getFileProtocalUrl(attFullpath);
-
-
-
-    // //部署模式计算真实本地url
-    // let currGraphDir=path.dirname(graphFileFullpath);//当前图表文件的目录
-    // let picFullpath=path.resolve(currGraphDir,picRelaPath);
-    // return getFileProtocalUrl(picFullpath);
 }
 
 
@@ -925,7 +911,14 @@ const openMapsDir = () => {
     openUrl(url);
 }
 
-
+/**
+ * 打开当前导图目录
+ * @param {*} mdFullpath 导图markdown文件路径
+ */
+const openCurrMapDir=(mdFullpath)=>{
+    const bundleDir= path.dirname(mdFullpath);
+    openUrl(`file:///${bundleDir}`);
+};
 
 
 
@@ -1262,6 +1255,7 @@ const ipcHandlers={
     copyAttToAttsDir,
     calcPicUrl,
     calcAttUrl,
+    openCurrMapDir,
 };
 
 /**
