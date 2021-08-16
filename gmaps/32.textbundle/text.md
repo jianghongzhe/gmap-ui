@@ -211,9 +211,9 @@ b \in (a,b) \\
 
 # ref:区间在数轴上的表示
 ### 有限区间
-![region.jpg](./region.jpg)
+![region.jpg](assets/region.jpg)
 ### 无穷区间
-![region_infinity.jpg](./region_infinity.jpg)
+![region_infinity.jpg](assets/region_infinity.jpg)
 
 
 # ref:无穷区间

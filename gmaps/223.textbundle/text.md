@@ -3,5 +3,5 @@
 	
 ***
 # ref:aa
-![mmm.png](./mmm.png) 
-[2.txt](./2.txt)
+![mmm.png](assets/mmm.png) 
+[2.txt](assets/2.txt)

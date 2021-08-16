@@ -6,6 +6,6 @@
 	
 	
 ***
-![hahaha.jpg](./imgs/hahaha.jpg)
+![hahaha.jpg](assets/imgs/hahaha.jpg)
 
-![clip.jpg](./imgs/clip.jpg)
+![clip.jpg](assets/imgs/clip.jpg)
