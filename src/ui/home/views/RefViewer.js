@@ -77,30 +77,41 @@ const RefViewer=(props)=>{
             },
             linkConfig: {
                 disableDefault: true,
+
+                /**
+                 * 转换url：
+                 * 如果不是附件路径（即不是以 assets/ 开头），则原样返回；
+                 * 是附件路径，则根据当前导图文件路径计算出绝对路径
+                 * @param {*} oldurl 
+                 * @returns 转换后的路径
+                 */
                 convertUrl: (oldurl) => {
-                    let addr = oldurl;
-                    if (mindmapSvc.hasUrlPrefix(addr)){
-                        return addr;
+                    if(!oldurl.startsWith("assets/")){
+                        return oldurl;
                     }
-                    if(addr.startsWith("./")){
-                        let a=new Date().getTime();
-                        console.log("link url before ", oldurl);
-                        const ret=api.calcAttUrlSync(activeKey, oldurl);
-                        console.log("link url after"+(new Date().getTime()-a), ret);
-                        return ret;
-                    }
-                    return addr;
+                    let a=new Date().getTime();
+                    console.log("link url before ", oldurl);
+                    const ret=api.calcAttUrlSync(activeKey, oldurl);
+                    console.log("link url after"+(new Date().getTime()-a), ret);
+                    return ret;                    
                 }
             },
             imgConfig: {
+                /**
+                 * 转换url：
+                 * 如果不是附件路径（即不是以 assets/ 开头），则原样返回；
+                 * 是附件路径，则根据当前导图文件路径计算出绝对路径，并进行urlencode
+                 * @param {*} oldurl 
+                 * @returns [0]转换后的明文路径 [1]转换后的urlencode路径
+                 */
                 convertUrl: (oldurl) => {
-                    if (!(oldurl.startsWith("./") || oldurl.startsWith("../"))) { return oldurl; }//跳过不是本地相对路径的
+                    if (!oldurl.startsWith("assets/")) { return [oldurl, oldurl]; }//跳过不是本地相对路径的
                     let a=new Date().getTime();
-                    console.log("img url before ", oldurl);
-                    const ret=api.calcPicUrlSync(activeKey, oldurl);
-                    console.log("img url after"+(new Date().getTime()-a), ret);
-                    return ret;
-
+                    //console.log("img url before ", oldurl);
+                    const [urlShow, urlOpen]=api.calcPicUrlSync(activeKey, oldurl);
+                    const encodeRet=encodeURI(urlShow);
+                    //console.log("img url after"+(new Date().getTime()-a), ret);
+                    return [urlOpen, encodeRet];
                 }
             }
         });

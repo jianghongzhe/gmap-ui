@@ -146,7 +146,9 @@ class MarkedHighlightUtil {
         //-----------链接----------------------------
         if (linkConfig) {
             renderer.link = function (href, title, text) {
-                href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
+                //console.log("00", href);
+                //href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
+                //console.log("01", href);
                 if (href === null) {
                     return text;
                 }
@@ -155,13 +157,15 @@ class MarkedHighlightUtil {
                 if(linkConfig.convertUrl){
                     newHref=linkConfig.convertUrl(newHref);
                 }
-                let out = `<a class="${mdLinkCls}" href="${doEscape(newHref)}" `;
+                console.log("newHref", newHref);
+                // doEscape(newHref)
+                let out = `<a class="${mdLinkCls}" href="${newHref}" `;
                 if(linkConfig.disableDefault){
-                    out = `<a class="${mdLinkCls}" href="javascript:void(0);" hrefex="${doEscape(newHref)}" `;
+                    out = `<a class="${mdLinkCls}" href="javascript:void(0);" hrefex="${newHref}" `;
                 }                
-                if (title) {
-                    out += `title="${title}" `;
-                }
+                //if (title) {
+                    out += `title="${text}" `;
+                //}
                 out =out.trim()+ `>${text}</a>`;
                 return out;
             };
@@ -171,19 +175,30 @@ class MarkedHighlightUtil {
         //-----------图片----------------------------
         if(imgConfig){
             renderer.image=function(href, title, text) {
-                href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
+                //href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
                 if (href === null) {
                   return text;
                 }
+
+                /**
+                 * src：显示用，需要urlencode
+                 * srcex：点击时打开用，不需要urlencode，即明文
+                 */
             
                 let newHref=href;
+                let newHrefEx=href;
+
+
+
                 if(imgConfig.convertUrl){
-                    newHref=imgConfig.convertUrl(newHref);
+                    const tmp=imgConfig.convertUrl(newHref);
+                    newHrefEx=tmp[0];
+                    newHref=tmp[1];
                 }
-                let out = `<img class="${mdImgCls}" style="display:block;" src="${newHref}" alt="${text}"`;
-                if (title) {
-                  out += ` title="${title}"`;
-                }
+                let out = `<img class="${mdImgCls}" style="display:block;" src="${newHref}" srcex="${newHrefEx}" alt="${text}" `;
+                //if (title) {
+                  out += ` title="${text}"`;
+                //}
                 out += '/>';
                 return out;
             }
@@ -220,11 +235,8 @@ class MarkedHighlightUtil {
 
             //绑定事件
             ele.setAttribute("hasBindEvent","yes");
-            ele.addEventListener("click",()=>{
-                console.log("link cb", cb);
-                console.log("link addr", addr);
-                cb(addr,ele);
-            });//增加点击事件，点击时使用外部浏览器打开
+            const handler=delegateOpenUrlFun.bind(this, cb, addr);
+            ele.addEventListener("click",handler);//增加点击事件，点击时使用外部浏览器打开
         });
     }
 
@@ -241,14 +253,18 @@ class MarkedHighlightUtil {
 
             ele.setAttribute("hasBindEvent","yes");
             ele.style.cursor='pointer';//绑定点击事件要把光标设为手形
-            let addr=ele.getAttribute('src');
-            ele.addEventListener("click",()=>{
-                console.log("img cb", cb);
-                console.log("img addr", addr);
-                cb(addr,ele);
-            });//本地打开时使用不带随机参数的url
+            let addr=ele.getAttribute('srcex');
+
+            const handler=delegateOpenUrlFun.bind(this, cb, addr);
+            ele.addEventListener("click", handler);//本地打开时使用不带随机参数的url
         });
     }
 }
+
+const delegateOpenUrlFun=(fun, url)=>{
+    if(fun && url){
+        fun(url);
+    }
+};
 
 export default MarkedHighlightUtil;

@@ -263,11 +263,11 @@ const model={
                 rej();
                 return;
             }
-            let [fn, themeName, fullpath] = fnAndFullpath;
+            let [fn, themeName, fullpath, mdFullpath] = fnAndFullpath;
 
             //保存文件
             let defMapTxt = getDefMapTxt(themeName);
-            let ret = yield call(api.save, fullpath, defMapTxt);
+            let ret = yield call(api.createMapBundle, fullpath, defMapTxt);
             if (ret && false === ret.succ) {
                 message.error(ret.msg);
                 rej();
@@ -284,14 +284,14 @@ const model={
                 ...currState.panes,
                 {
                     title: fn,
-                    key: fullpath,
+                    key: mdFullpath,
                     mapTxts: defMapTxt,
                     ds: ndsSet,
                 }
             ];
             yield put(creater.setPanesAndActiveKey({
                 panes:newPanes, 
-                activeKey:fullpath,
+                activeKey:mdFullpath,
             }));
             yield put(gcreater.filesel.loadCurrDir());
             res();
@@ -438,8 +438,7 @@ const getDefMapTxt = (theleName = "中心主题") => (
 \t- 分主题
 \t- c:#1890ff|带颜色的分主题
 \t- 带说明的分主题|m:balabala
-\t- 带链接的分主题|www.sina.com
-\t- 带链接的另一分主题|[新浪网](www.sina.com)
+\t- 带链接的分主题|[百度](https://baidu.com)
 \t- 带引用的分主题|ref:长段文字
 
 ***

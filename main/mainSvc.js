@@ -226,10 +226,13 @@ const copyAttToAttsDir=(fromPicFullpath,showName,currGraphFullpath)=>{
  * @param {*} showName 
  * @param {*} currGraphFullpath 
  */
-const saveImgAndGetRelaPath=(im,showName,currGraphFullpath)=>{
+const saveImgAndGetRelaPath=(im,showName,mdFullpath)=>{
+    const currGraphBundleFullpath=path.dirname(mdFullpath);
+    const targetPath= path.join(currGraphBundleFullpath, 'assets', showName);
+
     //写文件
-    let toPicFullPath=getImgsPath(showName);   //指定图片保存到本地的绝对路径
-    fs.writeFileSync(toPicFullPath,getDefFormatImgBuff(im));
+    //let toPicFullPath=getImgsPath(showName);   //指定图片保存到本地的绝对路径
+    fs.writeFileSync(targetPath, getDefFormatImgBuff(im));
 
     // //计算从导图所在目录到图片的相对路径
     // let graphDir=path.dirname(currGraphFullpath);//导图所在目录
@@ -239,12 +242,14 @@ const saveImgAndGetRelaPath=(im,showName,currGraphFullpath)=>{
     // }
     // return relapath;
 
-    return "./"+showName;
+    return "assets/"+showName;
 }
 
-const saveAttAndGetRelaPath=(fromFullpath,showName,currGraphFullpath)=>{
-    fs.copyFileSync(fromFullpath,getAttsPath(showName));
-    return "./"+showName;
+const saveAttAndGetRelaPath=(fromFullpath,showName,mdFullpath)=>{
+    const currGraphBundleFullpath=path.dirname(mdFullpath);
+    const targetPath= path.join(currGraphBundleFullpath, 'assets', showName);
+    fs.copyFileSync(fromFullpath, targetPath);
+    return "assets/"+showName;
 }
 
 
@@ -322,18 +327,21 @@ const getTmpAttSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+".da
  * 计算指定导图文件按某相对路径解析后的绝对路径，返回file协议的字符串
  * @param {*} graphFileFullpath 
  * @param {*} picRelaPath 
+ * @returns [0]显示用的url [1]打开用的url
  */
 const calcPicUrl=(graphFileFullpath,picRelaPath)=>{
-    //开发模式返回favicon图标
+    if(!picRelaPath.startsWith("assets/")){
+        return [picRelaPath, picRelaPath];
+    }
+
+    const faviconUrl=getDevServerFaviconUrl();
+    const attFullpath=path.join(path.dirname(graphFileFullpath), picRelaPath);
+    const factUrl=getFileProtocalUrl(attFullpath);
+
     if(isDevMode()){
-        return getDevServerUrl().trim()+"/favicon.ico";
+        return [faviconUrl, factUrl];
     }
-
-    if(!picRelaPath.startsWith("./")){
-        return picRelaPath;
-    }
-
-    return getFileProtocalUrl(getImgsPath(picRelaPath.substring(2)));
+    return [factUrl, factUrl];
 
 
 
@@ -345,15 +353,17 @@ const calcPicUrl=(graphFileFullpath,picRelaPath)=>{
 
 const calcAttUrl=(graphFileFullpath,picRelaPath)=>{
     //开发模式返回favicon图标
-    if(isDevMode()){
-        return getDevServerUrl().trim()+"/favicon.ico";
-    }
+    // if(isDevMode()){
+    //     return getDevServerUrl().trim()+"/favicon.ico";
+    // }
 
-    if(!picRelaPath.startsWith("./")){
+    if(!picRelaPath.startsWith("assets/")){
         return picRelaPath;
     }
 
-    return getFileProtocalUrl(getAttsPath(picRelaPath.substring(2)));
+    //const bundleDir=path.dirname(graphFileFullpath);
+    const attFullpath=path.join(path.dirname(graphFileFullpath), picRelaPath);
+    return getFileProtocalUrl(attFullpath);
 
 
 
@@ -417,38 +427,28 @@ const getPathItems=(assignedDir = null)=>{
     return items;
 }
 
+/**
+ * 递归列出所有层次的目录（不包含导图的包）
+ * @returns 
+ */
 const listAllDirs=()=>{
-    const listDir=(assignedDir, parNode)=>{
-        let currDir=(assignedDir ? assignedDir : getMapsPath());
-        let imgsDir=getImgsPath();
-        let attsDir=getAttsPath();
-        let basepath=getMapsPath();
+    const basepath=getMapsPath();
 
+    const listDir=(assignedDir, parNode)=>{
+        const currDir=(assignedDir ? assignedDir : getMapsPath());
         fs.readdirSync(currDir, { withFileTypes: true }).filter(ent => {
-            let handledFN = ent.name.toLowerCase().trim();
-            return (
-                'readme.md' !== handledFN && 
-                ".git" !== handledFN
-            ) && (
-                (ent.isFile() && handledFN.endsWith(".md")) || 
-                !ent.isFile()
-            );//不是readme文件，且不是git目录，且是目录或是md文件
-        })
-        .filter(ent=>{
-            return !ent.isFile();
+            return (!ent.isFile() && ent.name!=='.git' && !ent.name.endsWith(".textbundle"))
         })
         .map(ent => {
             let fullpath =path.resolve(currDir,ent.name);
-            let isfile = ent.isFile();
-            
             return {
                 name:       ent.name,
                 itemsName:  toSlash(path.relative(basepath,fullpath)),//显示在选项卡上的名称：eg. front/css3.md
                 fullpath:   fullpath,
-                isfile:     isfile,
+                isfile:     false,
             };
         })
-        .filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir)  //不包括图片目录
+        //.filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir)  //不包括图片目录
         .map(each=>({
             title: each.name, 
             value: each.itemsName, 
@@ -471,21 +471,19 @@ const listAllDirs=()=>{
  * 列出所有匹配的文件： .md 并且不是readme.md
  */
 const listFiles = (assignedDir = null) => {    
-    let currDir=(assignedDir ? assignedDir : getMapsPath());
-    let imgsDir=getImgsPath();
-    let attsDir=getAttsPath();
-    let basepath=getMapsPath();
+    const currDir=(assignedDir ? assignedDir : getMapsPath());
+    const basepath=getMapsPath();
     let ret=[];
 
-    
+    const mapExt=".textbundle";
+    const mapExtLen=mapExt.length;
     
 
 
     try{
         ret= fs.readdirSync(currDir, { withFileTypes: true }).filter(ent => {
-            //let handledFN = ent.name.toLowerCase().trim();
-            //return ('readme.md' !== handledFN && ".git" !== handledFN) && ((ent.isFile() && handledFN.endsWith(".md")) || !ent.isFile());//不是readme文件，且不是git目录，且是目录或是md文件
-            return !ent.isFile();
+            // 只保留名字不为'.git'的目录
+            return !ent.isFile() && ent.name!=='.git';
         }).sort((item1,item2)=>{
             // 排序：目录在文件之前，如果同为目录或文件，则按文件名排序
             let ord1=item1.name.endsWith(".textbundle") ? 1 : 0;
@@ -499,16 +497,13 @@ const listFiles = (assignedDir = null) => {
             return 0;
         }).map(ent => {
             // 是否为文件：如果以.textbundle结尾，则认为是导图的包，看作是一个文件；否则认为是普通目录
-            const mapExt=".textbundle";
-            const mapExtLen=mapExt.length;
-            let isfile =ent.name.endsWith(".textbundle");// ent.isFile();
+            let isfile =ent.name.endsWith(mapExt);// ent.isFile();
 
             // 全路径、列表显示的名称、tab头显示的名称
             let fullpath =path.resolve(currDir,ent.name);
             const showName= (isfile ? ent.name.substring(0, ent.name.length-mapExtLen) : ent.name);
             let itemsName=toSlash(path.relative(basepath,fullpath));
             itemsName=(isfile ? itemsName.substring(0, itemsName.length-mapExtLen) : itemsName);
-
 
             // 文件类型的特殊属性：包内导图的全路径、包内附件的目录路径（只对文件类型有效）、附件中第一个图片的全路径
             let mdFullpath=null;
@@ -523,7 +518,7 @@ const listFiles = (assignedDir = null) => {
                 });
                 if(0<imgItems.length){
                     if(isDevMode()){
-                        pic= getDevServerUrl().trim()+"/favicon.ico";
+                        pic= getDevServerFaviconUrl();
                     }else{
                         pic=getFileProtocalUrl(path.join(attDir, imgItems[0].name));
                         pic=encodeURI(pic);
@@ -616,13 +611,13 @@ const existsAtt=(attName)=>{
 /**
  * 判断指定导图文件名是否存在，以getMapsPath()表示的目录为基础
  * @param {*} fn 文件名或带相对路径的文件名，eg. aa   xx/yy/bb.md  mm/nn
- * @returns 如果存在，返回true，否则返回[文件名或带相对路径的文件名，主题名称，全路径]
+ * @returns 如果存在，返回true，否则返回[文件名或带相对路径的文件名，主题名称，包的全路径, 导图的全路径]
  */
 const existsGraph = (fn) => {
-    //保证扩展名为.md
+    //保证扩展名为.textbundle
     fn=fn.trim();   
-    if (".md"!==path.extname(fn).trim().toLowerCase()) {
-        fn+=".md";
+    if (".textbundle"!==path.extname(fn).trim().toLowerCase()) {
+        fn+=".textbundle";
     }
     
     //
@@ -631,7 +626,9 @@ const existsGraph = (fn) => {
     if (fs.existsSync(fullpath)) {
         return true;
     }
-    return [toSlash(fn),themeName, fullpath];
+    let tabName=toSlash(fn);
+    tabName=tabName.substring(0, tabName.length-".textbundle".length );
+    return [tabName, themeName, fullpath, path.join(fullpath, 'text.md')];
 }
 
 
@@ -653,7 +650,7 @@ const loadIcon=(url)=>{
            res({
                 succ: true,
                 msg: "",
-                data: getDevServerUrl().trim()+"/favicon.ico"
+                data: getDevServerFaviconUrl(),
            }); 
         });
     }
@@ -835,6 +832,29 @@ const saveFile = (fullpath, content) => {
         };
     }
 }
+
+/**
+ * 创建导图的包
+ */
+const createMapBundle=(bundleFullpath, content)=>{
+    try{
+        const attDir=path.join(bundleFullpath, 'assets');
+        const mdFullpath=path.join(bundleFullpath, 'text.md');
+        const jsonFullpath=path.join(bundleFullpath, 'info.json');
+
+        if(!fs.existsSync(attDir)){
+            fs.mkdirSync(attDir,{recursive:true});
+        }
+        fs.writeFileSync(jsonFullpath, "{}", 'utf-8');
+        fs.writeFileSync(mdFullpath, content, 'utf-8');
+        return true;
+    }catch(e){
+        return {
+            succ: false,
+            msg: "写入文件失败，请稍后重试"
+        };
+    }
+};
 
 
 const selPicFile = (mainWindow) => {
@@ -1131,6 +1151,12 @@ const isMaximized=()=>(mainWindow.isMaximized());
 const getInnerModuleVersions=()=>(process.versions);
 
 
+
+
+const getDevServerFaviconUrl=()=>{
+    return getDevServerUrl().trim()+"/favicon.ico"
+};
+
 /**
  * 获得开发模式的主页访问地址
  */
@@ -1219,6 +1245,7 @@ const ipcHandlers={
     listAllDirs,
     readFile,
     saveFile,
+    createMapBundle,
     listFiles,
     existsFullpath,
     isUrlFormat,

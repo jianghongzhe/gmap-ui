@@ -211,6 +211,15 @@ class Api{
         return ipcRenderer.invoke('saveFile', fullpath, content.replace(/\r/g,'').trim());
     }
 
+    /**
+     * 创建导图的包，包含其中的文件结构
+     * @param {*} fullpath 
+     * @param {*} content 
+     * @returns 
+     */
+    createMapBundle=(fullpath,content)=>{
+        return ipcRenderer.invoke('createMapBundle', fullpath, content.replace(/\r/g,'').trim());
+    }
 
     /**
      * 列出所有文件
