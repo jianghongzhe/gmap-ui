@@ -277,7 +277,32 @@ const MapsViewer=(props)=>{
     },[activeKey, panes]);
 
 
-    const onExpImage=useCallback(()=>{
+    const onExpPdf=useCallback(()=>{
+        panes.forEach((item,ind)=>{
+            if(activeKey!==item.key){
+                return;
+            }
+            let ele=document.querySelector(`#graphwrapper_${ind}`);
+            if(!ele){
+                message.warn("图表状态异常，无法导出");
+                return;
+            }
+            
+            console.log('begin');
+            const range=new Range();
+            range.setStart(ele, 0);
+            range.setEndAfter(ele, 0);
+            document.getSelection().removeAllRanges();
+            document.getSelection().addRange(range);
+            console.log('end');
+
+            api.expPdf();
+
+            
+        });
+    }, [activeKey, panes]);
+
+    const onExpImage=useCallback((expImg=true)=>{
         panes.forEach((item,ind)=>{
             if(activeKey!==item.key){
                 return;
@@ -298,7 +323,7 @@ const MapsViewer=(props)=>{
     
                 api.isDevMode().then(devMode=>{
                     screenShot(
-                        api.openSaveFileDlg,    //保存文件对话框函数
+                        expImg ? api.openSaveFileDlg : api.openSaveFileDlg.bind(this, 'pdf'),    //保存文件对话框函数
                         api.takeScreenShot,     //openUrl,            //执行截屏的函数
                         api.screenShotCombine,  //openUrl,
                         containerEle,           //容器元素
@@ -362,6 +387,7 @@ const MapsViewer=(props)=>{
                                 onExpImage={onExpImage}
                                 onExpMarkdown={onExpMarkdown}
                                 onExpHtml={onExpHtml}
+                                onExpPdf={onExpImage.bind(this, false)}
                                 onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
                             />
                             <GraphTabs

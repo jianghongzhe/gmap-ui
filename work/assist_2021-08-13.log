@@ -1,2 +1,0 @@
-﻿[file_runner.service.Server] [thread-49] [2021-08-13 06:32:06.662]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///D:/ws/web/gmap-ui/gmaps\"}"}
-[file_runner.service.Server] [thread-49] [2021-08-13 06:32:07.004]  返回结果：{ reqId=1, succ=True, msg=, data= }

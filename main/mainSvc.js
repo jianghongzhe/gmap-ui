@@ -864,18 +864,23 @@ const openSaveFileDlg = (ext) => {
             { name: 'JPEG图片', extensions: ['jpeg'] },
             { name: 'SVG图片', extensions: ['svg'] },
             { name: 'WEBP图片', extensions: ['webp'] },
-            { name: '所有', extensions: ['*'] }
+            { name: '所有', extensions: ['*'] },
         ];
+        if('pdf'===ext){
+            filters= [
+                { name: 'pdf', extensions: ['pdf'] },
+            ];
+        }
         if('md'===ext){
             filters= [
                 { name: 'markdown', extensions: ['md'] },
-                { name: '所有', extensions: ['*'] }
+                { name: '所有', extensions: ['*'] },
             ];
         }
         if('html'===ext){
             filters= [
                 { name: 'html文件', extensions: ['html'] },
-                { name: '所有', extensions: ['*'] }
+                { name: '所有', extensions: ['*'] },
             ];
         }
         const result=dialog.showSaveDialogSync(mainWindow, { 
@@ -889,6 +894,23 @@ const openSaveFileDlg = (ext) => {
         rej("用户已取消");
     });
 }
+
+
+const expPdf=()=>{
+    return new Promise((res, rej)=>{
+        (async()=>{
+            try{
+                const path="C:\\Users\\Administrator\\Desktop\\333.pdf"; //await openSaveFileDlg('pdf');
+                const data=await mainWindow.webContents.printToPDF({printSelectionOnly: true,});
+                fs.writeFileSync(path, data);
+                res();
+            }catch(e){
+                common.log(e);
+                rej(e);
+            }
+        })();
+    });
+};
 
 
 
@@ -1256,6 +1278,7 @@ const ipcHandlers={
     calcPicUrl,
     calcAttUrl,
     openCurrMapDir,
+    expPdf,
 };
 
 /**

@@ -1,0 +1,122 @@
+﻿[file_runner.service.Server] [thread-6] [2021-08-18 03:27:36.796]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:27:36.803]  发送心跳响应
+[file_runner.service.Server] [thread-9] [2021-08-18 03:28:00.536]  收到请求：{"reqId":1,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1920,\"height\":877,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-08-18 03:28:00.644]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-08-18 03:28:00.648]  收到请求：{"reqId":2,"action":"shotCombine","data":"{\"itemWidth\":1920,\"itemHeight\":877,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\22.pdf\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}]]}"}
+[file_runner.service.Server] [thread-9] [2021-08-18 03:28:00.896]  System.ArgumentNullException: 值不能为 null。
+参数名: encoder
+   在 System.Drawing.Image.Save(Stream stream, ImageCodecInfo encoder, EncoderParameters encoderParams)
+   在 iTextSharp.text.Image.GetInstance(Image image, ImageFormat format)
+   在 file_runner.common.PdfUtil.img2Pdf(Image im, String pdfPath)
+   在 file_runner.service.ScreenShotCombineHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass14_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-9] [2021-08-18 03:28:00.896]  返回结果：{ reqId=2, succ=False, msg=值不能为 null。
+参数名: encoder, data= }
+[file_runner.service.Server] [thread-6] [2021-08-18 03:28:06.797]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:28:06.797]  发送心跳响应
+[file_runner.service.Server] [thread-6] [2021-08-18 03:28:36.800]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:28:36.800]  发送心跳响应
+[file_runner.service.Server] [thread-6] [2021-08-18 03:29:06.802]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:29:06.802]  发送心跳响应
+[file_runner.service.Server] [thread-6] [2021-08-18 03:29:36.804]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:29:36.804]  发送心跳响应
+[file_runner.service.Server] [thread-12] [2021-08-18 03:30:06.804]  收到心跳请求
+[file_runner.service.Server] [thread-12] [2021-08-18 03:30:06.804]  发送心跳响应
+[file_runner.service.Server] [thread-14] [2021-08-18 03:30:36.807]  收到心跳请求
+[file_runner.service.Server] [thread-14] [2021-08-18 03:30:36.807]  发送心跳响应
+[file_runner.service.Server] [thread-16] [2021-08-18 03:31:06.808]  收到心跳请求
+[file_runner.service.Server] [thread-16] [2021-08-18 03:31:06.808]  发送心跳响应
+[file_runner.service.Server] [thread-18] [2021-08-18 03:31:36.810]  收到心跳请求
+[file_runner.service.Server] [thread-18] [2021-08-18 03:31:36.810]  发送心跳响应
+[file_runner.service.Server] [thread-18] [2021-08-18 03:32:06.811]  收到心跳请求
+[file_runner.service.Server] [thread-18] [2021-08-18 03:32:06.811]  发送心跳响应
+[file_runner.service.Server] [thread-21] [2021-08-18 03:32:36.813]  收到心跳请求
+[file_runner.service.Server] [thread-21] [2021-08-18 03:32:36.813]  发送心跳响应
+[file_runner.service.Server] [thread-21] [2021-08-18 03:33:06.815]  收到心跳请求
+[file_runner.service.Server] [thread-21] [2021-08-18 03:33:06.815]  发送心跳响应
+[file_runner.service.Server] [thread-24] [2021-08-18 03:33:36.816]  收到心跳请求
+[file_runner.service.Server] [thread-24] [2021-08-18 03:33:36.817]  发送心跳响应
+[file_runner.service.Server] [thread-24] [2021-08-18 03:34:06.818]  收到心跳请求
+[file_runner.service.Server] [thread-24] [2021-08-18 03:34:06.818]  发送心跳响应
+[file_runner.service.Server] [thread-29] [2021-08-18 03:34:36.820]  收到心跳请求
+[file_runner.service.Server] [thread-29] [2021-08-18 03:34:36.820]  发送心跳响应
+[file_runner.service.Server] [thread-29] [2021-08-18 03:35:06.821]  收到心跳请求
+[file_runner.service.Server] [thread-29] [2021-08-18 03:35:06.822]  发送心跳响应
+[file_runner.service.Server] [thread-32] [2021-08-18 03:35:36.823]  收到心跳请求
+[file_runner.service.Server] [thread-32] [2021-08-18 03:35:36.823]  发送心跳响应
+[file_runner.service.Server] [thread-34] [2021-08-18 03:36:06.824]  收到心跳请求
+[file_runner.service.Server] [thread-34] [2021-08-18 03:36:06.824]  发送心跳响应
+[file_runner.service.Server] [thread-36] [2021-08-18 03:36:36.825]  收到心跳请求
+[file_runner.service.Server] [thread-36] [2021-08-18 03:36:36.825]  发送心跳响应
+[file_runner.service.Server] [thread-36] [2021-08-18 03:37:06.827]  收到心跳请求
+[file_runner.service.Server] [thread-36] [2021-08-18 03:37:06.827]  发送心跳响应
+[file_runner.service.Server] [thread-6] [2021-08-18 03:37:34.429]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:37:34.442]  发送心跳响应
+[file_runner.service.Server] [thread-4] [2021-08-18 03:37:47.229]  收到请求：{"reqId":1,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1920,\"height\":877,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-4] [2021-08-18 03:37:47.358]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-4] [2021-08-18 03:37:47.363]  收到请求：{"reqId":2,"action":"shotCombine","data":"{\"itemWidth\":1920,\"itemHeight\":877,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\zzz.pdf\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}]]}"}
+[file_runner.service.Server] [thread-4] [2021-08-18 03:37:47.938]  返回结果：{ reqId=2, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-6] [2021-08-18 03:38:04.438]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-18 03:38:04.439]  发送心跳响应
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.184]  收到请求：{"reqId":3,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.249]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-08-18 03:38:34.302]  收到请求：{"reqId":4,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"0_1.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-08-18 03:38:34.352]  返回结果：{ reqId=4, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.404]  收到请求：{"reqId":5,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-08-18 03:38:34.437]  收到心跳请求
+[file_runner.service.Server] [thread-7] [2021-08-18 03:38:34.437]  发送心跳响应
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.454]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.505]  收到请求：{"reqId":6,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"1_1.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.586]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.638]  收到请求：{"reqId":7,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.686]  返回结果：{ reqId=7, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.739]  收到请求：{"reqId":8,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"2_1.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.787]  返回结果：{ reqId=8, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:34.789]  收到请求：{"reqId":9,"action":"shotCombine","data":"{\"itemWidth\":1903,\"itemHeight\":860,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\ee.pdf\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0},{\"picName\":\"0_1.jpg\",\"cutLeft\":1814,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0},{\"picName\":\"1_1.jpg\",\"cutLeft\":1814,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":35},{\"picName\":\"2_1.jpg\",\"cutLeft\":1814,\"cutTop\":35}]]}"}
+[file_runner.service.Server] [thread-5] [2021-08-18 03:38:35.439]  返回结果：{ reqId=9, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-7] [2021-08-18 03:39:04.447]  收到心跳请求
+[file_runner.service.Server] [thread-7] [2021-08-18 03:39:04.447]  发送心跳响应
+[file_runner.service.Server] [thread-12] [2021-08-18 03:39:30.310]  收到请求：{"reqId":10,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-12] [2021-08-18 03:39:30.380]  返回结果：{ reqId=10, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-12] [2021-08-18 03:39:30.433]  收到请求：{"reqId":11,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"0_1.jpg\"}"}
+[file_runner.service.Server] [thread-12] [2021-08-18 03:39:30.477]  返回结果：{ reqId=11, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.531]  收到请求：{"reqId":12,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.579]  返回结果：{ reqId=12, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.632]  收到请求：{"reqId":13,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"1_1.jpg\"}"}
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.680]  返回结果：{ reqId=13, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-12] [2021-08-18 03:39:30.732]  收到请求：{"reqId":14,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-12] [2021-08-18 03:39:30.780]  返回结果：{ reqId=14, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.832]  收到请求：{"reqId":15,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":1903,\"height\":860,\"fileName\":\"2_1.jpg\"}"}
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.882]  返回结果：{ reqId=15, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:30.884]  收到请求：{"reqId":16,"action":"shotCombine","data":"{\"itemWidth\":1903,\"itemHeight\":860,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\eee.jpg\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0},{\"picName\":\"0_1.jpg\",\"cutLeft\":1814,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0},{\"picName\":\"1_1.jpg\",\"cutLeft\":1814,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":35},{\"picName\":\"2_1.jpg\",\"cutLeft\":1814,\"cutTop\":35}]]}"}
+[file_runner.service.Server] [thread-13] [2021-08-18 03:39:31.059]  返回结果：{ reqId=16, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-7] [2021-08-18 03:39:34.449]  收到心跳请求
+[file_runner.service.Server] [thread-7] [2021-08-18 03:39:34.449]  发送心跳响应
+[file_runner.service.Server] [thread-7] [2021-08-18 03:40:04.455]  收到心跳请求
+[file_runner.service.Server] [thread-7] [2021-08-18 03:40:04.455]  发送心跳响应
+[file_runner.service.Server] [thread-14] [2021-08-18 03:40:34.457]  收到心跳请求
+[file_runner.service.Server] [thread-14] [2021-08-18 03:40:34.458]  发送心跳响应
+[file_runner.service.Server] [thread-14] [2021-08-18 03:41:04.460]  收到心跳请求
+[file_runner.service.Server] [thread-14] [2021-08-18 03:41:04.460]  发送心跳响应
+[file_runner.service.Server] [thread-14] [2021-08-18 03:41:34.460]  收到心跳请求
+[file_runner.service.Server] [thread-14] [2021-08-18 03:41:34.460]  发送心跳响应
+[file_runner.service.Server] [thread-14] [2021-08-18 03:42:04.462]  收到心跳请求
+[file_runner.service.Server] [thread-14] [2021-08-18 03:42:04.462]  发送心跳响应
+[file_runner.service.Server] [thread-14] [2021-08-18 03:42:34.463]  收到心跳请求
+[file_runner.service.Server] [thread-14] [2021-08-18 03:42:34.463]  发送心跳响应
+[file_runner.service.Server] [thread-20] [2021-08-18 03:43:04.465]  收到心跳请求
+[file_runner.service.Server] [thread-20] [2021-08-18 03:43:04.465]  发送心跳响应
+[file_runner.service.Server] [thread-20] [2021-08-18 03:43:34.466]  收到心跳请求
+[file_runner.service.Server] [thread-20] [2021-08-18 03:43:34.467]  发送心跳响应
+[file_runner.service.Server] [thread-20] [2021-08-18 03:44:04.468]  收到心跳请求
+[file_runner.service.Server] [thread-20] [2021-08-18 03:44:04.468]  发送心跳响应
+[file_runner.service.Server] [thread-26] [2021-08-18 03:44:34.469]  收到心跳请求
+[file_runner.service.Server] [thread-26] [2021-08-18 03:44:34.469]  发送心跳响应
+[file_runner.service.Server] [thread-30] [2021-08-18 03:45:04.470]  收到心跳请求
+[file_runner.service.Server] [thread-30] [2021-08-18 03:45:04.471]  发送心跳响应
+[file_runner.service.Server] [thread-30] [2021-08-18 03:45:34.472]  收到心跳请求
+[file_runner.service.Server] [thread-30] [2021-08-18 03:45:34.472]  发送心跳响应
+[file_runner.service.Server] [thread-30] [2021-08-18 03:46:04.473]  收到心跳请求
+[file_runner.service.Server] [thread-30] [2021-08-18 03:46:04.473]  发送心跳响应
+[file_runner.service.Server] [thread-30] [2021-08-18 03:46:34.475]  收到心跳请求
+[file_runner.service.Server] [thread-30] [2021-08-18 03:46:34.476]  发送心跳响应

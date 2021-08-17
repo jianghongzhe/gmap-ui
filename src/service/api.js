@@ -303,6 +303,14 @@ class Api{
     }
 
     /**
+     * 导出pdf
+     * @returns 
+     */
+    expPdf=()=>{
+        return ipcRenderer.invoke('expPdf');
+    };
+
+    /**
      * 获得路径的每个部分
      * @param {*} dir 
      * @returns 

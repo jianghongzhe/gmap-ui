@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
+import api from '../../../service/api';
 
 const { Header } = Layout;
 
@@ -21,6 +22,12 @@ const Toolbar=(props)=>{
     const tmp={activeKey,panes};
     let showExpandAll=ifShowExpandAll(tmp);
     let showRestore=isShowRestore(tmp);
+
+    // expPdf
+
+    // const expPdf=useCallback(()=>{
+    //     api.expPdf();
+    // },[]);
 
     return (
         <Header css={headerStyle}>
@@ -64,6 +71,11 @@ const Toolbar=(props)=>{
             </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
                 <Button shape='circle' icon={<FileMarkdownOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpMarkdown} />
+            </Tooltip>
+
+
+            <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
+                <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpPdf} />
             </Tooltip>
             {/* <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={notSupported} title='导出pdf' />
             <Button shape='circle' icon={<FileWordOutlined />} className='toolbtn' type='default' size='large' onClick={notSupported} title='导出word' /> */}
