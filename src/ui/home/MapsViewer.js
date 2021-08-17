@@ -271,36 +271,13 @@ const MapsViewer=(props)=>{
 
     
     const onExpMarkdown=useCallback(()=>{
-        panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
-            expSvc.expMarkdown(item.mapTxts);
-        });
-    },[activeKey, panes]);
+        api.expMarkdown(activeKey);
 
+        // panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
+        //     expSvc.expMarkdown(item.mapTxts);
+        // });
+    },[activeKey/*, panes*/]);
 
-    const onExpPdf=useCallback(()=>{
-        panes.forEach((item,ind)=>{
-            if(activeKey!==item.key){
-                return;
-            }
-            let ele=document.querySelector(`#graphwrapper_${ind}`);
-            if(!ele){
-                message.warn("图表状态异常，无法导出");
-                return;
-            }
-            
-            console.log('begin');
-            const range=new Range();
-            range.setStart(ele, 0);
-            range.setEndAfter(ele, 0);
-            document.getSelection().removeAllRanges();
-            document.getSelection().addRange(range);
-            console.log('end');
-
-            api.expPdf();
-
-            
-        });
-    }, [activeKey, panes]);
 
     const onExpImage=useCallback((expImg=true)=>{
         panes.forEach((item,ind)=>{
@@ -385,9 +362,9 @@ const MapsViewer=(props)=>{
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
                                 onExpImage={onExpImage}
+                                onExpPdf={onExpImage.bind(this, false)}
                                 onExpMarkdown={onExpMarkdown}
                                 onExpHtml={onExpHtml}
-                                onExpPdf={onExpImage.bind(this, false)}
                                 onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
                             />
                             <GraphTabs

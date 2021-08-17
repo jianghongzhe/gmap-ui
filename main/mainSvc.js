@@ -853,6 +853,54 @@ const selPicFile = (mainWindow) => {
     });
 }
 
+/**
+ * 导出markdown
+ * @param {*} mdFullpath 
+ * @returns 
+ */
+const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
+    //选择文件
+    let dir=dialog.showOpenDialogSync(mainWindow, { 
+        properties: ['openDirectory'],
+    });
+    if(!dir){
+        return;
+    }
+    dir=dir[0];
+
+    // 来源路径
+    const bundleDir=path.dirname(mdFullpath);   
+    const bundleName=path.basename(bundleDir);   
+    const jsonPath=path.join(bundleDir, 'info.json'); 
+    const assetsDir=path.join(bundleDir, 'assets');
+    
+    // 结果路径：如果指定了标题，则使用该名称的目录，否则使用来源名称的目录
+    const bundleExtLen=".textbundle".length;
+    let expDir=path.join(dir, assignedTitle ? assignedTitle+".textbundle" : bundleName);
+    if(fs.existsSync(expDir)){
+        expDir=expDir.substring(0, expDir.length-bundleExtLen)+`_${common.getYmdhms()}.textbundle`;
+    }
+    const expAssetsDir=path.join(expDir, 'assets');
+    const expMdPath=path.join(expDir, 'text.md');
+    const expJsonPath=path.join(expDir, 'info.json'); 
+
+    // 创建结果路径并复制info.json和assets目录中的内容
+    fs.mkdirSync(expAssetsDir,{recursive:true});
+    fs.copyFileSync(jsonPath, expJsonPath);
+    fs.readdirSync(assetsDir, { withFileTypes: true }).filter(ent => ent.isFile()).forEach(ent=>{
+        const fromAttPath=path.join(assetsDir, ent.name);
+        const toAttPath=path.join(expAssetsDir, ent.name);
+        fs.copyFileSync(fromAttPath, toAttPath);
+    });
+    // 如果指定了文件内容，则直接写入，否则从来源文件直接复制
+    if(assignedMdTxt){
+        fs.writeFileSync(expMdPath, assignedMdTxt, 'utf-8');
+    }else{
+        fs.copyFileSync(mdFullpath, expMdPath);
+    }
+    showNotification('markdown已导出', `内容保存在：\r\n${expDir}`, 'succ');
+};
+
 
 const openSaveFileDlg = (ext) => {
     return new Promise((res, rej)=>{
@@ -1279,6 +1327,7 @@ const ipcHandlers={
     calcAttUrl,
     openCurrMapDir,
     expPdf,
+    expMarkdown,
 };
 
 /**

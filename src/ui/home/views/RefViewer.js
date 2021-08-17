@@ -275,8 +275,9 @@ const RefViewer=(props)=>{
 
     
     const onExpMarkdown=useCallback(()=>{
-        expSvc.expMarkdown(txt);
-    },[txt]);
+        api.expMarkdown(activeKey,refname, txt);
+        //expSvc.expMarkdown(txt);
+    },[activeKey, refname, txt]);
     
     
     

@@ -138,6 +138,19 @@ const log=(info)=>{
 };
 
 
+const getYmdhms=()=>{
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const h=now.getHours();
+    const min=now.getMinutes();
+    const s=now.getSeconds();
+    const ms=now.getMilliseconds();
+
+    const ymd=`${now.getFullYear()-2000}${m<10 ? "0"+m : m}${d<10 ? "0"+d : d}`;
+    const hms=`${h<10 ? '0'+h : h}${min<10 ? '0'+min : min}${s<10 ? '0'+s : s}`;
+    return ymd+"_"+hms;
+};
 
 
 
@@ -146,4 +159,5 @@ module.exports={
     connWs,
     send,
     log,
+    getYmdhms,
 };

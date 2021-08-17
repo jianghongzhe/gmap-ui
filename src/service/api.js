@@ -42,6 +42,10 @@ class Api{
         return ipcRenderer.invoke('loadIcon', url);
     };
 
+    expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
+        return ipcRenderer.invoke('expMarkdown', mdFullpath,assignedTitle, assignedMdTxt);
+    };
+
     /**
      * 获取内部组件的版本号
      * @returns 
