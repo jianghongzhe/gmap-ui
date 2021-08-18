@@ -859,46 +859,68 @@ const selPicFile = (mainWindow) => {
  * @returns 
  */
 const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
-    //选择文件
-    let dir=dialog.showOpenDialogSync(mainWindow, { 
-        properties: ['openDirectory'],
-    });
-    if(!dir){
+    // dialog.showSaveDialogSync(mainWindow, {defaultPath: 'aa.pdf'});
+
+    // //选择文件
+    // let dir=dialog.showOpenDialogSync(mainWindow, { 
+    //     properties: ['openDirectory'],
+    // });
+    // if(!dir){
+    //     return;
+    // }
+    // dir=dir[0];
+
+    if(assignedTitle){
+        let expZipFilePath=dialog.showSaveDialogSync(mainWindow, {defaultPath: assignedTitle+".zip"});
         return;
     }
-    dir=dir[0];
+
+    console.log("no title");
 
     // 来源路径
-    const bundleDir=path.dirname(mdFullpath);   
-    const bundleName=path.basename(bundleDir);   
-    const jsonPath=path.join(bundleDir, 'info.json'); 
-    const assetsDir=path.join(bundleDir, 'assets');
-    
-    // 结果路径：如果指定了标题，则使用该名称的目录，否则使用来源名称的目录
-    const bundleExtLen=".textbundle".length;
-    let expDir=path.join(dir, assignedTitle ? assignedTitle+".textbundle" : bundleName);
-    if(fs.existsSync(expDir)){
-        expDir=expDir.substring(0, expDir.length-bundleExtLen)+`_${common.getYmdhms()}.textbundle`;
-    }
-    const expAssetsDir=path.join(expDir, 'assets');
-    const expMdPath=path.join(expDir, 'text.md');
-    const expJsonPath=path.join(expDir, 'info.json'); 
+    const bundleDir=path.dirname(mdFullpath); 
+    const bundleName=path.basename(bundleDir, ".textbundle");
+    let expZipFilePath=dialog.showSaveDialogSync(mainWindow, {defaultPath: bundleName+".zip"});
+    sendCmdToServer("zip", {srcDir: bundleDir , destZipFullpath:expZipFilePath}).then(rs=>{
+        if(rs.succ){
+            showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
+            return;
+        }
+        showNotification('markdown导出有误', rs.msg, 'err');
+    })
 
-    // 创建结果路径并复制info.json和assets目录中的内容
-    fs.mkdirSync(expAssetsDir,{recursive:true});
-    fs.copyFileSync(jsonPath, expJsonPath);
-    fs.readdirSync(assetsDir, { withFileTypes: true }).filter(ent => ent.isFile()).forEach(ent=>{
-        const fromAttPath=path.join(assetsDir, ent.name);
-        const toAttPath=path.join(expAssetsDir, ent.name);
-        fs.copyFileSync(fromAttPath, toAttPath);
-    });
-    // 如果指定了文件内容，则直接写入，否则从来源文件直接复制
-    if(assignedMdTxt){
-        fs.writeFileSync(expMdPath, assignedMdTxt, 'utf-8');
-    }else{
-        fs.copyFileSync(mdFullpath, expMdPath);
-    }
-    showNotification('markdown已导出', `内容保存在：\r\n${expDir}`, 'succ');
+
+
+
+    // const bundleName=path.basename(bundleDir, ".textbundle");
+    // const jsonPath=path.join(bundleDir, 'info.json'); 
+    // const assetsDir=path.join(bundleDir, 'assets');
+    
+    // // 结果路径：如果指定了标题，则使用该名称的目录，否则使用来源名称的目录
+    // const bundleExtLen=".textbundle".length;
+    // let expDir=path.join(dir, assignedTitle ? assignedTitle+".textbundle" : bundleName);
+    // if(fs.existsSync(expDir)){
+    //     expDir=expDir.substring(0, expDir.length-bundleExtLen)+`_${common.getYmdhms()}.textbundle`;
+    // }
+    // const expAssetsDir=path.join(expDir, 'assets');
+    // const expMdPath=path.join(expDir, 'text.md');
+    // const expJsonPath=path.join(expDir, 'info.json'); 
+
+    // // 创建结果路径并复制info.json和assets目录中的内容
+    // fs.mkdirSync(expAssetsDir,{recursive:true});
+    // fs.copyFileSync(jsonPath, expJsonPath);
+    // fs.readdirSync(assetsDir, { withFileTypes: true }).filter(ent => ent.isFile()).forEach(ent=>{
+    //     const fromAttPath=path.join(assetsDir, ent.name);
+    //     const toAttPath=path.join(expAssetsDir, ent.name);
+    //     fs.copyFileSync(fromAttPath, toAttPath);
+    // });
+    // // 如果指定了文件内容，则直接写入，否则从来源文件直接复制
+    // if(assignedMdTxt){
+    //     fs.writeFileSync(expMdPath, assignedMdTxt, 'utf-8');
+    // }else{
+    //     fs.copyFileSync(mdFullpath, expMdPath);
+    // }
+    // showNotification('markdown已导出', `内容保存在：\r\n${expDir}`, 'succ');
 };
 
 

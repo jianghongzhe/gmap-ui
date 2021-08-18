@@ -294,7 +294,7 @@ const MapsViewer=(props)=>{
 
             api.isMaximized().then(maximized=>{
                 if(!maximized){
-                    api.showNotification("警告","窗口只有在最大化时才能导出图片","warn");
+                    api.showNotification("警告",`窗口只有在最大化时才能导出${expImg ? "图片" : "PDF"}`,"warn");
                     return;
                 }
     

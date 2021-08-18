@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
-import { FileMarkdownOutlined,FileImageOutlined } from '@ant-design/icons';
+import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import mindmapSvc from '../../../service/mindmapSvc';
@@ -18,6 +18,8 @@ import mermaid from 'mermaid';
 import flowchart from 'flowchart.js';
 import * as echarts from 'echarts';
 import echartParser from '../../../common/echartParser';
+import screenShot from '../../../service/screenShot';
+
 // import lodash from 'lodash';
 //import snap from 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js'
 // import seqdiagram from 'js-sequence-diagram';
@@ -69,6 +71,7 @@ const RefViewer=(props)=>{
 
 
     const [wrapperId]=useState(()=>"refviewercontainer"+new Date().getTime());
+    const [bodyId]=useState(()=>"refviewerbody"+new Date().getTime());
 
     useEffect(()=>{
         markedHighlightUtil.init(marked, hljs, {
@@ -279,6 +282,39 @@ const RefViewer=(props)=>{
         //expSvc.expMarkdown(txt);
     },[activeKey, refname, txt]);
     
+
+    const onExpImage=useCallback((expImg=true)=>{
+        (async()=>{
+            try{
+                const maximized=await api.isMaximized();
+                if(!maximized){
+                    api.showNotification("警告",`窗口只有在最大化时才能导出${expImg ? "图片" : "PDF"}`,"warn");
+                    return;
+                }
+                const devMode=await api.isDevMode();
+                const containerEle=document.querySelector(`#${wrapperId}`);
+                const bodyEle=document.querySelector(`#${bodyId}`);
+                let {x,y}=containerEle.getBoundingClientRect();
+                screenShot(
+                    expImg ? api.openSaveFileDlg : api.openSaveFileDlg.bind(this, 'pdf'),    //保存文件对话框函数
+                    api.takeScreenShot,     //openUrl,            //执行截屏的函数
+                    api.screenShotCombine,  //openUrl,
+                    containerEle,           //容器元素
+                    bodyEle,                //内容元素
+                    Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
+                    Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
+                    devMode                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                );
+            }catch(e){
+
+            }
+        })();
+    },[wrapperId, bodyId]);
+
+
+
+
+
     
     
     if(null===result){
@@ -293,7 +329,10 @@ const RefViewer=(props)=>{
                     <div>
                         {"查看引用 - " + refname}
                         <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
-                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={()=>{}}/>
+                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage}/>
+                        </Tooltip>
+                        <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
+                            <Button shape='circle' icon={<FilePdfOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, false)}/>
                         </Tooltip>
                         <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
                             <Button shape='circle' icon={<FileMarkdownOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpMarkdown}/>
@@ -305,13 +344,13 @@ const RefViewer=(props)=>{
                 visible={props.visible}
                 maskClosable={true}               
                 onCancel={props.onCancel}>
-            <div className='markdown-body' css={{
+            <div id={bodyId} className='markdown-body' css={{
                 margin:'0px auto',
                 width:'98%',
                 overflowX:'hidden'}}
                 dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
-            <div id='demo111' css={{width:'500px',height:'500px'}}></div>
+            {/* <div id='demo111' css={{width:'500px',height:'500px'}}></div> */}
             {
                 (props.backtopLoc && 2===props.backtopLoc.length) && (   
                     <BackTop  target={getScrollTarget} css={{
