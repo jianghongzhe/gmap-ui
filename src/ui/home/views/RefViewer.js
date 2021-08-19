@@ -283,6 +283,12 @@ const RefViewer=(props)=>{
     },[activeKey, refname, txt]);
     
 
+    
+
+    /**
+     * 导出图片或pdf
+     * @param {*} expImg  true-导出图片  false-导出pdf
+     */
     const onExpImage=useCallback((expImg=true)=>{
         (async()=>{
             try{

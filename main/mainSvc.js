@@ -7,6 +7,8 @@ const nodeNet = require('net');
 
 const ws=require('./ws');
 const common=require('./common');
+const { zip } = require('lodash');
+const { tmpdir } = require('os');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
@@ -854,73 +856,59 @@ const selPicFile = (mainWindow) => {
 }
 
 /**
- * 导出markdown
+ * 导出markdown：
+ * 默认文件名会根据导图的包名或指定的名称生成，以指定的名称优先。
+ * 最终导出的压缩包中的包名会根据实际的文件名生成。
  * @param {*} mdFullpath 
  * @returns 
  */
 const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
-    // dialog.showSaveDialogSync(mainWindow, {defaultPath: 'aa.pdf'});
-
-    // //选择文件
-    // let dir=dialog.showOpenDialogSync(mainWindow, { 
-    //     properties: ['openDirectory'],
-    // });
-    // if(!dir){
-    //     return;
-    // }
-    // dir=dir[0];
-
+    // 选择导出路径：
+    // 如果指定了名称，则以该名称为默认文件名
+    // 否则以导图的包名去掉.textbundle后缀作为默认文件名
+    const bundleDir=path.dirname(mdFullpath); 
+    let bundleName=path.basename(bundleDir, ".textbundle");
     if(assignedTitle){
-        let expZipFilePath=dialog.showSaveDialogSync(mainWindow, {defaultPath: assignedTitle+".zip"});
+        bundleName=assignedTitle;
+    }
+    let expZipFilePath=dialog.showSaveDialogSync(mainWindow, {
+        defaultPath: bundleName+".zip",
+        properties: ['showHiddenFiles'],
+            filters: [
+                { name: 'zip', extensions: ['zip'] },
+            ]
+    });
+    if(!expZipFilePath){
         return;
     }
+    if(fs.existsSync(expZipFilePath)){
+        fs.rmSync(expZipFilePath, {
+            force: true,
+            recursive: true,
+        });
+    }
 
-    console.log("no title");
-
-    // 来源路径
-    const bundleDir=path.dirname(mdFullpath); 
-    const bundleName=path.basename(bundleDir, ".textbundle");
-    let expZipFilePath=dialog.showSaveDialogSync(mainWindow, {defaultPath: bundleName+".zip"});
-    sendCmdToServer("zip", {srcDir: bundleDir , destZipFullpath:expZipFilePath}).then(rs=>{
+    // 根据导出文件名计算出带.textbundle后缀的名称作为包名
+    // 并在工作目录中的一个临时目录中创建此包
+    // 然后把来源目录中的内容复制到此包中
+    // 如果指定了内容，则覆盖包中text.md文件内容
+    let destBundleName=path.basename(expZipFilePath, ".zip");
+    destBundleName=(destBundleName.endsWith(".textbundle") ? destBundleName : destBundleName+".textbundle");
+    const tmpDir=path.join(workPath, ""+new Date().getTime(), destBundleName);
+    fs.mkdirSync(tmpDir, {recursive:true});
+    common.dirCopy(bundleDir, tmpDir);
+    if(assignedMdTxt){
+        fs.writeFileSync(path.join(tmpDir,'text.md'), assignedMdTxt, 'utf-8');
+    }
+    
+    // 包目录打包生成结果文件
+    sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath}).then(rs=>{
         if(rs.succ){
             showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
             return;
         }
         showNotification('markdown导出有误', rs.msg, 'err');
     })
-
-
-
-
-    // const bundleName=path.basename(bundleDir, ".textbundle");
-    // const jsonPath=path.join(bundleDir, 'info.json'); 
-    // const assetsDir=path.join(bundleDir, 'assets');
-    
-    // // 结果路径：如果指定了标题，则使用该名称的目录，否则使用来源名称的目录
-    // const bundleExtLen=".textbundle".length;
-    // let expDir=path.join(dir, assignedTitle ? assignedTitle+".textbundle" : bundleName);
-    // if(fs.existsSync(expDir)){
-    //     expDir=expDir.substring(0, expDir.length-bundleExtLen)+`_${common.getYmdhms()}.textbundle`;
-    // }
-    // const expAssetsDir=path.join(expDir, 'assets');
-    // const expMdPath=path.join(expDir, 'text.md');
-    // const expJsonPath=path.join(expDir, 'info.json'); 
-
-    // // 创建结果路径并复制info.json和assets目录中的内容
-    // fs.mkdirSync(expAssetsDir,{recursive:true});
-    // fs.copyFileSync(jsonPath, expJsonPath);
-    // fs.readdirSync(assetsDir, { withFileTypes: true }).filter(ent => ent.isFile()).forEach(ent=>{
-    //     const fromAttPath=path.join(assetsDir, ent.name);
-    //     const toAttPath=path.join(expAssetsDir, ent.name);
-    //     fs.copyFileSync(fromAttPath, toAttPath);
-    // });
-    // // 如果指定了文件内容，则直接写入，否则从来源文件直接复制
-    // if(assignedMdTxt){
-    //     fs.writeFileSync(expMdPath, assignedMdTxt, 'utf-8');
-    // }else{
-    //     fs.copyFileSync(mdFullpath, expMdPath);
-    // }
-    // showNotification('markdown已导出', `内容保存在：\r\n${expDir}`, 'succ');
 };
 
 

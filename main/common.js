@@ -114,6 +114,37 @@ const send=(action, data)=>{
 
 
 /**
+ * 把一个目录中的所有内容（包含子目录）复制到另一个目录
+ * @param {*} srcDir 
+ * @param {*} destDir 
+ */
+const dirCopy=(srcDir, destDir)=>{
+    if(!fs.existsSync(destDir)){
+        fs.mkdirSync(destDir,{recursive:true});
+    }
+
+    const recursivelyCopy=(baseDir)=>{
+        fs.readdirSync(baseDir, { withFileTypes: true }).forEach(ent=>{
+            const fromFullpath=path.join(baseDir, ent.name);
+            const fromRelaPath=path.relative(srcDir, fromFullpath);
+            const toFullpath=path.join(destDir, fromRelaPath);
+
+            if(ent.isFile()){
+                fs.copyFileSync(fromFullpath, toFullpath);
+                return;
+            }
+
+            if(!fs.existsSync(toFullpath)){
+                fs.mkdirSync(toFullpath);
+            }
+            recursivelyCopy(fromFullpath);
+        });
+    };
+    recursivelyCopy(srcDir);
+};
+
+
+/**
  * 记录日志
  * @param {*} info 
  */
@@ -160,4 +191,5 @@ module.exports={
     send,
     log,
     getYmdhms,
+    dirCopy,
 };

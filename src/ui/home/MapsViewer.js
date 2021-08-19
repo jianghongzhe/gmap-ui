@@ -279,39 +279,49 @@ const MapsViewer=(props)=>{
     },[activeKey/*, panes*/]);
 
 
+    /**
+     * 导出图片或pdf  
+     * @param {*} expImg  true-导出图片  false-导出pdf
+     */
     const onExpImage=useCallback((expImg=true)=>{
-        panes.forEach((item,ind)=>{
-            if(activeKey!==item.key){
+        (async()=>{
+            // 查找当前tab的索引（与导图div元素的id对应）
+            let currInd=-1;
+            panes.forEach((item,ind)=>{
+                if(activeKey===item.key){
+                    currInd=ind;
+                    return false;
+                }
+            });
+            if(-1===currInd){
                 return;
             }
-            let ele=document.querySelector(`#graphwrapper_${ind}`);
+
+            // 取当前div的父元素作为其容器，并计算容器的位置等信息作为截图的依据
+            let ele=document.querySelector(`#graphwrapper_${currInd}`);
             if(!ele){
-                message.warn("图表状态异常，无法导出");
+                api.showNotification('错误','图表状态异常，无法导出','err');
                 return;
             }
             let containerEle=ele.parentNode;
             let {x,y}=containerEle.getBoundingClientRect();
-
-            api.isMaximized().then(maximized=>{
-                if(!maximized){
-                    api.showNotification("警告",`窗口只有在最大化时才能导出${expImg ? "图片" : "PDF"}`,"warn");
-                    return;
-                }
-    
-                api.isDevMode().then(devMode=>{
-                    screenShot(
-                        expImg ? api.openSaveFileDlg : api.openSaveFileDlg.bind(this, 'pdf'),    //保存文件对话框函数
-                        api.takeScreenShot,     //openUrl,            //执行截屏的函数
-                        api.screenShotCombine,  //openUrl,
-                        containerEle,           //容器元素
-                        ele,                    //内容元素
-                        Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
-                        Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-                        devMode                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
-                    );
-                });
-            });
-        });
+            const maximized=await api.isMaximized();
+            if(!maximized){
+                api.showNotification("警告",`窗口只有在最大化时才能导出${expImg ? "图片" : "PDF"}`,"warn");
+                return;
+            }
+            const devMode=await api.isDevMode();
+            screenShot(
+                expImg ? api.openSaveFileDlg : api.openSaveFileDlg.bind(this, 'pdf'),    //保存文件对话框函数
+                api.takeScreenShot,     //openUrl,            //执行截屏的函数
+                api.screenShotCombine,  //openUrl,
+                containerEle,           //容器元素
+                ele,                    //内容元素
+                Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
+                Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
+                devMode                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+            );
+        })();
     },[activeKey, panes]);
 
 

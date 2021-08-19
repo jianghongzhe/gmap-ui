@@ -69,14 +69,13 @@ const Toolbar=(props)=>{
             <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
                 <Button shape='circle' icon={<FileImageOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} />
             </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
+                <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpPdf} />
+            </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
                 <Button shape='circle' icon={<FileMarkdownOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpMarkdown} />
             </Tooltip>
 
-
-            <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
-                <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpPdf} />
-            </Tooltip>
             {/* <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={notSupported} title='导出pdf' />
             <Button shape='circle' icon={<FileWordOutlined />} className='toolbtn' type='default' size='large' onClick={notSupported} title='导出word' /> */}
             {/* <Button shape='circle' icon={<Html5Outlined />} className='toolbtn' type='default' size='large' onClick={props.onExpHtml} title='导出html' /> */}
