@@ -1,0 +1,6 @@
+﻿[file_runner.service.Server] [thread-6] [2021-08-19 18:17:49.754]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-19 18:17:49.761]  发送心跳响应
+[file_runner.service.Server] [thread-7] [2021-08-19 18:18:20.629]  收到请求：{"reqId":1,"action":"zip","data":"{\"srcDir\":\"D:\\\\ws\\\\web\\\\gmap-ui\\\\work\\\\1629368300537\\\\hoho.textbundle\",\"destZipFullpath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\hoho.zip\"}"}
+[file_runner.service.Server] [thread-6] [2021-08-19 18:18:20.643]  收到心跳请求
+[file_runner.service.Server] [thread-6] [2021-08-19 18:18:20.643]  发送心跳响应
+[file_runner.service.Server] [thread-7] [2021-08-19 18:18:20.741]  返回结果：{ reqId=1, succ=True, msg=, data= }
