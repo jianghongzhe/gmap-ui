@@ -15,6 +15,7 @@ const userPngImg=true;//默认是否
 const appBasePath=path.join(__dirname, '../');;
 const externalPath=path.join(__dirname, '../', 'externals');
 const fileRunnerPath=path.join(__dirname, '../', 'externals', 'file_runner.exe');
+const htmlTmplDir=path.join(__dirname, '../', 'externals', 'tmpl_html'); 
 const mapsPath=path.join(__dirname, '../', 'gmaps');
 const imgsPath=path.join(__dirname, '../', 'gmaps','imgs');
 const attsPath=path.join(__dirname, '../', 'gmaps','atts');
@@ -902,7 +903,7 @@ const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
     }
     
     // 包目录打包生成结果文件
-    sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath}).then(rs=>{
+    sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath, containsRootDir:true,}).then(rs=>{
         if(rs.succ){
             showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
             return;
