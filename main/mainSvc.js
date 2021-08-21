@@ -909,8 +909,86 @@ const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
             return;
         }
         showNotification('markdown导出有误', rs.msg, 'err');
+    });
+};
+
+
+
+/**
+ * 导出html
+ * @param {*} mdFullpath 
+ * @param {*} assignedTitle 
+ * @param {*} assignedMdTxt 
+ */
+const expHtml=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
+    // 选择导出路径：
+    // 如果指定了名称，则以该名称为默认文件名
+    // 否则以导图的包名去掉.textbundle后缀作为默认文件名
+    const bundleDir=path.dirname(mdFullpath); 
+    let bundleName=path.basename(bundleDir, ".textbundle");
+    if(assignedTitle){
+        bundleName=assignedTitle;
+    }
+    let expZipFilePath=dialog.showSaveDialogSync(mainWindow, {
+        defaultPath: bundleName+".zip",
+        properties: ['showHiddenFiles'],
+            filters: [
+                { name: 'zip', extensions: ['zip'] },
+            ]
+    });
+    if(!expZipFilePath){
+        return;
+    }
+    
+
+
+    // 根据导出文件名计算出不带.textbundle后缀的名称作为标题名
+    // 并在工作目录中的创建一个临时目录
+    // 然后把来源目录中的内容与html模板目录中的内容复制到此临时目录中
+    // 如果指定了内容，则使用该内容替换模板html文件中的指定部分，否则使用text.md文件内容替换
+    let titleName=path.basename(expZipFilePath, ".zip");
+    if(titleName.endsWith(".textbundle")){
+        titleName=titleName.substring(0, titleName.length-".textbundle".length);
+    }
+    const tmpDir=path.join(workPath, ""+new Date().getTime());
+    const tmpHtmlPath=path.join(tmpDir, 'index.html');
+    const tmpMdPath=path.join(tmpDir, 'text.md');
+    const tmpJsonPath=path.join(tmpDir, 'info.json');
+
+    fs.mkdirSync(tmpDir, {recursive:true});
+    common.dirCopy(bundleDir, tmpDir);
+    common.dirCopy(htmlTmplDir, tmpDir);
+    
+    let htmlContent=fs.readFileSync(tmpHtmlPath, "utf-8");
+    htmlContent=htmlContent.replace("#title#", titleName);
+    if(assignedMdTxt){
+        htmlContent=htmlContent.replace("#cont#", assignedMdTxt);
+    }else{
+        const fullMdTxt=fs.readFileSync(tmpMdPath, 'utf-8');
+        htmlContent=htmlContent.replace("#cont#", fullMdTxt);
+    }
+    fs.writeFileSync(tmpHtmlPath, htmlContent, 'utf-8');
+    fs.rmSync(tmpMdPath, {force: true,recursive: true,});
+    fs.rmSync(tmpJsonPath, {force: true,recursive: true,});
+
+    // 包目录打包生成结果文件，如果存在先删除之前的
+    if(fs.existsSync(expZipFilePath)){
+        fs.rmSync(expZipFilePath, {
+            force: true,
+            recursive: true,
+        });
+    }
+    sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath, containsRootDir:false,}).then(rs=>{
+        if(rs.succ){
+            showNotification('html已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
+            return;
+        }
+        showNotification('html导出有误', rs.msg, 'err');
     })
 };
+
+
+
 
 
 const openSaveFileDlg = (ext) => {
@@ -1339,6 +1417,7 @@ const ipcHandlers={
     openCurrMapDir,
     expPdf,
     expMarkdown,
+    expHtml,
 };
 
 /**

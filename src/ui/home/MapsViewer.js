@@ -261,13 +261,15 @@ const MapsViewer=(props)=>{
 
 
     const onExpHtml=useCallback(()=>{
-        panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
-            const fromInd=item.key.lastIndexOf("\\")+1;
-            const name=item.key.substring(fromInd,item.key.length-3);
-            console.log(name);
-            expSvc.expHtml(name,marked(item.mapTxts));
-        });
-    },[activeKey, panes]);
+        // panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
+        //     const fromInd=item.key.lastIndexOf("\\")+1;
+        //     const name=item.key.substring(fromInd,item.key.length-3);
+        //     console.log(name);
+        //     expSvc.expHtml(name,marked(item.mapTxts));
+        // });
+        api.expHtml(activeKey);
+
+    },[activeKey/*, panes*/]);
 
     
     const onExpMarkdown=useCallback(()=>{

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
-import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined } from '@ant-design/icons';
+import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import mindmapSvc from '../../../service/mindmapSvc';
@@ -273,8 +273,9 @@ const RefViewer=(props)=>{
 
     
     const onExpHtml=useCallback(()=>{
-        expSvc.expHtml(refname, marked(txt));
-    },[refname, txt]);
+        //expSvc.expHtml(refname, marked(txt));
+        api.expHtml(activeKey, refname, txt);
+    },[activeKey, refname, txt]);
 
     
     const onExpMarkdown=useCallback(()=>{
@@ -343,7 +344,9 @@ const RefViewer=(props)=>{
                         <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
                             <Button shape='circle' icon={<FileMarkdownOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpMarkdown}/>
                         </Tooltip>
-                        {/* <Button shape='circle' icon={<Html5Outlined />} css={{marginLeft:'6px'}} type='default' size='default' onClick={onExpHtml} title='导出html' /> */}
+                        <Tooltip color='cyan' placement="bottomLeft" title='导出html'>
+                            <Button shape='circle' icon={<Html5Outlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpHtml} />
+                        </Tooltip>
                     </div>
                 }
                 size={{w:winW-200, h:winH-300, fixh:true, wrapperId:wrapperId}}                
