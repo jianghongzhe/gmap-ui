@@ -3,6 +3,7 @@
 	- 222|[](cp:///dfas)
 	- file|[](file:///d:\a.txt)|[](file:///d:\aaaaa.txt)
 	- dir|[](dir:///d:\a.txt)|[](dir:///d:\aaaaa.txt)
+	- ssssssss|[](file:///D:\中 文\a.txt)|[](openas:///D:\中 文\a.txt)
 	
 	
 ***

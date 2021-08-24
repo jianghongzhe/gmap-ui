@@ -13,7 +13,7 @@ const NodeLinkIcon=(props)=>{
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://", "dir://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://", "openas://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);

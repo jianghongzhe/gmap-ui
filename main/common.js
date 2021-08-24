@@ -51,10 +51,10 @@ const connWs=(url)=>{
     wsClient.on('message', function incoming(message) {
         if(message instanceof Buffer){
             const str=message.toString('utf-8');
-            if('pong'===str){
-                log("从服务端接收到心跳");
-                return;
-            }
+            // if('pong'===str){
+            //     log("从服务端接收到心跳");
+            //     return;
+            // }
             const resp=JSON.parse(str);
             if(reqIdCallbackMap[resp.reqId]){
                 const func=reqIdCallbackMap[resp.reqId];
@@ -62,6 +62,9 @@ const connWs=(url)=>{
                 delete reqIdCallbackMap[resp.reqId];
             }
         }
+    });
+    wsClient.on('pong', ()=>{
+        log("收到心跳");
     });
 };
 
@@ -79,8 +82,10 @@ const beginHeartbeat=()=>{
         log("尚未连接到websocket服务端，无法发送心跳消息");
         return;
     }
-    log("向服务端发送心跳");
-    wsClient.send("ping");
+    // log("向服务端发送心跳");
+    // wsClient.send("ping");
+    log("发送心跳");
+    wsClient.ping();
     setTimeout(beginHeartbeat, wsHeartBeatIntervalMs);
 };
 

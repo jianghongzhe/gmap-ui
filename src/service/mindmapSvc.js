@@ -887,6 +887,8 @@ class MindmapSvc {
                     txt='复制';
                 }else if(url.startsWith("dir://")){
                     txt='打开目录并选择';
+                }else if(url.startsWith("openas://")){
+                    txt='打开方式';
                 }else{
                     txt='打开';
                 }
@@ -896,9 +898,9 @@ class MindmapSvc {
                 url=url+"";
             }else if(url.startsWith("./")){
                 url=api.calcAttUrlSync("",url);
-            }else{
+            }/*else{
                 url = "http://" + url;
-            }
+            }*/
 
             let link={
                 name: txt,
