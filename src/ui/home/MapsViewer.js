@@ -13,6 +13,7 @@ import RefViewer from './views/RefViewer';
 import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
 import GantDlg from './views/gantt/GantDlg';
+import StrParamReplaceDlg from './views/StrParamReplaceDlg';
 
 
 import {dispatcher} from '../../common/gflow';
@@ -22,6 +23,7 @@ import { useSelector } from 'react-redux';
 import keyDetector from '../../common/keyDetector';
 import expSvc from '../../service/expSvc';
 import marked from 'marked';
+import strTmpl from '../../common/strTmpl';
 
 const { Content } = Layout;
 
@@ -57,6 +59,10 @@ const MapsViewer=(props)=>{
 
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
     const [selMapDlgVisible, setSelMapDlgVisible]=useState(false);
+
+    const [strParamReplaceDlgVisible, setStrParamReplaceDlgVisible]=useState(false);
+    const [currLinkUrl, setCurrLinkUrl]=useState(null);
+    const [paramReplItems, setParamReplItems]=useState([]);
 
     const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false);
 
@@ -109,6 +115,7 @@ const MapsViewer=(props)=>{
         setProgsDlgState((state)=>({...state, progsDlgVisible:false}));
         setGantdlgState((state)=>({...state, gantdlgVisible:false}));
         setRelaChartDlgVisible(false);
+        setStrParamReplaceDlgVisible(false);
     },[
         setNewMapDlgVisible,
         setSelMapDlgVisible,
@@ -117,7 +124,8 @@ const MapsViewer=(props)=>{
         setTimelineDlgState,
         setProgsDlgState,
         setGantdlgState,
-        setRelaChartDlgVisible
+        setRelaChartDlgVisible,
+        setStrParamReplaceDlgVisible,
     ]);
 
 
@@ -333,7 +341,35 @@ const MapsViewer=(props)=>{
     const onShowCurrMapDir=useCallback(()=>{
         api.openCurrMapDir(activeKey);
     },[activeKey]);
-    // api.openMapsDir
+    
+
+
+    
+
+    /**
+     * 导图上链接点击事件：当其中不包含占位符时直接执行链接，否则打开对话框当设置占位符
+     * @param {*} url 
+     * @returns 
+     */
+    const onBeforeOpenLink=useCallback((url)=>{
+        const replaceItems= strTmpl.parse(url);
+        if(null===replaceItems){
+            api.openUrl(url);
+            return;
+        }
+        setCurrLinkUrl(url);
+        setParamReplItems(replaceItems);
+        setStrParamReplaceDlgVisible(true);
+    },[setCurrLinkUrl, setParamReplItems, setStrParamReplaceDlgVisible]);
+
+    /**
+     * 参数占位符替换后的回调
+     * @param {*} url 
+     */
+    const onStrParamReplaceDlgOk=useCallback((url)=>{
+        setStrParamReplaceDlgVisible(false);
+        api.openUrl(url);
+    },[setStrParamReplaceDlgVisible]);
 
 
     /***
@@ -381,7 +417,7 @@ const MapsViewer=(props)=>{
                             />
                             <GraphTabs
                                 hasOpenDlg={hasOpenDlg}
-                                onOpenLink={api.openUrl}
+                                onOpenLink={onBeforeOpenLink}
                                 onOpenRef={openRef}
                                 onShowTimeline={onShowTimeline}
                                 onShowProgs={onShowProgs}
@@ -403,6 +439,14 @@ const MapsViewer=(props)=>{
                         </Content>
                 }
             </Layout>
+
+            <StrParamReplaceDlg
+                visible={strParamReplaceDlgVisible}
+                replItems={paramReplItems}
+                currLinkUrl={currLinkUrl}
+                onOk={onStrParamReplaceDlgOk}
+                onCancel={setStrParamReplaceDlgVisible.bind(this, false)}
+            />
 
             <NewGraphDlg
                 visible={newMapDlgVisible}
@@ -427,6 +471,7 @@ const MapsViewer=(props)=>{
             />
 
             <RefViewer
+                onOpenLink={onBeforeOpenLink}
                 currRefObj={currRefObj}
                 visible={refViewerDlgVisible}
                 onCancel={closeAllDlg}

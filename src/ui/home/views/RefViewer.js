@@ -152,6 +152,9 @@ const RefViewer=(props)=>{
         });
     },[stateHolderRef]);
 
+
+    
+
     /**
      * 当窗口显示时初始化以下组件：
      * 1、链接点击事件
@@ -165,8 +168,8 @@ const RefViewer=(props)=>{
     useEffect(()=>{
         if(props.visible){
             setTimeout(() => {
-                markedHighlightUtil.bindLinkClickEvent(api.openUrl);
-                markedHighlightUtil.bindImgClickEvent(api.openUrl);
+                markedHighlightUtil.bindLinkClickEvent(props.onOpenLink);
+                markedHighlightUtil.bindImgClickEvent(props.onOpenLink);
 
                 //绘制mermaid图表
                 markedHighlightUtil.mermaidInit();                
@@ -248,7 +251,7 @@ const RefViewer=(props)=>{
                 resizeEchartGraphs();
             }, 500);
         }
-    },[props.visible, stateHolderRef, resizeEchartGraphs]);
+    },[props.visible, stateHolderRef, resizeEchartGraphs, props.onOpenLink]);
     
 
     
@@ -360,15 +363,12 @@ const RefViewer=(props)=>{
                 dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
             {/* <div id='demo111' css={{width:'500px',height:'500px'}}></div> */}
-            {
-                (props.backtopLoc && 2===props.backtopLoc.length) && (   
-                    <BackTop  target={getScrollTarget} css={{
-                        right:200,
-                        bottom:170,
-                        ...backtopColorStyle
-                    }}/>
-                )
-            }
+            
+            <BackTop target={getScrollTarget} css={{
+                right:140,
+                bottom:120,
+                ...backtopColorStyle
+            }}/>
         </EnhDlg>
     </React.Fragment>);
     

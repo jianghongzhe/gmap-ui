@@ -4,11 +4,26 @@
 	- file|[](file:///d:\a.txt)|[](file:///d:\aaaaa.txt)
 	- dir|[](dir:///d:\a.txt)|[](dir:///d:\aaaaa.txt)
 	- ssssssss|[](file:///D:\中 文\a.txt)|[](openas:///D:\中 文\a.txt)
+	- ping|[](cmd://ping 192.168.{{ip1}}.{{ip2:1}})
+	- 百度|[](https://www.baidu.com/s?wd={{关键词}})
 	
 	
 ***
 
 # ref:haha
+```echart
+bar
+title 柱状图
+w 50%
+h 200px
+x 横轴名称
+y 纵轴名称
+,2018,2019,2020
+食品,500,400,300
+娱乐,600,400,600
+医疗,500,200,300
+```
+
 ### 一、引导用户登录并获取授权码：authorization_code
 #### 方式1：通过回调地址获取
 ```http

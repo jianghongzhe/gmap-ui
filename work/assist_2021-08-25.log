@@ -1,0 +1,14 @@
+﻿[file_runner.service.Server] [thread-7] [2021-08-25 21:19:49.956]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///D:\\\\games\\\\TombRaider\\\\开始游戏.exe\"}"}
+[file_runner.service.Server] [thread-7] [2021-08-25 21:19:50.564]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-71] [2021-08-25 22:09:41.959]  收到请求：{"reqId":1,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.38\"}"}
+[file_runner.service.Server] [thread-71] [2021-08-25 22:09:43.111]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-77] [2021-08-25 22:11:00.566]  收到请求：{"reqId":2,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.38\"}"}
+[file_runner.service.Server] [thread-77] [2021-08-25 22:11:00.998]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-84] [2021-08-25 22:24:23.133]  收到请求：{"reqId":3,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.38\"}"}
+[file_runner.service.Server] [thread-84] [2021-08-25 22:24:23.579]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-64] [2021-08-25 22:32:20.986]  收到请求：{"reqId":4,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.38\"}"}
+[file_runner.service.Server] [thread-64] [2021-08-25 22:32:21.616]  返回结果：{ reqId=4, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-23] [2021-08-25 22:44:41.803]  收到请求：{"reqId":5,"action":"zip","data":"{\"srcDir\":\"D:\\\\ws\\\\web\\\\gmap-ui\\\\work\\\\1629902677985\",\"destZipFullpath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\qq.zip\",\"containsRootDir\":false}"}
+[file_runner.service.Server] [thread-23] [2021-08-25 22:44:42.165]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-21] [2021-08-25 22:45:25.373]  收到请求：{"reqId":6,"action":"zip","data":"{\"srcDir\":\"D:\\\\ws\\\\web\\\\gmap-ui\\\\work\\\\1629902724923\",\"destZipFullpath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\rr.zip\",\"containsRootDir\":false}"}
+[file_runner.service.Server] [thread-21] [2021-08-25 22:45:25.724]  返回结果：{ reqId=6, succ=True, msg=, data= }
