@@ -6,6 +6,7 @@
 	- ssssssss|[](file:///D:\中 文\a.txt)|[](openas:///D:\中 文\a.txt)
 	- ping|[](cmd://ping 192.168.{{ip1}}.{{ip2:1}})
 	- 百度|[](https://www.baidu.com/s?wd={{关键词}})
+	- goto|[跳转到导图 - jvm/test/ccdfasd](gmap://jvm/test/ccdfasd)
 	
 	
 ***

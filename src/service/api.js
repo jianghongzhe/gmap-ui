@@ -185,6 +185,16 @@ class Api{
                 }
 
                 let item=await ipcRenderer.invoke('getFileItem', fn);
+                item={
+                    showname:       item.name,
+                    itemsName:      item.itemsName,
+                    fullpath:       item.fullpath,
+                    isfile:         item.isfile,
+                    size:           '',
+                    pic:            item.pic,
+                    mdFullpath:     item.mdFullpath,
+                    attDir:         item.attDir,
+                };
                 dispatcher.tabs.onSelItemPromise(item).then();
             })();
             return;

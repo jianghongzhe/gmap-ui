@@ -1,0 +1,4 @@
+﻿[file_runner.service.Server] [thread-12] [2021-08-26 23:50:05.081]  收到请求：{"reqId":1,"action":"cp","data":"{\"url\":\"cp://[跳转到导图 - 22](gmap://22)\"}"}
+[file_runner.service.Server] [thread-12] [2021-08-26 23:50:05.209]  返回结果：{ reqId=1, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-13] [2021-08-26 23:50:35.565]  收到请求：{"reqId":2,"action":"cp","data":"{\"url\":\"cp://[跳转到导图 - jvm/test/ccdfasd](gmap://jvm/test/ccdfasd)\"}"}
+[file_runner.service.Server] [thread-13] [2021-08-26 23:50:35.566]  返回结果：{ reqId=2, succ=True, msg=, data=System.Collections.Hashtable }

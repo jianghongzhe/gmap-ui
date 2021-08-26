@@ -541,16 +541,35 @@ const listFiles = (assignedDir = null) => {
 };
 
 const getFileItem=(fn)=>{
-    if(!fn.endsWith(".md")){
-        fn+=".md";
+    if(!fn.endsWith(".textbundle")){
+        fn+=".textbundle";
     }
-    let fullpath=toBackSlash(path.join(mapsPath,fn));
-    let showName=toSlash(path.relative(mapsPath,fullpath));
+    const bundleFullpath=toBackSlash(path.join(mapsPath,fn));
+    const mdFullpath=path.join(bundleFullpath,'text.md');
+    const attDir=path.join(bundleFullpath,'assets');
+    const showName=toSlash(path.relative(mapsPath,bundleFullpath));
+    const name=path.basename(bundleFullpath, ".textbundle");
+    console.log({
+        name,
+        itemsName:  showName,//显示在选项卡上的名称：eg. front/css3.md
+        fullpath:   bundleFullpath,
+        mdFullpath,
+        attDir,
+        isfile:     true,
+        emptyDir:   false,
+        size:       0,
+        pic:        null,
+    });
     return {
-        isfile: true,
-        emptyDir: false,
-        fullpath,
-        itemsName: showName,
+        name,
+        itemsName:  showName,//显示在选项卡上的名称：eg. front/css3.md
+        fullpath:   bundleFullpath,
+        mdFullpath,
+        attDir,
+        isfile:     true,
+        emptyDir:   false,
+        size:       0,
+        pic:        null,
     };
 };
 
