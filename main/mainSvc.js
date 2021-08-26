@@ -7,8 +7,8 @@ const nodeNet = require('net');
 
 const ws=require('./ws');
 const common=require('./common');
-const { zip } = require('lodash');
-const { tmpdir } = require('os');
+
+
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
