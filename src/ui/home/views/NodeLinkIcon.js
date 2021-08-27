@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
-import { LinkOutlined,CodeOutlined,FolderOpenOutlined,CopyOutlined } from '@ant-design/icons';
+import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,FileDoneOutlined,CheckSquareOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
 import relaPic from '../../../assets/relachart.png';
 
@@ -13,7 +13,7 @@ const NodeLinkIcon=(props)=>{
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://", "dir://", "openas://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://", "openas://", "gmap://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
@@ -35,27 +35,67 @@ const NodeLinkIcon=(props)=>{
         };
     },[props.lindAddr, setLocalIcon]);
 
+    // 未找到匹配的图标，使用默认的按钮
     if(!localIcon){
         return getLinkIcon(props.lindAddr, props.onClick);
     }
+
+    // 找到匹配的图标
+    // 特殊名称：folder
+    if("folder"===localIcon){
+        return getBtn(<FolderOutlined className='themebtnicon' css={colors.dir}/>, props.onClick);
+    }
+    // 特殊名称：dir
+    if("dir"===localIcon){
+        //<CheckSquareOutlined />
+        return getBtn(<CheckSquareOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+    }
+    // 特殊名称：openas
+    if("openas"===localIcon){
+        return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+    }
+    // 特殊名称：gmap
+    if("gmap"===localIcon){
+        return getBtn(<DeploymentUnitOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+    }
+    // 直接使用本地图片文件
     return <Avatar size={18} src={localIcon} css={avatarStyle} onClick={props.onClick}/>;
 };
 
 
-
+/**
+ * 获得链接默认的按钮：根据不同链接类型获得不同按钮
+ * @param {*} addr 
+ * @param {*} onClick 
+ * @returns 
+ */
 const getLinkIcon=(addr ,onClick)=>{
-    if(addr.startsWith("gmap://")){
-        return <Avatar size={18} src={relaPic} css={avatarStyle} onClick={onClick}/>;
+    // 需要验证的类型，默认为灰色，验证后为蓝色或正常色
+    // 打开方式：默认为灰色，如果路径有效则为蓝色
+    if(addr.startsWith("openas://")){
+        return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
+    // 打开并选中：默认为灰色，如果路径有效则为蓝色
+    if(addr.startsWith("dir://")){
+        return getBtn(<CheckSquareOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
+    // 导图链接图标：默认为灰色，如果路径有效则为蓝色
+    if(addr.startsWith("gmap://")){
+        return getBtn(<DeploymentUnitOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
+
+    // 不需要验证的类型
+    // 复制图标
     if(addr.startsWith("cp://")){
         return getBtn(<CopyOutlined className='themebtnicon' css={colors.copy}/>, onClick);
     }
-    if(addr.startsWith("dir://")){
-        return getBtn(<FolderOpenOutlined className='themebtnicon' css={colors.dir}/>, onClick);
-    }
+    // 命令图标
     if(addr.startsWith("cmd://")){
         return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
     }
+
+    // 其他情况认为是默认的类型
+    // 默认：使用链接图标
     return getBtn(<LinkOutlined className='themebtnicon' css={colors.link}/>, onClick);
 }
 
@@ -86,6 +126,7 @@ const colors={
     cmd: {color:'gray'},
     copy: {color:'#1890ff'},
     linkDark: {color:'#faad14'},
+    disable: {color:'grey'},
 };
 
-export default NodeLinkIcon;
+export default React.memo(NodeLinkIcon);
