@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button,Tooltip, Progress,Avatar  } from 'antd';
 import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import gantPic from '../../../assets/gantt.png';
@@ -14,6 +14,35 @@ import './markdown-node.css';
  * @param {*} props 
  */
 const MindNode=(props)=>{
+
+    /**
+     * 把fileext协议的url分解为三个具体的协议：file、openas、dir
+     */
+    const splitFileExtProtocol=useCallback((addr, name)=>{
+        const len="fileext://".length;
+        const after=addr.substring(len);
+        const fileUrl="file:///"+after;
+        const openasUrl="openas://"+after;
+        const dirUrl="dir://"+after;
+        return [
+            {
+                addr: fileUrl,
+                tooltip:  (name ? name+"  "+fileUrl:fileUrl),
+            },
+            {
+                addr: openasUrl,
+                tooltip: "打开方式  "+openasUrl,
+            },
+            {
+                addr: dirUrl,
+                tooltip: "打开目录并选择  "+dirUrl,
+            },
+            
+            
+            
+        ];
+    },[]);
+
     //如果节点不存在，不需要渲染
     const nd=props.nd;
     if(!nd){return null;}
@@ -27,6 +56,9 @@ const MindNode=(props)=>{
         (nd.refs && 0<nd.refs.length) ||
         (nd.links && 0<nd.links.length)
     );
+
+
+    
 
     //按主题的不同层级设置不同样式，同时根据是否有文本之外的内容而显示不同的样式（只对根节点）
     let themeStyle=themeStyles[nd.lev>2 ? 2 : nd.lev];
@@ -124,19 +156,39 @@ const MindNode=(props)=>{
         {
             (nd && nd.links && 0<nd.links.length) && <>{
                 nd.links.map((link,linkInd)=>(
-                    <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
-                        <span css={themeBtnWrapperStyle} >
-                            <NodeLinkIcon 
-                                lindAddr={link.addr}
-                                onClick={props.onOpenLink.bind(this,link.addr)}/>
-                        </span>
-                    </Tooltip>
+                    <React.Fragment key={'link-'+linkInd}>
+                    {
+                        link.addr.startsWith("fileext://") 
+                            ?
+                        splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
+                            <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="bottomLeft" title={subitem.tooltip}>
+                                <span css={themeBtnWrapperStyle} >
+                                    <NodeLinkIcon 
+                                        lindAddr={subitem.addr}
+                                        onClick={props.onOpenLink.bind(this,subitem.addr)}/>
+                                </span>
+                            </Tooltip>
+                        ))
+                            :
+                        <Tooltip  color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
+                            <span css={themeBtnWrapperStyle} >
+                                <NodeLinkIcon 
+                                    lindAddr={link.addr}
+                                    onClick={props.onOpenLink.bind(this,link.addr)}/>
+                            </span>
+                        </Tooltip>
+                    }
+                    </React.Fragment>
+                    
                 ))
             }</>
         }
     </span>);
     
 }
+
+
+
 
 const progressFormater=(st,percent)=>{
     if('exception'===st){
