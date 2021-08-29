@@ -83,6 +83,11 @@ const getLinkIcon=(addr ,onClick)=>{
     if(addr.startsWith("gmap://")){
         return getBtn(<DeploymentUnitOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
+    // 文件
+    if(addr.startsWith("file://")){
+        return getBtn(<LinkOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
+    
 
     // 不需要验证的类型
     // 复制图标
