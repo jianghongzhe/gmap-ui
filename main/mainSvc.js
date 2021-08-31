@@ -858,10 +858,12 @@ const createMapBundle=(bundleFullpath, content)=>{
         const attDir=path.join(bundleFullpath, 'assets');
         const mdFullpath=path.join(bundleFullpath, 'text.md');
         const jsonFullpath=path.join(bundleFullpath, 'info.json');
+        const placeHolderFilePath=path.join(bundleFullpath, 'assets', '.keep');
 
         if(!fs.existsSync(attDir)){
             fs.mkdirSync(attDir,{recursive:true});
         }
+        fs.closeSync(fs.openSync(placeHolderFilePath, 'w'));
         fs.writeFileSync(jsonFullpath, "{}", 'utf-8');
         fs.writeFileSync(mdFullpath, content, 'utf-8');
         return true;
