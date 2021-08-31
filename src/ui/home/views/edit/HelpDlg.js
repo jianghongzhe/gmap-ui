@@ -3,6 +3,14 @@ import React from 'react';
 import { Tabs, Modal, Button } from 'antd';
 import {withEnh} from '../../../common/specialDlg';
 import api from '../../../../service/api';
+import imgUrlPie from '../../../../assets/graph_pie.png';
+import imgUrlBar from '../../../../assets/graph_bar.png';
+import imgUrlLine from '../../../../assets/graph_line.png';
+import imgUrlStack from '../../../../assets/graph_stack.png';
+import imgUrlMix from '../../../../assets/graph_mix.png';
+import imgUrlScatter from '../../../../assets/graph_scatter.png';
+import imgUrlRela from '../../../../assets/graph_rela.png';
+import imgUrlEchart from '../../../../assets/graph_echart.png';
 
 const EnhDlg=withEnh(Modal);
 
@@ -133,15 +141,16 @@ const HelpDlg=(props)=>{
                     <table css={helpTableStyle}>
                             <tbody>
                             <tr>
-                                <th>图表名称</th>
+                                <th style={{width:'100px'}}>图表名称</th>
                                 <th>用法示例</th>
+                                <th>图示</th>
                             </tr>
                             <tr>
                                 <td>饼图</td>
                                 <td>
                                     <div>
                                         <div>
-                                            <div className='chartItem'> 
+                                            <div className='chartItem' style={{width:'200px'}}> 
                                                 ```echart<br/>
                                                 pie<br/>
                                                 title 饼图<br/>
@@ -154,6 +163,9 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlPie} style={{width:'320px'}}/>
                                 </td>
                             </tr>
                             <tr>
@@ -178,6 +190,9 @@ const HelpDlg=(props)=>{
                                         </div>
                                     </div>
                                 </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlBar} style={{width:'320px'}}/>
+                                </td>
                             </tr>
                             <tr>
                                 <td>折线图</td>
@@ -201,6 +216,9 @@ const HelpDlg=(props)=>{
                                         </div>
                                     </div>
                                 </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlLine} style={{width:'320px'}}/>
+                                </td>
                             </tr>
                             <tr>
                                 <td>堆积图</td>
@@ -223,6 +241,9 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlStack} style={{width:'320px'}}/>
                                 </td>
                             </tr>
                             <tr>
@@ -249,6 +270,9 @@ const HelpDlg=(props)=>{
                                         </div>
                                     </div>
                                 </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlMix} style={{width:'320px'}}/>
+                                </td>
                             </tr>
                             <tr>
                                 <td>散点图</td>
@@ -269,6 +293,9 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlScatter} style={{width:'320px'}}/>
                                 </td>
                             </tr>
                             <tr>
@@ -292,6 +319,9 @@ const HelpDlg=(props)=>{
                                         </div>
                                     </div>
                                 </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlRela} style={{width:'320px'}}/>
+                                </td>
                             </tr>
                             <tr>
                                 <td>使用json配置</td>
@@ -309,6 +339,9 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td style={{textAlign:'center'}}>
+                                    <img src={imgUrlEchart} style={{width:'100px'}}/>
                                 </td>
                             </tr>
                             </tbody>
@@ -365,9 +398,11 @@ const nodes=[
         ['ls \\| grep aa','// 使用 <span style="color:black;">\\|</span> 来显示竖线'],
         ['press `ctrl` + `c`','// 支持markdown语法'],
         ['[打开](file:///d:\\a\\b.txt)','// 执行文件或打开目录'],
-        ['[选择](dir:///d:\\a\\b.txt)','// 打开目录并选择指定文件或目录'],
-        ['[执行](cmd:///dir d:\\)','// 执行命令，使用 <span style="color:black;">[space]\\</span> 表示换行'],
-        ['[复制](cp:///这是一段文本)','// 复制内容，使用 <span style="color:black;">[space]\\</span> 表示换行'],
+        ['[打开方式](openas://d:\\xx.txt)','// 选择打开方式'],
+        ['[选择](dir://d:\\a\\b.txt)','// 打开目录并选择指定文件或目录'],
+        ['[打开](fileext://d:\\a\\b.txt)','// 相当于file、openas、dir的组合'],
+        ['[执行](cmd://dir d:\\)','// 执行命令，使用 <span style="color:black;">[space]\\</span> 表示换行'],
+        ['[复制](cp://这是一段文本)','// 复制内容，使用 <span style="color:black;">[space]\\</span> 表示换行'],
     ]],
     ['线条颜色',[
         ['c:red',''],
@@ -533,7 +568,7 @@ const helpTableStyle = {
         display: 'table-cell',
     },
     '& td:nth-child(2) > div > div > div:nth-child(1)': {
-        width:180,
+        width:220,
         // backgroundColor:'red',
         // textAlign:'center',
     },

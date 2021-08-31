@@ -114,12 +114,17 @@
                 }
             }
         });
+
+        document.querySelectorAll("img").forEach((ele)=>{
+            ele.style.display="block";
+            //ele.style.width="100%";
+        });
     };
     </script>
 </head>
-<body>
+<body style="background-color: white;">
     <textarea id='src' style='display: none;'>#cont#</textarea>
-    <div id='dest' class="markdown-body" style='width:96%; margin-left: auto;margin-right: auto;margin-top: 30px;'>
+    <div id='dest' class="markdown-body" style='background-color: white; width:96%; margin-left: auto;margin-right: auto;margin-top: 30px;'>
 
     </div>
 </body>
