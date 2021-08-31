@@ -1163,7 +1163,7 @@ const openDevTool=()=>{
 const init=(_mainWindow)=>{
     mainWindow=_mainWindow;
 
-    [imgsPath,attsPath,workPath, cachePath].forEach(eachWorkdir=>{
+    [/*imgsPath,attsPath,*/workPath, cachePath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
