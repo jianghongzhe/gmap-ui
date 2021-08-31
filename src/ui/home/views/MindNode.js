@@ -19,7 +19,8 @@ const MindNode=(props)=>{
      * 把fileext协议的url分解为三个具体的协议：file、openas、dir
      */
     const splitFileExtProtocol=useCallback((addr, name)=>{
-        const len="fileext://".length;
+
+        const len=(addr.startsWith("fileext:///") ? "fileext:///".length : "fileext://".length);
         const after=addr.substring(len);
         const fileUrl="file:///"+after;
         const openasUrl="openas://"+after;
