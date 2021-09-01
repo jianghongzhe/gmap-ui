@@ -1,0 +1,140 @@
+﻿[file_runner.service.Server] [thread-5] [2021-09-01 17:57:58.988]  收到请求：{"reqId":1,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.101]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.157]  收到请求：{"reqId":2,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.193]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.246]  收到请求：{"reqId":3,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.276]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.329]  收到请求：{"reqId":4,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"3_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.361]  返回结果：{ reqId=4, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.414]  收到请求：{"reqId":5,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"4_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.447]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.498]  收到请求：{"reqId":6,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"5_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.527]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.580]  收到请求：{"reqId":7,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"6_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.610]  返回结果：{ reqId=7, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.662]  收到请求：{"reqId":8,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"7_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-09-01 17:57:59.694]  返回结果：{ reqId=8, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.746]  收到请求：{"reqId":9,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"8_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.777]  返回结果：{ reqId=9, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.830]  收到请求：{"reqId":10,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"9_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.861]  返回结果：{ reqId=10, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.913]  收到请求：{"reqId":11,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"10_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.943]  返回结果：{ reqId=11, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:57:59.995]  收到请求：{"reqId":12,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"11_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:58:00.028]  返回结果：{ reqId=12, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:58:00.081]  收到请求：{"reqId":13,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"12_0.jpg\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:58:00.110]  返回结果：{ reqId=13, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-01 17:58:00.112]  收到请求：{"reqId":14,"action":"shotCombine","data":"{\"itemWidth\":1655,\"itemHeight\":697,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\222.jpg\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"3_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"4_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"5_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"6_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"7_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"8_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"9_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"10_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"11_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"12_0.jpg\",\"cutLeft\":0,\"cutTop\":305}]]}"}
+[file_runner.service.Server] [thread-5] [2021-09-01 17:58:00.446]  返回结果：{ reqId=14, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-16] [2021-09-01 17:59:59.909]  收到请求：{"reqId":15,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 17:59:59.945]  返回结果：{ reqId=15, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 17:59:59.997]  收到请求：{"reqId":16,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.043]  返回结果：{ reqId=16, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.096]  收到请求：{"reqId":17,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.127]  返回结果：{ reqId=17, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.179]  收到请求：{"reqId":18,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"3_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.210]  返回结果：{ reqId=18, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.262]  收到请求：{"reqId":19,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"4_0.jpg\"}"}
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.294]  返回结果：{ reqId=19, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.347]  收到请求：{"reqId":20,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"5_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.398]  返回结果：{ reqId=20, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.451]  收到请求：{"reqId":21,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"6_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.495]  返回结果：{ reqId=21, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.547]  收到请求：{"reqId":22,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"7_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.593]  返回结果：{ reqId=22, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.646]  收到请求：{"reqId":23,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"8_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:00.694]  返回结果：{ reqId=23, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.747]  收到请求：{"reqId":24,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"9_0.jpg\"}"}
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.795]  返回结果：{ reqId=24, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.847]  收到请求：{"reqId":25,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"10_0.jpg\"}"}
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.893]  返回结果：{ reqId=25, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.946]  收到请求：{"reqId":26,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"11_0.jpg\"}"}
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:00.975]  返回结果：{ reqId=26, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:01.029]  收到请求：{"reqId":27,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"12_0.jpg\"}"}
+[file_runner.service.Server] [thread-16] [2021-09-01 18:00:01.060]  返回结果：{ reqId=27, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:01.062]  收到请求：{"reqId":28,"action":"shotCombine","data":"{\"itemWidth\":1655,\"itemHeight\":697,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\222.jpg\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"3_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"4_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"5_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"6_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"7_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"8_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"9_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"10_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"11_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"12_0.jpg\",\"cutLeft\":0,\"cutTop\":305}]]}"}
+[file_runner.service.Server] [thread-17] [2021-09-01 18:00:01.405]  返回结果：{ reqId=28, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:24.671]  收到请求：{"reqId":29,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:24.707]  返回结果：{ reqId=29, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:24.759]  收到请求：{"reqId":30,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:24.789]  返回结果：{ reqId=30, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:24.841]  收到请求：{"reqId":31,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:24.872]  返回结果：{ reqId=31, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:24.925]  收到请求：{"reqId":32,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"3_0.jpg\"}"}
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:24.957]  返回结果：{ reqId=32, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:25.008]  收到请求：{"reqId":33,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"4_0.jpg\"}"}
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:25.041]  返回结果：{ reqId=33, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.095]  收到请求：{"reqId":34,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"5_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.141]  返回结果：{ reqId=34, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:25.193]  收到请求：{"reqId":35,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"6_0.jpg\"}"}
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:25.228]  返回结果：{ reqId=35, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:25.280]  收到请求：{"reqId":36,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"7_0.jpg\"}"}
+[file_runner.service.Server] [thread-19] [2021-09-01 18:00:25.324]  返回结果：{ reqId=36, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.377]  收到请求：{"reqId":37,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"8_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.422]  返回结果：{ reqId=37, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.475]  收到请求：{"reqId":38,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"9_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.505]  返回结果：{ reqId=38, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.557]  收到请求：{"reqId":39,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"10_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.588]  返回结果：{ reqId=39, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.640]  收到请求：{"reqId":40,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"11_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.671]  返回结果：{ reqId=40, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.724]  收到请求：{"reqId":41,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"12_0.jpg\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.756]  返回结果：{ reqId=41, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:25.757]  收到请求：{"reqId":42,"action":"shotCombine","data":"{\"itemWidth\":1655,\"itemHeight\":697,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\333.pdf\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"3_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"4_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"5_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"6_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"7_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"8_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"9_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"10_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"11_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"12_0.jpg\",\"cutLeft\":0,\"cutTop\":305}]]}"}
+[file_runner.service.Server] [thread-18] [2021-09-01 18:00:28.728]  返回结果：{ reqId=42, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.191]  收到请求：{"reqId":1,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.298]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.354]  收到请求：{"reqId":2,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.392]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.444]  收到请求：{"reqId":3,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.476]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:28.533]  收到请求：{"reqId":4,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"3_0.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:28.578]  返回结果：{ reqId=4, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.630]  收到请求：{"reqId":5,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"4_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.679]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.732]  收到请求：{"reqId":6,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"5_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.781]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.833]  收到请求：{"reqId":7,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"6_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.880]  返回结果：{ reqId=7, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.932]  收到请求：{"reqId":8,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"7_0.jpg\"}"}
+[file_runner.service.Server] [thread-7] [2021-09-01 18:05:28.978]  返回结果：{ reqId=8, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.030]  收到请求：{"reqId":9,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"8_0.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.075]  返回结果：{ reqId=9, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.129]  收到请求：{"reqId":10,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"9_0.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.175]  返回结果：{ reqId=10, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.228]  收到请求：{"reqId":11,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"10_0.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.273]  返回结果：{ reqId=11, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.327]  收到请求：{"reqId":12,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"11_0.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.410]  返回结果：{ reqId=12, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.464]  收到请求：{"reqId":13,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"12_0.jpg\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.510]  返回结果：{ reqId=13, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.511]  收到请求：{"reqId":14,"action":"shotCombine","data":"{\"itemWidth\":1655,\"itemHeight\":697,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\qq.jpg\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"3_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"4_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"5_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"6_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"7_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"8_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"9_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"10_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"11_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"12_0.jpg\",\"cutLeft\":0,\"cutTop\":305}]]}"}
+[file_runner.service.Server] [thread-10] [2021-09-01 18:05:29.844]  返回结果：{ reqId=14, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:14:59.832]  收到请求：{"reqId":15,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:14:59.873]  返回结果：{ reqId=15, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-43] [2021-09-01 18:14:59.926]  收到请求：{"reqId":16,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-43] [2021-09-01 18:14:59.968]  返回结果：{ reqId=16, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.020]  收到请求：{"reqId":17,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.052]  返回结果：{ reqId=17, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.107]  收到请求：{"reqId":18,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"3_0.jpg\"}"}
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.152]  返回结果：{ reqId=18, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.205]  收到请求：{"reqId":19,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"4_0.jpg\"}"}
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.252]  返回结果：{ reqId=19, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.304]  收到请求：{"reqId":20,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"5_0.jpg\"}"}
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.353]  返回结果：{ reqId=20, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.405]  收到请求：{"reqId":21,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"6_0.jpg\"}"}
+[file_runner.service.Server] [thread-43] [2021-09-01 18:15:00.453]  返回结果：{ reqId=21, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.505]  收到请求：{"reqId":22,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"7_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.556]  返回结果：{ reqId=22, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.608]  收到请求：{"reqId":23,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"8_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.665]  返回结果：{ reqId=23, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.717]  收到请求：{"reqId":24,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"9_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.750]  返回结果：{ reqId=24, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.803]  收到请求：{"reqId":25,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"10_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.835]  返回结果：{ reqId=25, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.888]  收到请求：{"reqId":26,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"11_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.917]  返回结果：{ reqId=26, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:00.970]  收到请求：{"reqId":27,"action":"shot","data":"{\"left\":124,\"top\":232,\"width\":1655,\"height\":697,\"fileName\":\"12_0.jpg\"}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:01.000]  返回结果：{ reqId=27, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:01.002]  收到请求：{"reqId":28,"action":"shotCombine","data":"{\"itemWidth\":1655,\"itemHeight\":697,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\qq.jpg\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"3_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"4_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"5_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"6_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"7_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"8_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"9_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"10_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"11_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"12_0.jpg\",\"cutLeft\":0,\"cutTop\":305}]]}"}
+[file_runner.service.Server] [thread-41] [2021-09-01 18:15:01.359]  返回结果：{ reqId=28, succ=True, msg=, data=System.Collections.Hashtable }

@@ -2,22 +2,48 @@ class ScreenShotSvc{
     constructor(){
         this.doing=false;
         this.resultImgPath=null;
+        this.excludeId=null;
+        this.excludePrevState=null;
     }
+
+    hideExclude=()=>{
+        if(this.excludeId){
+            const ele=document.querySelector(`#${this.excludeId}`);
+            this.excludePrevState=ele.style.display;
+            ele.style.display="none";
+        }
+    };
+
+    showExclude=()=>{
+        if(this.excludeId){
+            const ele=document.querySelector(`#${this.excludeId}`);
+            if("none"===ele.style.display){
+                ele.style.display=this.excludePrevState;
+            }
+        }
+    };
 
 
     /**
      * 进行滚动截屏，此方法会暴露给外部调用
      * @param {*} selFileFun        保存文件对话框函数
      * @param {*} takeScrenShotFun  截屏命令执行的函数
+     * @param {*} combineScreenShotFun 合并图片的函数
      * @param {*} eleContainer      容器组件的html元素对象
      * @param {*} eleContent        实际内容的组件的html元素对象
      * @param {*} offsetX           要开始截取的部分相对于浏览器主内容区域左端的偏移
      * @param {*} offsetY           要开始截取的部分相对于浏览器主内容区域上端的偏移
+     * @param {*} hasBrowserMenu    是否包含菜单栏，此值对截图位置有影响
+     * @param {*} _excludeId        排除的元素的id，截图前先隐藏，完成后恢复显示
      */
-    doScreenShot=(selFileFun, takeScrenShotFun, combineScreenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true)=>{       
+    doScreenShot=(selFileFun, takeScrenShotFun, combineScreenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true, _excludeId)=>{       
         //当前截屏任务未完成时不允许进行操作
         if(this.doing){
             return;
+        }
+
+        if(_excludeId){
+            this.excludeId=_excludeId;
         }
 
 
@@ -37,9 +63,13 @@ class ScreenShotSvc{
             this.resultImgPath=resultImgPath;
             this.takeScrenShotFun=takeScrenShotFun;
             this.combineScreenShotFun=combineScreenShotFun;
-            setTimeout(() => {    
+            setTimeout(() => {   
+                this.hideExclude(); 
                 this.prepareScreenShot(eleContainer, eleContent);
             }, 200);
+        }).catch(e=>{
+            console.log("截图取消。。。");
+            this.showExclude();
         });
     }
 
@@ -193,6 +223,7 @@ class ScreenShotSvc{
             this.eleContainer.scrollTop= this.oldPos.y;
             this.eleContainer.scrollLeft=this.oldPos.x;
             this.doing=false;
+            this.showExclude();
         });   
     }
 }

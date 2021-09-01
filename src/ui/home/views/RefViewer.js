@@ -72,6 +72,7 @@ const RefViewer=(props)=>{
 
     const [wrapperId]=useState(()=>"refviewercontainer"+new Date().getTime());
     const [bodyId]=useState(()=>"refviewerbody"+new Date().getTime());
+    const [backtopId]=useState(()=>"backtop"+new Date().getTime());
 
     useEffect(()=>{
         markedHighlightUtil.init(marked, hljs, {
@@ -313,7 +314,8 @@ const RefViewer=(props)=>{
                     bodyEle,                //内容元素
                     Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
                     Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-                    devMode                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                    devMode,                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                    backtopId
                 );
             }catch(e){
 
@@ -364,7 +366,7 @@ const RefViewer=(props)=>{
             </div>
             {/* <div id='demo111' css={{width:'500px',height:'500px'}}></div> */}
             
-            <BackTop target={getScrollTarget} css={{
+            <BackTop id={backtopId} target={getScrollTarget} css={{
                 right:140,
                 bottom:120,
                 ...backtopColorStyle

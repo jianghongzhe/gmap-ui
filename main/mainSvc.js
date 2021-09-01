@@ -1392,6 +1392,7 @@ const ipcHandlers={
     expPdf,
     expMarkdown,
     expHtml,
+    isDevMode: common.isDevMode
 };
 
 /**
