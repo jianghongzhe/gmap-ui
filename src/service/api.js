@@ -1,7 +1,5 @@
-//import {message} from 'antd';
 import {dispatcher} from '../common/gflow';
 
-//const {app} = window.require('electron').remote; //window.require('@electron/remote');// window.require('electron').remote;
 const { ipcRenderer } = window.require('electron');
 
 

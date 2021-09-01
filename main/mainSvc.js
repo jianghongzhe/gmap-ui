@@ -337,11 +337,11 @@ const calcPicUrl=(mdFullpath,picRelaPath)=>{
         return [picRelaPath, picRelaPath];
     }
 
-    const faviconUrl=getDevServerFaviconUrl();
+    const faviconUrl=common.getDevServerFaviconUrl();
     const attFullpath=path.join(path.dirname(mdFullpath), picRelaPath);
     const factUrl=getFileProtocalUrl(attFullpath);
 
-    if(isDevMode()){
+    if(common.isDevMode()){
         return [faviconUrl, factUrl];
     }
     return [factUrl, factUrl];
@@ -506,8 +506,8 @@ const listFiles = (assignedDir = null) => {
                     return ['.png','.jpg','.jpeg','.gif','.bmp'].some(eachExt=>tmpFn.endsWith(eachExt));
                 });
                 if(0<imgItems.length){
-                    if(isDevMode()){
-                        pic= getDevServerFaviconUrl();
+                    if(common.isDevMode()){
+                        pic= common.getDevServerFaviconUrl();
                     }else{
                         pic=getFileProtocalUrl(path.join(attDir, imgItems[0].name));
                         pic=encodeURI(pic);
@@ -653,12 +653,12 @@ const existsGraph = (fn) => {
  * @returns 
  */
 const loadIcon=(url)=>{
-    if(isDevMode()){
+    if(common.isDevMode()){
         return new Promise((res,rej)=>{
            res({
                 succ: true,
                 msg: "",
-                data: getDevServerFaviconUrl(),
+                data: common.getDevServerFaviconUrl(),
            }); 
         });
     }
@@ -876,7 +876,7 @@ const createMapBundle=(bundleFullpath, content)=>{
 };
 
 
-const selPicFile = (mainWindow) => {
+const selPicFile = () => {
     return dialog.showOpenDialogSync(mainWindow, { 
         properties: ['openFile'],
         filters: [
@@ -1157,13 +1157,13 @@ const openDevTool=()=>{
 /**
  * 初始化工作：
  * 1、持有主窗口对象
- * 2、创建初始目录：图片目录、附件目录、工作目录、缓存目录等
- * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url前缀、进程id等），然后连接后台服务websocket
+ * 2、创建初始目录：导图目录、工作目录、缓存目录等
+ * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url、进程id等），然后连接后台服务websocket
  */
 const init=(_mainWindow)=>{
     mainWindow=_mainWindow;
 
-    [/*imgsPath,attsPath,*/workPath, cachePath].forEach(eachWorkdir=>{
+    [mapsPath, workPath, cachePath].forEach(eachWorkdir=>{
         if(!fs.existsSync(eachWorkdir)){
             fs.mkdirSync(eachWorkdir,{recursive:true});
         }
@@ -1321,10 +1321,7 @@ const showNotification=(...args)=>{
     }, 6*1000);
 };
 
-/**
- * 通过环境变量判断当前是否为开发模式
- */
-const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? true : false);
+
 
 const hasDevToolExtension=()=>(process && process.env && process.env.DEV_TOOL_EXTENSION_URL ? true : false);
 
@@ -1335,27 +1332,6 @@ const getInnerModuleVersions=()=>(process.versions);
 
 
 
-const getDevServerFaviconUrl=()=>{
-    return getDevServerUrl().trim()+"/favicon.ico"
-};
-
-/**
- * 获得开发模式的主页访问地址
- */
-const getDevServerUrl=()=>{
-    if(isDevMode()){
-        return process.env.DEV_SERVER_URL;
-    }
-    return '';
-}
-
-const getDevToolExtensionUrl=()=>{
-    if(hasDevToolExtension()){
-        return process && process.env && process.env.DEV_TOOL_EXTENSION_URL;
-    }
-    return '';
-}
-
 /**
  * 向助手程序发送内容并得到结果
  * @param {*} action 
@@ -1364,37 +1340,6 @@ const getDevToolExtensionUrl=()=>{
  */
 const sendCmdToServer=(action, data)=>{
     return common.send(action, data);
-
-    // return new Promise((res, rej)=>{
-    //     let sumBuffer=null;
-    //     const request = net.request({
-    //         method:     server_info.method,
-    //         protocol:   server_info.protocol,
-    //         hostname:   server_info.hostname,
-    //         port:       server_info.port,
-    //         path:       `${server_info.basePath}${action}`
-    //     });
-    //     request.on('response', (response) => {
-    //         response.on('end', ()=>{
-    //             res(JSON.parse(sumBuffer.toString("utf-8")));
-    //         });
-    //         response.on('data', (chunk) => {
-    //             if(null===sumBuffer){
-    //                 sumBuffer=chunk;
-    //                 return;
-    //             }
-    //             sumBuffer=Buffer.concat([sumBuffer, chunk]);
-    //         });
-    //         response.on('error',(errObj)=>{
-    //             rej(errObj);
-    //         });
-    //     });
-    //     request.on('error',(errObj)=>{
-    //         rej(errObj);
-    //     });
-    //     request.write("string"===typeof(data) ? data : JSON.stringify(data), 'utf-8');
-    //     request.end();
-    // });
 };
 
 
@@ -1417,7 +1362,6 @@ const ipcHandlers={
     openMapsDir,
     reloadAppPage,
     openDevTool,
-    isDevMode,
     isMaximized,
     getBasePath,
     openUrl,
@@ -1495,49 +1439,4 @@ for(key in ipcHandlers){
 module.exports={
     //初始化
     init,
-
-    //文件操作：读写、判断存在性、列表等
-    getBasePath,
-    existsPic, 
-    existsAtt,
-    existsGraph, 
-    existsFullpath,
-    readFile,
-    saveFile, 
-    getPathItems, 
-    listFiles,
-    listAllDirs,
-
-    //图片相关操作
-    copyPicToImgsDir,
-    copyAttToAttsDir,
-    copyClipboardPicToImgsDir,
-    calcPicUrl,
-    calcAttUrl,
-    selPicFile,//使用操作系统对话框
-    openSaveFileDlg,
-    selAttFile,
-
-    //打开外部资源：导图目录、bash控制台、网页链接或本地file协议资源、图片等
-    openMapsDir, 
-    openGitBash, 
-    openUrl, 
-    openPicByName,
-    openAttByName,
-
-    //杂项
-    openDevTool,
-    isDevMode,
-    isMaximized,
-    getDevServerUrl,
-    hasDevToolExtension,
-    getDevToolExtensionUrl,
-    loadAppInfo,
-    reloadAppPage,
-    isUrlFormat,
-    getInnerModuleVersions,
-    getFileItem,
-    
-    
-    
 };

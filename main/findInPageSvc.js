@@ -1,6 +1,7 @@
 const {BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
+const common=require('./common');
 
 /*
  * 总体说明：
@@ -16,11 +17,9 @@ const findInPageIndexPath= path.join(__dirname, "../" , "findinpage", "index.htm
 /**
  * 初始化
  * @param {*} _mainWindow  主窗口
- * @param {*} _devMode     是否为开发模式
  */
-const init=(_mainWindow, _devMode)=>{
+const init=(_mainWindow)=>{
     const mainWindow=_mainWindow;
-    const devMode=_devMode;
     let findWin=null; //网页内查找窗口
 
     /**
@@ -63,7 +62,7 @@ const init=(_mainWindow, _devMode)=>{
         findWin.loadFile(findInPageIndexPath);
 
         //如果是开发模式，打开控制台
-        if(devMode){
+        if(common.isDevMode()){
             findWin.webContents.toggleDevTools();
         }
 
@@ -91,7 +90,7 @@ const init=(_mainWindow, _devMode)=>{
             mainWinY=0;
         }
         const x=(w-winW-30)+mainWinX; //水平位置：居右
-        const y=(winTop+(devMode?20:0))+mainWinY; //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
+        const y=(winTop+(common.isDevMode()?20:0))+mainWinY; //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
         return {x,y};
     };
 
@@ -224,7 +223,8 @@ const init=(_mainWindow, _devMode)=>{
 }
 
 module.exports={
-    init, //初始化
+    //初始化
+    init, 
 };
 
 

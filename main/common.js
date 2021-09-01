@@ -174,6 +174,10 @@ const log=(info)=>{
 };
 
 
+/**
+ * 获取年月日时分秒：210830_153025
+ * @returns 
+ */
 const getYmdhms=()=>{
     const now=new Date();
     const m=now.getMonth()+1;
@@ -189,6 +193,30 @@ const getYmdhms=()=>{
 };
 
 
+/**
+ * 是否为开发模式
+ * @returns 
+ */
+const isDevMode = () => (process && process.env && process.env.DEV_SERVER_URL ? true : false);
+
+
+/**
+ * 获得开发模式的主页访问地址
+ */
+ const getDevServerUrl=()=>{
+    if(isDevMode()){
+        return process.env.DEV_SERVER_URL;
+    }
+    return '';
+}
+
+/**
+ * 获取开发服务器的favicon图标
+ * @returns 
+ */
+const getDevServerFaviconUrl=()=>{
+    return getDevServerUrl().trim()+"/favicon.ico"
+};
 
 
 module.exports={
@@ -197,4 +225,7 @@ module.exports={
     log,
     getYmdhms,
     dirCopy,
+    isDevMode,
+    getDevServerUrl,
+    getDevServerFaviconUrl,
 };
