@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <title>启动页</title>
+        <style>
+        #root{
+            text-align: center;
+        }
+        #root .logo{
+            width:500px;
+        }
+        #root .sysname{
+            font-size:20px;
+        }
+        #root .sysname .ver{
+            margin-left: 30px;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="root">
+            <img class="logo" src="logo.jpg"/>
+            <div class="sysname">GMap - 思维导图<span class="ver">V0.0.1</span></div>
+        </div>
+        <script>
+        window.onload=async()=>{
+            try{
+                const { ipcRenderer } = window.require('electron');
+                const info=await ipcRenderer.invoke("loadAppInfo");
+                document.querySelector(".ver").innerHTML="V"+info.version;
+            }catch(e){
+            }
+        };
+        </script>
+    </body>
+</html>

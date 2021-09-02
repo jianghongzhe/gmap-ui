@@ -1169,13 +1169,16 @@ const init=(_mainWindow)=>{
         }
     });
 
-    spawn(fileRunnerPath, [], {cwd: externalPath});
-    setTimeout(() => {
-        server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-        console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`);
-        common.connWs(server_info.connectUrl);
-    }, 2000);
     console.log(`app started, pid is: ${process.pid}`);
+    spawn(fileRunnerPath, [], {cwd: externalPath});
+    return new Promise((res, rej)=>{
+        setTimeout(() => {
+            server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
+            console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`);
+            common.connWs(server_info.connectUrl);
+            res();
+        }, 3000);
+    });
 }
 
 

@@ -6,6 +6,12 @@ const mainSvc = require('./mainSvc');
 const findInPageSvc= require('./findInPageSvc');
 const common=require('./common');
 
+
+/**
+ * 启动窗口
+ */
+let splashWindow=null;
+
 /**
  * 主窗口
  */
@@ -17,8 +23,35 @@ app.commandLine.appendSwitch("--disable-http-cache");
 /**
  * 主体功能主页的地址
  */
-const mainPageIndexPath=path.join(__dirname, "../", "build", "index.html");;
+const mainPageIndexPath=path.join(__dirname, "../", "build", "index.html");
 
+/**
+ * 启动页的地址
+ */
+const splashPageIndexPath=path.join(__dirname, "../", "splash", "index.html");
+
+
+/**
+ * 创建启动页窗口并加载内容
+ */
+const createSplashWindow=()=>{
+    splashWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        frame: false,
+        center: true,
+        movable: false,
+        resizable: false,
+        show: true,
+        skipTaskbar: true,
+        webPreferences: {
+            nodeIntegration: true,
+            enableRemoteModule: true,
+            contextIsolation: false,
+        }
+    });
+    splashWindow.loadFile(splashPageIndexPath);
+};
 
 /**
  * 创建主窗口但不加载首页
@@ -41,8 +74,7 @@ const createWindow=()=>{
         }
     });
 
-    mainWindow.maximize();
-    mainWindow.show();
+    
 
     mainWindow.on('closed', function () {
         mainWindow = null;
@@ -53,6 +85,9 @@ const createWindow=()=>{
  * 加载首页：当为开发模式时加载开发服务器地址，否则加载本地文件地址
  */
 const loadFirstPage=()=>{
+    mainWindow.maximize();
+    mainWindow.show();
+
     if (common.isDevMode()) {
         mainWindow.loadURL(common.getDevServerUrl());
     } else {
@@ -67,11 +102,15 @@ const loadFirstPage=()=>{
  * 2、初始化主服务和查找窗口服务
  * 3、加载首页
  */
-app.on('ready', () => {    
-    createWindow();
-    mainSvc.init(mainWindow);
-    findInPageSvc.init(mainWindow);
-    loadFirstPage();
+app.on('ready', () => {   
+    (async()=>{
+        createSplashWindow();
+        createWindow();
+        await mainSvc.init(mainWindow);
+        findInPageSvc.init(mainWindow);
+        loadFirstPage();    
+        splashWindow.close();
+    })();
 });
 
 
