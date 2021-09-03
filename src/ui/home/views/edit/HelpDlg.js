@@ -399,6 +399,7 @@ const nodes=[
         ['press `ctrl` + `c`','// 支持markdown语法'],
         ['[打开](file:///d:\\a\\b.txt)','// 执行文件或打开目录'],
         ['[打开方式](openas://d:\\xx.txt)','// 选择打开方式'],
+        ['[打开](openby://d:\\a.txt@@notepad)','// 用指定打开方式打开'],
         ['[选择](dir://d:\\a\\b.txt)','// 打开目录并选择指定文件或目录'],
         ['[打开](fileext://d:\\a\\b.txt)','// 相当于file、openas、dir的组合'],
         ['[执行](cmd://dir d:\\)','// 执行命令，使用 <span style="color:black;">[space]\\</span> 表示换行'],
@@ -568,7 +569,7 @@ const helpTableStyle = {
         display: 'table-cell',
     },
     '& td:nth-child(2) > div > div > div:nth-child(1)': {
-        width:220,
+        width:250,
         // backgroundColor:'red',
         // textAlign:'center',
     },

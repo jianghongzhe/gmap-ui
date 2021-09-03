@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
-import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,FileDoneOutlined,CheckSquareOutlined } from '@ant-design/icons';
+import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,ReadOutlined,CheckSquareOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
 import relaPic from '../../../assets/relachart.png';
 
@@ -13,7 +13,7 @@ const NodeLinkIcon=(props)=>{
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://", "dir://", "openas://", "gmap://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://", "openas://","openby://", "gmap://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
@@ -54,6 +54,10 @@ const NodeLinkIcon=(props)=>{
     if("openas"===localIcon){
         return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
     }
+    // 特殊名称：openby
+    if("openby"===localIcon){
+        return getBtn(<ReadOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+    }
     // 特殊名称：gmap
     if("gmap"===localIcon){
         return getBtn(<DeploymentUnitOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
@@ -74,6 +78,9 @@ const getLinkIcon=(addr ,onClick)=>{
     // 打开方式：默认为灰色，如果路径有效则为蓝色
     if(addr.startsWith("openas://")){
         return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
+    if(addr.startsWith("openby://")){
+        return getBtn(<ReadOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     // 打开并选中：默认为灰色，如果路径有效则为蓝色
     if(addr.startsWith("dir://")){
