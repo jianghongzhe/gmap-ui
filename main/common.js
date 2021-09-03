@@ -42,32 +42,28 @@ let reqIdCallbackMap={};
  * @param {*} url 
  */
 const connWs=(url)=>{
-    try{
-        wsClient = new ws(url);
-        console.log("gggg");
-        console.log(wsClient);
-    }catch(e){
-        console.log("hahaha");
-        console.log(e);
-    }
-    wsClient.on('open', ()=>{
-        log(`后台websocket服务已连接：${url}`);
-        wsConnected=true;
-        setTimeout(beginHeartbeat, wsHeartBeatDelayMs);
-    });
-    wsClient.on('message', function incoming(message) {
-        if(message instanceof Buffer){
-            const str=message.toString('utf-8');
-            const resp=JSON.parse(str);
-            if(reqIdCallbackMap[resp.reqId]){
-                const func=reqIdCallbackMap[resp.reqId];
-                func(resp);
-                delete reqIdCallbackMap[resp.reqId];
+    return new Promise((res, rej)=>{
+        wsClient = new ws(url);    
+        wsClient.on('open', ()=>{
+            log(`后台websocket服务已连接：${url}`);
+            wsConnected=true;
+            setTimeout(beginHeartbeat, wsHeartBeatDelayMs);
+            res();
+        });
+        wsClient.on('message', function incoming(message) {
+            if(message instanceof Buffer){
+                const str=message.toString('utf-8');
+                const resp=JSON.parse(str);
+                if(reqIdCallbackMap[resp.reqId]){
+                    const func=reqIdCallbackMap[resp.reqId];
+                    func(resp);
+                    delete reqIdCallbackMap[resp.reqId];
+                }
             }
-        }
-    });
-    wsClient.on('pong', ()=>{
-        log("收到心跳");
+        });
+        wsClient.on('pong', ()=>{
+            log("收到心跳");
+        });
     });
 };
 
@@ -155,8 +151,9 @@ const dirCopy=(srcDir, destDir)=>{
 /**
  * 记录日志
  * @param {*} info 
+ * @param {*} printToConsole 是否也打印到控制台
  */
-const log=(info)=>{
+const log=(info, printToConsole=false)=>{
     const now=new Date();
     const m=now.getMonth()+1;
     const d=now.getDate();
@@ -169,11 +166,15 @@ const log=(info)=>{
     const hms=`${h<10 ? '0'+h : h}:${min<10 ? '0'+min : min}:${s<10 ? '0'+s : s}.${ms<10?'00'+ms:(ms<100?'0'+ms:ms)}`;
     const localpath=path.join(__dirname, '../', 'work', `main_${ymd}.log`);
 
-    fs.appendFileSync(
+    fs.appendFile(
         localpath,
         `[${ymd} ${hms}] ${info}\r\n`,
-        'utf-8'
+        'utf-8',
+        ()=>{}
     );
+    if(printToConsole){
+        console.log(info);
+    }
 };
 
 

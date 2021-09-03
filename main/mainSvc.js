@@ -1170,22 +1170,24 @@ const openDevTool=()=>{
  * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url、进程id等），然后连接后台服务websocket
  */
 const init=(_mainWindow)=>{
-    mainWindow=_mainWindow;
-
-    [mapsPath, workPath, cachePath].forEach(eachWorkdir=>{
-        if(!fs.existsSync(eachWorkdir)){
-            fs.mkdirSync(eachWorkdir,{recursive:true});
-        }
-    });
-
-    console.log(`app started, pid is: ${process.pid}`);
-    spawn(fileRunnerPath, [], {cwd: externalPath});
     return new Promise((res, rej)=>{
+        mainWindow=_mainWindow;
+
+        [mapsPath, workPath, cachePath].forEach(eachWorkdir=>{
+            if(!fs.existsSync(eachWorkdir)){
+                fs.mkdirSync(eachWorkdir,{recursive:true});
+            }
+        });
+
+        common.log(`app started, pid is: ${process.pid}`, true)
+        spawn(fileRunnerPath, [], {cwd: externalPath});
+
         setTimeout(() => {
             server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-            console.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`);
-            common.connWs(server_info.connectUrl);
-            res();
+            common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
+            common.connWs(server_info.connectUrl).then(()=>{
+                res();
+            });
         }, 3000);
     });
 }
@@ -1392,7 +1394,6 @@ const ipcHandlers={
     openPicByName,
     openAttByName,
     getPathItems,
-    existsGraph,
     selPicFile,
     selAttFile,
     copyPicToImgsDir,
@@ -1435,14 +1436,14 @@ const delegateHandlerSync=(handler, evt, ...args)=>{
 /**
  * 接收异步调用并返回promise
  */
-for(key in ipcHandlers){
+for(let key in ipcHandlers){
     ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
 }
 
 /**
  * 接收同步调用并返回实际结果
  */
-for(key in ipcHandlers){
+for(let key in ipcHandlers){
     ipcMain.on(key+"Sync", delegateHandlerSync.bind(this, ipcHandlers[key]));
 }
 

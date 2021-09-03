@@ -65,8 +65,6 @@
     ]
   },
   "devDependencies": {
-    "@electron/remote": "^1.2.0",
-    "electron": "^13.1.7",
-    "electron-react-devtools": "^0.5.3"
+    "electron": "^13.3.0"
   }
 }
