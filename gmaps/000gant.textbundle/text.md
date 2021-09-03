@@ -1,2 +1,3 @@
 - 常用内容
 	- 222|[](openby://d:\\a.txt@@360chrome)
+	- aa|[](fileext://D:\中 文\a.txt)

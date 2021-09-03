@@ -25,6 +25,7 @@ const MindNode=(props)=>{
         const fileUrl="file:///"+after;
         const openasUrl="openas://"+after;
         const dirUrl="dir://"+after;
+        const cpUrl="cp://"+after;
         return [
             {
                 addr: fileUrl,
@@ -38,9 +39,10 @@ const MindNode=(props)=>{
                 addr: dirUrl,
                 tooltip: "打开目录并选择  "+dirUrl,
             },
-            
-            
-            
+            {
+                addr: cpUrl,
+                tooltip: "复制  "+cpUrl,
+            },
         ];
     },[]);
 

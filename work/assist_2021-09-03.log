@@ -19,3 +19,13 @@ notepad++22, data= }
 [file_runner.service.Server] [thread-5] [2021-09-03 21:37:45.403]  返回结果：{ reqId=5, succ=True, msg=, data= }
 [file_runner.service.Server] [thread-5] [2021-09-03 21:37:53.816]  收到请求：{"reqId":6,"action":"openby","data":"{\"url\":\"openby://d:\\\\\\\\a.txt@@360chrome\"}"}
 [file_runner.service.Server] [thread-5] [2021-09-03 21:37:53.899]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-4] [2021-09-03 21:56:30.753]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///D:\\\\中 文\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-4] [2021-09-03 21:56:31.250]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-03 21:56:34.965]  收到请求：{"reqId":2,"action":"openas","data":"{\"url\":\"openas://D:\\\\中 文\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-03 21:56:35.117]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-03 21:56:46.389]  收到请求：{"reqId":3,"action":"dir","data":"{\"url\":\"dir://D:\\\\中 文\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-03 21:56:49.164]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-03 21:56:56.595]  收到请求：{"reqId":4,"action":"cp","data":"{\"url\":\"cp://D:\\\\中 文\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-03 21:56:56.599]  返回结果：{ reqId=4, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-5] [2021-09-03 21:57:08.221]  收到请求：{"reqId":5,"action":"cp","data":"{\"url\":\"cp://D:\\\\中 文\\\\a.txt222\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-03 21:57:08.222]  返回结果：{ reqId=5, succ=True, msg=, data=System.Collections.Hashtable }

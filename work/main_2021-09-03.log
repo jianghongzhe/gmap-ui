@@ -25,3 +25,16 @@
 [2021-09-03 21:41:59.236] 收到心跳
 [2021-09-03 21:42:29.235] 发送心跳
 [2021-09-03 21:42:29.237] 收到心跳
+[2021-09-03 21:47:06.687] Caught exception: Error: connect ECONNREFUSED 127.0.0.1:56777
+Exception origin: uncaughtException
+[2021-09-03 21:48:17.811] Caught exception: Error: connect ECONNREFUSED 127.0.0.1:56777
+Exception origin: uncaughtException
+[2021-09-03 21:55:09.544] Caught exception: Error: connect ECONNREFUSED 127.0.0.1:56777
+Exception origin: uncaughtException
+[2021-09-03 21:55:43.948] 尚未连接到websocket服务端，无法发送消息
+[2021-09-03 21:56:00.181] 尚未连接到websocket服务端，无法发送消息
+[2021-09-03 21:56:22.976] 后台websocket服务已连接：ws://localhost:56789/
+[2021-09-03 21:56:27.978] 发送心跳
+[2021-09-03 21:56:27.982] 收到心跳
+[2021-09-03 21:56:57.979] 发送心跳
+[2021-09-03 21:56:57.981] 收到心跳

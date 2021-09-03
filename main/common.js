@@ -42,7 +42,14 @@ let reqIdCallbackMap={};
  * @param {*} url 
  */
 const connWs=(url)=>{
-    wsClient = new ws(url);
+    try{
+        wsClient = new ws(url);
+        console.log("gggg");
+        console.log(wsClient);
+    }catch(e){
+        console.log("hahaha");
+        console.log(e);
+    }
     wsClient.on('open', ()=>{
         log(`后台websocket服务已连接：${url}`);
         wsConnected=true;
@@ -51,10 +58,6 @@ const connWs=(url)=>{
     wsClient.on('message', function incoming(message) {
         if(message instanceof Buffer){
             const str=message.toString('utf-8');
-            // if('pong'===str){
-            //     log("从服务端接收到心跳");
-            //     return;
-            // }
             const resp=JSON.parse(str);
             if(reqIdCallbackMap[resp.reqId]){
                 const func=reqIdCallbackMap[resp.reqId];
