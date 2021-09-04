@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
-import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,ReadOutlined,CheckSquareOutlined } from '@ant-design/icons';
+import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,FileUnknownOutlined,CheckSquareOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
 import relaPic from '../../../assets/relachart.png';
 
@@ -56,7 +56,7 @@ const NodeLinkIcon=(props)=>{
     }
     // 特殊名称：openby
     if("openby"===localIcon){
-        return getBtn(<ReadOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+        return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
     }
     // 特殊名称：gmap
     if("gmap"===localIcon){
@@ -80,7 +80,7 @@ const getLinkIcon=(addr ,onClick)=>{
         return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     if(addr.startsWith("openby://")){
-        return getBtn(<ReadOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+        return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     // 打开并选中：默认为灰色，如果路径有效则为蓝色
     if(addr.startsWith("dir://")){
