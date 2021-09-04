@@ -1,0 +1,22 @@
+﻿[file_runner.service.Server] [thread-87] [2021-09-04 16:09:56.435]  收到请求：{"reqId":1,"action":"cmd","data":"{\"url\":\"cmd://ping .,.\"}"}
+[file_runner.service.Server] [thread-87] [2021-09-04 16:09:57.031]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-92] [2021-09-04 16:12:58.406]  收到请求：{"reqId":2,"action":"cmd","data":"{\"url\":\"cmd://ping .,.\"}"}
+[file_runner.service.Server] [thread-92] [2021-09-04 16:12:58.652]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-94] [2021-09-04 16:13:49.065]  收到请求：{"reqId":3,"action":"cmd","data":"{\"url\":\"cmd://ping 1.2,3.4\"}"}
+[file_runner.service.Server] [thread-94] [2021-09-04 16:13:49.370]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-94] [2021-09-04 16:14:01.945]  收到请求：{"reqId":4,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168,1.1\"}"}
+[file_runner.service.Server] [thread-94] [2021-09-04 16:14:02.229]  返回结果：{ reqId=4, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-89] [2021-09-04 16:14:47.079]  收到请求：{"reqId":5,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.1\"}"}
+[file_runner.service.Server] [thread-89] [2021-09-04 16:14:47.441]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-89] [2021-09-04 16:14:59.828]  收到请求：{"reqId":6,"action":"cmd","data":"{\"url\":\"cmd://ping 13413.34123.3413.312\"}"}
+[file_runner.service.Server] [thread-89] [2021-09-04 16:15:00.109]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-55] [2021-09-04 16:24:37.255]  收到请求：{"reqId":7,"action":"cmd","data":"{\"url\":\"cmd://ping 1.1.1.1\"}"}
+[file_runner.service.Server] [thread-55] [2021-09-04 16:24:37.542]  返回结果：{ reqId=7, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-39] [2021-09-04 16:29:51.000]  收到请求：{"reqId":8,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.1\"}"}
+[file_runner.service.Server] [thread-39] [2021-09-04 16:29:51.308]  返回结果：{ reqId=8, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-35] [2021-09-04 16:30:00.795]  收到请求：{"reqId":9,"action":"cmd","data":"{\"url\":\"cmd://ping 127.0.0.1\"}"}
+[file_runner.service.Server] [thread-35] [2021-09-04 16:30:01.173]  返回结果：{ reqId=9, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-35] [2021-09-04 16:30:17.752]  收到请求：{"reqId":10,"action":"cmd","data":"{\"url\":\"cmd://ping 192.168.1.32\"}"}
+[file_runner.service.Server] [thread-35] [2021-09-04 16:30:17.988]  返回结果：{ reqId=10, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-11] [2021-09-04 16:36:50.366]  收到请求：{"reqId":11,"action":"cmd","data":"{\"url\":\"cmd://ping 127.0.0.1\"}"}
+[file_runner.service.Server] [thread-11] [2021-09-04 16:36:50.646]  返回结果：{ reqId=11, succ=True, msg=, data= }
