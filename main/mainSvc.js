@@ -35,6 +35,8 @@ const icons={
     warn: iconWarnPath,
 };
 
+const ASSIST_STARTED_SYMBOL="started";
+
 
 const SLASH='/';
 const BACK_SLASH='\\';
@@ -1167,28 +1169,34 @@ const openDevTool=()=>{
  * 初始化工作：
  * 1、持有主窗口对象
  * 2、创建初始目录：导图目录、工作目录、缓存目录等
- * 3、启动后台监听服务并在过一会后获得服务器信息（访问地址url、进程id等），然后连接后台服务websocket
+ * 3、启动后台监听服务，并监听其控制台输出，在得到启动完成标志后连接后台服务websocket，同时不再监听
+ * @returns {*} promise 准备完成后调用promise的resolve
  */
 const init=(_mainWindow)=>{
     return new Promise((res, rej)=>{
         mainWindow=_mainWindow;
-
         [mapsPath, workPath, cachePath].forEach(eachWorkdir=>{
             if(!fs.existsSync(eachWorkdir)){
                 fs.mkdirSync(eachWorkdir,{recursive:true});
             }
         });
+        common.log(`app started, pid is: ${process.pid}`, true);
 
-        common.log(`app started, pid is: ${process.pid}`, true)
-        spawn(fileRunnerPath, [], {cwd: externalPath});
-
-        setTimeout(() => {
-            server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-            common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
-            common.connWs(server_info.connectUrl).then(()=>{
-                res();
-            });
-        }, 3000);
+        const assistProcess= spawn(fileRunnerPath, [], {cwd: externalPath});
+        if(assistProcess && assistProcess.stdout){
+            const assistListener=(data)=>{
+                if(!(data instanceof Buffer)){
+                    return;
+                }
+                if(ASSIST_STARTED_SYMBOL===data.toString("utf-8").trim()){
+                    assistProcess.stdout.removeListener("data", assistListener);
+                    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
+                    common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
+                    common.connWs(server_info.connectUrl).then(res);
+                }
+            };
+            assistProcess.stdout.on("data", assistListener);
+        }
     });
 }
 

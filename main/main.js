@@ -31,27 +31,27 @@ const mainPageIndexPath=path.join(__dirname, "../", "build", "index.html");
 const splashPageIndexPath=path.join(__dirname, "../", "splash", "index.html");
 
 
-/**
- * 创建启动页窗口并加载内容
- */
-const createSplashWindow=()=>{
-    splashWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        frame: false,
-        center: true,
-        movable: false,
-        resizable: false,
-        show: true,
-        skipTaskbar: true,
-        webPreferences: {
-            nodeIntegration: true,
-            enableRemoteModule: true,
-            contextIsolation: false,
-        }
-    });
-    splashWindow.loadFile(splashPageIndexPath);
-};
+// /**
+//  * 创建启动页窗口并加载内容
+//  */
+// const createSplashWindow=()=>{
+//     splashWindow = new BrowserWindow({
+//         width: 800,
+//         height: 600,
+//         frame: false,
+//         center: true,
+//         movable: false,
+//         resizable: false,
+//         show: true,
+//         skipTaskbar: true,
+//         webPreferences: {
+//             nodeIntegration: true,
+//             enableRemoteModule: true,
+//             contextIsolation: false,
+//         }
+//     });
+//     splashWindow.loadFile(splashPageIndexPath);
+// };
 
 /**
  * 创建主窗口但不加载首页
@@ -106,7 +106,7 @@ const loadFirstPage=()=>{
  */
 app.on('ready', () => {   
     (async()=>{
-        createSplashWindow();
+        //createSplashWindow();
         createWindow();
         await mainSvc.init(mainWindow);
         findInPageSvc.init(mainWindow);
