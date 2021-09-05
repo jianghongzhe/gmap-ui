@@ -22,3 +22,10 @@
 [file_runner.service.Server] [thread-28] [2021-09-06 01:01:30.886]  收到请求：{"reqId":5,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@notepad\"}"}
 [file_runner.service.Server] [thread-28] [2021-09-06 01:01:30.978]  返回结果：{ reqId=5, succ=True, msg=, data= }
 [file_runner.Program] [thread-1] [2021-09-06 01:05:12.993]  已接收到主进程id：5204
+[file_runner.Program] [thread-1] [2021-09-06 01:34:12.555]  已接收到主进程id：8824
+[file_runner.service.Server] [thread-23] [2021-09-06 01:39:12.411]  收到请求：{"reqId":1,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@notepad\"}"}
+[file_runner.service.Server] [thread-23] [2021-09-06 01:39:12.745]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-24] [2021-09-06 01:39:25.696]  收到请求：{"reqId":2,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@emeditor\"}"}
+[file_runner.service.Server] [thread-24] [2021-09-06 01:39:25.753]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-24] [2021-09-06 01:39:35.960]  收到请求：{"reqId":3,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@notepad\"}"}
+[file_runner.service.Server] [thread-24] [2021-09-06 01:39:36.053]  返回结果：{ reqId=3, succ=True, msg=, data= }

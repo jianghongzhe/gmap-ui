@@ -827,13 +827,20 @@ class MindmapSvc {
             const linkName=matchResult[1].trim()
             const oldLink=matchResult[2].trim()
             const openerName=matchResult[3].trim();
+
+            // 从引用中的打开方式字典中未找到打开方式，则说明使用系统自带的打开方式，链接不做处理
             if(!openers[openerName]){
-                return [true,false,null];
+                return [true,true,{
+                    name: linkName,
+                    addr: oldLink,
+                }];
             }
+            
+            // 已找到打开方式，使用替换后的链接地址
             const replacedUrl=oldLink.replace(`@@${openerName}`, `@@${openers[openerName]}`).trim();
             let link={
                 name: linkName,
-                addr: replacedUrl
+                addr: replacedUrl,
             };
             return [true,true,link];
         },

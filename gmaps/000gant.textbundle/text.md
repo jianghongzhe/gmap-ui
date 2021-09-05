@@ -1,8 +1,8 @@
 - 常用内容
-	- 222|[](openby://D:\c.txt@@t)
+	- 222|[](openby://D:\c.txt@@t2)|[](https://baidu.com)
 	
 ***
 
 
 # openers
-[t]: notepad
+[t2]: notepad
