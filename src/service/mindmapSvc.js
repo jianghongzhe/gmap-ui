@@ -819,6 +819,25 @@ class MindmapSvc {
             return [true,false,null];
         },
 
+        handleOpener: (item, openers)=>{
+            const matchResult=item.match(/^\[([^[\]]*)\]\((openby[:][/][/].+[@][@](.+))\)$/);
+            if(!matchResult){
+                return [false,false,null];
+            }
+            const linkName=matchResult[1].trim()
+            const oldLink=matchResult[2].trim()
+            const openerName=matchResult[3].trim();
+            if(!openers[openerName]){
+                return [true,false,null];
+            }
+            const replacedUrl=oldLink.replace(`@@${openerName}`, `@@${openers[openerName]}`).trim();
+            let link={
+                name: linkName,
+                addr: replacedUrl
+            };
+            return [true,true,link];
+        },
+
         handleGraph:(item, graphs)=>{
             let graphfPrefixLen = 'graph:'.length;
             if (!item.startsWith("graph:") || item.length <= graphfPrefixLen) {
@@ -983,7 +1002,7 @@ class MindmapSvc {
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
 
-        let { ndLines, refs, graphs} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, graphs, openers} = this.loadParts(arrayOrTxt);
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -1042,6 +1061,15 @@ class MindmapSvc {
                     if(handled){
                         if(hasVal){
                             ref.push(val);
+                        }
+                        return;
+                    }
+
+                    //是打开为
+                    [handled,hasVal,val]=this.linePartHandlers.handleOpener(item, openers);
+                    if(handled){
+                        if(hasVal){
+                            links.push(val);
                         }
                         return;
                     }
@@ -1318,6 +1346,7 @@ class MindmapSvc {
      * 把内容拆分为
      */
     loadParts = (alltxts) => {
+        let openers={};
         let refs = {};
         let trefs = {};
         let graphs = {};
@@ -1352,6 +1381,9 @@ class MindmapSvc {
                 currRefName = trimLine.substring("# ".length);
                 return;
             }
+            if("# openers"===trimLine){
+                currRefName="openers";
+            }   
 
             //还没有当前标识符
             if (null == currRefName) {
@@ -1359,7 +1391,15 @@ class MindmapSvc {
             }
 
             //已有当前标识符
-            if(currRefName.startsWith("ref:")){
+            if("openers"===currRefName){
+                // [haha]: d:\\a\\b.exe
+                const matchResult=trimLine.match(/^\[([^[\]]+)\][:](.+)$/);
+                if(matchResult && matchResult[1] && matchResult[2]){
+                    const openerId=matchResult[1].trim();
+                    const openerContent=matchResult[2].trim();
+                    openers[openerId]=openerContent;
+                }
+            }else if(currRefName.startsWith("ref:")){
                 //是已记录过的引用
                 if ("undefined" !== typeof (refs[currRefName])) {
                     refs[currRefName] += '\n' + line;
@@ -1437,7 +1477,7 @@ class MindmapSvc {
         });
 
 
-        return { ndLines, refs, graphs};
+        return { ndLines, refs, graphs, openers};
     }
 
     setLeaf = (nd) => {
