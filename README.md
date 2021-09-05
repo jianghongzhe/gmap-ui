@@ -1,5 +1,5 @@
-## 图形工具软件
-目前只支持思维导图类型，以后会支持其他类型
+## 思维导图工具软件
+通过markdown文本自动生成思维导图，不使用鼠标拖拽的方式，更适合程序员手不离开键盘的使用方式。
 
 #### 运行开发服务器
 - package.json
@@ -12,6 +12,18 @@
 - npm run build：打包react项目到build目录
 - main.js中要指定启动的静态页：mainWindow.loadFile(__dirname+'\\build\\index.html');
 - 复制package.json、main.js、build目录到electron预编译目录的resources/app下
+
+#### 部署目录说明
+|目录或文件名|说明|
+|-|-|
+|main|主进程相关文件，其中包含启动入口|
+|build|系统主功能窗口的渲染进程|
+|findinpage|查找窗口渲染进程|
+|externals|外部程序和导出模版|
+|gmaps|导图主目录，应为空|
+|cache|缓存目录，应为空|
+|work|工作目录，应为空|
+|package.json|主配置文件|
 
 
 
