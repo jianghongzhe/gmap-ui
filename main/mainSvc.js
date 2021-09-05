@@ -1182,7 +1182,7 @@ const init=(_mainWindow)=>{
         });
         common.log(`app started, pid is: ${process.pid}`, true);
 
-        const assistProcess= spawn(fileRunnerPath, [], {cwd: externalPath});
+        const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
         if(assistProcess && assistProcess.stdout){
             const assistListener=(data)=>{
                 if(!(data instanceof Buffer)){
