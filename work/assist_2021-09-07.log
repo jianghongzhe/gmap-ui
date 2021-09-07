@@ -61,3 +61,29 @@ D:\ccc.txt
 D:\ccc.txt, data= }
 [file_runner.service.Server] [thread-20] [2021-09-07 22:59:31.153]  收到请求：{"reqId":9,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@emeditor\"}"}
 [file_runner.service.Server] [thread-20] [2021-09-07 22:59:31.224]  返回结果：{ reqId=9, succ=True, msg=, data= }
+[file_runner.Program] [thread-1] [2021-09-07 23:10:01.528]  已接收到主进程id：19436
+[file_runner.service.Server] [thread-10] [2021-09-07 23:10:29.017]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///@@control\"}"}
+[file_runner.service.Server] [thread-10] [2021-09-07 23:10:29.106]  System.Exception: 指定的路径不存在：
+@@control
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-10] [2021-09-07 23:10:29.106]  返回结果：{ reqId=1, succ=False, msg=指定的路径不存在：
+@@control, data= }
+[file_runner.Program] [thread-1] [2021-09-07 23:38:13.223]  已接收到主进程id：15460
+[file_runner.service.Server] [thread-4] [2021-09-07 23:38:27.102]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///@@control\"}"}
+[file_runner.service.Server] [thread-4] [2021-09-07 23:38:27.446]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-4] [2021-09-07 23:38:43.820]  收到请求：{"reqId":2,"action":"file","data":"{\"url\":\"file:///@@notepad\"}"}
+[file_runner.service.Server] [thread-4] [2021-09-07 23:38:43.940]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-6] [2021-09-07 23:38:54.316]  收到请求：{"reqId":3,"action":"file","data":"{\"url\":\"file:///@@emeditor\"}"}
+[file_runner.service.Server] [thread-6] [2021-09-07 23:38:54.371]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-6] [2021-09-07 23:39:08.684]  收到请求：{"reqId":4,"action":"file","data":"{\"url\":\"file:///@@cmd\"}"}
+[file_runner.service.Server] [thread-6] [2021-09-07 23:39:08.792]  返回结果：{ reqId=4, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-07 23:39:23.044]  收到请求：{"reqId":5,"action":"file","data":"{\"url\":\"file:///@@cmd\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-07 23:39:23.149]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-5] [2021-09-07 23:39:40.485]  收到请求：{"reqId":6,"action":"file","data":"{\"url\":\"file:///@@cmd.ex\"}"}
+[file_runner.service.Server] [thread-5] [2021-09-07 23:39:40.530]  System.Exception: 未匹配到有效路径：
+cmd.ex.exe
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-5] [2021-09-07 23:39:40.531]  返回结果：{ reqId=6, succ=False, msg=未匹配到有效路径：
+cmd.ex.exe, data= }

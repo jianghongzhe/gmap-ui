@@ -165,7 +165,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlPie} style={{width:'320px'}}/>
+                                    <img src={imgUrlPie} style={{width:'320px'}} alt="饼图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -191,7 +191,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlBar} style={{width:'320px'}}/>
+                                    <img src={imgUrlBar} style={{width:'320px'}} alt="柱状图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -217,7 +217,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlLine} style={{width:'320px'}}/>
+                                    <img src={imgUrlLine} style={{width:'320px'}} alt="折线图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -243,7 +243,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlStack} style={{width:'320px'}}/>
+                                    <img src={imgUrlStack} style={{width:'320px'}} alt="堆积图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -271,7 +271,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlMix} style={{width:'320px'}}/>
+                                    <img src={imgUrlMix} style={{width:'320px'}} alt="柱线混合图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -295,7 +295,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlScatter} style={{width:'320px'}}/>
+                                    <img src={imgUrlScatter} style={{width:'320px'}} alt="散点图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -320,7 +320,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlRela} style={{width:'320px'}}/>
+                                    <img src={imgUrlRela} style={{width:'320px'}} alt="关系图"/>
                                 </td>
                             </tr>
                             <tr>
@@ -341,7 +341,7 @@ const HelpDlg=(props)=>{
                                     </div>
                                 </td>
                                 <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlEchart} style={{width:'100px'}}/>
+                                    <img src={imgUrlEchart} style={{width:'100px'}} alt="自定义json配置"/>
                                 </td>
                             </tr>
                             </tbody>
@@ -398,8 +398,9 @@ const nodes=[
         ['ls \\| grep aa','// 使用 <span style="color:black;">\\|</span> 来显示竖线'],
         ['press `ctrl` + `c`','// 支持markdown语法'],
         ['[打开](file:///d:\\a\\b.txt)','// 执行文件或打开目录'],
+        ['[打开](file:///@@control)','// 从环境变量或注册表app path匹配路径并执行'],
         ['[打开方式](openas://d:\\xx.txt)','// 选择打开方式'],
-        ['[打开](openby://d:\\a.txt@@nt)','// 用指定打开方式打开'],
+        ['[打开为](openby://d:\\a.txt@@nt)','// 用指定打开方式打开'],
         ['[选择](dir://d:\\a\\b.txt)','// 打开目录并选择指定文件或目录'],
         ['[打开](filex://d:\\a\\b.txt)','// 相当于file、openas、dir、cp的组合'],
         ['[打开](dirx://d:\\a\\b\\c)','// 相当于file、dir、cp的组合'],
