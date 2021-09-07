@@ -102,7 +102,10 @@ const MindNode=(props)=>{
     
 
     /**
-     * 渲染链接
+     * 渲染链接：
+     * 1、如果是fileext或filex协议，则拆分为file、openas、dir、cp几个链接
+     * 2、如果是dirext或dirx协议，则拆分为file、dir、cp几个链接
+     * 3、否则，生成一个链接
      */
     const renderLink=useCallback((link, linkInd)=>{
         if(isFileExtProtocol(link.addr)){
@@ -135,14 +138,14 @@ const MindNode=(props)=>{
                 }
             </React.Fragment>
         }
-        <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
+        return <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
             <span css={themeBtnWrapperStyle} >
                 <NodeLinkIcon 
                     lindAddr={link.addr}
                     onClick={props.onOpenLink.bind(this,link.addr)}/>
             </span>
         </Tooltip>
-    },[props.onOpenLink]);
+    },[props.onOpenLink, isFileExtProtocol, isDirExtProtocol, splitFileExtProtocol, splitDirExtProtocol]);
 
 
     

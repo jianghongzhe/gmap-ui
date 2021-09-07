@@ -22,3 +22,42 @@
 [file_runner.service.Server] [thread-14] [2021-09-07 20:42:24.355]  收到请求：{"reqId":6,"action":"dir","data":"{\"url\":\"dir://d:\\\\down\"}"}
 [file_runner.service.Server] [thread-14] [2021-09-07 20:42:24.493]  返回结果：{ reqId=6, succ=True, msg=, data= }
 [file_runner.Program] [thread-1] [2021-09-07 20:44:21.123]  已接收到主进程id：836
+[file_runner.Program] [thread-1] [2021-09-07 22:53:20.419]  已接收到主进程id：13976
+[file_runner.service.Server] [thread-18] [2021-09-07 22:57:33.120]  收到请求：{"reqId":1,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@emeditor\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-07 22:57:33.423]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-18] [2021-09-07 22:57:44.073]  收到请求：{"reqId":2,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@tts\"}"}
+[file_runner.service.Server] [thread-18] [2021-09-07 22:57:44.116]  System.Exception: 未找到指定的打开方式：
+tts
+   在 file_runner.service.OpenByHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-18] [2021-09-07 22:57:44.117]  返回结果：{ reqId=2, succ=False, msg=未找到指定的打开方式：
+tts, data= }
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:00.953]  收到请求：{"reqId":3,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@notepad\"}"}
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:01.088]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:32.209]  收到请求：{"reqId":4,"action":"file","data":"{\"url\":\"file:///d:\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:32.210]  System.Exception: 指定的路径不存在：
+d:\a.txt
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:32.210]  返回结果：{ reqId=4, succ=False, msg=指定的路径不存在：
+d:\a.txt, data= }
+[file_runner.service.Server] [thread-24] [2021-09-07 22:58:41.057]  收到请求：{"reqId":5,"action":"openas","data":"{\"url\":\"openas://d:\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-24] [2021-09-07 22:58:41.059]  System.Exception: 指定的路径不存在：
+d:\a.txt
+   在 file_runner.service.OpenAsHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-24] [2021-09-07 22:58:41.059]  返回结果：{ reqId=5, succ=False, msg=指定的路径不存在：
+d:\a.txt, data= }
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:45.473]  收到请求：{"reqId":6,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@notepad\"}"}
+[file_runner.service.Server] [thread-20] [2021-09-07 22:58:45.591]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-24] [2021-09-07 22:58:56.305]  收到请求：{"reqId":7,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@emeditor\"}"}
+[file_runner.service.Server] [thread-24] [2021-09-07 22:58:56.374]  返回结果：{ reqId=7, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-20] [2021-09-07 22:59:14.313]  收到请求：{"reqId":8,"action":"openby","data":"{\"url\":\"openby://D:\\\\ccc.txt@@emeditor\"}"}
+[file_runner.service.Server] [thread-20] [2021-09-07 22:59:14.313]  System.Exception: 文件不存在，无法打开：
+D:\ccc.txt
+   在 file_runner.service.OpenByHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-20] [2021-09-07 22:59:14.313]  返回结果：{ reqId=8, succ=False, msg=文件不存在，无法打开：
+D:\ccc.txt, data= }
+[file_runner.service.Server] [thread-20] [2021-09-07 22:59:31.153]  收到请求：{"reqId":9,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@emeditor\"}"}
+[file_runner.service.Server] [thread-20] [2021-09-07 22:59:31.224]  返回结果：{ reqId=9, succ=True, msg=, data= }
