@@ -111,7 +111,7 @@ app.on('ready', () => {
         await mainSvc.init(mainWindow);
         findInPageSvc.init(mainWindow);
         loadFirstPage();    
-        splashWindow.close();
+        //splashWindow.close();
     })();
 });
 

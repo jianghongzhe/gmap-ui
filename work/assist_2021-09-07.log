@@ -1,0 +1,24 @@
+﻿[file_runner.Program] [thread-1] [2021-09-07 20:21:16.824]  已接收到主进程id：6148
+[file_runner.service.Server] [thread-9] [2021-09-07 20:22:00.086]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///D:/ws/web/gmap-ui/gmaps\"}"}
+[file_runner.service.Server] [thread-9] [2021-09-07 20:22:00.356]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.Program] [thread-1] [2021-09-07 20:23:23.870]  已接收到主进程id：1676
+[file_runner.Program] [thread-1] [2021-09-07 20:25:38.750]  已接收到主进程id：3624
+[file_runner.Program] [thread-1] [2021-09-07 20:31:17.196]  已接收到主进程id：15864
+[file_runner.Program] [thread-1] [2021-09-07 20:36:29.490]  已接收到主进程id：5604
+[file_runner.Program] [thread-1] [2021-09-07 20:37:48.597]  已接收到主进程id：11432
+[file_runner.Program] [thread-1] [2021-09-07 20:38:54.248]  已接收到主进程id：15768
+[file_runner.Program] [thread-1] [2021-09-07 20:39:53.542]  已接收到主进程id：15452
+[file_runner.Program] [thread-1] [2021-09-07 20:40:08.195]  已接收到主进程id：15804
+[file_runner.service.Server] [thread-13] [2021-09-07 20:41:45.839]  收到请求：{"reqId":1,"action":"file","data":"{\"url\":\"file:///d:\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-13] [2021-09-07 20:41:46.434]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-14] [2021-09-07 20:41:50.331]  收到请求：{"reqId":2,"action":"openas","data":"{\"url\":\"openas://d:\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-14] [2021-09-07 20:41:50.625]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-14] [2021-09-07 20:41:57.211]  收到请求：{"reqId":3,"action":"dir","data":"{\"url\":\"dir://d:\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-14] [2021-09-07 20:41:59.489]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-13] [2021-09-07 20:42:09.867]  收到请求：{"reqId":4,"action":"cp","data":"{\"url\":\"cp://d:\\\\a.txt\"}"}
+[file_runner.service.Server] [thread-13] [2021-09-07 20:42:09.881]  返回结果：{ reqId=4, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-14] [2021-09-07 20:42:16.210]  收到请求：{"reqId":5,"action":"file","data":"{\"url\":\"file:///d:\\\\down\"}"}
+[file_runner.service.Server] [thread-14] [2021-09-07 20:42:16.291]  返回结果：{ reqId=5, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-14] [2021-09-07 20:42:24.355]  收到请求：{"reqId":6,"action":"dir","data":"{\"url\":\"dir://d:\\\\down\"}"}
+[file_runner.service.Server] [thread-14] [2021-09-07 20:42:24.493]  返回结果：{ reqId=6, succ=True, msg=, data= }
+[file_runner.Program] [thread-1] [2021-09-07 20:44:21.123]  已接收到主进程id：836

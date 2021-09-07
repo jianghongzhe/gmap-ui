@@ -15,12 +15,28 @@ import './markdown-node.css';
  */
 const MindNode=(props)=>{
 
+    const isFileExtProtocol=useCallback((addr)=>{
+        return (addr.startsWith("fileext://") || addr.startsWith("filex://"));
+    },[]);
+
+    const isDirExtProtocol=useCallback((addr)=>{
+        return (addr.startsWith("dirext://") || addr.startsWith("dirx://"));
+    },[]);
+
     /**
      * 把fileext协议的url分解为三个具体的协议：file、openas、dir
      */
     const splitFileExtProtocol=useCallback((addr, name)=>{
 
-        const len=(addr.startsWith("fileext:///") ? "fileext:///".length : "fileext://".length);
+        let len=0;
+        if(addr.startsWith("fileext://")){
+            len=(addr.startsWith("fileext:///") ? "fileext:///".length : "fileext://".length);
+        }else if(addr.startsWith("filex://")){
+            len=(addr.startsWith("filex:///") ? "filex:///".length : "filex://".length);
+        }else{
+            return [];
+        }
+        
         const after=addr.substring(len);
         const fileUrl="file:///"+after;
         const openasUrl="openas://"+after;
@@ -46,6 +62,94 @@ const MindNode=(props)=>{
         ];
     },[]);
 
+    /**
+     * 把fileext协议的url分解为三个具体的协议：file、openas、dir
+     */
+    const splitDirExtProtocol=useCallback((addr, name)=>{
+        let len=0;
+        if(addr.startsWith("dirext://")){
+            len=(addr.startsWith("dirext:///") ? "dirext:///".length : "dirext://".length);
+        }else if(addr.startsWith("dirx://")){
+            len=(addr.startsWith("dirx:///") ? "dirx:///".length : "dirx://".length);
+        }else{
+            return [];
+        }
+        
+        const after=addr.substring(len);
+        const fileUrl="file:///"+after;
+        const dirUrl="dir://"+after;
+        const cpUrl="cp://"+after;
+        return [
+            {
+                addr: fileUrl,
+                tooltip:  (name ? name+"  "+fileUrl:fileUrl),
+            },
+            {
+                addr: dirUrl,
+                tooltip: "打开目录并选择  "+dirUrl,
+            },
+            {
+                addr: cpUrl,
+                tooltip: "复制  "+cpUrl,
+            },
+        ];
+    },[]);
+
+
+
+    
+
+    
+
+    /**
+     * 渲染链接
+     */
+    const renderLink=useCallback((link, linkInd)=>{
+        if(isFileExtProtocol(link.addr)){
+            return <React.Fragment key={'link-'+linkInd}>
+                {
+                    splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
+                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="bottomLeft" title={subitem.tooltip}>
+                            <span css={themeBtnWrapperStyle} >
+                                <NodeLinkIcon 
+                                    lindAddr={subitem.addr}
+                                    onClick={props.onOpenLink.bind(this,subitem.addr)}/>
+                            </span>
+                        </Tooltip>
+                    ))
+                }
+            </React.Fragment>
+        }
+        if(isDirExtProtocol(link.addr)){
+            return <React.Fragment key={'link-'+linkInd}>
+                {
+                    splitDirExtProtocol(link.addr, link.name).map((subitem, subind)=>(
+                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="bottomLeft" title={subitem.tooltip}>
+                            <span css={themeBtnWrapperStyle} >
+                                <NodeLinkIcon 
+                                    lindAddr={subitem.addr}
+                                    onClick={props.onOpenLink.bind(this,subitem.addr)}/>
+                            </span>
+                        </Tooltip>
+                    ))
+                }
+            </React.Fragment>
+        }
+        <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
+            <span css={themeBtnWrapperStyle} >
+                <NodeLinkIcon 
+                    lindAddr={link.addr}
+                    onClick={props.onOpenLink.bind(this,link.addr)}/>
+            </span>
+        </Tooltip>
+    },[props.onOpenLink]);
+
+
+    
+
+    
+
+
     //如果节点不存在，不需要渲染
     const nd=props.nd;
     if(!nd){return null;}
@@ -60,13 +164,9 @@ const MindNode=(props)=>{
         (nd.links && 0<nd.links.length)
     );
 
-
-    
-
     //按主题的不同层级设置不同样式，同时根据是否有文本之外的内容而显示不同的样式（只对根节点）
     let themeStyle=themeStyles[nd.lev>2 ? 2 : nd.lev];
     themeStyle=themeStyle(hasExtraItems);
-
 
     return (<span css={themeStyle}>
         {/* 日期部分 */}
@@ -157,34 +257,9 @@ const MindNode=(props)=>{
 
         {/* 链接按钮 */}
         {
-            (nd && nd.links && 0<nd.links.length) && <>{
-                nd.links.map((link,linkInd)=>(
-                    <React.Fragment key={'link-'+linkInd}>
-                    {
-                        link.addr.startsWith("fileext://") 
-                            ?
-                        splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                            <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="bottomLeft" title={subitem.tooltip}>
-                                <span css={themeBtnWrapperStyle} >
-                                    <NodeLinkIcon 
-                                        lindAddr={subitem.addr}
-                                        onClick={props.onOpenLink.bind(this,subitem.addr)}/>
-                                </span>
-                            </Tooltip>
-                        ))
-                            :
-                        <Tooltip  color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
-                            <span css={themeBtnWrapperStyle} >
-                                <NodeLinkIcon 
-                                    lindAddr={link.addr}
-                                    onClick={props.onOpenLink.bind(this,link.addr)}/>
-                            </span>
-                        </Tooltip>
-                    }
-                    </React.Fragment>
-                    
-                ))
-            }</>
+            (nd && nd.links && 0<nd.links.length) && <React.Fragment>{
+                nd.links.map((link,linkInd)=>renderLink(link,linkInd))
+            }</React.Fragment>
         }
     </span>);
     
