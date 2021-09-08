@@ -1,12 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
-import api from '../../../service/api';
+
 
 const { Header } = Layout;
 

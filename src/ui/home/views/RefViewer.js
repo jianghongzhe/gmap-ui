@@ -4,7 +4,6 @@ import {  Modal,Button,BackTop,Tooltip } from 'antd';
 import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
-import mindmapSvc from '../../../service/mindmapSvc';
 import api from '../../../service/api';
 import {createSelector} from 'reselect';
 
@@ -13,7 +12,6 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';
 import { useSelector } from 'react-redux';
-import expSvc from '../../../service/expSvc';
 import mermaid from 'mermaid';
 import flowchart from 'flowchart.js';
 import * as echarts from 'echarts';
@@ -109,12 +107,10 @@ const RefViewer=(props)=>{
                  * @returns [0]转换后的明文路径 [1]转换后的urlencode路径
                  */
                 convertUrl: (oldurl) => {
-                    if (!oldurl.startsWith("assets/")) { return [oldurl, oldurl]; }//跳过不是本地相对路径的
-                    let a=new Date().getTime();
-                    //console.log("img url before ", oldurl);
+                    //跳过不是本地相对路径的
+                    if (!oldurl.startsWith("assets/")) { return [oldurl, oldurl]; }
                     const [urlShow, urlOpen]=api.calcPicUrlSync(activeKey, oldurl);
                     const encodeRet=encodeURI(urlShow);
-                    //console.log("img url after"+(new Date().getTime()-a), ret);
                     return [urlOpen, encodeRet];
                 }
             }
@@ -321,7 +317,7 @@ const RefViewer=(props)=>{
 
             }
         })();
-    },[wrapperId, bodyId]);
+    },[wrapperId, bodyId, backtopId]);
 
 
 

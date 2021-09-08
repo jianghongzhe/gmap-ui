@@ -1,5 +1,4 @@
 import api from './api';
-import { message } from 'antd';
 
 class ExpSvc{
     expHtml=(title='', content='')=>{

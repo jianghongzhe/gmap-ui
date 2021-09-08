@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, message,Modal } from 'antd';
+import { Layout, message } from 'antd';
 
 import Welcome from './views/Welcome';
 import OpenGraphDlg from './views/OpenGraphDlg';
@@ -21,8 +21,6 @@ import api from '../../service/api';
 import screenShot from '../../service/screenShot';
 import { useSelector } from 'react-redux';
 import keyDetector from '../../common/keyDetector';
-import expSvc from '../../service/expSvc';
-import marked from 'marked';
 import strTmpl from '../../common/strTmpl';
 
 const { Content } = Layout;

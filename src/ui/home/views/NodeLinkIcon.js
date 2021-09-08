@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
 import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,FileUnknownOutlined,CheckSquareOutlined } from '@ant-design/icons';
 import api from '../../../service/api';
-import relaPic from '../../../assets/relachart.png';
 
 const NodeLinkIcon=(props)=>{
     const [localIcon, setLocalIcon]=useState(null);

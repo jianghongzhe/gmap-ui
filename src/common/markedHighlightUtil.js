@@ -1,4 +1,4 @@
-import { cleanUrl, escape as doEscape } from 'marked/src/helpers';
+import {  escape as doEscape } from 'marked/src/helpers';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
