@@ -542,6 +542,13 @@ const listFiles = (assignedDir = null) => {
     return ret;
 };
 
+const trimEndOnce=(str, suffix)=>{
+    if(str.endsWith(suffix)){
+        return str.substring(0, str.length-suffix.length).trim();
+    }
+    return str.trim();
+};
+
 const getFileItem=(fn)=>{
     if(!fn.endsWith(".textbundle")){
         fn+=".textbundle";
@@ -549,7 +556,7 @@ const getFileItem=(fn)=>{
     const bundleFullpath=toBackSlash(path.join(mapsPath,fn));
     const mdFullpath=path.join(bundleFullpath,'text.md');
     const attDir=path.join(bundleFullpath,'assets');
-    const showName=toSlash(path.relative(mapsPath,bundleFullpath));
+    const showName=trimEndOnce(toSlash(path.relative(mapsPath,bundleFullpath)), ".textbundle");
     const name=path.basename(bundleFullpath, ".textbundle");
     console.log({
         name,
