@@ -32,6 +32,13 @@ class Api{
     }
 
     /**
+     * 打开自动更新程序
+     */
+    openUpdateApp=()=>{
+        ipcRenderer.invoke('openUpdateApp');
+    };
+
+    /**
      * 获取url对应的图标
      * @param {*} url 
      * @returns 

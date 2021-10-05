@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, {  useEffect, useState } from 'react';
 import { Button,Row, Col, Avatar,Tooltip   } from 'antd';
-import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined,CloudSyncOutlined } from '@ant-design/icons';
 
 import logourl from '../../../assets/logo.jpg';
 import { createSelector } from 'reselect';
@@ -61,6 +61,9 @@ const Welcome=(props)=>{
                                 </Tooltip>
                                 <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
                                     <Button type="default" className='rbtn' shape='circle' icon={<ReloadOutlined/>} size='large' onClick={props.onReloadApp}></Button>
+                                </Tooltip>
+                                <Tooltip color='cyan' placement="bottomLeft" title='检查更新'>
+                                    <Button type="default" className='rbtn' shape='circle' icon={<CloudSyncOutlined/>} size='large' onClick={api.openUpdateApp}></Button>
                                 </Tooltip>
                             </div>                               
                         </div>
