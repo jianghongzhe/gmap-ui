@@ -1211,6 +1211,10 @@ const init=(_mainWindow)=>{
 
 
 const openUpdateApp=()=>{
+    if(!existsFullpath(autoUpdaterPath)){
+        showNotification('未找到自动更新模块', '请安装该模块后再使用', 'err');
+        return;
+    }
     execFile(autoUpdaterPath, [`${process.pid}`], {cwd: autoUpdaterDir});
     return null;
 };
