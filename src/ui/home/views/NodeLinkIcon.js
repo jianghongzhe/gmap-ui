@@ -104,9 +104,11 @@ const getLinkIcon=(addr ,onClick)=>{
     if(addr.startsWith("cmd://")){
         return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
     }
-
-    // 其他情况认为是默认的类型
-    // 默认：使用链接图标
+    // 命令行打开目录图标
+    if(addr.startsWith("cmdopen://")){
+        return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
+    }
+    // 其他情况认为是默认的类型，使用链接图标
     return getBtn(<LinkOutlined className='themebtnicon' css={colors.link}/>, onClick);
 }
 

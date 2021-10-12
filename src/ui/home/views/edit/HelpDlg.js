@@ -405,6 +405,7 @@ const nodes=[
         ['[打开](filex://d:\\a\\b.txt)','// 相当于file、openas、dir、cp的组合'],
         ['[打开](dirx://d:\\a\\b\\c)','// 相当于file、dir、cp的组合'],
         ['[执行](cmd://dir d:\\)','// 执行命令，使用 <span style="color:black;">[space]\\</span> 表示换行'],
+        ['[执行](cmdopen://d:\\abc)','// 从命令提示符打开指定目录'],
         ['[复制](cp://这是一段文本)','// 复制内容，使用 <span style="color:black;">[space]\\</span> 表示换行'],
     ]],
     ['线条颜色',[

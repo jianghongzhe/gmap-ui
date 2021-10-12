@@ -734,6 +734,15 @@ const openUrl=(url)=>{
     if(url.startsWith("cmd://")){
         return sendCmdToServer("cmd", {url});
     }
+    // 命令打开目录
+    if(url.startsWith("cmdopen://")){
+        return sendCmdToServer("cmdopen", {url}).then(resp=>{
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg, 'err');
+            }
+            return resp;
+        });
+    }
     // 执行文件或打开目录
     if(url.startsWith("file://")){
         return sendCmdToServer("file", {url}).then(resp=>{
