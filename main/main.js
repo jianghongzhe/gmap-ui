@@ -107,6 +107,9 @@ const loadFirstPage=()=>{
 app.on('ready', () => {   
     (async()=>{
         //createSplashWindow();
+        if(app.setAppUserModelId){
+            app.setAppUserModelId("GMap");
+        }
         createWindow();
         await mainSvc.init(mainWindow);
         findInPageSvc.init(mainWindow);
