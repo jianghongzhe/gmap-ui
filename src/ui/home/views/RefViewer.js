@@ -357,7 +357,8 @@ const RefViewer=(props)=>{
             <div id={bodyId} className='markdown-body' css={{
                 margin:'0px auto',
                 width:'98%',
-                overflowX:'hidden'}}
+                overflowX:'hidden',
+                overflowY:'hidden',}}
                 dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
             {/* <div id='demo111' css={{width:'500px',height:'500px'}}></div> */}
