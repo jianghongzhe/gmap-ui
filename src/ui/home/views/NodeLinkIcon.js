@@ -12,11 +12,11 @@ const NodeLinkIcon=(props)=>{
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://", "dir://", "openas://","openby://", "gmap://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://", "openas://","openby://","openin://", "gmap://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
-                    if(resp.succ && resp.data){
+                    if(resp && resp.succ && resp.data){
                         if(!canceled){
                             try{
                                 setLocalIcon(resp.data);
@@ -57,6 +57,10 @@ const NodeLinkIcon=(props)=>{
     if("openby"===localIcon){
         return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
     }
+    // 特殊名称：openin
+    if("openin"===localIcon){
+        return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+    }
     // 特殊名称：gmap
     if("gmap"===localIcon){
         return getBtn(<DeploymentUnitOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
@@ -79,6 +83,9 @@ const getLinkIcon=(addr ,onClick)=>{
         return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     if(addr.startsWith("openby://")){
+        return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
+    if(addr.startsWith("openin://")){
         return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     // 打开并选中：默认为灰色，如果路径有效则为蓝色

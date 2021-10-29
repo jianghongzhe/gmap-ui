@@ -770,6 +770,15 @@ const openUrl=(url)=>{
             return resp;
         });
     }
+    // 调用指定的打开方式来打开指定文件
+    if(url.startsWith("openin://")){
+        return sendCmdToServer("openin", {url}).then(resp=>{
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg, 'err');
+            }
+            return resp;
+        });
+    }
     // 打开目录并选择文件
     if(url.startsWith("dir://")){
         return sendCmdToServer("dir", {url}).then(resp=>{
