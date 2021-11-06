@@ -793,6 +793,18 @@ const openUrl=(url)=>{
         return sendCmdToServer("cp", {url}).then(resp=>{
             if(resp && resp.succ){
                 showNotification(resp.data.title, resp.data.body, 'succ');
+            }          
+            return resp;
+        });
+    }
+    // 复制路径
+    if(url.startsWith("cppath://")){
+        return sendCmdToServer("cppath", {url}).then(resp=>{
+            if(resp && resp.succ){
+                showNotification(resp.data.title, resp.data.body, 'succ');
+            }
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });

@@ -12,7 +12,7 @@ const NodeLinkIcon=(props)=>{
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://", "dir://", "openas://","openby://","openin://", "gmap://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://", "openas://","openby://","openin://", "gmap://", "cppath://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
@@ -65,6 +65,13 @@ const NodeLinkIcon=(props)=>{
     if("gmap"===localIcon){
         return getBtn(<DeploymentUnitOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
     }
+    // 特殊名称：cppath
+    if("cppath"===localIcon){
+        return getBtn(<CopyOutlined className='themebtnicon' css={colors.link}/>, props.onClick);
+    }
+    
+
+
     // 直接使用本地图片文件
     return <Avatar size={18} src={localIcon} css={avatarStyle} onClick={props.onClick}/>;
 };
@@ -100,13 +107,17 @@ const getLinkIcon=(addr ,onClick)=>{
     if(addr.startsWith("file://")){
         return getBtn(<LinkOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
+    // 复制路径
+    if(addr.startsWith("cppath://")){
+        return getBtn(<CopyOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
     
-
     // 不需要验证的类型
-    // 复制图标
+    // 复制文本
     if(addr.startsWith("cp://")){
         return getBtn(<CopyOutlined className='themebtnicon' css={colors.copy}/>, onClick);
     }
+    
     // 命令图标
     if(addr.startsWith("cmd://")){
         return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);

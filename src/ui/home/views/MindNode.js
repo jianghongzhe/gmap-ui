@@ -41,7 +41,7 @@ const MindNode=(props)=>{
         const fileUrl="file:///"+after;
         const openasUrl="openas://"+after;
         const dirUrl="dir://"+after;
-        const cpUrl="cp://"+after;
+        const cpUrl="cppath://"+after;
         return [
             {
                 addr: fileUrl,
@@ -78,7 +78,7 @@ const MindNode=(props)=>{
         const after=addr.substring(len);
         const fileUrl="file:///"+after;
         const dirUrl="dir://"+after;
-        const cpUrl="cp://"+after;
+        const cpUrl="cppath://"+after;
         return [
             {
                 addr: fileUrl,
