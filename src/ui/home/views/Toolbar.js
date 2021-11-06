@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
@@ -37,6 +37,7 @@ const Toolbar=(props)=>{
             <Tooltip color='cyan' placement="bottomLeft" title='打开'>
                 <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowSelMapDlg} />
             </Tooltip>
+
             <Divider type="vertical" className='divider'/>
             <Tooltip color='cyan' placement="bottomLeft" title='打开目录'>
                 <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDir} />                                   
@@ -49,6 +50,9 @@ const Toolbar=(props)=>{
             </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
                 <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={props.onReloadApp}  />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='检查更新'>
+                <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCheckUpdate}  />
             </Tooltip>
             
             <Divider type="vertical" className='divider'/>

@@ -411,6 +411,7 @@ const MapsViewer=(props)=>{
                                 onExpPdf={onExpImage.bind(this, false)}
                                 onExpMarkdown={onExpMarkdown}
                                 onExpHtml={onExpHtml}
+                                onCheckUpdate={api.openUpdateApp}
                                 onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
                             />
                             <GraphTabs
