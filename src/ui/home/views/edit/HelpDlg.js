@@ -498,6 +498,7 @@ const shortcuts=[
             ['Ctrl + I','插入附件'],
             ['Ctrl + T','插入日期'],
             ['Ctrl + H','打开帮助页'],
+            ['Tab','跳转到ref或tref定义位置'],
         ]
     },
     {

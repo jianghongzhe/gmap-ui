@@ -19,6 +19,7 @@ import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
 
 import editorSvc from '../../../../service/editorSvc';
+import editorSvcEx from '../../../../service/editorSvcEx';
 import { createSelector } from 'reselect';
 
 
@@ -143,6 +144,24 @@ const Editor=(props)=>{
         replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     },[replaceLine]);
 
+
+
+    useEffect(()=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+
+        const keyDownHandler=(instance, event)=>{
+            if("Tab"===event.code && !event.altKey && !event.shiftKey && !event.ctrlKey){
+                editorSvcEx.gotoDefinition(instance, event);
+                return;
+            }
+        };
+        codeMirrorInstRef.current.on("keydown", keyDownHandler);
+        return ()=>{
+            codeMirrorInstRef.current.off("keydown", keyDownHandler);
+        };
+    },[]);
 
 
     /**
