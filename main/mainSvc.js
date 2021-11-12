@@ -1068,6 +1068,13 @@ const expHtml=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
 };
 
 
+/**
+ * 静默复制文本，不提示
+ * @param {*} txt 
+ */
+const copyTxtQuiet=(txt)=>{
+    clipboard.writeText("string"===typeof(txt) ? txt : ""+txt);
+};
 
 
 
@@ -1460,6 +1467,7 @@ const ipcHandlers={
     expMarkdown,
     expHtml,
     openUpdateApp,
+    copyTxtQuiet,
     isDevMode: common.isDevMode
 };
 

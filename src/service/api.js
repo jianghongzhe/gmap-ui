@@ -38,6 +38,16 @@ class Api{
         ipcRenderer.invoke('openUpdateApp');
     };
 
+
+    /**
+     * 静默复制文本
+     * @param {*} txt 
+     * @returns 
+     */
+    copyTxtQuiet=(txt)=>{
+        return ipcRenderer.invoke('copyTxtQuiet', txt);
+    };
+
     /**
      * 获取url对应的图标
      * @param {*} url 
