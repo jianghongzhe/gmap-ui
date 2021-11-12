@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, message, Button } from 'antd';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Modal, message, Button,List } from 'antd';
 import { PictureOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
 import {useSelector} from 'react-redux';
 
@@ -12,7 +12,7 @@ import DateDlg from './edit/DateDlg';
 import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
 import ColorPickerDlg from './edit/ColorPickerDlg';
 import Editor from './edit/Editor';
-
+import editorSvcEx from '../../../service/editorSvcEx';
 
 
 const EnhDlg=withEnh(Modal);
@@ -36,7 +36,10 @@ const EditGraphDlg=(props)=>{
     const [helpDlgVisible, setHelpDlgVisible]=useState(false);
     const [dateDlgVisible, setDateDlgVisible]=useState(false);
     const [isImg, setIsImg]=useState(true);
-
+    const codeMirrorInstRef=useRef();
+    const [refNavDlgVisible, setRefNavDlgVisible]=useState(false);
+    const [refNavDlgTitle, setRefNavDlgTitle]=useState("");
+    const [refNavDlgItems, setRefNavDlgItems]=useState([]);
     
 
     const hideAllDlg =useCallback(() => {
@@ -45,7 +48,8 @@ const EditGraphDlg=(props)=>{
         setInsertPicDlgVisible(false);
         setHelpDlgVisible(false);
         setDateDlgVisible(false);
-    },[setColorPickerVisible, setAdvColorPickerVisible, setInsertPicDlgVisible, setHelpDlgVisible, setDateDlgVisible]);
+        setRefNavDlgVisible(false);
+    },[setColorPickerVisible, setAdvColorPickerVisible, setInsertPicDlgVisible, setHelpDlgVisible, setDateDlgVisible, setRefNavDlgVisible]);
 
     const showHelpPicDlg = useCallback(() => {
         setHelpDlgVisible(true);
@@ -129,6 +133,41 @@ const EditGraphDlg=(props)=>{
         });        
     },[hideAllDlg, setEditorAction]);
 
+
+    //-------------------显示引用对话框与跳转功能-----------------------------------    
+    const showRefs=useCallback(()=>{
+        const items=editorSvcEx.loadAllRefNames(codeMirrorInstRef.current);
+        if(null==items || 0===items.length){
+            message.info("当前文档不存在引用");
+            return;
+        }
+        setRefNavDlgItems(items);
+        setRefNavDlgTitle("引用");
+        setRefNavDlgVisible(true);
+    },[setRefNavDlgItems, setRefNavDlgTitle, setRefNavDlgVisible]);
+
+    const showTrefs=useCallback(()=>{
+        const items=editorSvcEx.loadAllTrefNames(codeMirrorInstRef.current);
+        if(null==items || 0===items.length){
+            message.info("当前文档不存在文本引用");
+            return;
+        }
+        setRefNavDlgItems(items);
+        setRefNavDlgTitle("文本引用");
+        setRefNavDlgVisible(true);
+    },[setRefNavDlgItems, setRefNavDlgTitle, setRefNavDlgVisible]);
+
+    const gotoRefDefinition=useCallback((ref)=>{
+        hideAllDlg();
+        setTimeout(() => {
+            editorSvcEx.gotoLine(codeMirrorInstRef.current, ref.headLineInd, ref.contentLineInd);    
+        }, 400);
+    },[hideAllDlg]);
+
+    const setCodeMirrorInst=useCallback((inst)=>{
+        codeMirrorInstRef.current=inst;
+    },[]);
+
     
 
     /**
@@ -173,6 +212,8 @@ const EditGraphDlg=(props)=>{
                         <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={showDateDlg} />
                         <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={showInsertPicDlg} />
                         <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} />
+                        <div css={txtBtnStyle} title='查看引用' onClick={showRefs}>ref</div>
+                        <div css={txtBtnStyle} title='查看文本引用' onClick={showTrefs}>tref</div>
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={showHelpPicDlg} />
                     </div>
                     <Editor
@@ -182,6 +223,7 @@ const EditGraphDlg=(props)=>{
                         onChange={props.onChangeEditTmpTxt}
                         onOnlySave={props.onOnlySave}
                         onOk={props.onOk}
+                        onSetInst={setCodeMirrorInst}
                         onShowInsertPicDlg={showInsertPicDlg}
                         onShowInsertAttDlg={showInsertAttDlg}
                         onShowHelpDlg={showHelpPicDlg}
@@ -189,6 +231,25 @@ const EditGraphDlg=(props)=>{
                     />
                 </div>
             </EnhDlg>
+
+            <Modal
+                title={refNavDlgTitle}
+                visible={refNavDlgVisible}
+                onCancel={hideAllDlg}
+                width={800}
+                footer={null}>
+                <div css={{overflowX:'hidden', overflowY:'auto', maxHeight:'calc(100vh - 320px)'}}>
+                    <List
+                        header={null}
+                        footer={null}
+                        bordered={false}
+                        dataSource={refNavDlgItems}
+                        renderItem={item => (
+                            <List.Item css={{cursor:'pointer','&:hover':{color:'#1890ff',}}} onClick={gotoRefDefinition.bind(this, item)}>{item.name}</List.Item>
+                        )}
+                    />
+                </div>
+            </Modal>
 
             {/*插入图片对话框*/}
             <InsertImgDlg                    
@@ -258,6 +319,27 @@ const baseHoverStyle = {
         // transform:'skew(-15deg)'
     }
 }
+
+const txtBtnStyle={
+    width: 30,
+    height: 16,
+    fontSize:'14px',
+    lineHeight:'16px',
+    textAlign:'center',
+    display: 'inline-block',
+    marginLeft: 10,
+    borderRadius: 7,
+    border:'1px solid grey',
+    cursor: 'pointer',
+    transition: 'all 0.2s 0.1s',
+    '&:hover': {
+        color: '#1890ff',
+        borderRadius: 7,
+        opacity: 0.8,
+        border:'1px solid #1890ff',
+        // transform:'skew(-15deg)'
+    }
+};
 
 const insertImgStyle = {
     fontSize: 19,

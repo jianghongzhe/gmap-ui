@@ -840,7 +840,10 @@ const editorSvcExInstWrapper=(function(){
     }
 
     return {
-        gotoDefinition
+        gotoDefinition,
+        loadAllRefNames,
+        loadAllTrefNames,
+        gotoLine,
     };
 })();
 

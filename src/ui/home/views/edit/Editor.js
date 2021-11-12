@@ -21,6 +21,7 @@ import 'codemirror/addon/search/jump-to-line';
 import editorSvc from '../../../../service/editorSvc';
 import editorSvcEx from '../../../../service/editorSvcEx';
 import { createSelector } from 'reselect';
+import { propertyOf } from 'lodash';
 
 
 
@@ -34,10 +35,12 @@ const Editor=(props)=>{
         winH:       state.common.winH,
     }));
 
+    const propsOnSetInst=props.onSetInst;
     const codeMirrorInstRef=useRef(null);
     const bindCodeMirrorInstRef=useCallback((ele)=>{
         codeMirrorInstRef.current=ele;
-    },[]);
+        propsOnSetInst(ele);
+    },[propsOnSetInst]);
 
     /**
      * 防止默认事件触发的处理
