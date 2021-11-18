@@ -50,11 +50,11 @@ const model={
                 dispatcher.refreshResizeSymbol(null);
             });
             document.onselectionchange=()=>{
-                const str=document.getSelection().toString();
-                if(''===str){
-                    return;
-                }
-                api.copyTxtQuiet(str);
+                // const str=document.getSelection().toString();
+                // if(''===str){
+                //     return;
+                // }
+                // api.copyTxtQuiet(str);
             }
         },
         init:({dispatcher,gdispatcher})=>{
