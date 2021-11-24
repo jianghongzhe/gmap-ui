@@ -734,6 +734,9 @@ const openUrl=(url)=>{
     if(url.startsWith("cmd://")){
         return sendCmdToServer("cmd", {url});
     }
+    if(url.startsWith("cmdp://")){
+        return sendCmdToServer("cmdp", {url});
+    }
     // 命令打开目录
     if(url.startsWith("cmdopen://")){
         return sendCmdToServer("cmdopen", {url}).then(resp=>{
