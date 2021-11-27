@@ -142,7 +142,8 @@ const Editor=(props)=>{
         let lineTxt = codeMirrorInst.getLine(line);
 
         //替换行
-        let targetDateStr=dateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
+        // let targetDateStr=dateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
+        const targetDateStr=editorSvcEx.toDateFmt(new Date(dateStr));
         let { newLinetxt, cusorPos } = editorSvc.addDate(lineTxt, ch, targetDateStr);
         replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
     },[replaceLine]);

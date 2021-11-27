@@ -456,6 +456,57 @@ const editorSvcExInstWrapper=(function(){
     };
 
 
+
+    /**
+     * 是否处于自动完成字符的位置，如下所示：
+     * aaaaa{d}xxx   -->字符
+     *         ^     -->光标
+     * @param {*} str 
+     * @param {*} lineInd 
+     * @param {*} ind 
+     * @returns 
+     */
+    const isDateAutoCompleteSymbol=(str, lineInd, ind)=>{
+        if(ind<=0){
+            return false;
+        }
+        let tmp=str.substring(0,ind);
+        const match=/^.*([{]d(([+-])([0-9]+))?[}])$/.exec(tmp);
+        if(!match){
+            return false;
+        }
+        const placeHolderLen= match[1].length;
+        let addDays=0;
+        if('+'===match[3]){
+            addDays=parseInt(match[4]);
+        }else if('-'===match[3]){
+            addDays=0-parseInt(match[4]);
+        }
+        return {
+            line: lineInd,
+            start: tmp.length-placeHolderLen,
+            end: ind,
+            addDays
+        };
+    };
+
+    const replaceDate=(cm, autoCompletePos)=>{
+        const date=new Date(new Date().getTime()+86400000*autoCompletePos.addDays);
+        const resultDate=toDateFmt(date);
+        //console.log('resultDate',resultDate);
+        cm.doc.replaceRange(resultDate, {line: autoCompletePos.line, ch: autoCompletePos.start}, {line: autoCompletePos.line, ch: autoCompletePos.end});
+    };
+
+    const toDateFmt=(date)=>{
+        const m=date.getMonth()+1;
+        const d=date.getDate();
+        const weekday=['日','一','二','三','四','五','六'][date.getDay()];
+        const resultDate=""+(new Date().getFullYear()-2000)+"."+(m<10?"0":"")+m+"."+(d<10?"0":"")+d+" "+weekday;
+        return resultDate;
+    };
+
+
+
     /**
      * 跳到当前光标位置对应的ref:xx或tref:xx的定义处，如果没有找到定义，则自动创建。
      * 如果当前光标不在有效的节点处，或当前位置不存在ref:xx或tref:xx，则不做操作。
@@ -466,6 +517,16 @@ const editorSvcExInstWrapper=(function(){
     const gotoDefinition=(cm, event)=>{
         const pos=cm.doc.getCursor();// { ch: 3  line: 0}
         const line=cm.doc.getLine(pos.line);
+
+        // 自动完成的处理
+        const autoCompletePos=isDateAutoCompleteSymbol(line, pos.line, pos.ch);
+        if(false!==autoCompletePos){
+            event.preventDefault();
+            replaceDate(cm, autoCompletePos);
+            return;
+        }
+
+        // 跳转到引用的处理
         const doc=analyzeDoc(getAllLines(cm));
         if(!doc.nodes.some(nd=>pos.line===nd.ind)){
             return null;
@@ -844,6 +905,7 @@ const editorSvcExInstWrapper=(function(){
         loadAllRefNames,
         loadAllTrefNames,
         gotoLine,
+        toDateFmt,
     };
 })();
 
