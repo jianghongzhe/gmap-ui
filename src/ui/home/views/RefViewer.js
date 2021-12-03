@@ -7,7 +7,7 @@ import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import api from '../../../service/api';
 import {createSelector} from 'reselect';
 
-import marked from 'marked';
+import {marked} from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';

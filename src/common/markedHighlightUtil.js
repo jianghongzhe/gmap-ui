@@ -84,6 +84,9 @@ class MarkedHighlightUtil {
             return hljs.highlight(code, {language:validLanguage}).value;
         };
 
+        console.log("marked xxx", marked);
+        console.log("marked.Renderer", marked.Renderer);
+
         //渲染器实现，对原代码做如下修改：
         //1、解决marked生成的html中没有hljs样式的问题
         //2、解决hljs中背景颜色样式没有github-markdown-css优先级高的问题

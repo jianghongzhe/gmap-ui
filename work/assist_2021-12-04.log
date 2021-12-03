@@ -1,1 +1,30 @@
 ﻿[file_runner.Program] [thread-1] [2021-12-04 02:08:07.710]  已接收到主进程id：23276
+[file_runner.Program] [thread-1] [2021-12-04 02:30:16.940]  已接收到主进程id：25872
+[file_runner.Program] [thread-1] [2021-12-04 02:35:40.337]  已接收到主进程id：17476
+[file_runner.Program] [thread-1] [2021-12-04 02:37:53.203]  已接收到主进程id：20448
+[file_runner.service.Server] [thread-13] [2021-12-04 02:39:58.300]  收到请求：{"reqId":1,"action":"cppath","data":"{\"url\":\"cppath://d:\\\\down\"}"}
+[file_runner.service.Server] [thread-13] [2021-12-04 02:39:58.449]  System.Exception: 路径不存在：
+d:\down
+   在 file_runner.service.CpPathProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-13] [2021-12-04 02:39:58.451]  返回结果：{ reqId=1, succ=False, msg=路径不存在：
+d:\down, data= }
+[file_runner.service.Server] [thread-14] [2021-12-04 02:40:05.605]  收到请求：{"reqId":2,"action":"openby","data":"{\"url\":\"openby://D:\\\\c.txt@@emeditor\"}"}
+[file_runner.service.Server] [thread-14] [2021-12-04 02:40:05.885]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-14] [2021-12-04 02:40:11.062]  收到请求：{"reqId":3,"action":"file","data":"{\"url\":\"file:///@@cmd.exe\"}"}
+[file_runner.service.Server] [thread-14] [2021-12-04 02:40:11.128]  System.Exception: 未匹配到有效路径：
+@@cmd.exe
+   在 file_runner.service.FileProtocolHandler.handle(BaseReq generalReq)
+   在 file_runner.service.Server.<>c__DisplayClass12_0.<handleRequest>b__0()
+[file_runner.service.Server] [thread-14] [2021-12-04 02:40:11.128]  返回结果：{ reqId=3, succ=False, msg=未匹配到有效路径：
+@@cmd.exe, data= }
+[file_runner.Program] [thread-1] [2021-12-04 02:41:42.634]  已接收到主进程id：20708
+[file_runner.Program] [thread-1] [2021-12-04 02:42:47.664]  已接收到主进程id：2656
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:41.685]  收到请求：{"reqId":1,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":2543,\"height\":1237,\"fileName\":\"0_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:41.879]  返回结果：{ reqId=1, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:41.935]  收到请求：{"reqId":2,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":2543,\"height\":1237,\"fileName\":\"1_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:42.012]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:42.077]  收到请求：{"reqId":3,"action":"shot","data":"{\"left\":0,\"top\":163,\"width\":2543,\"height\":1237,\"fileName\":\"2_0.jpg\"}"}
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:42.172]  返回结果：{ reqId=3, succ=True, msg=, data= }
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:42.174]  收到请求：{"reqId":4,"action":"shotCombine","data":"{\"itemWidth\":2543,\"itemHeight\":1237,\"resultFullPath\":\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\xx.pdf\",\"lines\":[[{\"picName\":\"0_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"1_0.jpg\",\"cutLeft\":0,\"cutTop\":0}],[{\"picName\":\"2_0.jpg\",\"cutLeft\":0,\"cutTop\":1166}]]}"}
+[file_runner.service.Server] [thread-9] [2021-12-04 02:43:43.411]  返回结果：{ reqId=4, succ=True, msg=, data=System.Collections.Hashtable }

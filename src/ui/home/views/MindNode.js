@@ -5,7 +5,7 @@ import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlin
 import gantPic from '../../../assets/gantt.png';
 import relaPic from '../../../assets/relachart.png';
 import {createSelector} from 'reselect';
-import marked from 'marked';
+import {marked} from 'marked';
 import NodeLinkIcon from './NodeLinkIcon';
 import './markdown-node.css';
 
