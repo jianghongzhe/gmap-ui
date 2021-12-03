@@ -458,9 +458,9 @@ const editorSvcExInstWrapper=(function(){
 
 
     /**
-     * 是否处于自动完成字符的位置，如下所示：
+     * 是否处于自动完成字符的位置，如下所示两个位置：
      * aaaaa{d}xxx   -->字符
-     *         ^     -->光标
+     *        ^^     -->光标
      * @param {*} str 
      * @param {*} lineInd 
      * @param {*} ind 
@@ -470,10 +470,21 @@ const editorSvcExInstWrapper=(function(){
         if(ind<=0){
             return false;
         }
+        const reg=/^.*([{]d(([+-])([0-9]+))?[}])$/;
         let tmp=str.substring(0,ind);
-        const match=/^.*([{]d(([+-])([0-9]+))?[}])$/.exec(tmp);
+        let match=reg.exec(tmp);
+        let endInd=ind;
         if(!match){
-            return false;
+            if(ind+1>str.length){
+                return false;
+            }
+            tmp=str.substring(0,ind+1);
+            match=reg.exec(tmp);
+            console.log(tmp, match);
+            if(!match){
+                return false;
+            }
+            endInd=ind+1;
         }
         const placeHolderLen= match[1].length;
         let addDays=0;
@@ -485,7 +496,7 @@ const editorSvcExInstWrapper=(function(){
         return {
             line: lineInd,
             start: tmp.length-placeHolderLen,
-            end: ind,
+            end: endInd,
             addDays
         };
     };
