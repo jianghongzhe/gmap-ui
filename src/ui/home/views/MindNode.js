@@ -112,7 +112,7 @@ const MindNode=(props)=>{
             return <React.Fragment key={'link-'+linkInd}>
                 {
                     splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="bottomLeft" title={subitem.tooltip}>
+                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="top" title={subitem.tooltip}>
                             <span css={themeBtnWrapperStyle} >
                                 <NodeLinkIcon 
                                     lindAddr={subitem.addr}
@@ -127,7 +127,7 @@ const MindNode=(props)=>{
             return <React.Fragment key={'link-'+linkInd}>
                 {
                     splitDirExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="bottomLeft" title={subitem.tooltip}>
+                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="top" title={subitem.tooltip}>
                             <span css={themeBtnWrapperStyle} >
                                 <NodeLinkIcon 
                                     lindAddr={subitem.addr}
@@ -138,7 +138,7 @@ const MindNode=(props)=>{
                 }
             </React.Fragment>
         }
-        return <Tooltip key={'link-'+linkInd} color='cyan' placement="bottomLeft" title={link.name ? link.name+"  "+link.addr:link.addr}>
+        return <Tooltip key={'link-'+linkInd} color='cyan' placement="top" title={link.name ? link.name+"  "+link.addr:link.addr}>
             <span css={themeBtnWrapperStyle} >
                 <NodeLinkIcon 
                     lindAddr={link.addr}
@@ -244,7 +244,7 @@ const MindNode=(props)=>{
         {
             (nd && nd.refs && 0<nd.refs.length) && (
                 nd.refs.map((refItem,refInd)=>(                
-                    <Tooltip key={refInd} color='cyan' placement="bottomLeft" title={'查看引用 - '+refItem.showname}>
+                    <Tooltip key={refInd} color='cyan' placement="top" title={'查看引用 - '+refItem.showname}>
                         <span css={themeBtnWrapperStyle}>
                             <Button 
                                 type="link" 
