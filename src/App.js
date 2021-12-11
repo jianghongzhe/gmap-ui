@@ -18,7 +18,22 @@ function App() {
                 },
                 '.markdown-body blockquote': {
                     borderLeft: '.25em solid lightgreen !important',
-                }
+                },
+                '.markdown-body table > thead > tr': {
+                    color: '#fff',
+                    backgroundColor: '#1890ff',
+                },
+                '.markdown-body table > thead > tr > th': {
+                    border: '1px solid #1890ff',
+                    borderLeft: '1px solid #d0d7de',
+                    borderRight: '1px solid #d0d7de',
+                },
+                '.markdown-body table > thead > tr > th:first-child': {
+                    borderLeft: '1px solid #1890ff',
+                },
+                '.markdown-body table > thead > tr > th:last-child': {
+                    borderRight: '1px solid #1890ff',
+                },
             }}/>
             <ConfigProvider locale={zhCN}>
                 <MapsViewer />
