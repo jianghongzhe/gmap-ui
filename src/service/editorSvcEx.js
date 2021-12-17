@@ -911,12 +911,50 @@ const editorSvcExInstWrapper=(function(){
         return true;
     }
 
+
+    /**
+     * 向下或向上复制当前行内容
+     * @param {*} cm 
+     * @param {*} downDirection 
+     * @returns 
+     */
+    const copyLine=(cm, downDirection=true)=>{
+        const pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        const lineTxt=cm.doc.getLine(pos.line);
+        const len=lineTxt.length;
+    
+        // 向下复制，直接创建新行
+        if(downDirection){
+            const newData=lineTxt+"\n"+lineTxt;
+            cm.doc.replaceRange(newData, {line: pos.line, ch: 0}, {line: pos.line, ch: len});
+            cm.doc.setCursor({line:pos.line+1, ch:pos.ch});
+            return;
+        }
+    
+        // 向上复制
+        // 如果有前一行且前一行为空行，则把前一行替换
+        if(pos.line>0){
+            const preLineTxt=cm.doc.getLine(pos.line-1);
+            if(""===preLineTxt.trim()){
+                const preLineLen=preLineTxt.length;
+                cm.doc.replaceRange(lineTxt, {line: pos.line-1, ch: 0}, {line: pos.line-1, ch: preLineLen});
+                cm.doc.setCursor({line:pos.line-1, ch:pos.ch});
+                return;
+            }
+        }
+        // 否则把当前行向下复制一行，且光标停在当前行
+        const newData=lineTxt+"\n"+lineTxt;
+        cm.doc.replaceRange(newData, {line: pos.line, ch: 0}, {line: pos.line, ch: len});
+        cm.doc.setCursor({line:pos.line, ch:pos.ch});
+    };
+
     return {
         gotoDefinition,
         loadAllRefNames,
         loadAllTrefNames,
         gotoLine,
         toDateFmt,
+        copyLine,
     };
 })();
 

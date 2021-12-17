@@ -155,9 +155,28 @@ const Editor=(props)=>{
             return;
         }
 
+        /**
+         * 键盘事件处理：
+         * tab：转到定义处
+         * ctrl+alt+下：复制当前行到下一行
+         * ctrl+alt+上：复制当前行到上一行
+         * @param {*} instance 
+         * @param {*} event 
+         * @returns 
+         */
         const keyDownHandler=(instance, event)=>{
             if("Tab"===event.code && !event.altKey && !event.shiftKey && !event.ctrlKey){
                 editorSvcEx.gotoDefinition(instance, event);
+                return;
+            }
+            if("ArrowUp"===event.code && event.altKey && !event.shiftKey && event.ctrlKey){
+                event.preventDefault();
+                editorSvcEx.copyLine(instance, false);
+                return;
+            }
+            if("ArrowDown"===event.code && event.altKey && !event.shiftKey && event.ctrlKey){
+                event.preventDefault();
+                editorSvcEx.copyLine(instance, true);
                 return;
             }
         };

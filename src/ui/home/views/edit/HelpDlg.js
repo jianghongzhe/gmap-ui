@@ -502,6 +502,8 @@ const shortcuts=[
             ['Ctrl + T','插入日期'],
             ['Ctrl + H','打开帮助页'],
             ['Tab','跳转到ref或tref定义位置'],
+            ['Ctrl + Alt+ ↓','复制当前行到下一行'],
+            ['Ctrl + Alt+ ↑','复制当前行到上一行'],
         ]
     },
     {
