@@ -12,7 +12,7 @@ const NodeLinkIcon=(props)=>{
      */
     useEffect(()=>{
         let canceled=false;
-        if(["file://", "http://", "https://", "dir://", "openas://","openby://","openin://", "gmap://", "cppath://"].some(pref=>props.lindAddr.startsWith(pref))){
+        if(["file://", "http://", "https://", "dir://", "openas://","openby://","diropenby://","openin://", "gmap://", "cppath://"].some(pref=>props.lindAddr.startsWith(pref))){
             const fun=async ()=>{
                 try{
                     const resp= await api.loadIcon(props.lindAddr);
@@ -90,6 +90,9 @@ const getLinkIcon=(addr ,onClick)=>{
         return getBtn(<AppstoreOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     if(addr.startsWith("openby://")){
+        return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.disable}/>, onClick);
+    }
+    if(addr.startsWith("diropenby://")){
         return getBtn(<FileUnknownOutlined className='themebtnicon' css={colors.disable}/>, onClick);
     }
     if(addr.startsWith("openin://")){

@@ -2,7 +2,7 @@
 	- 分主题
 	- c:#1890ff|带颜色的分主题
 	- 带说明的分主题|m:balabala
-	- 带链接的分主题|[百度](https://baidu.com)
+	- 带链接的分主题|[](diropenby://F:\workspace2\front\ims@@code)
 	- 带引用的分主题|ref:长段文字
 
 ***

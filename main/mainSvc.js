@@ -773,6 +773,15 @@ const openUrl=(url)=>{
             return resp;
         });
     }
+    // 调用指定的打开方式来打开指定目录
+    if(url.startsWith("diropenby://")){
+        return sendCmdToServer("diropenby", {url}).then(resp=>{
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg, 'err');
+            }
+            return resp;
+        });
+    }
     // 调用指定的打开方式来打开指定文件
     if(url.startsWith("openin://")){
         return sendCmdToServer("openin", {url}).then(resp=>{
