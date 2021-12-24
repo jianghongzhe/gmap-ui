@@ -7,6 +7,8 @@ import zhCN from 'antd/es/locale/zh_CN';
 import 'moment/locale/zh-cn';
 import 'antd/dist/antd.css';
 
+const table_color_title="#409EFF";
+const table_color_border="#d0d7de";
 
 function App() {
     return (
@@ -21,18 +23,18 @@ function App() {
                 },
                 '.markdown-body table > thead > tr': {
                     color: '#fff',
-                    backgroundColor: '#1890ff',
+                    backgroundColor: table_color_title,
                 },
                 '.markdown-body table > thead > tr > th': {
-                    border: '1px solid #1890ff',
-                    borderLeft: '1px solid #d0d7de',
-                    borderRight: '1px solid #d0d7de',
+                    border: `1px solid ${table_color_title}`,
+                    borderLeft: `1px solid ${table_color_border}`,
+                    borderRight: `1px solid ${table_color_border}`,
                 },
                 '.markdown-body table > thead > tr > th:first-child': {
-                    borderLeft: '1px solid #1890ff',
+                    borderLeft: `1px solid ${table_color_title}`,
                 },
                 '.markdown-body table > thead > tr > th:last-child': {
-                    borderRight: '1px solid #1890ff',
+                    borderRight: `1px solid ${table_color_title}`,
                 },
             }}/>
             <ConfigProvider locale={zhCN}>
