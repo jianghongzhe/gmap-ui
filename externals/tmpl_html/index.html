@@ -11,6 +11,10 @@
     <link rel="stylesheet" type="text/css" href="css/atom-one-dark-reasonable.css"/>
     <link rel="stylesheet" type="text/css" href="css/katex.min.css"/>
     <style>
+    :root{
+    	--table_title_color: #409EFF;
+    	--table_border_color: #d0d7de;
+    }
     body {
         margin: 0;
         background-color: #f0f2f5;
@@ -20,18 +24,18 @@
     }
     .markdown-body table > thead > tr {
         color: #fff;
-        background-color: #409EFF;
+        background-color: var(--table_title_color);
     }
     .markdown-body table > thead > tr > th {
-        border: 1px solid #409EFF;
-        border-left: 1px solid #d0d7de;
-        border-right: 1px solid #d0d7de;
+        border: 1px solid var(--table_title_color);
+        border-left: 1px solid var(--table_border_color);
+        border-right: 1px solid var(--table_border_color);
     }
     .markdown-body table > thead > tr > th:first-child {
-        border-left: 1px solid #409EFF;
+        border-left: 1px solid var(--table_title_color);
     }
     .markdown-body table > thead > tr > th:last-child {
-        border-right: 1px solid #409EFF;
+        border-right: 1px solid var(--table_title_color);
     }
     </style>
 
