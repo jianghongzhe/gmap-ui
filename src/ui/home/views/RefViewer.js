@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
-import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined } from '@ant-design/icons';
+import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import api from '../../../service/api';
@@ -290,12 +290,23 @@ const RefViewer=(props)=>{
      * 导出图片或pdf
      * @param {*} expImg  true-导出图片  false-导出pdf
      */
-    const onExpImage=useCallback((expImg=true)=>{
+    const onExpImage=useCallback((type='img')=>{
         (async()=>{
+            const typeNames={
+                img: '图片',
+                pdf: 'PDF',
+                word: 'word文档',
+            };
+            const typeFuncs={
+                img: api.openSaveFileDlg,
+                pdf: api.openSaveFileDlg.bind(this, 'pdf'),
+                word: api.openSaveFileDlg.bind(this, 'word'),
+            };
+
             try{
                 const maximized=await api.isMaximized();
                 if(!maximized){
-                    api.showNotification("警告",`窗口只有在最大化时才能导出${expImg ? "图片" : "PDF"}`,"warn");
+                    api.showNotification("警告",`窗口只有在最大化时才能导出${typeNames[type]}`,"warn");
                     return;
                 }
                 const devMode=await api.isDevMode();
@@ -303,7 +314,7 @@ const RefViewer=(props)=>{
                 const bodyEle=document.querySelector(`#${bodyId}`);
                 let {x,y}=containerEle.getBoundingClientRect();
                 screenShot(
-                    expImg ? api.openSaveFileDlg : api.openSaveFileDlg.bind(this, 'pdf'),    //保存文件对话框函数
+                    typeFuncs[type],    //保存文件对话框函数
                     api.takeScreenShot,     //openUrl,            //执行截屏的函数
                     api.screenShotCombine,  //openUrl,
                     containerEle,           //容器元素
@@ -340,7 +351,10 @@ const RefViewer=(props)=>{
                             <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage}/>
                         </Tooltip>
                         <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
-                            <Button shape='circle' icon={<FilePdfOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, false)}/>
+                            <Button shape='circle' icon={<FilePdfOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'pdf')}/>
+                        </Tooltip>
+                        <Tooltip color='cyan' placement="bottomLeft" title='导出word'>
+                            <Button shape='circle' icon={<FileWordOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'word')}/>
                         </Tooltip>
                         <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
                             <Button shape='circle' icon={<FileMarkdownOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpMarkdown}/>

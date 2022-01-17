@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
@@ -75,6 +75,9 @@ const Toolbar=(props)=>{
             </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
                 <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpPdf} />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='导出word'>
+                <Button shape='circle' icon={<FileWordOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpWord} />
             </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
                 <Button shape='circle' icon={<FileMarkdownOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpMarkdown} />

@@ -291,8 +291,19 @@ const MapsViewer=(props)=>{
      * 导出图片或pdf  
      * @param {*} expImg  true-导出图片  false-导出pdf
      */
-    const onExpImage=useCallback((expImg=true)=>{
+    const onExpImage=useCallback((type='img')=>{
         (async()=>{
+            const typeNames={
+                img: '图片',
+                pdf: 'PDF',
+                word: 'word文档',
+            };
+            const typeFuncs={
+                img: api.openSaveFileDlg,
+                pdf: api.openSaveFileDlg.bind(this, 'pdf'),
+                word: api.openSaveFileDlg.bind(this, 'word'),
+            };
+
             // 查找当前tab的索引（与导图div元素的id对应）
             let currInd=-1;
             panes.forEach((item,ind)=>{
@@ -315,12 +326,12 @@ const MapsViewer=(props)=>{
             let {x,y}=containerEle.getBoundingClientRect();
             const maximized=await api.isMaximized();
             if(!maximized){
-                api.showNotification("警告",`窗口只有在最大化时才能导出${expImg ? "图片" : "PDF"}`,"warn");
+                api.showNotification("警告",`窗口只有在最大化时才能导出${typeNames[type]}`,"warn");
                 return;
             }
             const devMode=await api.isDevMode();
             screenShot(
-                expImg ? api.openSaveFileDlg : api.openSaveFileDlg.bind(this, 'pdf'),    //保存文件对话框函数
+                typeFuncs[type],    //保存文件对话框函数
                 api.takeScreenShot,     //openUrl,            //执行截屏的函数
                 api.screenShotCombine,  //openUrl,
                 containerEle,           //容器元素
@@ -408,7 +419,8 @@ const MapsViewer=(props)=>{
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
                                 onExpImage={onExpImage}
-                                onExpPdf={onExpImage.bind(this, false)}
+                                onExpPdf={onExpImage.bind(this, 'pdf')}
+                                onExpWord={onExpImage.bind(this, 'word')}
                                 onExpMarkdown={onExpMarkdown}
                                 onExpHtml={onExpHtml}
                                 onCheckUpdate={api.openUpdateApp}

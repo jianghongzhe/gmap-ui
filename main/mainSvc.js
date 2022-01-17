@@ -1107,6 +1107,12 @@ const openSaveFileDlg = (ext) => {
                 { name: 'pdf', extensions: ['pdf'] },
             ];
         }
+        if('word'===ext){
+            filters= [
+                { name: 'doc', extensions: ['doc'] },
+                { name: 'docx', extensions: ['docx'] },
+            ];
+        }
         if('md'===ext){
             filters= [
                 { name: 'markdown', extensions: ['md'] },
