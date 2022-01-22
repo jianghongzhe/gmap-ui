@@ -1407,11 +1407,12 @@ const showNotification=(...args)=>{
             icon="info";
         }
     }
-    const n=new Notification({ title, body, icon: icons[icon] });
-    n.show();
-    setTimeout(() => {
-        n.close();
-    }, 6*1000);
+    // const n=new Notification({ title, body, icon: icons[icon] });
+    // n.show();
+    // setTimeout(() => {
+    //     n.close();
+    // }, 6*1000);
+    sendCmdToServer("notify", {pic:icons[icon], title, body }).then();
 };
 
 
