@@ -4,6 +4,7 @@ class ScreenShotSvc{
         this.resultImgPath=null;
         this.excludeId=null;
         this.excludePrevState=null;
+        this.maxWH=null;
     }
 
     hideExclude=()=>{
@@ -36,14 +37,19 @@ class ScreenShotSvc{
      * @param {*} hasBrowserMenu    是否包含菜单栏，此值对截图位置有影响
      * @param {*} _excludeId        排除的元素的id，截图前先隐藏，完成后恢复显示
      */
-    doScreenShot=(selFileFun, takeScrenShotFun, combineScreenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true, _excludeId)=>{       
+    doScreenShot=(selFileFun, takeScrenShotFun, combineScreenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true, _excludeId, _maxWH)=>{       
         //当前截屏任务未完成时不允许进行操作
         if(this.doing){
             return;
         }
 
+        this.excludeId=null;
         if(_excludeId){
             this.excludeId=_excludeId;
+        }
+        this.maxWH=null;
+        if(_maxWH && _maxWH[0] &&_maxWH[1]){
+            this.maxWH=_maxWH;
         }
 
 
@@ -68,6 +74,7 @@ class ScreenShotSvc{
                 this.prepareScreenShot(eleContainer, eleContent);
             }, 200);
         }).catch(e=>{
+            this.doing=false;
             console.log("截图取消。。。");
             this.showExclude();
         });
@@ -217,7 +224,9 @@ class ScreenShotSvc{
                     cutLeft:    item.cutLeft,
                     cutTop:     item.cutTop
                 }))
-            ))
+            )),
+            maxW: (this.maxWH ? this.maxWH[0] : null),
+            maxH: (this.maxWH ? this.maxWH[1] : null),
         };
         this.combineScreenShotFun(opt).then(()=>{
             this.eleContainer.scrollTop= this.oldPos.y;

@@ -348,7 +348,7 @@ const RefViewer=(props)=>{
                     <div>
                         {"查看引用 - " + refname}
                         <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
-                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage}/>
+                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage.bind(this, 'img')}/>
                         </Tooltip>
                         <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
                             <Button shape='circle' icon={<FilePdfOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'pdf')}/>

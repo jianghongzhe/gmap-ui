@@ -1,4 +1,0 @@
-﻿[file_runner.Program] [thread-1] [2021-09-12 17:54:00.932]  已接收到主进程id：16572
-[file_runner.service.Server] [thread-6] [2021-09-12 17:54:17.270]  收到请求：{"reqId":1,"action":"cp","data":"{\"url\":\"cp://[跳转到导图 - 22](gmap://22)\"}"}
-[file_runner.service.Server] [thread-6] [2021-09-12 17:54:17.443]  返回结果：{ reqId=1, succ=True, msg=, data=System.Collections.Hashtable }
-[file_runner.Program] [thread-1] [2021-09-12 17:57:34.672]  已接收到主进程id：848

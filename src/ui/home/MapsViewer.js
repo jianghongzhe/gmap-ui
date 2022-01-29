@@ -322,6 +322,27 @@ const MapsViewer=(props)=>{
                 api.showNotification('错误','图表状态异常，无法导出','err');
                 return;
             }
+            let {width:maxW, height:maxH}= ele.getBoundingClientRect();
+            let minL=99999;
+            let maxB=0;
+            document.querySelectorAll(`#graphwrapper_${currInd} .item`).forEach(ele=>{
+                const ndRect=ele.getBoundingClientRect();
+                const ndLeft=parseInt(ele.style.left.substring(0, ele.style.left.length-2));
+                if(ndLeft<minL){
+                    minL=ndLeft;
+                }
+                const ndBottom=parseInt(ndRect.height)+ parseInt(ele.style.top.substring(0, ele.style.top.length-2));
+                if(ndBottom>maxB){
+                    maxB=ndBottom;
+                }
+            });
+            if(maxW-2*minL+60<maxW){
+                maxW=maxW-2*minL+60;
+            }
+            if(maxB+30<maxH){
+                maxH=maxB+30;
+            }
+
             let containerEle=ele.parentNode;
             let {x,y}=containerEle.getBoundingClientRect();
             const maximized=await api.isMaximized();
@@ -338,7 +359,9 @@ const MapsViewer=(props)=>{
                 ele,                    //内容元素
                 Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
                 Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-                devMode                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                devMode,                //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                null,                   // 排除id为空
+                [maxW, maxH]            // 有效部分最大的宽和高
             );
         })();
     },[activeKey, panes]);
@@ -418,7 +441,7 @@ const MapsViewer=(props)=>{
                                 onShowCmd={api.openBash}
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
-                                onExpImage={onExpImage}
+                                onExpImage={onExpImage.bind(this, 'img')}
                                 onExpPdf={onExpImage.bind(this, 'pdf')}
                                 onExpWord={onExpImage.bind(this, 'word')}
                                 onExpMarkdown={onExpMarkdown}
