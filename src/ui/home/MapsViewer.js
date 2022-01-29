@@ -323,6 +323,8 @@ const MapsViewer=(props)=>{
                 return;
             }
             let {width:maxW, height:maxH}= ele.getBoundingClientRect();
+            maxW=parseInt(maxW);
+            maxH=parseInt(maxH);
             let minL=99999;
             let maxB=0;
             document.querySelectorAll(`#graphwrapper_${currInd} .item`).forEach(ele=>{
