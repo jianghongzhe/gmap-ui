@@ -49,13 +49,13 @@ const model={
                 dispatcher.loadWinSize(null);
                 dispatcher.refreshResizeSymbol(null);
             });
-            document.onselectionchange=()=>{
+            // document.onselectionchange=()=>{
                 // const str=document.getSelection().toString();
                 // if(''===str){
                 //     return;
                 // }
                 // api.copyTxtQuiet(str);
-            }
+            // }
         },
         init:({dispatcher,gdispatcher})=>{
             //设置标题、加载窗口大小、文件列表加载、目录列表加载

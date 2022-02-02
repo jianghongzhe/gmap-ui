@@ -22,6 +22,7 @@ import screenShot from '../../service/screenShot';
 import { useSelector } from 'react-redux';
 import keyDetector from '../../common/keyDetector';
 import strTmpl from '../../common/strTmpl';
+import FindInFileDlg from './views/FindInFileDlg';
 
 const { Content } = Layout;
 
@@ -61,6 +62,9 @@ const MapsViewer=(props)=>{
     const [strParamReplaceDlgVisible, setStrParamReplaceDlgVisible]=useState(false);
     const [currLinkUrl, setCurrLinkUrl]=useState(null);
     const [paramReplItems, setParamReplItems]=useState([]);
+
+
+    const [findInFileDlgVisible, setFindInFileDlgVisible]=useState(false);
 
     const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false);
 
@@ -144,6 +148,12 @@ const MapsViewer=(props)=>{
                     api.showFindInPageDlg();
                 },
 
+                'ctrl+shift+f':(e)=>{
+                    if(isExclude){return;}
+                    setFindInFileDlgVisible(true);
+                },
+
+
                 //esc 关闭网页内查找
                 'esc':(e)=>{
                     if(isExclude){return;}
@@ -154,7 +164,7 @@ const MapsViewer=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[editMapDlgVisible, newMapDlgVisible]);
+    },[editMapDlgVisible, newMapDlgVisible, setFindInFileDlgVisible]);
 
     useEffect(()=>{
         api.closeFindInPageDlg();
@@ -475,6 +485,10 @@ const MapsViewer=(props)=>{
                         </Content>
                 }
             </Layout>
+
+            <FindInFileDlg visible={findInFileDlgVisible}
+                onCancel={setFindInFileDlgVisible.bind(this, false)}
+            />
 
             <StrParamReplaceDlg
                 visible={strParamReplaceDlgVisible}

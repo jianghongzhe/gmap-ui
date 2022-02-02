@@ -495,6 +495,7 @@ const shortcuts=[
             ['Ctrl + S','只保存'],
             ['Ctrl + Shift + S','保存并关闭'],
             ['Ctrl + F','查找对话框'],
+            ['Ctrl + Shift + F','在文件中查找对话框'],
             ['Enter','下一个'],
             ['Shift + Enter','上一个'],
             ['Ctrl + G','跳转到指定行'],
