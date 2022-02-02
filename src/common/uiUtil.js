@@ -1,40 +1,30 @@
 
 
 
-const bindInputEle=(comp,iptName,ele)=>{
-    console.log('aaa',ele);
-    if(ele && ele.input){
-        comp[iptName]=ele.input;
-    }
-}
 
 
-
-const doFocus=(comp,iptName,propName,isProp=true)=>{
-    if(comp[iptName]){
-        doFocusBaseInner(comp,iptName,propName,isProp);
+/**
+ * 使ref对应的元素获得焦点
+ * @param {*} refObj 
+ * @param {*} delay true/false/number
+ * @returns 
+ */
+const focusRef=(refObj, delay=false)=>{
+    const func=()=>{
+        if(refObj && refObj.current){
+            try{
+                refObj.current.focus();
+            }catch(e){}
+        }
+    };
+    if(!delay){
+        func();
         return;
     }
-    setTimeout(()=>{
-        if(comp[iptName]){
-            doFocusBaseInner(comp,iptName,propName,isProp);
-            return;
-        }    
-    },300);
-}
-
-const doFocusBaseInner=(comp,iptName,propName,isProp)=>{
-    let len=(isProp? comp.props[propName].length : comp.state[propName].length);
-    comp[iptName].focus();
-    comp[iptName].setSelectionRange(len,len);
-}
+    setTimeout(func, ("number"===typeof(delay) ? delay : 400));
+};
 
 
 
-const bindChangeEventToState=(comp,stateName,e)=>{
-    let newState={};
-    newState[stateName]=(e && e.target ? e.target.value : e);
-    comp.setState(newState);
-}
 
-export {bindInputEle,doFocus,bindChangeEventToState};
+export { focusRef};

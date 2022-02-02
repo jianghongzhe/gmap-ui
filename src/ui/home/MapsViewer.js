@@ -14,7 +14,7 @@ import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
 import GantDlg from './views/gantt/GantDlg';
 import StrParamReplaceDlg from './views/StrParamReplaceDlg';
-
+import {useBoolean} from 'ahooks';
 
 import {dispatcher} from '../../common/gflow';
 import api from '../../service/api';
@@ -64,9 +64,10 @@ const MapsViewer=(props)=>{
     const [paramReplItems, setParamReplItems]=useState([]);
 
 
-    const [findInFileDlgVisible, setFindInFileDlgVisible]=useState(false);
+    
+    const [findInFileDlgVisible,{setTrue:showFindInFileDlg, setFalse:hideFindInFileDlg}]=useBoolean(false);
 
-    const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false);
+    const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false); 
 
     const [graphObj, setGraphObj]=useState([]);
     
@@ -152,7 +153,7 @@ const MapsViewer=(props)=>{
                 'ctrl+shift+f':(e)=>{
                     (async()=>{
                         if(isExclude || await api.getFindInPageDlgVisible()){return;}
-                        setFindInFileDlgVisible(true);
+                        showFindInFileDlg();
                     })();
                 },
 
@@ -167,7 +168,7 @@ const MapsViewer=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, setFindInFileDlgVisible]);
+    },[editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, showFindInFileDlg]);
 
     useEffect(()=>{
         api.closeFindInPageDlg();
@@ -490,7 +491,7 @@ const MapsViewer=(props)=>{
             </Layout>
 
             <FindInFileDlg visible={findInFileDlgVisible}
-                onCancel={setFindInFileDlgVisible.bind(this, false)}
+                onCancel={hideFindInFileDlg}
             />
 
             <StrParamReplaceDlg

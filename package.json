@@ -1,6 +1,6 @@
 {
   "name": "gmap",
-  "version": "3.22.0-20220130.release",
+  "version": "3.23.0-20220203.beta",
   "showname": "GMap - 思维导图",
   "private": true,
   "homepage": "./",
@@ -12,6 +12,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "ahooks": "^3.1.9",
     "antd": "^4.17.2",
     "codemirror": "^5.64.0",
     "echarts": "^5.2.2",

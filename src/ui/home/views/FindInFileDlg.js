@@ -1,113 +1,93 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Input, Space, Typography} from 'antd';
-import { Controlled } from 'react-codemirror2';
 import api from '../../../service/api';
-
+import {useChange, useBindInputRef} from '../../../common/commonHooks';
+import {focusRef} from '../../../common/uiUtil';
+import {useDebounceEffect} from 'ahooks';
 
 const { Title,Paragraph } = Typography;
 
-const FindInFileDlg=(props)=>{
-    const [title, setTitle, onTitleChange]= useChange('');
-    const [cont, setCont, onContChange]= useChange('');
-    const [both, setBoth, onBothChange]= useChange('');
 
+/**
+ * 在文件中查找的对话框
+ * @param {*} param0 
+ * @returns 
+ */
+const FindInFileDlg=({visible, onCancel})=>{
+    const [title, {change: onTitleChange}]= useChange('');
+    const [cont, {change: onContChange}]= useChange('');
+    const [both, {change: onBothChange}]= useChange('');
     const [searchResults, setSearchResults]= useState([]);
 
-    const titleRef= useRef();
-    const contRef= useRef();
-    const bothRef= useRef();
+    const [titleRef, bindTitleRef]= useBindInputRef();
+    const [contRef, bindContRef]= useBindInputRef();
+    const [bothRef, bindBothRef]= useBindInputRef();
+
 
     // 当显示时使第一个输入框获得焦点
     useEffect(()=>{
-        if(props.visible){
+        if(visible){
             focusRef(titleRef, true);
         }
-    },[props.visible]);
+    },[visible, titleRef]);
 
 
-    //
-    const doSearch=useCallback(()=>{
-        if(!props.visible){
+    // 当输入框值有改变时进行查询，同时进行防抖处理
+    useDebounceEffect(()=>{
+        if(!visible){
             return;
         }
         (async () => {
+            console.log("文件中查找");
             const result=await api.searchInFile({title, cont, both});
             if(result && true===result.succ){
                 setSearchResults(result.data);
             }
         })();
-    },[title, cont, both, setSearchResults, props.visible]);
-
-    useEffectDebounce(doSearch);
-
-    // // 当输入框值有改变时，自动触发查询，同时做防抖处理
-    // const debouceConf=useRef({timer:null, lastTime:0});
-    // useEffect(()=>{
-    //     if(!props.visible){
-    //         return;
-    //     }
-    //     const currTime=new Date().getTime();        
-    //     if(currTime-debouceConf.current.lastTime<400){
-    //         if(debouceConf.current.timer){
-    //             clearTimeout(debouceConf.current.timer);
-    //         }
-    //     }
-    //     debouceConf.current.lastTime=currTime;
-    //     debouceConf.current.timer=setTimeout(async () => {
-    //         const result=await api.searchInFile({title, cont, both});
-    //         if(true===result.succ){
-    //             setSearchResults(result.data);
-    //         }
-    //     }, 400);
-    // },[title, cont, both, props.visible, setSearchResults]);
+    },[title, cont, both, setSearchResults, visible],{wait: 500,});
 
     
+    /**
+     * 打开导图
+     * @param {*} fullTitle 标题的全路径 a/b/c
+     */
     const openMap=useCallback((fullTitle)=>{
         api.openUrl(`gmap://${fullTitle}`);
-        props.onCancel();
-    },[props.onCancel]);
+        onCancel();
+    },[onCancel]);
 
 
 
     return <Modal 
-            visible={props.visible}
+            visible={visible}
             title="文件内查找"
             footer={null}
-            width={"calc(80vw)"}
-            onCancel={props.onCancel}>
+            width={"80vw"}
+            onCancel={onCancel}>
         <div>
-            <Space direction='vertical' css={{width:"80%"}}>
-                <Input addonBefore="标题：　　　" size="large" allowClear={true} value={title} onChange={onTitleChange} ref={bindInputRef.bind(this, titleRef)} onPressEnter={focusRef.bind(this, contRef, false)}/>
-                <Input addonBefore="内容：　　　" size="large" allowClear={true} value={cont} onChange={onContChange} ref={bindInputRef.bind(this, contRef)} onPressEnter={focusRef.bind(this, bothRef, false)}/>
-                <Input addonBefore="标题和内容：" size="large" allowClear={true} value={both} onChange={onBothChange} ref={bindInputRef.bind(this, bothRef)} onPressEnter={focusRef.bind(this, titleRef, false)}/>
+            <Space direction='vertical' css={inputContainerStyle}>
+                <div>
+                    <label>标题：</label>
+                    <Input className='ipt' size="large"  allowClear={true} value={title} onChange={onTitleChange} ref={bindTitleRef} onPressEnter={focusRef.bind(this, contRef, false)}/>
+                </div>
+                <div>
+                    <label>内容：</label>
+                    <Input className='ipt' size="large" allowClear={true} value={cont} onChange={onContChange} ref={bindContRef} onPressEnter={focusRef.bind(this, bothRef, false)}/>
+                </div>
+                <div>
+                    <label>标题和内容：</label>
+                    <Input className='ipt' size="large"  allowClear={true} value={both} onChange={onBothChange} ref={bindBothRef} onPressEnter={focusRef.bind(this, titleRef, false)}/>
+                </div>
             </Space>
             <div css={{marginTop:'40px', maxHeight: 'calc(100vh - 350px)',height: 'calc(100vh - 450px)', overflowY:'auto'}}>
                 {
                     searchResults.map((searchItem, ind)=><div css={{cursor:'pointer', marginBottom:'30px'}} onClick={openMap.bind(this, searchItem.fullTitle)}>
                         <Title level={4}>
-                            {
-                                searchItem.titleParts.map((item,ind)=><React.Fragment key={"txt-"+ind}>
-                                    {
-                                        true===item.keyword ? 
-                                            <span css={{color:'#f73131'}}>{item.txt}</span>
-                                                :
-                                            <span>{item}</span>
-                                    }
-                                </React.Fragment>)
-                            }  
+                            { searchItem.titleParts.map((item,ind)=><ResultItem key={"title-"+ind} data={item}/>) }  
                         </Title>
                         <Paragraph >
-                            {
-                                searchItem.contParts.map((item,ind)=><React.Fragment key={"txt-"+ind}>
-                                    {
-                                        true===item.keyword ? 
-                                            <span css={{color:'#f73131',fontWeight:'bold'}}>{item.txt}</span>
-                                                :
-                                            <span>{item}</span>
-                                    }
-                                </React.Fragment>)
-                            }                           
+                            { searchItem.contParts.map((item,ind)=><ResultItem key={"cont-"+ind} data={item} bold={true}/>) }   
                         </Paragraph>
                     </div>)
                 }
@@ -117,45 +97,36 @@ const FindInFileDlg=(props)=>{
 };
 
 
+const ResultItem=({data, bold})=>{
+    let highlightStyle={color:'#f73131'};
+    if(bold){
+        highlightStyle={...highlightStyle, fontWeight:'bold'}
+    }
 
-const useEffectDebounce=(fun)=>{
-    const debouceConf=useRef({timer:null, lastTime:0});
-    
-    const currTime=new Date().getTime();        
-    if(currTime-debouceConf.current.lastTime<400){
-        if(debouceConf.current.timer){
-            clearTimeout(debouceConf.current.timer);
+    return <React.Fragment>
+        {
+            true===data.keyword ? 
+                <span css={highlightStyle}>{data.txt}</span>
+                    :
+                <span>{data}</span>
         }
-    }
-    debouceConf.current.lastTime=currTime;
-    debouceConf.current.timer=setTimeout(fun, 400);
+    </React.Fragment>;
 };
 
-const bindInputRef=(refObj, e)=>{
-    if(e && e.input){
-        refObj.current=e.input;
+
+const inputContainerStyle={
+    width:"100%",
+    '& div label':{
+        display:'inline-block',
+        width:'90px', 
+        textAlign:'right',
+        marginRight:'10px',
+    },
+    '& div .ipt':{
+        width:'60%',
     }
 };
 
-const focusRef=(refObj, delay=true)=>{
-    const func=()=>{
-        if(refObj && refObj.current){
-            refObj.current.focus();
-        }
-    };
-    if(!delay){
-        func();
-        return;
-    }
-    setTimeout(func, 400);
-};
 
-const useChange=(initVal='')=>{
-    const [txt, setTxt]= useState(initVal);
-    const onChange=useCallback((e)=>{
-        setTxt(e.target.value);
-    },[setTxt]);
-    return [txt, setTxt, onChange];
-};
 
 export default React.memo(FindInFileDlg);
