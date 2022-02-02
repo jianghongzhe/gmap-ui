@@ -32,10 +32,22 @@ class Api{
     }
 
     /**
+     * 获取查询对话框是否已显示
+     * @returns 
+     */
+    getFindInPageDlgVisible=()=>{
+        return ipcRenderer.invoke('getFindInPageVisible');
+    };
+
+    /**
      * 打开自动更新程序
      */
     openUpdateApp=()=>{
         ipcRenderer.invoke('openUpdateApp');
+    };
+
+    searchInFile=({title, cont, both})=>{
+        return ipcRenderer.invoke('searchInFile', {title, cont, both});
     };
 
 

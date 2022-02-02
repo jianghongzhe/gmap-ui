@@ -131,6 +131,13 @@ const init=(_mainWindow)=>{
         findWin.webContents.send("focus-input", {});
     };
 
+    const getFindInPageVisible=()=>{
+        if(!findWin){
+            return false;
+        }
+        return findWin.isVisible();
+    };
+
     /**
      * 网页查找：
      * 如果未查到结果，则返回一个默认的promise对象，其中值为默认值0。
@@ -209,7 +216,8 @@ const init=(_mainWindow)=>{
         hideFindInPage,
         find,
         findNext,
-        findPre
+        findPre,
+        getFindInPageVisible,
     };
 
     const baseHandler=async (handler, evt, ...args)=>{

@@ -851,6 +851,11 @@ const openUrl=(url)=>{
 }
 
 
+const searchInFile=({title, cont, both})=>{
+    return sendCmdToServer("search", {title, cont, both});
+};
+
+
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
     openUrl(url);
@@ -1487,7 +1492,8 @@ const ipcHandlers={
     expHtml,
     openUpdateApp,
     copyTxtQuiet,
-    isDevMode: common.isDevMode
+    isDevMode: common.isDevMode,
+    searchInFile,
 };
 
 /**

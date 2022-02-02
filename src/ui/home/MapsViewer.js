@@ -144,13 +144,16 @@ const MapsViewer=(props)=>{
             keyDetector.on(e,{
                 //ctrl+f 网页内查找
                 'ctrl+f':(e)=>{
-                    if(isExclude){return;}
+                    if(isExclude || findInFileDlgVisible){return;}
                     api.showFindInPageDlg();
                 },
 
+                // ctrl+shift+f 在文件中查询
                 'ctrl+shift+f':(e)=>{
-                    if(isExclude){return;}
-                    setFindInFileDlgVisible(true);
+                    (async()=>{
+                        if(isExclude || await api.getFindInPageDlgVisible()){return;}
+                        setFindInFileDlgVisible(true);
+                    })();
                 },
 
 
@@ -164,7 +167,7 @@ const MapsViewer=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[editMapDlgVisible, newMapDlgVisible, setFindInFileDlgVisible]);
+    },[editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, setFindInFileDlgVisible]);
 
     useEffect(()=>{
         api.closeFindInPageDlg();
