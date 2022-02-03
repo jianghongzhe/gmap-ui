@@ -38,6 +38,10 @@ const FindInFileDlg=({visible, onCancel})=>{
         if(!visible){
             return;
         }
+        if((null==title || ""===title.trim()) && (null==cont || ""===cont.trim()) && (null==both || ""===both.trim())){
+            setSearchResults([]);
+            return;
+        }
         (async () => {
             console.log("文件中查找");
             const result=await api.searchInFile({title, cont, both});
@@ -83,7 +87,7 @@ const FindInFileDlg=({visible, onCancel})=>{
             <div css={{marginTop:'40px', maxHeight: 'calc(100vh - 350px)',height: 'calc(100vh - 450px)', overflowY:'auto'}}>
                 {
                     searchResults.map((searchItem, ind)=><div css={{cursor:'pointer', marginBottom:'30px'}} onClick={openMap.bind(this, searchItem.fullTitle)}>
-                        <Title level={4}>
+                        <Title level={5}>
                             { searchItem.titleParts.map((item,ind)=><ResultItem key={"title-"+ind} data={item}/>) }  
                         </Title>
                         <Paragraph >
