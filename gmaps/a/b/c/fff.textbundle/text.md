@@ -11,6 +11,7 @@ xxxxxxxxxxxxxxxxxxx
 
 # ref:长段文字
 #### 这里可以放长段内容，支持markdown格式
+fsdfdf ![](http://39.105.27.161:50080/static/img/f8805efdf40f4a1daa235460bca9a432.jpg)  asda
 
 |a|b|a|b|
 |-|-|-|-|

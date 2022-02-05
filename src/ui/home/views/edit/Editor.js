@@ -22,6 +22,8 @@ import editorSvc from '../../../../service/editorSvc';
 import editorSvcEx from '../../../../service/editorSvcEx';
 import { createSelector } from 'reselect';
 import { propertyOf } from 'lodash';
+import { useMemo } from 'react';
+import api from '../../../../service/api';
 
 
 
@@ -31,9 +33,18 @@ import { propertyOf } from 'lodash';
  */
 const Editor=(props)=>{
 
-    const {winH}= useSelector((state)=>({
+    const {winH, activeKey}= useSelector((state)=>({
         winH:       state.common.winH,
+        activeKey:  state.tabs.activeKey,
     }));
+
+    const currAssetsDir=useMemo(()=>{
+        const to=parseInt(Math.max(activeKey.lastIndexOf("/"), activeKey.lastIndexOf("\\")))+1;
+        const result= activeKey.substring(0, to)+"assets";
+        return result;
+    },[activeKey]);
+    
+
 
     const propsOnSetInst=props.onSetInst;
     const codeMirrorInstRef=useRef(null);
@@ -166,7 +177,7 @@ const Editor=(props)=>{
          */
         const keyDownHandler=(instance, event)=>{
             if("Tab"===event.code && !event.altKey && !event.shiftKey && !event.ctrlKey){
-                editorSvcEx.gotoDefinition(instance, event);
+                editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
                 return;
             }
             if("ArrowUp"===event.code && event.altKey && !event.shiftKey && event.ctrlKey){
@@ -184,7 +195,7 @@ const Editor=(props)=>{
         return ()=>{
             codeMirrorInstRef.current.off("keydown", keyDownHandler);
         };
-    },[]);
+    },[currAssetsDir]);
 
 
     /**

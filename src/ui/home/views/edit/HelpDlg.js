@@ -103,10 +103,6 @@ const HelpDlg=(props)=>{
                         <div>
                             <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence）</Button>
                         </div>
-
-                        
-                        
-                        
                     </div>
                 </TabPane>
                 <TabPane tab="markdown扩展" key="3" className='tabitem'>
@@ -136,7 +132,34 @@ const HelpDlg=(props)=>{
                         </table>
                     </div>
                 </TabPane>
-                <TabPane tab="Echart图" key="4" className='tabitem'>
+                <TabPane tab="自动完成" key="4" className='tabitem'>
+                    <div className='wrapper'>
+                        <table css={helpTableStyle}>
+                            <tbody>
+                            <tr>
+                                <th>名称</th>
+                                <th>用法示例</th>
+                            </tr>
+                            {
+                                autoCompletes.map((item,ind)=>(
+                                    <tr key={ind}>
+                                        <td>{item[0]}</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div dangerouslySetInnerHTML={{__html:item[1]}}></div>
+                                                    <div>{item[2]}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </TabPane>
+                <TabPane tab="Echart图" key="5" className='tabitem'>
                     <div className='wrapper'>
                     <table css={helpTableStyle}>
                             <tbody>
@@ -348,7 +371,7 @@ const HelpDlg=(props)=>{
                         </table>
                     </div>
                 </TabPane>
-                <TabPane tab="快捷键" key="5" className='tabitem'>
+                <TabPane tab="快捷键" key="6" className='tabitem'>
                     <div className='wrapper'>
                         <table css={helpTableStyle}>
                             <tbody>
@@ -457,21 +480,23 @@ const nodes=[
         ['[某网](http://cc.dd)','// markdown格式链接'],
     ]]
 ];
-
-
-                          
-                                     
-                                       
-                                      
-
-                       
+           
                          
                           
 const markdownExts=[
-    ['行内latex','$a_{1}^{2}+b_{1}=c$',''],
+    ['行内Latex','$a_{1}^{2}+b_{1}=c$',''],
     ['文字高亮','==高亮==',''],
     ['上标','a^2^=9',''],
     ['下标','H--2--O',''],
+];
+
+const autoCompletes=[
+    ['ref:xx','跳转到引用位置','// 光标在该段中任意位置时生效'],
+    ['tref:yy','跳转到文字引用位置','// 光标在该段中任意位置时生效'],
+    ['{p}','保存剪切板图片到本地并生成标记：<br/>![](assets/xxx.jpg)','// 光标在 } 左侧或右侧时生效'],
+    ['{a}','保存剪切板附件到本地并生成标记：<br/>[abc.doc](assets/yyy.doc)','// 光标在 } 左侧或右侧时生效'],
+    ['{p+}','剪切板图片上传到图床并生成标记：<br/>![](http://mmm)','// 光标在 } 左侧或右侧时生效'],
+    ['{a+}','剪切板附件上传到图床并生成标记：<br/>[abc.doc](http://nnn)','// 光标在 } 左侧或右侧时生效'],
 ];
 
 
@@ -503,7 +528,7 @@ const shortcuts=[
             ['Ctrl + I','插入附件'],
             ['Ctrl + T','插入日期'],
             ['Ctrl + H','打开帮助页'],
-            ['Tab','跳转到ref或tref定义位置'],
+            ['Tab','自动完成'],
             ['Ctrl + Alt+ ↓','复制当前行到下一行'],
             ['Ctrl + Alt+ ↑','复制当前行到上一行'],
         ]

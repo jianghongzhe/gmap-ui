@@ -389,6 +389,20 @@ class Api{
         return ipcRenderer.invoke('selAttFile');
     }
 
+
+    /**
+     * 
+     * @param {*} param0 {
+     *  img:            true/false
+     *  saveDir:        "d:/a/b"
+     *  saveToPicHost:  true/false
+     * }
+     * @returns 
+     */
+    saveFileFromClipboard=({img, saveDir, saveToPicHost})=>{
+        return ipcRenderer.invoke('saveFileFromClipboard', {img, saveDir, saveToPicHost});
+    };
+
     /**
      * 复制剪切版中的图片到图片目录
      * @param {*} showName 

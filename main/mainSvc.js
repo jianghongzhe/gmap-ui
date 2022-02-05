@@ -856,6 +856,20 @@ const searchInFile=({title, cont, both})=>{
 };
 
 
+/**
+ * 
+ * @param {*} param0 {
+ *  img:            true/false
+ *  saveDir:        "d:/a/b"
+ *  saveToPicHost:  true/false
+ * }
+ * @returns 
+ */
+const saveFileFromClipboard=({img, saveDir, saveToPicHost})=>{
+    return sendCmdToServer("saveFileFromClipboard", {img, saveDir, saveToPicHost});
+};
+
+
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
     openUrl(url);
@@ -1494,6 +1508,7 @@ const ipcHandlers={
     copyTxtQuiet,
     isDevMode: common.isDevMode,
     searchInFile,
+    saveFileFromClipboard,
 };
 
 /**

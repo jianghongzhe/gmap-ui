@@ -517,6 +517,40 @@ const editorSvcExInstWrapper=(function(){
     };
 
 
+    const isCursorInLastLetterOrAfterLastLetter=(pos, line, str)=>{
+        const ch=pos.ch;
+        const len=str.length;
+        let flag=true;
+        
+        // {p}xxx
+        //    ^    -->光标在右括号后一位置
+        for(let i=0,j=ch-len;i<len;++i,++j){
+            if(str[i]!==line[j]){
+                flag=false;
+                break;
+            }
+        }
+        if(flag){
+            return [ch-len, ch];
+        }
+
+        flag=true;
+        // {p}xxxx
+        //   ^     -->光标在右括号处
+        for(let i=0,j=ch-len+1;i<len;++i,++j){
+            if(str[i]!==line[j]){
+                flag=false;
+                break;
+            }
+        }
+        if(flag){
+            return [ch-len+1, ch+1];
+        }
+
+        return false;
+    }
+
+
 
     /**
      * 跳到当前光标位置对应的ref:xx或tref:xx的定义处，如果没有找到定义，则自动创建。
@@ -525,7 +559,7 @@ const editorSvcExInstWrapper=(function(){
      * @param {*} cm 
      * @param {*} event 
      */
-    const gotoDefinition=(cm, event)=>{
+    const gotoDefinition=(cm, event,api, currAssetsDir)=>{
         const pos=cm.doc.getCursor();// { ch: 3  line: 0}
         const line=cm.doc.getLine(pos.line);
 
@@ -536,6 +570,94 @@ const editorSvcExInstWrapper=(function(){
             replaceDate(cm, autoCompletePos);
             return;
         }
+
+        // 输入[按tab会生成[链接]()，输入!按tab会生成![图片]()
+        if(0<pos.ch && '['===line[pos.ch-1]){
+            event.preventDefault();
+            cm.doc.replaceRange("[链接]()", {line: pos.line, ch: pos.ch-1}, {line: pos.line, ch: pos.ch});
+            cm.doc.setCursor({line:pos.line, ch:pos.ch+4});
+            return;
+        }
+        if(0<pos.ch && '!'===line[pos.ch-1]){
+            event.preventDefault();
+            cm.doc.replaceRange("![图片]()", {line: pos.line, ch: pos.ch-1}, {line: pos.line, ch: pos.ch});
+            cm.doc.setCursor({line:pos.line, ch:pos.ch+5});
+            return;
+        }
+
+
+        // 输入 {p}、{a}、{p+}、{a+} 时会自动生成图片或附件
+        let range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{p}");
+        if(false!==range){
+            event.preventDefault();
+            (async()=>{
+                let resp=await api.saveFileFromClipboard({img:true, saveDir:currAssetsDir, saveToPicHost:false});
+                if(resp){
+                    if(true===resp.succ){
+                        const replTxt=`![](assets/${resp.data.filename})`;
+                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                    }else{
+                        api.showNotification("操作有误",resp.msg,"err");
+                    }
+                }
+            })();
+            return;
+        }
+        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{a}");
+        if(false!==range){
+            event.preventDefault();
+            (async()=>{
+                let resp=await api.saveFileFromClipboard({img:false, saveDir:currAssetsDir, saveToPicHost:false});
+                if(resp){
+                    if(true===resp.succ){
+                        const replTxt=`[${resp.data.title}](assets/${resp.data.filename})`;
+                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                    }else{
+                        api.showNotification("操作有误",resp.msg,"err");
+                    }
+                }
+            })();
+            return;
+        }
+        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{p+}");
+        if(false!==range){
+            event.preventDefault();
+            (async()=>{
+                let resp=await api.saveFileFromClipboard({img:true, saveDir:currAssetsDir, saveToPicHost:true});
+                if(resp){
+                    if(true===resp.succ){
+                        const replTxt=`![](${resp.data.url})`;
+                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                    }else{
+                        api.showNotification("操作有误",resp.msg,"err");
+                    }
+                }else{
+
+                }
+            })();
+            return;
+        }
+        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{a+}");
+        if(false!==range){
+            event.preventDefault();
+            (async()=>{
+                let resp=await api.saveFileFromClipboard({img:false, saveDir:currAssetsDir, saveToPicHost:true});
+                if(resp){
+                    if(true===resp.succ){
+                        const replTxt=`[${resp.data.title}](${resp.data.url})`;
+                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                    }else{
+                        api.showNotification("操作有误",resp.msg,"err");
+                    }
+                }
+            })();
+            return;
+        }
+
 
         // 跳转到引用的处理
         const doc=analyzeDoc(getAllLines(cm));
