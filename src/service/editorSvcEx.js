@@ -516,6 +516,11 @@ const editorSvcExInstWrapper=(function(){
         return resultDate;
     };
 
+    const toTimeFmt=(date)=>{
+        const [h,m,s]=[date.getHours(), date.getMinutes(), date.getSeconds()];
+        return `${h<10?"0"+h:""+h}:${m<10?"0"+m:""+m}:${s<10?"0"+s:""+s}`;
+    }
+
 
     const isCursorInLastLetterOrAfterLastLetter=(pos, line, str)=>{
         const ch=pos.ch;
@@ -571,6 +576,9 @@ const editorSvcExInstWrapper=(function(){
             return;
         }
 
+        
+        
+
         // 输入[按tab会生成[链接]()，输入!按tab会生成![图片]()
         if(0<pos.ch && '['===line[pos.ch-1]){
             event.preventDefault();
@@ -586,8 +594,25 @@ const editorSvcExInstWrapper=(function(){
         }
 
 
-        // 输入 {p}、{a}、{p+}、{a+} 时会自动生成图片或附件
-        let range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{p}");
+        // 输入 {t}、{dt}、{p}、{a}、{p+}、{a+} 时会自动生成图片或附件
+        let range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{t}");
+        if(false!==range){
+            event.preventDefault();
+            const txt=toTimeFmt(new Date());
+            cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+            cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
+            return;
+        }
+        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{dt}");
+        if(false!==range){
+            event.preventDefault();
+            const date=new Date();
+            const txt=toDateFmt(date)+" "+toTimeFmt(date);
+            cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+            cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
+            return;
+        }
+        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{p}");
         if(false!==range){
             event.preventDefault();
             (async()=>{

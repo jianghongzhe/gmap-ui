@@ -39,6 +39,9 @@ const Editor=(props)=>{
     }));
 
     const currAssetsDir=useMemo(()=>{
+        if(!activeKey){
+            return null;
+        }
         const to=parseInt(Math.max(activeKey.lastIndexOf("/"), activeKey.lastIndexOf("\\")))+1;
         const result= activeKey.substring(0, to)+"assets";
         return result;
