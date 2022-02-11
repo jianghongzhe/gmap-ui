@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
@@ -70,6 +70,9 @@ const Toolbar=(props)=>{
             </Tooltip>
                       
             <Divider type="vertical" className='divider'/>
+            <Tooltip color='cyan' placement="bottomLeft" title='滚动截屏'>
+                <Button shape='circle' icon={<CameraOutlined />} className='toolbtn' type='default' size='large' onClick={props.onScreenShot} />
+            </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
                 <Button shape='circle' icon={<FileImageOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} />
             </Tooltip>

@@ -308,11 +308,13 @@ const MapsViewer=(props)=>{
     const onExpImage=useCallback((type='img')=>{
         (async()=>{
             const typeNames={
-                img: '图片',
-                pdf: 'PDF',
-                word: 'word文档',
+                shot: '滚动截屏',
+                img: '导出图片',
+                pdf: '导出PDF',
+                word: '导出word文档',
             };
             const typeFuncs={
+                shot: ()=>new Promise((res, rej)=>res("memory")),
                 img: api.openSaveFileDlg,
                 pdf: api.openSaveFileDlg.bind(this, 'pdf'),
                 word: api.openSaveFileDlg.bind(this, 'word'),
@@ -363,7 +365,7 @@ const MapsViewer=(props)=>{
             let {x,y}=containerEle.getBoundingClientRect();
             const maximized=await api.isMaximized();
             if(!maximized){
-                api.showNotification("警告",`窗口只有在最大化时才能导出${typeNames[type]}`,"warn");
+                api.showNotification("警告",`窗口只有在最大化时才能${typeNames[type]}`,"warn");
                 return;
             }
             const devMode=await api.isDevMode();
@@ -457,6 +459,7 @@ const MapsViewer=(props)=>{
                                 onShowCmd={api.openBash}
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
+                                onScreenShot={onExpImage.bind(this, 'shot')}
                                 onExpImage={onExpImage.bind(this, 'img')}
                                 onExpPdf={onExpImage.bind(this, 'pdf')}
                                 onExpWord={onExpImage.bind(this, 'word')}

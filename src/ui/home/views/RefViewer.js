@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
-import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined } from '@ant-design/icons';
+import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import api from '../../../service/api';
@@ -293,11 +293,13 @@ const RefViewer=(props)=>{
     const onExpImage=useCallback((type='img')=>{
         (async()=>{
             const typeNames={
-                img: '图片',
-                pdf: 'PDF',
-                word: 'word文档',
+                shot: '滚动截屏',
+                img: '导出图片',
+                pdf: '导出PDF',
+                word: '导出word文档',
             };
             const typeFuncs={
+                shot: ()=>new Promise((res, rej)=>res("memory")),
                 img: api.openSaveFileDlg,
                 pdf: api.openSaveFileDlg.bind(this, 'pdf'),
                 word: api.openSaveFileDlg.bind(this, 'word'),
@@ -306,7 +308,7 @@ const RefViewer=(props)=>{
             try{
                 const maximized=await api.isMaximized();
                 if(!maximized){
-                    api.showNotification("警告",`窗口只有在最大化时才能导出${typeNames[type]}`,"warn");
+                    api.showNotification("警告",`窗口只有在最大化时才能${typeNames[type]}`,"warn");
                     return;
                 }
                 const devMode=await api.isDevMode();
@@ -347,19 +349,22 @@ const RefViewer=(props)=>{
                 title={
                     <div>
                         {"查看引用 - " + refname}
-                        <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
-                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage.bind(this, 'img')}/>
+                        <Tooltip color='cyan' placement="top" title='滚动截屏'>
+                            <Button shape='circle' icon={<CameraOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage.bind(this, 'shot')}/>
                         </Tooltip>
-                        <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
+                        <Tooltip color='cyan' placement="top" title='导出图片'>
+                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'img')}/>
+                        </Tooltip>
+                        <Tooltip color='cyan' placement="top" title='导出pdf'>
                             <Button shape='circle' icon={<FilePdfOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'pdf')}/>
                         </Tooltip>
-                        <Tooltip color='cyan' placement="bottomLeft" title='导出word'>
+                        <Tooltip color='cyan' placement="top" title='导出word'>
                             <Button shape='circle' icon={<FileWordOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'word')}/>
                         </Tooltip>
-                        <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
+                        <Tooltip color='cyan' placement="top" title='导出markdown'>
                             <Button shape='circle' icon={<FileMarkdownOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpMarkdown}/>
                         </Tooltip>
-                        <Tooltip color='cyan' placement="bottomLeft" title='导出html'>
+                        <Tooltip color='cyan' placement="top" title='导出html'>
                             <Button shape='circle' icon={<Html5Outlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpHtml} />
                         </Tooltip>
                     </div>
