@@ -209,9 +209,9 @@ const EditGraphDlg=(props)=>{
                         <div css={clearColorStyle} title='清除颜色' onClick={onClearColor}></div>
 
                         {/* 插入日期、图片、附件、帮助 */}
-                        <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={showDateDlg} />
+                        {/* <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={showDateDlg} />
                         <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={showInsertPicDlg} />
-                        <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} />
+                        <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} /> */}
                         <div css={txtBtnStyle} title='查看引用' onClick={showRefs}>ref</div>
                         <div css={txtBtnStyle} title='查看文本引用' onClick={showTrefs}>tref</div>
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={showHelpPicDlg} />
@@ -251,7 +251,7 @@ const EditGraphDlg=(props)=>{
                 </div>
             </Modal>
 
-            {/*插入图片对话框*/}
+            {/*插入图片对话框
             <InsertImgDlg                    
                 visible={insertPicDlgVisible}
                 isImg={isImg}
@@ -260,20 +260,15 @@ const EditGraphDlg=(props)=>{
                 onAddAtt={onAddAtt}
                 onCancel={hideAllDlg}
             />
+            */}
 
             {/* 颜色选择对话框 */}
             <ColorPickerDlg
-                t={colorDlgY}
-                offsetX={colorDlgAdjustX}
-                parW={winW-200}
                 visible={colorPickerVisible}
                 onCancel={hideAllDlg}
                 onOk={handleColorPickerColorChange}
             />
             <AdvColorPickerDlg
-                t={colorDlgY}
-                offsetX={advColorDlgAdjustX}
-                parW={winW-200}
                 visible={advColorPickerVisible}
                 onCancel={hideAllDlg}
                 onOk={handleColorPickerColorChange}
@@ -285,21 +280,18 @@ const EditGraphDlg=(props)=>{
                 visible={helpDlgVisible}
                 onCancel={hideAllDlg}/>
 
-            {/* 插入日期对话框 */}
+            {/* 插入日期对话框 
             <DateDlg
                 visible={dateDlgVisible}
                 onCancel={hideAllDlg}
                 onOk={onInsertDate}
                 />
+            */}
         </>
     );
     
 }
 
-//颜色选择对话框位置
-const colorDlgAdjustX = 258;
-const advColorDlgAdjustX = 284;
-const colorDlgY = 204;
 
 
 const commonColors=[

@@ -256,10 +256,10 @@ const Editor=(props)=>{
                 "Ctrl-G": "jumpToLine",
                 "Ctrl-S": props.onOnlySave,
                 "Shift-Ctrl-S": props.onOk,                                  
-                "Ctrl-P": props.onShowInsertPicDlg,
-                "Ctrl-I": props.onShowInsertAttDlg,
+                // "Ctrl-P": props.onShowInsertPicDlg,
+                // "Ctrl-I": props.onShowInsertAttDlg,
                 "Ctrl-H": props.onShowHelpDlg,
-                "Ctrl-T": props.onShowDateDlg,
+                // "Ctrl-T": props.onShowDateDlg,
                 
                 "Shift-Ctrl-G": onPreventKey,
                 "Shift-Ctrl-F": onPreventKey,

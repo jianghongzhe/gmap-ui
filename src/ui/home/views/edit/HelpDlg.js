@@ -91,17 +91,16 @@ const HelpDlg=(props)=>{
                             <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
                         </div>
                         <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex）</Button>
-                        </div>
-
-                        <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid）</Button>
+                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex```）</Button>
                         </div>
                         <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow）</Button>
+                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid```）</Button>
                         </div>
                         <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence）</Button>
+                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow```）</Button>
+                        </div>
+                        <div>
+                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence```）</Button>
                         </div>
                     </div>
                 </TabPane>
@@ -528,9 +527,9 @@ const shortcuts=[
             ['Enter','下一个'],
             ['Shift + Enter','上一个'],
             ['Ctrl + G','跳转到指定行'],
-            ['Ctrl + P','插入图片'],
-            ['Ctrl + I','插入附件'],
-            ['Ctrl + T','插入日期'],
+            // ['Ctrl + P','插入图片'],
+            // ['Ctrl + I','插入附件'],
+            // ['Ctrl + T','插入日期'],
             ['Ctrl + H','打开帮助页'],
             ['Tab','自动完成'],
             ['Ctrl + Alt+ ↓','复制当前行到下一行'],

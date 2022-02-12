@@ -4,31 +4,21 @@ import { Button,Row, Col, Avatar,Tooltip   } from 'antd';
 import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined,CloudSyncOutlined } from '@ant-design/icons';
 
 import logourl from '../../../assets/logo.jpg';
-import { createSelector } from 'reselect';
 import api from '../../../service/api';
 import ConnectedPathSelect from './ConnectedPathSelect';
-import { useSelector } from 'react-redux';
 
 /**
  * 首页
  * @param {*} props 
  */
 const Welcome=(props)=>{
-    const {winW,winH}=useSelector((state)=>({
-        winW:state.common.winW,
-        winH:state.common.winH,
-    }));
     const [appInfo, setAppInfo]=useState(()=>({}));
 
 
     useEffect(()=>{
-        api.loadAppInfo().then(info=>{
-            setAppInfo(info);
-        });
+        api.loadAppInfo().then(info=>setAppInfo(info));
     }, [setAppInfo]);
-
-    
-    const fileselectRight= calcBackTopRight({winW,winH});
+   
 
     return (
         <Row>
@@ -40,8 +30,8 @@ const Welcome=(props)=>{
                 }}>
                     <Col span={14} >
                         <ConnectedPathSelect 
-                            maxH={winH-160}
-                            backtopLoc={[fileselectRight,120]}
+                            maxH='calc(100vh - 160px)' 
+                            backtopLoc={['calc(44vw + 80px)',120]}
                             onSelectMapItem={props.onSelectMapItem}/>
                     </Col>
                     <Col span={10}>                   
@@ -50,21 +40,11 @@ const Welcome=(props)=>{
                             <p className='appname'>{appInfo.showname}<span className='ver'>V{appInfo.version}</span></p>
                             <div className='btns'>
                                 <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={props.onAddMap}>新建</Button>
-                                <Tooltip color='cyan' placement="bottomLeft" title='打开目录'>
-                                    <Button type="default" className='r2btn' shape='circle'  icon={<FolderOutlined />} size='large' onClick={props.onOpenMapsDir}></Button>
-                                </Tooltip>
-                                <Tooltip color='cyan' placement="bottomLeft" title='打开控制台'>
-                                    <Button type="default" className='rbtn' shape='circle' icon={<CodeOutlined/>} size='large' onClick={props.onOpenBash}></Button>
-                                </Tooltip>
-                                <Tooltip color='cyan' placement="bottomLeft" title='开发者工具'>
-                                    <Button type="default" className='rbtn' shape='circle' icon={<ControlOutlined/>} size='large' onClick={props.onShowDevTool}></Button>
-                                </Tooltip>
-                                <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
-                                    <Button type="default" className='rbtn' shape='circle' icon={<ReloadOutlined/>} size='large' onClick={props.onReloadApp}></Button>
-                                </Tooltip>
-                                <Tooltip color='cyan' placement="bottomLeft" title='检查更新'>
-                                    <Button type="default" className='rbtn' shape='circle' icon={<CloudSyncOutlined/>} size='large' onClick={api.openUpdateApp}></Button>
-                                </Tooltip>
+                                <ButtonItem title='打开目录' className='r2btn' icon={<FolderOutlined />} onClick={props.onOpenMapsDir}/>
+                                <ButtonItem title='打开控制台' className='rbtn' icon={<CodeOutlined />} onClick={props.onOpenBash}/>
+                                <ButtonItem title='开发者工具' className='rbtn' icon={<ControlOutlined />} onClick={props.onShowDevTool}/>
+                                <ButtonItem title='重新载入应用' className='rbtn' icon={<ReloadOutlined />} onClick={props.onReloadApp}/>
+                                <ButtonItem title='检查更新' className='rbtn' icon={<CloudSyncOutlined />} onClick={props.openUpdateApp}/>
                             </div>                               
                         </div>
                     </Col>
@@ -76,12 +56,11 @@ const Welcome=(props)=>{
 }
 
 
-const calcBackTopRight= createSelector(
-    props=>props.winW,
-    winw=>parseInt(winw*4/9)+80
+const ButtonItem=({title, className, icon, onClick})=>(
+    <Tooltip color='cyan' placement="bottomLeft" title={title}>
+        <Button type="default" className={className} shape='circle' icon={icon} size='large' onClick={onClick}></Button>
+    </Tooltip>
 );
-
-
 
 
 

@@ -13,8 +13,8 @@ const EnhDlg=withEnh(Modal);
  */
 const ColorPickerDlg=(props)=>{
     return <EnhDlg noTitle noFooter closable={false}
-            size={{w: dlgW}}
-            css={{left: props.offsetX - (props.parW - dlgW) / 2, top: props.t}}
+            size={{w: `${dlgW}px`}}
+            css={{left, top}}
             visible={props.visible}
             onCancel={props.onCancel}>
 
@@ -25,7 +25,14 @@ const ColorPickerDlg=(props)=>{
     </EnhDlg>;
 };
 
-const dlgW =540;// 290;
+const dlgW =540;
+const offsetX=258;
+const top='204px';
+
+//left = offsetX - (100vw - 200px - dlgW) / 2
+const left=`calc(${parseInt(offsetX+100+dlgW/2)}px - 50vw);`
+
+
 const colors=[
     '#4D4D4D', '#999999', '#EEEEEE',/*'#FFFFFF',*/ '#F44E3B', '#FE9200', '#FCDC00', '#DBDF00', '#A4DD00', '#68CCCA', '#73D8FF', '#AEA1FF', '#FDA1FF', 
     '#333333', '#808080', '#cccccc', '#D33115', '#E27300', '#FCC400', '#B0BC00', '#68BC00', '#16A5A5', '#009CE0', '#7B64FF', '#FA28FF', 

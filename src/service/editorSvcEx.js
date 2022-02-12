@@ -457,56 +457,7 @@ const editorSvcExInstWrapper=(function(){
 
 
 
-    /**
-     * 是否处于自动完成字符的位置，如下所示两个位置：
-     * aaaaa{d}xxx   -->字符
-     *        ^^     -->光标
-     * @param {*} str 
-     * @param {*} lineInd 
-     * @param {*} ind 
-     * @returns 
-     */
-    const isDateAutoCompleteSymbol=(str, lineInd, ind)=>{
-        if(ind<=0){
-            return false;
-        }
-        const reg=/^.*([{]d(([+-])([0-9]+))?[}])$/;
-        let tmp=str.substring(0,ind);
-        let match=reg.exec(tmp);
-        let endInd=ind;
-        if(!match){
-            if(ind+1>str.length){
-                return false;
-            }
-            tmp=str.substring(0,ind+1);
-            match=reg.exec(tmp);
-            console.log(tmp, match);
-            if(!match){
-                return false;
-            }
-            endInd=ind+1;
-        }
-        const placeHolderLen= match[1].length;
-        let addDays=0;
-        if('+'===match[3]){
-            addDays=parseInt(match[4]);
-        }else if('-'===match[3]){
-            addDays=0-parseInt(match[4]);
-        }
-        return {
-            line: lineInd,
-            start: tmp.length-placeHolderLen,
-            end: endInd,
-            addDays
-        };
-    };
-
-    const replaceDate=(cm, autoCompletePos)=>{
-        const date=new Date(new Date().getTime()+86400000*autoCompletePos.addDays);
-        const resultDate=toDateFmt(date);
-        //console.log('resultDate',resultDate);
-        cm.doc.replaceRange(resultDate, {line: autoCompletePos.line, ch: autoCompletePos.start}, {line: autoCompletePos.line, ch: autoCompletePos.end});
-    };
+    
 
     const toDateFmt=(date)=>{
         const m=date.getMonth()+1;
@@ -522,39 +473,49 @@ const editorSvcExInstWrapper=(function(){
     }
 
 
-    const isCursorInLastLetterOrAfterLastLetter=(pos, line, str)=>{
-        const ch=pos.ch;
-        const len=str.length;
-        let flag=true;
-        
-        // {p}xxx
-        //    ^    -->光标在右括号后一位置
-        for(let i=0,j=ch-len;i<len;++i,++j){
-            if(str[i]!==line[j]){
-                flag=false;
-                break;
+    
+
+
+    /**
+     * 获得当前光标处所在的自动完成表达式 {xxx}，如果找到返回json对象，否则返回false
+     * @param {*} line 该行内容
+     * @param {*} pos  光标在行中的位置
+     * @returns {
+     *  
+     * }
+     */
+    const getBraceAutoCompletePart=(line, pos)=>{
+        // 光标处在 } 的后面
+        if(pos>0 && '}'===line[pos-1]){
+            let tmp=line.substring(0, pos-1);
+            let ind=tmp.lastIndexOf("{");
+            if(ind>=0 && pos-ind>2){
+                if(''!==line.substring(ind+1, pos-1).trim()){
+                    return {
+                        exp: line.substring(ind, pos),
+                        range: [ind, pos],
+                    };
+                }
             }
-        }
-        if(flag){
-            return [ch-len, ch];
+            return false;
         }
 
-        flag=true;
-        // {p}xxxx
-        //   ^     -->光标在右括号处
-        for(let i=0,j=ch-len+1;i<len;++i,++j){
-            if(str[i]!==line[j]){
-                flag=false;
-                break;
+        // 找光标后面最近的 } 和它左边最近的 {，以及光标在它们之间的情况
+        let ind2=line.indexOf("}", pos);
+        if(ind2>=0){
+            let tmp=line.substring(0,ind2);
+            let ind1=tmp.lastIndexOf("{");
+            if(ind1>=0 && ind2-ind1>=2 && ind1<pos && pos<=ind2){
+                if(''!==line.substring(ind1+1, ind2).trim()){
+                    return {
+                        exp: line.substring(ind1, ind2+1),
+                        range: [ind1, ind2+1],
+                    };
+                }
             }
         }
-        if(flag){
-            return [ch-len+1, ch+1];
-        }
-
         return false;
-    }
-
+    };
 
 
     /**
@@ -568,17 +529,7 @@ const editorSvcExInstWrapper=(function(){
         const pos=cm.doc.getCursor();// { ch: 3  line: 0}
         const line=cm.doc.getLine(pos.line);
 
-        // 自动完成的处理
-        const autoCompletePos=isDateAutoCompleteSymbol(line, pos.line, pos.ch);
-        if(false!==autoCompletePos){
-            event.preventDefault();
-            replaceDate(cm, autoCompletePos);
-            return;
-        }
-
-        
-        
-
+        // 输入固定字符的处理
         // 输入[按tab会生成[链接]()，输入!按tab会生成![图片]()
         if(0<pos.ch && '['===line[pos.ch-1]){
             event.preventDefault();
@@ -594,93 +545,112 @@ const editorSvcExInstWrapper=(function(){
         }
 
 
-        // 输入 {t}、{dt}、{p}、{a}、{p+}、{a+} 时会自动生成图片或附件
-        let range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{t}");
-        if(false!==range){
-            event.preventDefault();
-            const txt=toTimeFmt(new Date());
-            cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
-            cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
-            return;
-        }
-        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{dt}");
-        if(false!==range){
-            event.preventDefault();
-            const date=new Date();
-            const txt=toDateFmt(date)+" "+toTimeFmt(date);
-            cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
-            cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
-            return;
-        }
-        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{p}");
-        if(false!==range){
-            event.preventDefault();
-            (async()=>{
-                let resp=await api.saveFileFromClipboard({img:true, saveDir:currAssetsDir, saveToPicHost:false});
-                if(resp){
-                    if(true===resp.succ){
-                        const replTxt=`![](assets/${resp.data.filename})`;
-                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
-                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
-                    }else{
-                        api.showNotification("操作有误",resp.msg,"err");
+        // 输入大符号的表达式的处理
+        // {t}、{dt}、{p}、{a}、{p+}、{a+}、{d}、{d+3}、{d-2}
+        const autoCompletePart=getBraceAutoCompletePart(line, pos.ch);
+        if(false!==autoCompletePart){
+            const {exp, range}=autoCompletePart;
+            
+            if("{t}"===exp){
+                event.preventDefault();
+                const txt=toTimeFmt(new Date());
+                cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
+                return;
+            }
+            if("{dt}"===exp){
+                event.preventDefault();
+                const date=new Date();
+                const txt=toDateFmt(date)+" "+toTimeFmt(date);
+                cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
+                return;
+            }
+            if("{p}"===exp){
+                event.preventDefault();
+                (async()=>{
+                    let resp=await api.saveFileFromClipboard({img:true, saveDir:currAssetsDir, saveToPicHost:false});
+                    if(resp){
+                        if(true===resp.succ){
+                            const replTxt=`![](assets/${resp.data.filename})`;
+                            cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                            cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                        }else{
+                            api.showNotification("操作有误",resp.msg,"err");
+                        }
                     }
-                }
-            })();
-            return;
-        }
-        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{a}");
-        if(false!==range){
-            event.preventDefault();
-            (async()=>{
-                let resp=await api.saveFileFromClipboard({img:false, saveDir:currAssetsDir, saveToPicHost:false});
-                if(resp){
-                    if(true===resp.succ){
-                        const replTxt=`[${resp.data.title}](assets/${resp.data.filename})`;
-                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
-                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
-                    }else{
-                        api.showNotification("操作有误",resp.msg,"err");
+                })();
+                return;
+            }
+            if("{a}"===exp){
+                event.preventDefault();
+                (async()=>{
+                    let resp=await api.saveFileFromClipboard({img:false, saveDir:currAssetsDir, saveToPicHost:false});
+                    if(resp){
+                        if(true===resp.succ){
+                            const replTxt=`[${resp.data.title}](assets/${resp.data.filename})`;
+                            cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                            cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                        }else{
+                            api.showNotification("操作有误",resp.msg,"err");
+                        }
                     }
-                }
-            })();
-            return;
-        }
-        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{p+}");
-        if(false!==range){
-            event.preventDefault();
-            (async()=>{
-                let resp=await api.saveFileFromClipboard({img:true, saveDir:currAssetsDir, saveToPicHost:true});
-                if(resp){
-                    if(true===resp.succ){
-                        const replTxt=`![](${resp.data.url})`;
-                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
-                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                })();
+                return;
+            }
+            if("{p+}"===exp){
+                event.preventDefault();
+                (async()=>{
+                    let resp=await api.saveFileFromClipboard({img:true, saveDir:currAssetsDir, saveToPicHost:true});
+                    if(resp){
+                        if(true===resp.succ){
+                            const replTxt=`![](${resp.data.url})`;
+                            cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                            cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                        }else{
+                            api.showNotification("操作有误",resp.msg,"err");
+                        }
                     }else{
-                        api.showNotification("操作有误",resp.msg,"err");
-                    }
-                }else{
 
-                }
-            })();
-            return;
-        }
-        range=isCursorInLastLetterOrAfterLastLetter(pos, line, "{a+}");
-        if(false!==range){
-            event.preventDefault();
-            (async()=>{
-                let resp=await api.saveFileFromClipboard({img:false, saveDir:currAssetsDir, saveToPicHost:true});
-                if(resp){
-                    if(true===resp.succ){
-                        const replTxt=`[${resp.data.title}](${resp.data.url})`;
-                        cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
-                        cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
-                    }else{
-                        api.showNotification("操作有误",resp.msg,"err");
                     }
+                })();
+                return;
+            }
+            if("{a+}"===exp){
+                event.preventDefault();
+                (async()=>{
+                    let resp=await api.saveFileFromClipboard({img:false, saveDir:currAssetsDir, saveToPicHost:true});
+                    if(resp){
+                        if(true===resp.succ){
+                            const replTxt=`[${resp.data.title}](${resp.data.url})`;
+                            cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                            cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                        }else{
+                            api.showNotification("操作有误",resp.msg,"err");
+                        }
+                    }
+                })();
+                return;
+            }
+            
+            // {d}、{d+3}、{d-5}
+            const dateReg=/^[{]d(([+-])([0-9]+))?[}]$/;
+            const match=dateReg.exec(exp);
+            if(match){
+                event.preventDefault();
+                let addDays=0;
+                if('+'===match[2]){
+                    addDays=parseInt(match[3]);
                 }
-            })();
-            return;
+                if('-'===match[2]){
+                    addDays=0-parseInt(match[3]);
+                }
+                const date=new Date(new Date().getTime()+86400000*addDays);
+                const txt=toDateFmt(date);
+                cm.doc.replaceRange(txt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
+                return;
+            }
         }
 
 
@@ -721,9 +691,7 @@ const editorSvcExInstWrapper=(function(){
 
 
 
-    const getSelfAndSubNodes=()=>{
-
-    };
+    
 
 
     /**
