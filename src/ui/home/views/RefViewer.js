@@ -349,27 +349,15 @@ const RefViewer=(props)=>{
                 title={
                     <div>
                         {"查看引用 - " + refname}
-                        <Tooltip color='cyan' placement="top" title='滚动截屏'>
-                            <Button shape='circle' icon={<CameraOutlined />} css={{marginLeft:'20px'}} type='default' size='default' onClick={onExpImage.bind(this, 'shot')}/>
-                        </Tooltip>
-                        <Tooltip color='cyan' placement="top" title='导出图片'>
-                            <Button shape='circle' icon={<FileImageOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'img')}/>
-                        </Tooltip>
-                        <Tooltip color='cyan' placement="top" title='导出pdf'>
-                            <Button shape='circle' icon={<FilePdfOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'pdf')}/>
-                        </Tooltip>
-                        <Tooltip color='cyan' placement="top" title='导出word'>
-                            <Button shape='circle' icon={<FileWordOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpImage.bind(this, 'word')}/>
-                        </Tooltip>
-                        <Tooltip color='cyan' placement="top" title='导出markdown'>
-                            <Button shape='circle' icon={<FileMarkdownOutlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpMarkdown}/>
-                        </Tooltip>
-                        <Tooltip color='cyan' placement="top" title='导出html'>
-                            <Button shape='circle' icon={<Html5Outlined />} css={{marginLeft:'8px'}} type='default' size='default' onClick={onExpHtml} />
-                        </Tooltip>
+                        <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, 'shot')} isFirst={true}/>
+                        <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, 'img')} isFirst={false}/>
+                        <ToolbarItem title='导出pdf' icon={<FilePdfOutlined />} onClick={onExpImage.bind(this, 'pdf')} isFirst={false}/>
+                        <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={onExpImage.bind(this, 'word')} isFirst={false}/>
+                        <ToolbarItem title='导出markdown' icon={<FileMarkdownOutlined />} onClick={onExpMarkdown} isFirst={false}/>
+                        <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={onExpHtml} isFirst={false}/>
                     </div>
                 }
-                size={{w:winW-200, h:winH-300, fixh:true, wrapperId:wrapperId}}                
+                size={{w:'calc(100vw - 200px)', h:'calc(100vh - 300px)', fixh:true, wrapperId:wrapperId}}
                 visible={props.visible}
                 maskClosable={true}               
                 onCancel={props.onCancel}>
@@ -391,6 +379,14 @@ const RefViewer=(props)=>{
     </React.Fragment>);
     
 }
+
+
+const ToolbarItem=({title, icon, onClick, isFirst=false})=>(
+    <Tooltip color='cyan' placement="top" title={title}>
+        <Button shape='circle' icon={icon} css={{marginLeft:isFirst?'20px':'8px'}} type='default' size='default' onClick={onClick}/>
+    </Tooltip>
+);
+
 
 const dataSelector=createSelector(
     props=>props.currRefObj,

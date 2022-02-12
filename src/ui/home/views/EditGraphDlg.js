@@ -187,7 +187,7 @@ const EditGraphDlg=(props)=>{
         <>
             <EnhDlg
                     title={"编辑图表 - " + props.currMapName}
-                    size={{w:winW-200}}
+                    size={{w:'calc(100vw - 200px)'}}
                     maskClosable={false}
                     visible={props.visible}
                     footer={[

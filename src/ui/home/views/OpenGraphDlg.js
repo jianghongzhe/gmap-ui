@@ -27,7 +27,7 @@ const OpenGraphDlg=(props)=>{
                 visible={props.visible}
                 onCancel={props.onCancel}>
             <ConnectedPathSelect 
-                maxH={contentMaxH}
+                maxH='calc(100vh - 64px - 250px)'
                 forceMaxH={true}
                 backtopLoc={backtopLoc}
                 onSelectMapItem={props.onSelectMapItem}/>

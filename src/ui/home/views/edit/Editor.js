@@ -33,8 +33,7 @@ import api from '../../../../service/api';
  */
 const Editor=(props)=>{
 
-    const {winH, activeKey}= useSelector((state)=>({
-        winH:       state.common.winH,
+    const {activeKey}= useSelector((state)=>({
         activeKey:  state.tabs.activeKey,
     }));
 
@@ -241,7 +240,7 @@ const Editor=(props)=>{
 
     
     return <CodeMirror
-        css={getCodeEditorStyle(winH-400)}
+        css={codeEditorStyle}
         editorDidMount={bindCodeMirrorInstRef}
         value={props.value}
         options={{
@@ -272,18 +271,15 @@ const Editor=(props)=>{
         onBeforeChange={props.onChange} />;
 };
 
-const getCodeEditorStyle = createSelector(
-    height=>height,
-    (height) => ({
-        '& .CodeMirror': {
-            border: '1px solid lightgrey',
-            fontSize: 16,
-            height: height,
-            maxHeight: height,
-            minHeight: height,
-        }
-    })
-);
+const codeEditorStyle = {
+    '& .CodeMirror': {
+        border: '1px solid lightgrey',
+        fontSize: 16,
+        height: 'calc(100vh - 400px)',
+        maxHeight: 'calc(100vh - 400px)',
+        minHeight: 'calc(100vh - 400px)',
+    }
+};
 
 
 export default React.memo(Editor);

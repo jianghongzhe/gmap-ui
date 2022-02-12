@@ -29,7 +29,7 @@ const HelpDlg=(props)=>{
                 visible={props.visible}
                 onCancel={props.onCancel}>
             
-            <Tabs tabPosition='left' css={getTabsStyle(props.maxBodyH)}>
+            <Tabs tabPosition='left' css={tabsStyle}>
                 <TabPane tab="节点部分" key="1" className='tabitem'>
                     <div className='wrapper'>
                         <table css={helpTableStyle}>
@@ -559,27 +559,21 @@ const shortcuts=[
                   
 
 
-const getTabsStyle=(maxH)=>{
-    let requireH=600;
-    let itemMaxH=maxH-0;
-    let factH=(requireH>itemMaxH ? itemMaxH : requireH);
-
-    return {
-        '& .tabitem div.wrapper': {
-            minHeight: factH,
-            maxHeight: factH,
-            height:    factH,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-        },
-        '& .tabitem div.wrapper .chartTitle': {
-            fontSize:'20px',
-            fontWeight:'bold',
-        },
-        '& .tabitem div.wrapper .chartItem': {
-            color:'grey'
-        },
-    }
+const tabsStyle={
+    '& .tabitem div.wrapper': {
+        height:    '600px',
+        minHeight: '100px',
+        maxHeight: 'calc(100vh - 320px)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+    },
+    '& .tabitem div.wrapper .chartTitle': {
+        fontSize:'20px',
+        fontWeight:'bold',
+    },
+    '& .tabitem div.wrapper .chartItem': {
+        color:'grey'
+    },
 };
 
 
