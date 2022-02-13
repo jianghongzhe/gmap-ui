@@ -63,7 +63,7 @@
 
         // markdown解析
         const mdTxt=document.querySelector("#src").value.trim();
-        const html=marked(mdTxt);
+        const html=marked.parse(mdTxt);
         document.querySelector("#dest").innerHTML=html;
 
         // mermaid图表生成
