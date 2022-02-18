@@ -1,0 +1,5 @@
+﻿[file_runner.Program] [thread-1] [2022-02-19 00:35:15.529]  已接收到主进程id：25424
+[file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.386]  收到请求：{"reqId":1,"action":"cp","data":"{\"url\":\"cp://https://baidu.com\"}"}
+[file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.462]  返回结果：{ reqId=1, succ=True, msg=, data=System.Collections.Hashtable }
+[file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.480]  收到请求：{"reqId":2,"action":"notify","data":"{\"pic\":\"F:\\\\workspace2\\\\front\\\\gmap-ui\\\\main\\\\imgs\\\\succ.png\",\"title\":\"内容已复制\",\"body\":\"https://baidu.com\"}"}
+[file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.484]  返回结果：{ reqId=2, succ=True, msg=, data= }

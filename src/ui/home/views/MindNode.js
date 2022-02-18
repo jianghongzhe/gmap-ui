@@ -23,6 +23,33 @@ const MindNode=(props)=>{
         return (addr.startsWith("dirext://") || addr.startsWith("dirx://"));
     },[]);
 
+    const isUrlxProtocol=useCallback((addr)=>{
+        return addr.startsWith("urlx://");
+    },[]);
+
+
+    const splitUrlxProtocol=useCallback((addr, name)=>{
+        let len=0;
+        if(addr.startsWith("urlx://")){
+            len=(addr.startsWith("urlx:///") ? "urlx:///".length : "urlx://".length);
+        }else{
+            return [];
+        }
+        const originUrl=addr.substring(len);
+        const cpUrl=`cp://${originUrl}`;
+
+        return [
+            {
+                addr: originUrl,
+                tooltip:  (name ? name+"  "+originUrl:originUrl),
+            },
+            {
+                addr: cpUrl,
+                tooltip:  (name ? name+"  "+cpUrl:cpUrl),
+            },
+        ];
+    },[]);
+
     /**
      * 把fileext协议的url分解为三个具体的协议：file、openas、dir
      */
@@ -84,7 +111,7 @@ const MindNode=(props)=>{
                 addr: fileUrl,
                 tooltip:  (name ? name+"  "+fileUrl:fileUrl),
             },
-            {
+            {       
                 addr: dirUrl,
                 tooltip: "打开目录并选择  "+dirUrl,
             },
@@ -105,20 +132,15 @@ const MindNode=(props)=>{
      * 渲染链接：
      * 1、如果是fileext或filex协议，则拆分为file、openas、dir、cp几个链接
      * 2、如果是dirext或dirx协议，则拆分为file、dir、cp几个链接
-     * 3、否则，生成一个链接
+     * 3、如果是urlx协议，则拆分为普通链接、cp几个链接
+     * 4、否则，生成一个链接
      */
     const renderLink=useCallback((link, linkInd)=>{
         if(isFileExtProtocol(link.addr)){
             return <React.Fragment key={'link-'+linkInd}>
                 {
                     splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="top" title={subitem.tooltip}>
-                            <span css={themeBtnWrapperStyle} >
-                                <NodeLinkIcon 
-                                    lindAddr={subitem.addr}
-                                    onClick={props.onOpenLink.bind(this,subitem.addr)}/>
-                            </span>
-                        </Tooltip>
+                        <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={props.onOpenLink.bind(this,subitem.addr)}/>
                     ))
                 }
             </React.Fragment>
@@ -127,25 +149,22 @@ const MindNode=(props)=>{
             return <React.Fragment key={'link-'+linkInd}>
                 {
                     splitDirExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                        <Tooltip key={'sublink-'+linkInd+'_'+subind} color='cyan' placement="top" title={subitem.tooltip}>
-                            <span css={themeBtnWrapperStyle} >
-                                <NodeLinkIcon 
-                                    lindAddr={subitem.addr}
-                                    onClick={props.onOpenLink.bind(this,subitem.addr)}/>
-                            </span>
-                        </Tooltip>
+                        <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={props.onOpenLink.bind(this,subitem.addr)}/>
                     ))
                 }
             </React.Fragment>
         }
-        return <Tooltip key={'link-'+linkInd} color='cyan' placement="top" title={link.name ? link.name+"  "+link.addr:link.addr}>
-            <span css={themeBtnWrapperStyle} >
-                <NodeLinkIcon 
-                    lindAddr={link.addr}
-                    onClick={props.onOpenLink.bind(this,link.addr)}/>
-            </span>
-        </Tooltip>
-    },[props.onOpenLink, isFileExtProtocol, isDirExtProtocol, splitFileExtProtocol, splitDirExtProtocol]);
+        if(isUrlxProtocol(link.addr)){
+            return <React.Fragment key={'link-'+linkInd}>
+                {
+                    splitUrlxProtocol(link.addr, link.name).map((subitem, subind)=>(
+                        <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={props.onOpenLink.bind(this,subitem.addr)}/>
+                    ))
+                }
+            </React.Fragment>
+        }
+        return <LinkItem key={'link-'+linkInd} tooltip={link.name ? link.name+"  "+link.addr:link.addr} addr={link.addr} openLinkFunc={props.onOpenLink.bind(this,link.addr)}/>;
+    },[props.onOpenLink, isFileExtProtocol, isDirExtProtocol, splitFileExtProtocol, splitDirExtProtocol, isUrlxProtocol, splitUrlxProtocol]);
 
 
     
@@ -267,6 +286,15 @@ const MindNode=(props)=>{
     </span>);
     
 }
+
+
+const LinkItem=({key, tooltip, addr, openLinkFunc})=>(
+    <Tooltip key={key} color='cyan' placement="top" title={tooltip}>
+        <span css={themeBtnWrapperStyle} >
+            <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
+        </span>
+    </Tooltip>
+);
 
 
 
