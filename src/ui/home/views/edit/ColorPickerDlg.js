@@ -3,31 +3,57 @@ import React from 'react';
 import { Modal } from 'antd';
 import { CirclePicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
+import { useEffect } from 'react';
+import { useRef } from 'react';
+import generalSvc from '../../../../service/generalSvc';
 
 const EnhDlg=withEnh(Modal);
+
+const arrowStyle= generalSvc.getDlgTopArrowStyle({left:18 ,top:-6, len:6 ,color:'white'});
 
 
 /**
  * 颜色选择器对话框
  * @param {*} props 
  */
-const ColorPickerDlg=(props)=>{
-    return <EnhDlg noTitle noFooter closable={false}
-            size={{w: `${dlgW}px`}}
-            css={{left, top}}
-            visible={props.visible}
-            onCancel={props.onCancel}>
+const ColorPickerDlg=({visible, onCancel, onOk})=>{
+    // const dlgRef= useRef();
 
-        <CirclePicker
-            width ='504px'
-            colors={colors}
-            onChange={props.onOk} />
-    </EnhDlg>;
+    // useEffect(()=>{
+    //     const ele=document.querySelector('#globalArrow');
+    //     if(!ele){
+    //         return;
+    //     }
+
+    //     if(visible){
+    //         //const dlgEle=document.querySelector("#colorDlg");
+    //         console.log(dlgRef);
+
+    //         ele.style.display=null;
+    //         return;
+    //     }
+    //     ele.style.display="none";
+    // },[visible]);
+
+    return <React.Fragment>
+        <EnhDlg noTitle noFooter closable={false} 
+                size={{w: `${dlgW}px`}}
+                css={{left, top}}
+                visible={visible}
+                onCancel={onCancel}>
+            <div css={arrowStyle}></div>
+            <CirclePicker id='colorPickerxxx'
+                width ='504px'
+                colors={colors}
+                onChange={onOk} />
+        </EnhDlg>
+        
+    </React.Fragment> ;
 };
 
 const dlgW =540;
-const offsetX=258;
-const top='204px';
+const offsetX=242;// 258;
+const top='208px';//'204px';
 
 //left = offsetX - (100vw - 200px - dlgW) / 2
 const left=`calc(${parseInt(offsetX+100+dlgW/2)}px - 50vw);`

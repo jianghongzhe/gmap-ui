@@ -14,6 +14,21 @@ class GeneralSvc{
         return true;
     }
 
+    getDlgTopArrowStyle=({left,top,len,color})=>{
+        return {
+            position:'absolute', 
+            left: `${left}px`, 
+            top : `${top}px`,  
+            width: '0px',
+            height: '0px',
+            borderTop: '0px solid transparent',
+            borderBottom: `${len}px solid ${color}`,
+            borderLeft: `${len}px solid transparent`,
+            borderRight: `${len}px solid transparent`,
+            backgroundColor:'transparent',
+        };
+    };
+
 }
 
 const invalidChars=[' ','　','（','）','【','】','｛','｝'];

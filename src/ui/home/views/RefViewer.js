@@ -25,6 +25,8 @@ import screenShot from '../../../service/screenShot';
 //import lod from 'lodash';
 // import snap from 'snapsvg';
 import webfontloader from 'webfontloader';
+import { useEventListener } from 'ahooks';
+import { useMemo } from 'react';
 // import seqDiagram from '../../../common/sequence-diagram';
 //import seqDiagram from 'js-sequence-diagram';
 
@@ -47,30 +49,13 @@ const markedHighlightUtil = new MarkedHighlightUtil();
  * 引用查看器
  * @param {*} props 
  */
-const RefViewer=(props)=>{
-    const {winW,winH,activeKey}=useSelector((state)=>({
-        winW:       state.common.winW,
-        winH:       state.common.winH,
+const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
+    const {activeKey}=useSelector((state)=>({
         activeKey:  state.tabs.activeKey,
     }));
-    const stateHolderRef=useRef({
-        winW,
-        winH,
-        visible: props.visible,
-    });
-
-    useEffect(()=>{
-        stateHolderRef.current={
-            winW,
-            winH,
-            visible: props.visible,
-        };
-    },[winW,winH,props.visible]);
-
-
-    const [wrapperId]=useState(()=>"refviewercontainer"+new Date().getTime());
-    const [bodyId]=useState(()=>"refviewerbody"+new Date().getTime());
-    const [backtopId]=useState(()=>"backtop"+new Date().getTime());
+    const wrapperId=useCreatedId("refviewercontainer");//   useState(()=>"refviewercontainer"+new Date().getTime());
+    const bodyId=useCreatedId("refviewerbody");// useState(()=>"refviewerbody"+new Date().getTime());
+    const backtopId=useCreatedId("backtop");//  useState(()=>"backtop"+new Date().getTime());
 
     useEffect(()=>{
         markedHighlightUtil.init(marked, hljs, {
@@ -78,8 +63,6 @@ const RefViewer=(props)=>{
                 bg: codeBg
             },
             linkConfig: {
-                
-
                 /**
                  * 转换url：
                  * 如果不是附件路径（即不是以 assets/ 开头），则原样返回；
@@ -118,36 +101,17 @@ const RefViewer=(props)=>{
     },[activeKey]);
 
 
+
     /**
-     * 调整echart图的大小，使其对容器自适应
+     * 当窗口大小改变时，使echart图自适应，仅当引用窗口显示时有效
      */
-     const resizeEchartGraphs=useCallback(()=>{
-        document.querySelectorAll(".echart-graph[handled='true']").forEach((ele)=>{
-            let eleId=ele.getAttribute('targetid');
-            let nd=document.querySelector(`#${eleId}`);
-            let w=ele.getAttribute("w");
-            let h=ele.getAttribute("h");
-            const isRelaW=w.endsWith("%");
-            const isRelaH=h.endsWith("%");
+    useEventListener("resize", ()=>{
+        if(visible){
+            setTimeout(resizeEchartGraphs, 500);
+        }
+    }, {target:window});
 
-            //如果宽高都是绝对像素值，则不随窗口大小改变而改变，不需要重绘
-            if(!isRelaW && !isRelaH){
-                return;
-            }
-
-            if(isRelaH){
-                const percent=h.substring(0,h.length-1).trim();
-                h=parseInt((stateHolderRef.current.winH-300)*parseFloat(percent)/100)+"px";
-            }
-            nd.style.height=h;
-            nd.style.width=w;
-            echarts.getInstanceByDom(nd).resize({
-                width:'auto',
-                height:'auto',
-                silent:true,
-            });
-        });
-    },[stateHolderRef]);
+    
 
 
     
@@ -163,10 +127,10 @@ const RefViewer=(props)=>{
      * 7、对所有echart图设置自适应：以防止改变窗口大小后再次打开引用窗口后无法检测到窗口大小已改变
      */
     useEffect(()=>{
-        if(props.visible){
+        if(visible){
             setTimeout(() => {
-                markedHighlightUtil.bindLinkClickEvent(props.onOpenLink);
-                markedHighlightUtil.bindImgClickEvent(props.onOpenLink);
+                markedHighlightUtil.bindLinkClickEvent(onOpenLink);
+                markedHighlightUtil.bindImgClickEvent(onOpenLink);
 
                 //绘制mermaid图表
                 markedHighlightUtil.mermaidInit();                
@@ -221,8 +185,9 @@ const RefViewer=(props)=>{
                         const conf=echartParser.parse(txt);
                         nd.style.width=conf.w;
                         if(conf.h.endsWith("%")){
-                            const percent=conf.h.substring(0,conf.h.length-1).trim();
-                            nd.style.height=parseInt((stateHolderRef.current.winH-300)*parseFloat(percent)/100)+"px";
+                            const percent=parseInt(conf.h.substring(0,conf.h.length-1).trim());
+                            // (100vh-300px)*percent/100 = percent vh - 3*percent px
+                            nd.style.height=`calc(${percent}vh - ${3*percent}px)`;
                         }else{
                             nd.style.height=conf.h;
                         }
@@ -248,28 +213,32 @@ const RefViewer=(props)=>{
                 resizeEchartGraphs();
             }, 500);
         }
-    },[props.visible, stateHolderRef, resizeEchartGraphs, props.onOpenLink]);
+    },[visible, onOpenLink]);
     
 
     
+    
 
 
-    /**
-     * 当窗口大小改变时，使echart图自适应，仅当引用窗口显示时有效
-     */
-    useEffect(()=>{
-        if(!stateHolderRef.current.visible){
-            return;
-        }
-        setTimeout(() => {
-            resizeEchartGraphs();
-        }, 500);
-    },[winW,winH,stateHolderRef,resizeEchartGraphs]);
+    
     
 
     const getScrollTarget=useCallback(()=>document.getElementById(wrapperId),[wrapperId]);
-    let result=dataSelector(props);
-    let {refname, refCont, txt}=(result || {refname:'', refCont:'', txt:''});
+
+
+    let {result, refname, refCont, txt}=useMemo(()=>{
+        if(!currRefObj || !currRefObj.txt || !currRefObj.showname){
+            return {result:false, refname:'', refCont:'', txt:''};
+        }
+        if (null == currRefObj.parsedTxt) {
+            currRefObj.parsedTxt = marked(currRefObj.txt);
+        }
+        let refname=currRefObj.showname;
+        let refCont=currRefObj.parsedTxt;
+        return {result:true, refname, refCont, txt:currRefObj.txt};
+    },[currRefObj]);
+
+    
 
     
     const onExpHtml=useCallback(()=>{
@@ -338,10 +307,9 @@ const RefViewer=(props)=>{
 
     
     
-    if(null===result){
+    if(false===result){
         return null;
     }
-    
     
 
     return (<React.Fragment>
@@ -357,10 +325,10 @@ const RefViewer=(props)=>{
                         <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={onExpHtml} isFirst={false}/>
                     </div>
                 }
-                size={{w:'calc(100vw - 200px)', h:'calc(100vh - 300px)', fixh:true, wrapperId:wrapperId}}
-                visible={props.visible}
+                size={{w:'calc(100vw - 200px)', h:'calc(100vh - 300px)', fixh:true, wrapperId}}
+                visible={visible}
                 maskClosable={true}               
-                onCancel={props.onCancel}>
+                onCancel={onCancel}>
             <div id={bodyId} className='markdown-body' css={{
                 margin:'0px auto',
                 width:'98%',
@@ -388,20 +356,45 @@ const ToolbarItem=({title, icon, onClick, isFirst=false})=>(
 );
 
 
-const dataSelector=createSelector(
-    props=>props.currRefObj,
-    refObj=>{
-        if(!refObj || !refObj.txt || !refObj.showname){
-            return null;
+
+/**
+ * 调整echart图的大小，使其对容器自适应
+ */
+ const resizeEchartGraphs=()=>{
+    document.querySelectorAll(".echart-graph[handled='true']").forEach((ele)=>{
+        let eleId=ele.getAttribute('targetid');
+        let nd=document.querySelector(`#${eleId}`);
+        let w=ele.getAttribute("w");
+        let h=ele.getAttribute("h");
+        const isRelaW=w.endsWith("%");
+        const isRelaH=h.endsWith("%");
+
+        //如果宽高都是绝对像素值，则不随窗口大小改变而改变，不需要重绘
+        if(!isRelaW && !isRelaH){
+            return;
         }
-        if (null == refObj.parsedTxt) {
-            refObj.parsedTxt = marked(refObj.txt);
+
+        if(isRelaH){
+            const percent=parseInt(h.substring(0,h.length-1).trim());
+            // (100vh-300px)*percent/100 = percent vh - 3*percent px
+            h=`calc(${percent}vh - ${3*percent}px)`
         }
-        let refname=refObj.showname;
-        let refCont=refObj.parsedTxt;
-        return {refname,refCont, txt:refObj.txt};
-    }
-);
+        nd.style.height=h;
+        nd.style.width=w;
+        echarts.getInstanceByDom(nd).resize({
+            width:'auto',
+            height:'auto',
+            silent:true,
+        });
+    });
+};
+
+
+const useCreatedId=(prefix=null)=>{
+    return useState(()=>(prefix ? ""+prefix : "wild")+new Date().getTime())[0];
+};
+
+
 
 //24  144 255    #1890ff
 //16  136 233    #1088e9
