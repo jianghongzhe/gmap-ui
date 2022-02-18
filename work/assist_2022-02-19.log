@@ -3,3 +3,10 @@
 [file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.462]  返回结果：{ reqId=1, succ=True, msg=, data=System.Collections.Hashtable }
 [file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.480]  收到请求：{"reqId":2,"action":"notify","data":"{\"pic\":\"F:\\\\workspace2\\\\front\\\\gmap-ui\\\\main\\\\imgs\\\\succ.png\",\"title\":\"内容已复制\",\"body\":\"https://baidu.com\"}"}
 [file_runner.service.Server] [thread-9] [2022-02-19 00:35:52.484]  返回结果：{ reqId=2, succ=True, msg=, data= }
+[file_runner.Program] [thread-1] [2022-02-19 00:38:18.411]  已接收到主进程id：26008
+[file_runner.service.Server] [thread-48] [2022-02-19 00:51:43.347]  收到请求：{"reqId":1,"action":"search","data":"{\"title\":\"\",\"cont\":\"\",\"both\":\"aa\"}"}
+[file_runner.service.Server] [thread-48] [2022-02-19 00:51:43.420]  返回结果：{ reqId=1, succ=True, msg=, data=System.Collections.Generic.List`1[file_runner.service.SearchHandler+SearchResultItem] }
+[file_runner.service.Server] [thread-52] [2022-02-19 00:51:44.743]  收到请求：{"reqId":2,"action":"search","data":"{\"title\":\"\",\"cont\":\"\",\"both\":\"a\"}"}
+[file_runner.service.Server] [thread-52] [2022-02-19 00:51:44.772]  返回结果：{ reqId=2, succ=True, msg=, data=System.Collections.Generic.List`1[file_runner.service.SearchHandler+SearchResultItem] }
+[file_runner.service.Server] [thread-48] [2022-02-19 00:51:48.865]  收到请求：{"reqId":3,"action":"search","data":"{\"title\":\"\",\"cont\":\"\",\"both\":\"baidu\"}"}
+[file_runner.service.Server] [thread-48] [2022-02-19 00:51:48.871]  返回结果：{ reqId=3, succ=True, msg=, data=System.Collections.Generic.List`1[file_runner.service.SearchHandler+SearchResultItem] }

@@ -139,20 +139,21 @@ const MapsViewer=(props)=>{
     useEffect(()=>{
         const keyHandle=(e)=>{
             //当编辑窗口或新建窗口打开时，不支持查找功能
-            const excludeStates=[editMapDlgVisible, newMapDlgVisible];
-            const isExclude=excludeStates.some(each=>true===each);
+            const isExcludeForFindInFile=[editMapDlgVisible, newMapDlgVisible, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible].some(each=>true===each);
+            const isExcludeForFindInPage= [editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible].some(each=>true===each);
+            const isExcludeForEsc= [editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible].some(each=>true===each);
 
             keyDetector.on(e,{
                 //ctrl+f 网页内查找
                 'ctrl+f':(e)=>{
-                    if(isExclude || findInFileDlgVisible){return;}
+                    if(isExcludeForFindInPage){return;}
                     api.showFindInPageDlg();
                 },
 
                 // ctrl+shift+f 在文件中查询
                 'ctrl+shift+f':(e)=>{
                     (async()=>{
-                        if(isExclude || await api.getFindInPageDlgVisible()){return;}
+                        if(isExcludeForFindInFile || await api.getFindInPageDlgVisible()){return;}
                         showFindInFileDlg();
                     })();
                 },
@@ -160,7 +161,7 @@ const MapsViewer=(props)=>{
 
                 //esc 关闭网页内查找
                 'esc':(e)=>{
-                    if(isExclude){return;}
+                    if(isExcludeForEsc){return;}
                     api.closeFindInPageDlg();
                 },
             });
@@ -168,7 +169,7 @@ const MapsViewer=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, showFindInFileDlg]);
+    },[editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, showFindInFileDlg, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible]);
 
     useEffect(()=>{
         api.closeFindInPageDlg();
