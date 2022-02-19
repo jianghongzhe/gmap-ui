@@ -43,14 +43,17 @@ const init=(_mainWindow)=>{
         //创建查找窗口
         findWin = new BrowserWindow({
             width:          winW,
-            height:         55,
+            height:         56,
             show:           false,      //默认
             parent:         mainWindow,
             x:              -9999,
             y:              -9999,
             resizable:      false,
-            frame:          false,
-            backgroundColor:'#FFFFFF',
+            transparent :   true,
+            frame:          true,
+            titleBarStyle: 'hidden',
+            backgroundColor:'#00FFFFFF',
+            hasShadow:      false,
             webPreferences:     {
                 nodeIntegration:    true,
                 enableRemoteModule: true,

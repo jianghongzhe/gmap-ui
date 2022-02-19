@@ -5,10 +5,13 @@ body{
 }
 
 #root{
-    border:0px solid #DDDDDD;
+    border:1px solid #1890ff;
+    background-color: white;
+    border-radius: 10px;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
+    box-sizing: border-box;
 }
 
 #ipt{
