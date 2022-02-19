@@ -18,25 +18,26 @@ import 'codemirror/addon/scroll/annotatescrollbar';
 import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
 
-import editorSvc from '../../../../service/editorSvc';
+
 import editorSvcEx from '../../../../service/editorSvcEx';
-import { createSelector } from 'reselect';
-import { propertyOf } from 'lodash';
 import { useMemo } from 'react';
 import api from '../../../../service/api';
-
 
 
 /**
  * 编辑器
  * @param {*} props 
  */
-const Editor=(props)=>{
-
+const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange})=>{
     const {activeKey}= useSelector((state)=>({
         activeKey:  state.tabs.activeKey,
     }));
+    const codeMirrorInstRef=useRef(null);
 
+
+    /**
+     * 计算当前导图文件附件的目录，用于插入图片、附件等
+     */
     const currAssetsDir=useMemo(()=>{
         if(!activeKey){
             return null;
@@ -47,13 +48,14 @@ const Editor=(props)=>{
     },[activeKey]);
     
 
-
-    const propsOnSetInst=props.onSetInst;
-    const codeMirrorInstRef=useRef(null);
+    /**
+     * 绑定codemirror对象到本组件和父组件（通过回调函数）
+     */
     const bindCodeMirrorInstRef=useCallback((ele)=>{
         codeMirrorInstRef.current=ele;
-        propsOnSetInst(ele);
-    },[propsOnSetInst]);
+        onSetInst(ele);
+    },[onSetInst, codeMirrorInstRef]);
+
 
     /**
      * 防止默认事件触发的处理
@@ -67,102 +69,8 @@ const Editor=(props)=>{
 
 
     /**
-     * 替换内容并获得焦点
-     * @param {*} originCursor   替换前光标位置
-     * @param {*} originLineLen  替换前光标所在行的长度
-     * @param {*} newCursor      替换后光标位置
-     * @param {*} newLine        替换后整行的内容
-     * @param {*} delayFocus     是否延迟获得焦点
+     * 绑定键盘事件
      */
-    const replaceLine =useCallback((originCursor, originLineLen, newCursor, newLine, delayFocus = false) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-        codeMirrorInst.setCursor(originCursor);
-        codeMirrorInst.setSelection(originCursor, { line: originCursor.line, ch: originLineLen });
-        codeMirrorInst.replaceSelection(newLine);
-        codeMirrorInst.setCursor(newCursor);
-        codeMirrorInst.setSelection(newCursor);
-        codeMirrorInst.focus();
-
-        //对话框刚关闭时，不能马上获得焦点，因此这种情况需要延迟一下
-        if (delayFocus) {
-            setTimeout(() => {
-                codeMirrorInst.setCursor(newCursor);
-                codeMirrorInst.setSelection(newCursor);
-                codeMirrorInst.focus();
-            }, 500);
-        }
-    },[]);
-
-    const onAddColor =useCallback((color = null, delayFocus = false) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-
-        //获得当前光标位置与光标所在行
-        let cursor = codeMirrorInst.getCursor();
-        let { line } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let newLine = editorSvc.setColor(lineTxt, color);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: newLine.length }, newLine, delayFocus);
-    },[replaceLine]);
-
-    const onAddPic = useCallback((picRelaPath,pname) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-
-        //获得当前光标位置与光标所在行     
-        let cursor = codeMirrorInst.getCursor();
-        let { line, ch } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let { newLinetxt, cusorPos } = editorSvc.addPic(lineTxt, ch, picRelaPath,pname);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
-    },[replaceLine]);
-
-    const onAddAtt = useCallback((picRelaPath,pname) => {
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current;
-
-        //获得当前光标位置与光标所在行     
-        let cursor = codeMirrorInst.getCursor();
-        let { line, ch } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        let { newLinetxt, cusorPos } = editorSvc.addAtt(lineTxt, ch, picRelaPath,pname);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
-    },[replaceLine]);
-
-    const onAddDate=useCallback((dateStr)=>{
-        //获得当前光标位置与光标所在行
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const codeMirrorInst=codeMirrorInstRef.current; 
-        let cursor = codeMirrorInst.getCursor();
-        let { line, ch } = cursor;
-        let lineTxt = codeMirrorInst.getLine(line);
-
-        //替换行
-        // let targetDateStr=dateStr.substring(2).replace(/[-]/g,'.');//去掉两位年
-        const targetDateStr=editorSvcEx.toDateFmt(new Date(dateStr));
-        let { newLinetxt, cusorPos } = editorSvc.addDate(lineTxt, ch, targetDateStr);
-        replaceLine({ line, ch: 0 }, lineTxt.length, { line, ch: cusorPos }, newLinetxt, true);
-    },[replaceLine]);
-
-
-
     useEffect(()=>{
         if(!codeMirrorInstRef.current){
             return;
@@ -201,48 +109,37 @@ const Editor=(props)=>{
 
 
     /**
-     * 显示后获取焦点并刷新
+     * 处理由父组件传递进来的事件：
+     * addColor：设置颜色
+     * refresh：刷新codemirror
      */
     useEffect(()=>{
-        if(props.forceRefresh) {
-             const focusFun=()=>{
+        if(!action){
+            return;
+        }
+        if('addColor'===action.type){
+            editorSvcEx.setColor(codeMirrorInstRef.current, action.color, action.delayFocus);
+            return;
+        }
+        if('refresh'===action.type){
+            const focusFun=()=>{
                 if(codeMirrorInstRef.current){
                     codeMirrorInstRef.current.focus();
                     codeMirrorInstRef.current.refresh();
                     return true;
                 }
                 return false;
-             }
-             setTimeout(focusFun, 0);
-        }
-    },[props.forceRefresh]);
-
-    useEffect(()=>{
-        if(!props.action){
+            }
+            setTimeout(focusFun, 0);
             return;
         }
-        if('addColor'===props.action.type){
-            onAddColor(props.action.color, props.action.delayFocus);
-            return;
-        }
-        if('addPic'===props.action.type){
-            onAddPic(props.action.relaPath, props.action.name);
-            return;
-        }
-        if('addAtt'===props.action.type){
-            onAddAtt(props.action.relaPath, props.action.name);
-            return;
-        }
-        if('addDate'===props.action.type){
-            onAddDate(props.action.date);
-        }
-    },[props.action, onAddColor, onAddPic, onAddAtt, onAddDate]);
+    },[action, codeMirrorInstRef]);
 
     
     return <CodeMirror
         css={codeEditorStyle}
         editorDidMount={bindCodeMirrorInstRef}
-        value={props.value}
+        value={value}
         options={{
             lineNumbers: true,
             theme: 'default',
@@ -254,11 +151,11 @@ const Editor=(props)=>{
             extraKeys: {
                 "Ctrl-F": "findPersistent",
                 "Ctrl-G": "jumpToLine",
-                "Ctrl-S": props.onOnlySave,
-                "Shift-Ctrl-S": props.onOk,                                  
+                "Ctrl-S": onOnlySave,
+                "Shift-Ctrl-S": onOk,                                  
                 // "Ctrl-P": props.onShowInsertPicDlg,
                 // "Ctrl-I": props.onShowInsertAttDlg,
-                "Ctrl-H": props.onShowHelpDlg,
+                "Ctrl-H": onShowHelpDlg,
                 // "Ctrl-T": props.onShowDateDlg,
                 
                 "Shift-Ctrl-G": onPreventKey,
@@ -268,8 +165,11 @@ const Editor=(props)=>{
                 "Alt-G":        onPreventKey,
             }
         }}
-        onBeforeChange={props.onChange} />;
+        onBeforeChange={onChange} />;
 };
+
+
+
 
 const codeEditorStyle = {
     '& .CodeMirror': {

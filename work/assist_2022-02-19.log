@@ -11,3 +11,6 @@
 [file_runner.service.Server] [thread-48] [2022-02-19 00:51:48.865]  收到请求：{"reqId":3,"action":"search","data":"{\"title\":\"\",\"cont\":\"\",\"both\":\"baidu\"}"}
 [file_runner.service.Server] [thread-48] [2022-02-19 00:51:48.871]  返回结果：{ reqId=3, succ=True, msg=, data=System.Collections.Generic.List`1[file_runner.service.SearchHandler+SearchResultItem] }
 [file_runner.Program] [thread-1] [2022-02-19 00:54:22.450]  已接收到主进程id：15648
+[file_runner.Program] [thread-1] [2022-02-19 14:11:52.304]  已接收到主进程id：22260
+[file_runner.Program] [thread-1] [2022-02-19 14:17:40.028]  已接收到主进程id：9532
+[file_runner.Program] [thread-1] [2022-02-19 14:56:43.128]  已接收到主进程id：23324

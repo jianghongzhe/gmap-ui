@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect,  useState } from 'react';
 import { Modal, Input, Space, Typography} from 'antd';
 import api from '../../../service/api';
 import {useChange, useBindInputRef} from '../../../common/commonHooks';
@@ -67,7 +67,7 @@ const FindInFileDlg=({visible, onCancel})=>{
             visible={visible}
             title="文件内查找"
             footer={null}
-            width={"80vw"}
+            width={"86vw"}
             onCancel={onCancel}>
         <div>
             <Space direction='vertical' css={inputContainerStyle}>

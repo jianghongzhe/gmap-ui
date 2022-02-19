@@ -429,6 +429,7 @@ const nodes=[
         ['[选择](dir://d:\\a\\b.txt)','// 打开目录并选择指定文件或目录'],
         ['[打开](filex://d:\\a\\b.txt)','// 相当于file、openas、dir、cppath的组合'],
         ['[打开](dirx://d:\\a\\b\\c)','// 相当于file、dir、cppath的组合'],
+        ['[打开](urlx://http://xxx)','// 相当于普通链接、cp的组合'],
         ['[执行](cmd://dir d:\\)','// 执行命令，使用 <span style="color:black;">[space]\\</span> 表示换行'],
         ['[执行](cmdp://ping 127.0.0.1)','// 执行命令并在结尾加一条 pause 指令'],       
         ['[执行](cmdopen://d:\\abc)','// 从命令提示符打开指定目录'],

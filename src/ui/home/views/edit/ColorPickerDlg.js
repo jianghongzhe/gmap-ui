@@ -3,8 +3,6 @@ import React from 'react';
 import { Modal } from 'antd';
 import { CirclePicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
-import { useEffect } from 'react';
-import { useRef } from 'react';
 import generalSvc from '../../../../service/generalSvc';
 
 const EnhDlg=withEnh(Modal);
@@ -17,24 +15,6 @@ const arrowStyle= generalSvc.getDlgTopArrowStyle({left:18 ,top:-6, len:6 ,color:
  * @param {*} props 
  */
 const ColorPickerDlg=({visible, onCancel, onOk})=>{
-    // const dlgRef= useRef();
-
-    // useEffect(()=>{
-    //     const ele=document.querySelector('#globalArrow');
-    //     if(!ele){
-    //         return;
-    //     }
-
-    //     if(visible){
-    //         //const dlgEle=document.querySelector("#colorDlg");
-    //         console.log(dlgRef);
-
-    //         ele.style.display=null;
-    //         return;
-    //     }
-    //     ele.style.display="none";
-    // },[visible]);
-
     return <React.Fragment>
         <EnhDlg noTitle noFooter closable={false} 
                 size={{w: `${dlgW}px`}}
@@ -47,7 +27,6 @@ const ColorPickerDlg=({visible, onCancel, onOk})=>{
                 colors={colors}
                 onChange={onOk} />
         </EnhDlg>
-        
     </React.Fragment> ;
 };
 

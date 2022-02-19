@@ -1063,6 +1063,40 @@ const editorSvcExInstWrapper=(function(){
         cm.doc.setCursor({line:pos.line, ch:pos.ch});
     };
 
+    const setColor=(cm, color, delayFocus = false)=>{
+        let {line} = cm.getCursor();
+        let lineTxt = cm.getLine(line);
+        const originLen=lineTxt.length;
+
+        //拆分成项目符号部分和后面部分
+        let resultLine=lineTxt;
+        let left='';
+        let regStart=/^\t*[-].*$/;
+        if(regStart.test(resultLine)){
+            let ind=resultLine.indexOf("-");
+            left=resultLine.substring(0,ind+1)+" ";
+            resultLine=resultLine.substring(ind+1).trim();
+        }
+
+        //后面部分处理，过滤掉颜色标识
+        let regColor=/^c:.+$/;
+        let right=resultLine.split("|").map(item=>item.trim()).filter(item=>!regColor.test(item)).join("|");
+
+        //把项目符号、颜色（可能有）、后面部分重新拼接
+        resultLine=left+(color?"c:"+color+"|":"")+right;
+        cm.doc.replaceRange(resultLine, {line, ch: 0}, {line, ch: originLen});
+        const focusFun=()=>{
+            cm.setCursor({line, ch:resultLine.length});
+            cm.setSelection({line, ch:resultLine.length});
+            cm.focus();
+        };
+        if(!delayFocus){
+            focusFun();
+            return;
+        }
+        setTimeout(focusFun, 500);
+    };
+
     return {
         gotoDefinition,
         loadAllRefNames,
@@ -1070,6 +1104,7 @@ const editorSvcExInstWrapper=(function(){
         gotoLine,
         toDateFmt,
         copyLine,
+        setColor,
     };
 })();
 

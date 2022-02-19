@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 const useChange=(initVal='')=>{
     const [txt, set]= useState(initVal);

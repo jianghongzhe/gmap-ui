@@ -1,14 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, message, Button,List } from 'antd';
-import { PictureOutlined, QuestionCircleOutlined,CalendarOutlined,FileOutlined } from '@ant-design/icons';
-import {useSelector} from 'react-redux';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import {withEnh} from '../../common/specialDlg';
 
 import HelpDlg from './edit/HelpDlg';
-import InsertImgDlg from './edit/InsertImgDlg';
-import DateDlg from './edit/DateDlg';
 import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
 import ColorPickerDlg from './edit/ColorPickerDlg';
 import Editor from './edit/Editor';
@@ -22,20 +19,10 @@ const EnhDlg=withEnh(Modal);
  * 编辑图表对话框
  */
 const EditGraphDlg=(props)=>{
-    const {winW,winH,activeKey}= useSelector((state)=>({
-        winW:       state.common.winW,
-        winH:       state.common.winH,
-        activeKey:  state.tabs.activeKey,
-    }));
-
-    const [editorForceRefresh, setEditorForceRefresh]= useState(Symbol());
     const [editorAction, setEditorAction]= useState(null);
     const [colorPickerVisible, setColorPickerVisible]=useState(false);
     const [advColorPickerVisible, setAdvColorPickerVisible]=useState(false);
-    const [insertPicDlgVisible, setInsertPicDlgVisible]=useState(false);
     const [helpDlgVisible, setHelpDlgVisible]=useState(false);
-    const [dateDlgVisible, setDateDlgVisible]=useState(false);
-    const [isImg, setIsImg]=useState(true);
     const codeMirrorInstRef=useRef();
     const [refNavDlgVisible, setRefNavDlgVisible]=useState(false);
     const [refNavDlgTitle, setRefNavDlgTitle]=useState("");
@@ -45,16 +32,13 @@ const EditGraphDlg=(props)=>{
     const hideAllDlg =useCallback(() => {
         setColorPickerVisible(false);
         setAdvColorPickerVisible(false);
-        setInsertPicDlgVisible(false);
         setHelpDlgVisible(false);
-        setDateDlgVisible(false);
         setRefNavDlgVisible(false);
-    },[setColorPickerVisible, setAdvColorPickerVisible, setInsertPicDlgVisible, setHelpDlgVisible, setDateDlgVisible, setRefNavDlgVisible]);
+    },[setColorPickerVisible, setAdvColorPickerVisible, setHelpDlgVisible,  setRefNavDlgVisible]);
 
     const showHelpPicDlg = useCallback(() => {
         setHelpDlgVisible(true);
     },[setHelpDlgVisible]);
-
 
 
     //-------------------颜色选择相关-----------------------------------
@@ -85,53 +69,8 @@ const EditGraphDlg=(props)=>{
 
 
 
-    //-------------------增加图片或附件相关-----------------------------------
-    const onAddPic =useCallback((picRelaPath,pname) => {
-        setEditorAction({
-            type:       'addPic',
-            relaPath:   picRelaPath,
-            name:       pname,
-        });
-    },[setEditorAction]);
-
-    const onAddAtt =useCallback((picRelaPath,pname) => {
-        setEditorAction({
-            type:       'addAtt',
-            relaPath:   picRelaPath, 
-            name:       pname,
-        });
-    },[setEditorAction]);
-
-    const showInsertPicDlg =useCallback(() => {
-        setIsImg(true);
-        setInsertPicDlgVisible(true);
-    },[setIsImg, setInsertPicDlgVisible]);
-
-    const showInsertAttDlg=useCallback(()=>{
-        setIsImg(false);
-        setInsertPicDlgVisible(true);
-    },[setIsImg, setInsertPicDlgVisible]);
-
-
-
-
-    //-------------------插入日期相关-----------------------------------    
-    const showDateDlg=useCallback(()=>{
-        setDateDlgVisible(true);
-    },[setDateDlgVisible]);
-
-    const onInsertDate=useCallback((dateStr)=>{
-        if(null===dateStr || ''===dateStr.trim()){
-            message.warn("请选择日期");
-            return;
-        }
-
-        hideAllDlg();
-        setEditorAction({
-            type: 'addDate',
-            date: dateStr.trim(),
-        });        
-    },[hideAllDlg, setEditorAction]);
+    
+    
 
 
     //-------------------显示引用对话框与跳转功能-----------------------------------    
@@ -175,12 +114,12 @@ const EditGraphDlg=(props)=>{
      */
     useEffect(()=>{
         if(props.visible){
-            setEditorForceRefresh(Symbol());
+            setEditorAction({type: 'refresh',});
             setTimeout(() => {
-                setEditorForceRefresh(Symbol());
+                setEditorAction({type: 'refresh',});
             }, 500);
         }
-    },[props.visible, setEditorForceRefresh]);
+    },[props.visible, setEditorAction]);
 
 
     return (
@@ -218,16 +157,12 @@ const EditGraphDlg=(props)=>{
                     </div>
                     <Editor
                         value={props.editTmpTxt}
-                        forceRefresh={editorForceRefresh}
                         action={editorAction}
                         onChange={props.onChangeEditTmpTxt}
                         onOnlySave={props.onOnlySave}
                         onOk={props.onOk}
                         onSetInst={setCodeMirrorInst}
-                        onShowInsertPicDlg={showInsertPicDlg}
-                        onShowInsertAttDlg={showInsertAttDlg}
                         onShowHelpDlg={showHelpPicDlg}
-                        onShowDateDlg={showDateDlg}
                     />
                 </div>
             </EnhDlg>
@@ -251,17 +186,6 @@ const EditGraphDlg=(props)=>{
                 </div>
             </Modal>
 
-            {/*插入图片对话框
-            <InsertImgDlg                    
-                visible={insertPicDlgVisible}
-                isImg={isImg}
-                activeKey={activeKey}
-                onAddPic ={onAddPic}
-                onAddAtt={onAddAtt}
-                onCancel={hideAllDlg}
-            />
-            */}
-
             {/* 颜色选择对话框 */}
             <ColorPickerDlg
                 visible={colorPickerVisible}
@@ -276,17 +200,8 @@ const EditGraphDlg=(props)=>{
             
             {/* 帮助对话框 */}
             <HelpDlg
-                maxBodyH={winH-400+80}
                 visible={helpDlgVisible}
                 onCancel={hideAllDlg}/>
-
-            {/* 插入日期对话框 
-            <DateDlg
-                visible={dateDlgVisible}
-                onCancel={hideAllDlg}
-                onOk={onInsertDate}
-                />
-            */}
         </>
     );
     
@@ -333,16 +248,7 @@ const txtBtnStyle={
     }
 };
 
-const insertImgStyle = {
-    fontSize: 19,
-    marginLeft: 10,
-    color: 'grey',
-    ...baseHoverStyle,
-    '&:hover': {
-        opacity: 0.6,
-        transform: 'skew(-15deg)'
-    }
-}
+
 
 const helpStyle = {
     fontSize: 19,
