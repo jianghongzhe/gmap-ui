@@ -43,7 +43,7 @@ const init=(_mainWindow)=>{
         //创建查找窗口
         findWin = new BrowserWindow({
             width:          winW,
-            height:         56,
+            height:         55,
             show:           false,      //默认
             parent:         mainWindow,
             x:              -9999,
