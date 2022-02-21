@@ -489,7 +489,8 @@ const MapsViewer=(props)=>{
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
                                 onAddMap={onShowNewMapDlg}
-                                onSelectMapItem={onSelectMapItem}/>
+                                onSelectMapItem={onSelectMapItem}
+                                onOpenUpdateApp={api.openUpdateApp}/>
                         </Content>
                 }
             </Layout>

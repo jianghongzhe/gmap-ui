@@ -44,7 +44,7 @@ const Welcome=(props)=>{
                                 <ButtonItem title='打开控制台' className='rbtn' icon={<CodeOutlined />} onClick={props.onOpenBash}/>
                                 <ButtonItem title='开发者工具' className='rbtn' icon={<ControlOutlined />} onClick={props.onShowDevTool}/>
                                 <ButtonItem title='重新载入应用' className='rbtn' icon={<ReloadOutlined />} onClick={props.onReloadApp}/>
-                                <ButtonItem title='检查更新' className='rbtn' icon={<CloudSyncOutlined />} onClick={props.openUpdateApp}/>
+                                <ButtonItem title='检查更新' className='rbtn' icon={<CloudSyncOutlined />} onClick={props.onOpenUpdateApp}/>
                             </div>                               
                         </div>
                     </Col>
