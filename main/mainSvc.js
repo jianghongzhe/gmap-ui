@@ -851,8 +851,8 @@ const openUrl=(url)=>{
 }
 
 
-const searchInFile=({title, cont, both})=>{
-    return sendCmdToServer("search", {title, cont, both});
+const searchInFile=({exp})=>{
+    return sendCmdToServer("search", {exp});
 };
 
 

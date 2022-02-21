@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect,  useState } from 'react';
 import { Modal, Input, Space, Typography} from 'antd';
+import {SearchOutlined} from '@ant-design/icons'
 import api from '../../../service/api';
 import {useChange, useBindInputRef} from '../../../common/commonHooks';
 import {focusRef} from '../../../common/uiUtil';
@@ -14,23 +15,18 @@ const { Title,Paragraph } = Typography;
  * @param {*} param0 
  * @returns 
  */
-const FindInFileDlg=({visible, onCancel})=>{
-    const [title, {change: onTitleChange}]= useChange('');
-    const [cont, {change: onContChange}]= useChange('');
-    const [both, {change: onBothChange}]= useChange('');
+const FindInFileDlg=({visible, onCancel})=>{  
+    const [exp, {change: onExpChange, set: setExp}]= useChange('');
     const [searchResults, setSearchResults]= useState([]);
-
-    const [titleRef, bindTitleRef]= useBindInputRef();
-    const [contRef, bindContRef]= useBindInputRef();
-    const [bothRef, bindBothRef]= useBindInputRef();
+    const [expRef, bindExpRef]= useBindInputRef();
 
 
     // 当显示时使第一个输入框获得焦点
     useEffect(()=>{
         if(visible){
-            focusRef(titleRef, true);
+            focusRef(expRef, true);
         }
-    },[visible, titleRef]);
+    },[visible, expRef]);
 
 
     // 当输入框值有改变时进行查询，同时进行防抖处理
@@ -38,18 +34,18 @@ const FindInFileDlg=({visible, onCancel})=>{
         if(!visible){
             return;
         }
-        if((null==title || ""===title.trim()) && (null==cont || ""===cont.trim()) && (null==both || ""===both.trim())){
+        if(null==exp || ""===exp.trim()){
             setSearchResults([]);
             return;
         }
         (async () => {
             console.log("文件中查找");
-            const result=await api.searchInFile({title, cont, both});
+            const result=await api.searchInFile(exp);
             if(result && true===result.succ){
                 setSearchResults(result.data);
             }
         })();
-    },[title, cont, both, setSearchResults, visible],{wait: 500,});
+    },[exp, setSearchResults, visible],{wait: 500,});
 
     
     /**
@@ -72,19 +68,13 @@ const FindInFileDlg=({visible, onCancel})=>{
         <div>
             <Space direction='vertical' css={inputContainerStyle}>
                 <div>
-                    <label>标题：</label>
-                    <Input className='ipt' size="large"  allowClear={true} value={title} onChange={onTitleChange} ref={bindTitleRef} onPressEnter={focusRef.bind(this, contRef, false)}/>
-                </div>
-                <div>
-                    <label>内容：</label>
-                    <Input className='ipt' size="large" allowClear={true} value={cont} onChange={onContChange} ref={bindContRef} onPressEnter={focusRef.bind(this, bothRef, false)}/>
-                </div>
-                <div>
-                    <label>标题和内容：</label>
-                    <Input className='ipt' size="large"  allowClear={true} value={both} onChange={onBothChange} ref={bindBothRef} onPressEnter={focusRef.bind(this, titleRef, false)}/>
+                    {/* <label>标题和内容：</label> */}
+                    <Input className='ipt' prefix={<SearchOutlined />} 
+                        placeholder="表输入搜索关键词： t:标题、c:正文、f:全文、全文、!不匹配"
+                        size="large"  allowClear={true} value={exp} onChange={onExpChange} ref={bindExpRef} onPressEnter={setExp.bind(this,'')}/>
                 </div>
             </Space>
-            <div css={{marginTop:'40px', maxHeight: 'calc(100vh - 350px)',height: 'calc(100vh - 450px)', overflowY:'auto'}}>
+            <div css={{marginTop:'40px', maxHeight: 'calc(100vh - 400px)',height: 'calc(100vh - 400px)', overflowY:'auto'}}>
                 {
                     searchResults.map((searchItem, ind)=><div css={{cursor:'pointer', marginBottom:'30px'}} onClick={openMap.bind(this, searchItem.fullTitle)}>
                         <Title level={5}>
@@ -127,7 +117,7 @@ const inputContainerStyle={
         marginRight:'10px',
     },
     '& div .ipt':{
-        width:'60%',
+        width:'80%',
     }
 };
 

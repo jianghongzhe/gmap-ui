@@ -46,8 +46,8 @@ class Api{
         ipcRenderer.invoke('openUpdateApp');
     };
 
-    searchInFile=({title, cont, both})=>{
-        return ipcRenderer.invoke('searchInFile', {title, cont, both});
+    searchInFile=(exp)=>{
+        return ipcRenderer.invoke('searchInFile', {exp});
     };
 
 
