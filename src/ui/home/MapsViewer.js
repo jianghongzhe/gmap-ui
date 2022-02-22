@@ -6,13 +6,11 @@ import Welcome from './views/Welcome';
 import OpenGraphDlg from './views/OpenGraphDlg';
 import NewGraphDlg from './views/NewGraphDlg';
 import EditGraphDlg from './views/EditGraphDlg';
-import RelaChartDlg from './views/RelaChartDlg';
 import Toolbar from './views/Toolbar';
 import GraphTabs from './views/GraphTabs';
 import RefViewer from './views/RefViewer';
 import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
-import GantDlg from './views/gantt/GantDlg';
 import StrParamReplaceDlg from './views/StrParamReplaceDlg';
 import {useBoolean} from 'ahooks';
 
@@ -546,19 +544,6 @@ const MapsViewer=(props)=>{
                 visible={progsDlgVisible}
                 progsObj={progsObj}
                 onCancel={closeAllDlg}
-            />
-
-            <GantDlg
-                visible={gantdlgVisible}
-                gantObj={gantObj}
-                onCancel={closeAllDlg}
-            />
-
-            <RelaChartDlg
-                visible={relaChartDlgVisible}
-                onCancel={closeAllDlg}
-                name={graphObj.showname}
-                opts={graphObj.items}
             />
         </React.Fragment>
     );

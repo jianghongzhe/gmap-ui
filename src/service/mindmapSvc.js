@@ -1,5 +1,4 @@
 import mindMapValidateSvc from './mindMapValidateSvc';
-import ganttSvc from './ganttSvc';
 import api from './api';
 
 
@@ -845,22 +844,7 @@ class MindmapSvc {
             return [true,true,link];
         },
 
-        handleGraph:(item, graphs)=>{
-            let graphfPrefixLen = 'graph:'.length;
-            if (!item.startsWith("graph:") || item.length <= graphfPrefixLen) {
-                return [false,false,null];
-            }
-
-            if ('undefined' !== typeof (graphs[item])) {
-                let graph = {
-                    name: item,
-                    showname: item.substring(graphfPrefixLen).trim(),
-                    items: graphs[item],
-                }
-                return [true,true,graph];
-            }
-            return [true,false,null];
-        },
+        
 
         handleLineColor:(item)=>{
             if (!item.startsWith("c:")) {
@@ -935,13 +919,7 @@ class MindmapSvc {
             return [true,true,link];
         },
 
-        handleGant:(item)=>{
-            let gantItem=ganttSvc.parseGantItem(item);
-            if(false===gantItem){
-                return [false,false,null];
-            }
-            return [true,true,gantItem];
-        },
+        
 
         handleProg:(item, progs)=>{
             let progMatchItems=/^p[:]([-]?)([0-9]{1,3})$/.exec(item);
@@ -1003,9 +981,6 @@ class MindmapSvc {
         let root = null;
         let timeline = [];//时间线对象，后面会往里放
         let progs=[];
-        let gantData={
-            gantItems:[],
-        };
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
 
@@ -1013,7 +988,6 @@ class MindmapSvc {
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
-
             let lev = str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
             let txt = str.substring(lev + 1).trim();
             let txts=[txt];
@@ -1024,10 +998,7 @@ class MindmapSvc {
             let ref = [];
             let dateItem = null;
             let prog=null;
-            let gant=null;
-            let graph=null;//关系图
             let forceRight=false;
-
 
             //内容是简单类型，把转换的竖线再恢复回来
             let replTxt=escapeVLine(txt);
@@ -1080,15 +1051,6 @@ class MindmapSvc {
                         }
                         return;
                     }
-                    
-                    //是关系图引用
-                    [handled,hasVal,val]=this.linePartHandlers.handleGraph(item, graphs);
-                    if(handled){
-                        if(hasVal){
-                            graph=val;
-                        }
-                        return;
-                    }
 
                     //是颜色标记  c:red  c:#fcfcfc 
                     [handled,hasVal,val]=this.linePartHandlers.handleLineColor(item);
@@ -1113,17 +1075,6 @@ class MindmapSvc {
                     if(handled){
                         if(hasVal){
                             links.push(val);
-                        }
-                        return;
-                    }
-
-
-                    //是甘特图标识
-                    [handled,hasVal,val]=this.linePartHandlers.handleGant(item);
-                    if(handled){
-                        if(hasVal){
-                            gantData.gantItems.push(val);
-                            gant=gantData;
                         }
                         return;
                     }
@@ -1171,10 +1122,6 @@ class MindmapSvc {
             if(prog){
                 prog.txt=txts;
             }
-            if(gant){
-                gant.gantItems[gant.gantItems.length-1].task=txts;
-            }
-
 
             let nd = {
                 id: nodeIdPrefix+(++nodeIdCounter),
@@ -1193,8 +1140,6 @@ class MindmapSvc {
                 refs: ref,
                 dateItem: dateItem,
                 prog: prog,
-                gant:gant,
-                graph:graph,
                 forceRight: (0===lev?forceRight:false), //只有根节点才有可能设置forceRight，其他节点一律为false
             };
 
@@ -1235,16 +1180,6 @@ class MindmapSvc {
             }
             return t1.fullDate < t2.fullDate ? -1 : 1;
         });
-
-
-        //甘特图处理
-        // console.log("甘",gantData);
-
-        let {data,colKeys,relas}=ganttSvc.parseGantData(gantData.gantItems)
-        gantData.data=data;
-        gantData.colKeys=colKeys;
-        gantData.relas=relas;
-        // console.log(data);
         
         return root;
     }

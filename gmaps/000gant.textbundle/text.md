@@ -1,8 +1,8 @@
 - 常用内容
-	- 222|[](urlx://https://baidu.com)|ref:xx
-	- down|[](dirext://d:\down)
-	- by|[a](openby://D:\c.txt@@emeditor)
-	- @@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)
+	- 222|[](urlx://https://baidu.com)|ref:xx|d:22.2.22,green
+	- down|[](dirext://d:\down)|d:22.2.23
+	- by|[a](openby://D:\c.txt@@emeditor)|p:100
+	- @@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)|p:20
 	
 ***
 # ref:xx
