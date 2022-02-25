@@ -869,6 +869,10 @@ const saveFileFromClipboard=({img, saveDir, saveToPicHost})=>{
     return sendCmdToServer("saveFileFromClipboard", {img, saveDir, saveToPicHost});
 };
 
+const getUrlFromClipboard=(paramsObj)=>{
+    return sendCmdToServer("getUrlFromClipboard", paramsObj);
+};
+
 
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
@@ -1509,6 +1513,7 @@ const ipcHandlers={
     isDevMode: common.isDevMode,
     searchInFile,
     saveFileFromClipboard,
+    getUrlFromClipboard,
 };
 
 /**

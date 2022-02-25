@@ -566,6 +566,22 @@ const editorSvcExInstWrapper=(function(){
                 cm.doc.setCursor({line:pos.line, ch:range[0]+txt.length});
                 return;
             }
+            if("{u}"===exp){
+                event.preventDefault();
+                (async()=>{
+                    let resp=await api.getUrlFromClipboard();
+                    if(resp){
+                        if(true===resp.succ){
+                            const replTxt=`[${resp.data.title}](${resp.data.url})`;
+                            cm.doc.replaceRange(replTxt, {line: pos.line, ch: range[0]}, {line: pos.line, ch: range[1]});
+                            cm.doc.setCursor({line:pos.line, ch:range[0]+replTxt.length});
+                        }else{
+                            api.showNotification("操作有误",resp.msg,"err");
+                        }
+                    }
+                })();
+                return;
+            }
             if("{p}"===exp){
                 event.preventDefault();
                 (async()=>{

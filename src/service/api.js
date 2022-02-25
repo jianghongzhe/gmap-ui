@@ -403,6 +403,10 @@ class Api{
         return ipcRenderer.invoke('saveFileFromClipboard', {img, saveDir, saveToPicHost});
     };
 
+    getUrlFromClipboard=()=>{
+        return ipcRenderer.invoke('getUrlFromClipboard', {});
+    };
+
     /**
      * 复制剪切版中的图片到图片目录
      * @param {*} showName 
