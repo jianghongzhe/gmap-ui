@@ -773,11 +773,25 @@ class MindmapSvc {
      * @returns [
      *      (item, ...)=>[boolean, boolean, value]
      *      //参数：该行文本、其他依赖的对象等 
-     *      //返回：是否已处理、是否有有效的结果值、结果值内容
+     *      //返回：[0]是否已处理、[1]是否有有效的结果值、[2]结果值内容
      * ]
      * 
      */
     linePartHandlers={
+        handleId: (item)=>{
+            if(!item.startsWith("id:") || item.length<="id:".length){
+                return [false,false,null]
+            }
+            return [true,true,item.substring("id:".length).trim()];
+        },
+
+        handleToId:(item)=>{
+            if(!item.startsWith("toid:") || item.length<="toid:".length){
+                return [false,false,null]
+            }
+            return [true,true,item.substring("toid:".length).trim()];
+        },
+
         handleForceRight: (item)=>{
             if ('right:' !== item) {
                 return [false,false,null];
@@ -983,8 +997,9 @@ class MindmapSvc {
         let progs=[];
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
+        const relaLineNds=[];
 
-        let { ndLines, refs, graphs, openers} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, openers} = this.loadParts(arrayOrTxt);
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -999,6 +1014,8 @@ class MindmapSvc {
             let dateItem = null;
             let prog=null;
             let forceRight=false;
+            let logicId=null;
+            let logicToId=null;
 
             //内容是简单类型，把转换的竖线再恢复回来
             let replTxt=escapeVLine(txt);
@@ -1010,7 +1027,7 @@ class MindmapSvc {
             //内容是复合类型，则分别计算每一部分
             if (0 <= replTxt.indexOf("|")) {
                 txts=[];
-                replTxt.split('|').map(txt=>unescapeVLine(txt)).forEach(tmp => {
+                replTxt.split('|').map(txt=>unescapeVLine(txt)).filter(txt=>null!=txt && ""!==txt.trim()).map(txt=>txt.trim()).forEach(tmp => {
                     //=============指定行的项开始======================
                     
                     let item = tmp.trim();
@@ -1021,6 +1038,24 @@ class MindmapSvc {
                     if(handled){
                         if(hasVal){
                             forceRight = val;
+                        }
+                        return;
+                    }
+
+                    // id
+                    [handled,hasVal,val]=this.linePartHandlers.handleId(item);
+                    if(handled){
+                        if(hasVal){
+                            logicId=val;
+                        }
+                        return;
+                    }
+
+                    // toid
+                    [handled,hasVal,val]=this.linePartHandlers.handleToId(item);
+                    if(handled){
+                        if(hasVal){
+                            logicToId=val;
                         }
                         return;
                     }
@@ -1141,9 +1176,13 @@ class MindmapSvc {
                 dateItem: dateItem,
                 prog: prog,
                 forceRight: (0===lev?forceRight:false), //只有根节点才有可能设置forceRight，其他节点一律为false
+                logicId,
+                logicToId,
+                isRelaLineFrom: false,
+                isRelaLineTo: false,
             };
 
-            // console.log("关系图2",nd);
+            
 
 
             //还没有第一个节点，以第一个节点为根节点
@@ -1165,7 +1204,9 @@ class MindmapSvc {
 
             //每次处理完一次记录上个节点
             lastNd = nd;
-
+            if(null!=logicId || null!=logicToId){
+                relaLineNds.push(nd);
+            }
             //-------------数据行结束----------------------
         });
 
@@ -1179,6 +1220,17 @@ class MindmapSvc {
                 return 0;
             }
             return t1.fullDate < t2.fullDate ? -1 : 1;
+        });
+
+        // 关联id与toid
+        relaLineNds.filter(ndFrom=>null!=ndFrom.logicToId).forEach(ndFrom=>{
+            const ndTo=relaLineNds.find(ndTo=>ndTo.logicId===ndFrom.logicToId);
+            if("undefined"===typeof ndTo){
+                return;
+            }
+            ndFrom.toid=ndTo.id;
+            ndFrom.isRelaLineFrom=true;
+            ndTo.isRelaLineTo=true;
         });
         
         return root;
