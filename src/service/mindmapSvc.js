@@ -789,7 +789,18 @@ class MindmapSvc {
             if(!item.startsWith("toid:") || item.length<="toid:".length){
                 return [false,false,null]
             }
-            return [true,true,item.substring("toid:".length).trim()];
+            let result={};
+            item.split(",").filter(each=>null!=each && ""!==each.trim()).map(each=>each.trim()).forEach((each,ind)=>{
+                if(each.startsWith("toid:") && each.length>"toid:".length){
+                    result={...result, id:each.substring("toid:".length).trim()};
+                    return;
+                }
+                if(each.startsWith("c:") && each.length>"c:".length){
+                    result={...result, color:each.substring("c:".length).trim() };
+                    return;
+                }
+            });
+            return [true,true,result];
         },
 
         handleForceRight: (item)=>{
@@ -1016,6 +1027,7 @@ class MindmapSvc {
             let forceRight=false;
             let logicId=null;
             let logicToId=null;
+            let relaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
 
             //内容是简单类型，把转换的竖线再恢复回来
             let replTxt=escapeVLine(txt);
@@ -1055,7 +1067,10 @@ class MindmapSvc {
                     [handled,hasVal,val]=this.linePartHandlers.handleToId(item);
                     if(handled){
                         if(hasVal){
-                            logicToId=val;
+                            logicToId=val.id;
+                            if(val.color){
+                                relaLineColor=val.color;
+                            }
                         }
                         return;
                     }
@@ -1178,6 +1193,7 @@ class MindmapSvc {
                 forceRight: (0===lev?forceRight:false), //只有根节点才有可能设置forceRight，其他节点一律为false
                 logicId,
                 logicToId,
+                relaLineColor,
                 isRelaLineFrom: false,
                 isRelaLineTo: false,
             };

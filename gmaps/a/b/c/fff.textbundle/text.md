@@ -1,9 +1,9 @@
 - fff|tref:xxx
-	- 分主题
-	- c:#1890ff|带颜色的分主题
-	- 带说明的分主题|m:balabala
+	- 分主题|toid:xx,c:gray
+	- c:#1890ff|带颜色的分主题|toid:xx
+	- 带说明的分主题|m:balabala|toid:xx,c:#1890ff
 	- 带链接的分主题|[](diropenby://F:\workspace2\front\ims@@code)
-	- 带引用的分主题|ref:长段文字
+	- 带引用的分主题|ref:长段文字|id:xx
 
 ***
 # tref:xxx
