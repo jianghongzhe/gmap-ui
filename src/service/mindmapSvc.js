@@ -1133,10 +1133,13 @@ class MindmapSvc {
                     [handled,hasVal,val]=this.linePartHandlers.handleProg(item, progs);
                     if(handled){
                         if(hasVal){
-                            if(null==prog){
+                            if(!prog){
                                 prog=val;
                                 progs.push(prog);//保持加入的顺序不变，后面不用排序
+                                return;
                             }
+                            prog=val;
+                            progs[progs.length-1]=prog;
                         }
                         return;
                     }

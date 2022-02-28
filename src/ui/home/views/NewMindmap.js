@@ -224,6 +224,7 @@ const defaultWrapperStyle={
         verticalAlign: 'bottom',
         // backgroundColor: 'lightblue',
         ...outOfViewStyle,
+        zIndex:2,
     },
 
     '& .expBtn':{
