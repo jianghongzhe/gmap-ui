@@ -3,7 +3,7 @@
 	- down|[](dirext://d:\down)|d:22.2.23
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100
 	- @@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)|p:20
-	- by|[a](openby://D:\c.txt@@emeditor)|p:100|p:100
+	- bytto|[a](openby://D:\c.txt@@emeditor)|p:100
 		- by|[a](openby://D:\c.txt@@emeditor)
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100
