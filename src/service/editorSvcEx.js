@@ -518,6 +518,44 @@ const editorSvcExInstWrapper=(function(){
     };
 
 
+    const getFirstGeneralTxt=(line)=>{
+        const vlineEscapeTxt='___vline___';
+        const escapeVLineReg=/[\\][|]/g;
+        const unescapeVLineReg=new RegExp(vlineEscapeTxt,"g");
+        const escapeVLine=(str)=>str.replace(escapeVLineReg,vlineEscapeTxt);
+        const unescapeVLine=(str)=>str.replace(unescapeVLineReg,'|');
+    
+        const fixVals=['right:','zip:','r','t'];
+        const prefixs=["id:","toid:","ref:","tref:","c:","m:","p:","d:"];
+        const regs=[/^\[.*?\]\(.+?\)$/];
+    
+        line=line.trim();
+        const generalTxts=escapeVLine(line.startsWith("- ") ? line.substring(2) : line).split("|")
+                .map(item=>unescapeVLine(item))
+                .filter(item=>null!=item && ""!==item.trim())
+                .map(item=>item.trim())
+                .filter(item=>{
+            for(let fixVal of fixVals){
+                if (fixVal === item) {
+                    return false;
+                }
+            }
+            for(let prefix of prefixs){
+                if (item.startsWith(prefix) && item.length > prefix.length) {
+                    return false;
+                }
+            }
+            for(let reg of regs){
+                if (reg.test(item)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return (generalTxts.length>0 ? generalTxts[0] : false);
+    };
+
+
     /**
      * 跳到当前光标位置对应的ref:xx或tref:xx的定义处，如果没有找到定义，则自动创建。
      * 如果当前光标不在有效的节点处，或当前位置不存在ref:xx或tref:xx，则不做操作。
@@ -541,6 +579,27 @@ const editorSvcExInstWrapper=(function(){
             event.preventDefault();
             cm.doc.replaceRange("![图片]()", {line: pos.line, ch: pos.ch-1}, {line: pos.line, ch: pos.ch});
             cm.doc.setCursor({line:pos.line, ch:pos.ch+5});
+            return;
+        }
+        // [f -> [](file:///)
+        if(pos.ch>=2 && '[f'===line.substring(pos.ch-2,pos.ch)){
+            event.preventDefault();
+            const txt="[](file:///)";
+            cm.doc.replaceRange(txt, {line: pos.line, ch: pos.ch-2}, {line: pos.line, ch: pos.ch});
+            cm.doc.setCursor({line:pos.line, ch:pos.ch-2+txt.length-1});
+            return;
+        }
+        // |t -> |tref:qqxx
+        // |r -> |ref:mmnn
+        if(pos.ch===line.length && (line.endsWith("|t") || line.endsWith("|r"))){
+            const name=getFirstGeneralTxt(line);
+            if(false===name){
+                return;
+            }
+            event.preventDefault();
+            const txt=(line.endsWith("|t") ? "ref" : "ef")+":"+name;
+            cm.doc.replaceRange(txt, {line: pos.line, ch: pos.ch}, {line: pos.line, ch: pos.ch});
+            cm.doc.setCursor({line:pos.line, ch:pos.ch+txt.length});
             return;
         }
 
