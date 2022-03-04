@@ -10,10 +10,8 @@
 
 #### 部署
 - npm run build：打包react项目到build目录
-- main.js中要指定启动的静态页：mainWindow.loadFile(__dirname+'\\build\\index.html');
-- 复制package.json、main.js、build目录到electron预编译目录的resources/app下
+- 复制如下指定内容目录到electron预编译目录的resources/app下
 
-#### 部署目录说明
 |目录或文件名|说明|
 |-|-|
 |main|主进程相关文件，其中包含启动入口|
