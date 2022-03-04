@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect,  useState } from 'react';
-import { Modal, Input, Space, Typography} from 'antd';
+import { Modal, Input, Space, Typography, Empty} from 'antd';
 import {SearchOutlined} from '@ant-design/icons'
 import api from '../../../service/api';
 import {useChange, useBindInputRef} from '../../../common/commonHooks';
@@ -72,6 +72,9 @@ const FindInFileDlg=({visible, onCancel})=>{
                     <Input className='ipt' prefix={<SearchOutlined />} 
                         placeholder="请输入搜索关键词：  t:标题 、 c:正文 、 f:全文 、 全文 、 !不匹配 、 并列条件1 并列条件2"
                         size="large"  allowClear={true} value={exp} onChange={onExpChange} ref={bindExpRef} onPressEnter={setExp.bind(this,'')}/>
+                    {
+                        (searchResults && searchResults.length>0) && <span className='matchCntTxt'>共 <span className='num'>{searchResults.length}</span> 个匹配项</span>
+                    }
                 </div>
             </Space>
             <div css={{marginTop:'40px', maxHeight: 'calc(100vh - 400px)',height: 'calc(100vh - 400px)', overflowY:'auto'}}>
@@ -84,6 +87,9 @@ const FindInFileDlg=({visible, onCancel})=>{
                             { searchItem.contParts.map((item,ind)=><ResultItem key={"cont-"+ind} data={item} bold={true}/>) }   
                         </Paragraph>
                     </div>)
+                }
+                {
+                    (null==searchResults || 0===searchResults.length) && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 }
             </div>
         </div>
@@ -118,7 +124,19 @@ const inputContainerStyle={
     },
     '& div .ipt':{
         width:'80%',
-    }
+    },
+    '& div .matchCntTxt':{
+        marginLeft:'30px',
+        fontSize:'16px',
+    },
+    '& div .matchCntTxt > .num':{
+        fontWeight:'bold',
+        fontSize:'20px',
+        color:'red',
+    },
+
+    
+    
 };
 
 
