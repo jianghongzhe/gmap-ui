@@ -1214,6 +1214,9 @@ class MindmapSvc {
             if (null == root) {
                 root = nd;
                 lastNd = nd;
+                if(null!=logicId || null!=logicToId){
+                    relaLineNds.push(nd);
+                }
                 return;
             }
 

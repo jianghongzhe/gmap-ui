@@ -370,6 +370,8 @@ const putRelaLines=(ndStyles)=>{
                 pos.x2=rect2.left-rect1.left-rect1.width;
                 scaleX(-4);
                 typeX=1;
+
+                console.log("左->右，无重叠部分");
             }
             // 右->左，无重叠部分
             else if(rect2.left+rect2.width<rect1.left){
@@ -399,6 +401,8 @@ const putRelaLines=(ndStyles)=>{
                 pos.y2=rect2.top-rect1.top-rect1.height;
                 scaleY(-4);
                 typeY=1;
+
+                console.log("上->下，无重叠部分");
             }
             // 下->上，无重叠部分
             else if(rect2.top+rect2.height<rect1.top){
@@ -421,24 +425,32 @@ const putRelaLines=(ndStyles)=>{
                 pos.h=toCenter[1]-fromCenter[1];
                 pos.y1=0;
                 pos.y2=toCenter[1]-fromCenter[1];
+
+                console.log("111 "+pos.w+" "+pos.h);
             }
-            if(2===typeY && (1===typeX || 2===typeX) && pos.w>pos.h){
+            else if(2===typeY && (1===typeX || 2===typeX) && pos.w>pos.h){
                 pos.t=toCenter[1];
                 pos.h=fromCenter[1]-toCenter[1];
                 pos.y1=fromCenter[1]-toCenter[1];
                 pos.y2=0;
+
+                console.log("222");
             }
-            if(1===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
+            else if(1===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
                 pos.l=fromCenter[0];
                 pos.w=toCenter[0]-fromCenter[0];
                 pos.x1=0;
                 pos.x2=toCenter[0]-fromCenter[0];
+
+                console.log("333 "+pos.w+" "+pos.h);
             }
-            if(2===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
+            else if(2===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
                 pos.l=toCenter[0];
                 pos.w=fromCenter[0]-toCenter[0];
                 pos.x1=fromCenter[0]-toCenter[0];
                 pos.x2=0;
+
+                console.log("444");
             }
 
 

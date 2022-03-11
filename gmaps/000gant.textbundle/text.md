@@ -1,5 +1,5 @@
-- 常用内容|ref:常用内容
-	- 222|[](urlx://https://baidu.com)|d:22.2.22,green|toid:xx
+- 常用内容|ref:常用内容|toid:xx
+	- 222|[](urlx://https://baidu.com)|d:22.2.22,green
 	- down|[](dirext://d:\down)|d:22.2.23
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100
 	- @@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)|p:20
@@ -8,8 +8,9 @@
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100|ref:by2
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100
 	- by|[a](openby://D:\c.txt@@emeditor)|p:100
-		- by|[a](openby://D:\c.txt@@emeditor)|p:100|id:xx
-	- by|[a](openby://D:\c.txt@@emeditor)|p:100|ref:xx
+		- by|[a](openby://D:\c.txt@@emeditor)|p:100
+			- qqq
+	- by|[a](openby://D:\c.txt@@emeditor)|p:100|ref:xx|id:xx
 	
 ***
 # ref:常用内容
