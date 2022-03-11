@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
+import api from '../../../service/api';
 
 
 const { Header } = Layout;
@@ -50,6 +51,9 @@ const Toolbar=(props)=>{
             </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
                 <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={props.onReloadApp}  />
+            </Tooltip>
+            <Tooltip color='cyan' placement="bottomLeft" title='版本发布说明'>
+                <Button shape='circle' icon={<HistoryOutlined />} className='toolbtn' type='default' size='large' onClick={api.openReleaseNote}  />
             </Tooltip>
             <Tooltip color='cyan' placement="bottomLeft" title='检查更新'>
                 <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCheckUpdate}  />

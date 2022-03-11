@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, {  useEffect, useState } from 'react';
 import { Button,Row, Col, Avatar,Tooltip   } from 'antd';
-import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined,CloudSyncOutlined } from '@ant-design/icons';
+import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined,CloudSyncOutlined,HistoryOutlined } from '@ant-design/icons';
 
 import logourl from '../../../assets/logo.jpg';
 import api from '../../../service/api';
@@ -39,12 +39,21 @@ const Welcome=(props)=>{
                             <p><Avatar size={256} src={logourl}/></p>
                             <p className='appname'>{appInfo.showname}<span className='ver'>V{appInfo.version}</span></p>
                             <div className='btns'>
-                                <Button type="primary"  icon={<PlusOutlined />} size='large' onClick={props.onAddMap}>新建</Button>
-                                <ButtonItem title='打开目录' className='r2btn' icon={<FolderOutlined />} onClick={props.onOpenMapsDir}/>
-                                <ButtonItem title='打开控制台' className='rbtn' icon={<CodeOutlined />} onClick={props.onOpenBash}/>
-                                <ButtonItem title='开发者工具' className='rbtn' icon={<ControlOutlined />} onClick={props.onShowDevTool}/>
-                                <ButtonItem title='重新载入应用' className='rbtn' icon={<ReloadOutlined />} onClick={props.onReloadApp}/>
-                                <ButtonItem title='检查更新' className='rbtn' icon={<CloudSyncOutlined />} onClick={props.onOpenUpdateApp}/>
+                                <div>
+                                    <ButtonItem title='打开目录'  icon={<FolderOutlined />} onClick={props.onOpenMapsDir}/>
+                                    <ButtonItem title='打开控制台' className='rbtn' icon={<CodeOutlined />} onClick={props.onOpenBash}/>
+                                    <ButtonItem title='开发者工具' className='rbtn' icon={<ControlOutlined />} onClick={props.onShowDevTool}/>
+                                    <ButtonItem title='重新载入应用' className='rbtn' icon={<ReloadOutlined />} onClick={props.onReloadApp}/>
+                                    <ButtonItem title='版本发布说明' className='rbtn' icon={<HistoryOutlined />} onClick={api.openReleaseNote}/>
+                                    <ButtonItem title='检查更新' className='rbtn' icon={<CloudSyncOutlined />} onClick={props.onOpenUpdateApp}/>
+                                </div>
+                                <div css={{marginTop:'20px'}}>
+                                    <div css={{width:'280px',marginLeft:'auto',marginRight:'auto',}}>
+                                        <Button type="primary" block  icon={<PlusOutlined />} size='large' onClick={props.onAddMap}>新建</Button>
+                                    </div>
+                                </div> 
+                                
+                                
                             </div>                               
                         </div>
                     </Col>
@@ -77,7 +86,7 @@ const logoWrapperStyle={
         'marginLeft':30
     },
     '& .btns':{
-        'marginTop':20
+        marginTop:50,
     },
     '& .btns .rbtn':{
         'marginLeft':10

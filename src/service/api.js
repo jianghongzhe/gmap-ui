@@ -39,6 +39,13 @@ class Api{
         return ipcRenderer.invoke('getFindInPageVisible');
     };
 
+    /***
+     * 打开版本历史
+     */
+    openReleaseNote=()=>{
+        this.openUrl("https://gitee.com/gigi198436/gmap-ui/releases");
+    };
+
     /**
      * 打开自动更新程序
      */
