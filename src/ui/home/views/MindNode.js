@@ -269,7 +269,7 @@ const MindNode=(props)=>{
                                 type="link" 
                                 size='small' 
                                 className='themebtn'
-                                icon={<ReadOutlined className='themebtnicon' css={colors.ref}/>}  
+                                icon={<ReadOutlined className='themebtnicon' css={refItem.combined ? colors.combinedRef : colors.ref}/>}  
                                 onClick={props.onOpenRef.bind(this,refItem)}/>
                         </span>
                     </Tooltip>
@@ -348,6 +348,7 @@ const themeIconStyle={
 };
 
 const colors={
+    combinedRef: {color:'#1890ff'},
     ref: {color:'#faad14'},
     memo: {color:'#faad14'},
     link: {color:'#1890ff'},

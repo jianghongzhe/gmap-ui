@@ -1009,8 +1009,9 @@ class MindmapSvc {
         let nodeIdCounter=0;
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
         const relaLineNds=[];
+        let refNames=[];
 
-        let { ndLines, refs, openers, refNames} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, openers} = this.loadParts(arrayOrTxt);
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -1088,6 +1089,9 @@ class MindmapSvc {
                     [handled,hasVal,val]=this.linePartHandlers.handleRef(item, refs);
                     if(handled){
                         if(hasVal){
+                            if(!refNames.includes(val.name)){
+                                refNames.push(val.name);
+                            }
                             ref.push(val);
                         }
                         return;
@@ -1260,7 +1264,7 @@ class MindmapSvc {
         refNames.forEach(refName=>{
             if('undefined'!== typeof(refs[refName])){
                 ++refCnt;
-                allRefs+=refName.replace("ref:","")+"\n"+refs[refName]+"\n\n";
+                allRefs+=refName.replace("ref:","# ")+"\n"+refs[refName]+"\n\n";
             }
         });
         if(refCnt>=2){
@@ -1269,6 +1273,7 @@ class MindmapSvc {
                 showname: "全部引用",
                 txt: allRefs,
                 parsedTxt: null,
+                combined:true,
             };
             root.refs.push(sumRef);
         }
@@ -1386,9 +1391,6 @@ class MindmapSvc {
         let ndLines = [];
         let currRefName = null;
         let alreadyHandleRefs = false;
-        let refNames=[];
-
-        
 
         alltxts.trim().replace(/\r/g, '').split("\n").forEach(line => {
             if ("***" === line.trim() && !alreadyHandleRefs) {
@@ -1434,9 +1436,6 @@ class MindmapSvc {
                     openers[openerId]=openerContent;
                 }
             }else if(currRefName.startsWith("ref:")){
-                if(!refNames.includes(currRefName)){
-                    refNames.push(currRefName);
-                }
                 //是已记录过的引用
                 if ("undefined" !== typeof (refs[currRefName])) {
                     refs[currRefName] += '\n' + line;
@@ -1514,7 +1513,7 @@ class MindmapSvc {
         });
 
 
-        return { ndLines, refs, graphs, openers, refNames};
+        return { ndLines, refs, graphs, openers};
     }
 
     setLeaf = (nd) => {
