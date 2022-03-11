@@ -1010,7 +1010,7 @@ class MindmapSvc {
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
         const relaLineNds=[];
 
-        let { ndLines, refs, openers} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, openers, refNames} = this.loadParts(arrayOrTxt);
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -1253,7 +1253,25 @@ class MindmapSvc {
             ndFrom.isRelaLineFrom=true;
             ndTo.isRelaLineTo=true;
         });
-        
+
+        // 把所有引用的内容合并在一起，如果超过两个引用，则放到根节点中，否则不处理
+        let refCnt=0;
+        let allRefs="";
+        refNames.forEach(refName=>{
+            if('undefined'!== typeof(refs[refName])){
+                ++refCnt;
+                allRefs+=refName.replace("ref:","")+"\n"+refs[refName]+"\n\n";
+            }
+        });
+        if(refCnt>=2){
+            const sumRef={
+                name: "ref:全部引用",
+                showname: "全部引用",
+                txt: allRefs,
+                parsedTxt: null,
+            };
+            root.refs.push(sumRef);
+        }
         return root;
     }
 
@@ -1368,6 +1386,7 @@ class MindmapSvc {
         let ndLines = [];
         let currRefName = null;
         let alreadyHandleRefs = false;
+        let refNames=[];
 
         
 
@@ -1415,6 +1434,9 @@ class MindmapSvc {
                     openers[openerId]=openerContent;
                 }
             }else if(currRefName.startsWith("ref:")){
+                if(!refNames.includes(currRefName)){
+                    refNames.push(currRefName);
+                }
                 //是已记录过的引用
                 if ("undefined" !== typeof (refs[currRefName])) {
                     refs[currRefName] += '\n' + line;
@@ -1492,7 +1514,7 @@ class MindmapSvc {
         });
 
 
-        return { ndLines, refs, graphs, openers};
+        return { ndLines, refs, graphs, openers, refNames};
     }
 
     setLeaf = (nd) => {
