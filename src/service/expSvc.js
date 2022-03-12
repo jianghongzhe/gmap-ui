@@ -1,9 +1,12 @@
 import api from './api';
 
 class ExpSvc{
-    expHtml=(title='', content='')=>{
+    expHtml=(title='', content='', preHandle=false)=>{
         (async()=>{
             try{
+                if(preHandle){
+                    content=this.preHandleMDBeforeExport(content);
+                }
                 const path= await api.openSaveFileDlg("html");
                 const basePath=await api.getBasePath();
                 let txt=await api.load(`${basePath}\\tmpl_exp_html.html`);
@@ -20,9 +23,12 @@ class ExpSvc{
         })();
     };
 
-    expMarkdown=(content='')=>{
+    expMarkdown=(content='', preHandle=false)=>{
         (async()=>{
             try{
+                if(preHandle){
+                    content=this.preHandleMDBeforeExport(content);
+                }
                 const path=await api.openSaveFileDlg("md");
                 await api.save(path, content);
                 api.showNotification('操作成功', '已导出markdown', 'succ');
@@ -34,6 +40,11 @@ class ExpSvc{
                 console.log(e);
             }
         })();
+    };
+
+    preHandleMDBeforeExport=(mdTxt)=>{
+        // todo
+        return mdTxt;
     };
 }
 
