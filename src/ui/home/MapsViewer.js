@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
 import keyDetector from '../../common/keyDetector';
 import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
+import expSvc from '../../service/expSvc';
 
 const { Content } = Layout;
 
@@ -280,23 +281,32 @@ const MapsViewer=(props)=>{
 
 
     const onExpHtml=useCallback(()=>{
-        // panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
-        //     const fromInd=item.key.lastIndexOf("\\")+1;
-        //     const name=item.key.substring(fromInd,item.key.length-3);
-        //     console.log(name);
-        //     expSvc.expHtml(name,marked(item.mapTxts));
-        // });
-        api.expHtml(activeKey);
-
+        (async ()=>{
+            const exists=await api.existsFullpath(activeKey);
+            if(!exists){
+                api.showNotification("无法导出html",`路径不存在：\n${activeKey}`,"err");
+                return;
+            }
+            const content=await api.load(activeKey);
+            const handledContent=expSvc.preHandleMDBeforeExport(content);
+            console.log(activeKey);
+            api.expHtml(activeKey,null,handledContent);
+        })();
     },[activeKey/*, panes*/]);
 
     
     const onExpMarkdown=useCallback(()=>{
-        api.expMarkdown(activeKey);
-
-        // panes.filter(item=>activeKey===item.key).forEach((item,ind)=>{
-        //     expSvc.expMarkdown(item.mapTxts);
-        // });
+        (async ()=>{
+            const exists=await api.existsFullpath(activeKey);
+            if(!exists){
+                api.showNotification("无法导出Markdown",`路径不存在：\n${activeKey}`,"err");
+                return;
+            }
+            const content=await api.load(activeKey);
+            const handledContent=expSvc.preHandleMDBeforeExport(content);
+            console.log(activeKey);
+            api.expMarkdown(activeKey,null,handledContent);
+        })();
     },[activeKey/*, panes*/]);
 
 

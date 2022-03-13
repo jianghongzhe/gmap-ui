@@ -43,9 +43,65 @@ class ExpSvc{
     };
 
     preHandleMDBeforeExport=(mdTxt)=>{
-        // todo
-        return mdTxt;
+        let hasReachRefPart=false;
+        let resultLines=[];
+        let idInd=0;
+        const refNameIdMap={};
+
+        mdTxt.replace(/\r/g,"").split("\n").forEach(line=>{
+            let lineTrim=line.trim();
+
+            // 节点和引用的分隔符
+            if("***"===lineTrim && !hasReachRefPart){
+                hasReachRefPart=true;
+                resultLines.push("***");
+                return;
+            }
+
+            // 节点部分
+            if(!hasReachRefPart){
+                let handledLine=line;
+                extractRefNames(line).forEach(refPart=>{
+                    const refName=refPart.substring("ref:".length);
+                    const refId=`ref${++idInd}`;
+                    const anchorMd=`[${refName}](#${refId})`;
+                    handledLine=handledLine.replace(refPart, anchorMd);
+                    refNameIdMap[refPart]=refId;
+                });
+                resultLines.push(handledLine);
+                return;
+            }
+
+            // 引用部分
+            if(lineTrim.startsWith("# ref:")){
+                const refName=lineTrim.substring("# ".length);
+                if('undefined'!==typeof(refNameIdMap[refName])){
+                    resultLines.push(`${lineTrim.replace("ref:","")} <span id="${refNameIdMap[refName]}"> </span>`);
+                    return;
+                }
+                resultLines.push(`${lineTrim.replace("ref:","")}`);
+                return;
+            }
+            resultLines.push(line);
+        });
+        return resultLines.join("\r\n");
     };
 }
+
+
+/**
+ * 从节点行中提取引用部分
+ * @param ndLine
+ * @returns ["ref:aa", "ref:bb"]
+ */
+ const extractRefNames=(ndLine)=>{
+    ndLine=ndLine.trim();
+    if(ndLine.startsWith("- ")){
+      ndLine=ndLine.substring(2).trim();
+    }
+    return ndLine.replace(/[\\][|]/g,"___vline___").split("|")
+            .map(item=>item.replace(/___vline___/g,"|").trim())
+            .filter(item=>item.startsWith("ref:"));
+  };
 
 export default new ExpSvc();
