@@ -178,6 +178,9 @@ const editorSvcExInstWrapper=(function(){
         if(part.startsWith("tref:") && part.length>"tref:".length){
             return part;
         }
+        if(part.startsWith("toid:") && part.length>"toid:".length){
+            return part;
+        }
         return null;
     };
 
@@ -760,6 +763,22 @@ const editorSvcExInstWrapper=(function(){
             if(!exists){
                 createRefOrTref(name, cm, doc);
             }
+            return;
+        }
+        if(name.startsWith("toid:")){
+            // |id:xxx|
+            const exp="|"+name.substring(2).trim()+"|";
+            doc.nodes.filter(nd=>{
+                let txt=nd.txt.trim();
+                if(txt.startsWith("- ")){
+                    txt=txt.substring(2).trim();
+                }
+                txt="|"+txt+"|";
+                return txt.includes(exp);
+            }).forEach(nd=>{
+                gotoLine(cm, nd.ind, nd.ind);
+                cm.doc.setCursor({line:nd.ind, ch:nd.txt.length});
+            });
             return;
         }
     };
