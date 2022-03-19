@@ -1172,6 +1172,79 @@ const editorSvcExInstWrapper=(function(){
         setTimeout(focusFun, 500);
     };
 
+    /**
+     * 设置光标所在行为指定级别的标题
+     * @param {*} cm 
+     * @param {*} titleLev 标题级别0-6，如果为0表示去掉标题标识符
+     */
+    const setTitle=(cm, titleLev)=>{
+        let {line} = cm.getCursor();
+        let lineTxt = cm.getLine(line);
+        const len=lineTxt.length;
+        const prefix=(0===titleLev?"":"#".repeat(titleLev)+" ");
+        const newData=prefix+lineTxt.replace(/^[ 　\t]*[#]+ (.*)$/,"$1").trim();
+        cm.doc.replaceRange(newData, {line, ch: 0}, {line, ch: len});
+        cm.doc.setCursor({line, ch:newData.length});
+    };
+
+    const setBold=(cm)=>{
+        setWrapperMark(cm,"**");
+    };
+
+    const setItalic=(cm)=>{
+        setWrapperMark(cm,"*");
+    };
+
+    const setStrikeLine=(cm)=>{
+        setWrapperMark(cm,"~~");
+    };
+
+    const setWrapperMark=(cm, mark)=>{
+        let sel=cm.doc.listSelections();
+        if(!sel[0]){
+            return;
+        }
+        sel=sel[0];
+        
+        // 没有选中区域
+        if(sel.anchor.line===sel.head.line && sel.anchor.ch===sel.head.ch){
+            const replTxt=mark.repeat("2");
+            cm.doc.replaceRange(replTxt, sel.anchor, sel.anchor);
+            cm.doc.setCursor({line:sel.anchor.line, ch:sel.anchor.ch+replTxt.length/2});
+            return;
+        }
+        // 有选中区域，在同一行，如果是从后向前选择，则需要交换后处理
+        if(sel.anchor.line===sel.head.line && sel.anchor.ch!==sel.head.ch){
+            let from=sel.anchor;
+            let to=sel.head;
+            if(sel.anchor.ch > sel.head.ch){
+                from=sel.head;
+                to=sel.anchor;
+            }
+            to={line:to.line, ch:to.ch+mark.length};
+            cm.doc.replaceRange(mark, from, from);
+            cm.doc.replaceRange(mark, to , to);
+            cm.doc.setCursor(to);
+            return;
+        }
+        // 有选中区域，不在同一行
+        cm.doc.replaceRange(mark, sel.anchor, sel.anchor);
+        cm.doc.replaceRange(mark, sel.head , sel.head);
+        cm.doc.setCursor(sel.head);
+    };
+
+    const clearSelection=(cm)=>{
+        let sel=cm.doc.listSelections();
+        if(!sel[0]){
+            return;
+        }
+        sel=sel[0];
+        if(sel.anchor.line===sel.head.line && sel.anchor.ch===sel.head.ch){
+            return;
+        }
+        cm.doc.setCursor(sel.anchor);
+    };
+
     return {
         gotoDefinition,
         loadAllRefNames,
@@ -1180,6 +1253,11 @@ const editorSvcExInstWrapper=(function(){
         toDateFmt,
         copyLine,
         setColor,
+        setTitle,
+        setBold,
+        setItalic,
+        setStrikeLine,
+        clearSelection,
     };
 })();
 

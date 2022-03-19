@@ -78,9 +78,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
 
         /**
          * 键盘事件处理：
-         * tab：转到定义处
-         * ctrl+alt+下：复制当前行到下一行
-         * ctrl+alt+上：复制当前行到上一行
+         * tab：自动完成
          * @param {*} instance 
          * @param {*} event 
          * @returns 
@@ -90,22 +88,41 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                 editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
                 return;
             }
-            if("ArrowUp"===event.code && event.altKey && !event.shiftKey && event.ctrlKey){
-                event.preventDefault();
-                editorSvcEx.copyLine(instance, false);
-                return;
-            }
-            if("ArrowDown"===event.code && event.altKey && !event.shiftKey && event.ctrlKey){
-                event.preventDefault();
-                editorSvcEx.copyLine(instance, true);
-                return;
-            }
         };
         codeMirrorInstRef.current.on("keydown", keyDownHandler);
         return ()=>{
             codeMirrorInstRef.current.off("keydown", keyDownHandler);
         };
     },[currAssetsDir]);
+
+
+    const copyLine=useCallback((down=true, cm=null)=>{
+        window.event.preventDefault();
+        editorSvcEx.copyLine(cm, down);
+    },[]);
+
+
+    const setTitle=useCallback((lev)=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        editorSvcEx.setTitle(codeMirrorInstRef.current, lev);
+    },[]);
+
+    const setWrapperMark=useCallback((func)=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        func(codeMirrorInstRef.current);
+    },[]);
+
+    const clearSelection=useCallback(()=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        onPreventKey();
+        editorSvcEx.clearSelection(codeMirrorInstRef.current);
+    },[onPreventKey]);
 
 
     /**
@@ -153,16 +170,27 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                 "Ctrl-G": "jumpToLine",
                 "Ctrl-S": onOnlySave,
                 "Shift-Ctrl-S": onOk,                                  
-                // "Ctrl-P": props.onShowInsertPicDlg,
-                // "Ctrl-I": props.onShowInsertAttDlg,
+                // "Ctrl-P": props.onShowInsertPicDlg,               
+                "Ctrl-B": setWrapperMark.bind(this,editorSvcEx.setBold),
+                "Ctrl-I": setWrapperMark.bind(this,editorSvcEx.setItalic),
+                "Ctrl-D": setWrapperMark.bind(this,editorSvcEx.setStrikeLine),
                 "Ctrl-H": onShowHelpDlg,
+                "Ctrl-0": setTitle.bind(this,0),
+                "Ctrl-1": setTitle.bind(this,1),
+                "Ctrl-2": setTitle.bind(this,2),
+                "Ctrl-3": setTitle.bind(this,3),
+                "Ctrl-4": setTitle.bind(this,4),
+                "Ctrl-5": setTitle.bind(this,5),
+                "Ctrl-6": setTitle.bind(this,6),
                 // "Ctrl-T": props.onShowDateDlg,
                 
                 "Shift-Ctrl-G": onPreventKey,
                 "Shift-Ctrl-F": onPreventKey,
                 "Shift-Ctrl-R": onPreventKey,
-                "Esc":          onPreventKey,
+                "Esc":          clearSelection,
                 "Alt-G":        onPreventKey,
+                "Ctrl-Alt-Up": copyLine.bind(this,false),
+                "Ctrl-Alt-Down": copyLine.bind(this,true),
             }
         }}
         onBeforeChange={onChange} />;
