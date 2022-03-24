@@ -1,12 +1,10 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
-import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
-import api from '../../../service/api';
 
 
 const { Header } = Layout;
@@ -20,131 +18,88 @@ const Toolbar=(props)=>{
         activeKey:  state.tabs.activeKey,
         panes:      state.tabs.panes,
     }));
-    const tmp={activeKey,panes};
-    let showExpandAll=ifShowExpandAll(tmp);
-    let showRestore=isShowRestore(tmp);
 
-    // expPdf
+    const ifHasValidTab =useCallback(() => {
+        //不存选项卡或不存在活动选项卡，认为不显示按钮
+        if (null == panes || 0 === panes.length) {
+            return false;
+        }
+        let currPane = panes.filter(pane => pane.key === activeKey);
+        if (null == currPane || 0 === currPane.length) {
+            return false;
+        }
+        currPane = currPane[0];
+    
+        //当前选项卡内容解析失败
+        if (currPane.ds && false === currPane.ds.succ) {
+            return false;
+        }
+        return currPane;
+    },[activeKey,panes]);
 
-    // const expPdf=useCallback(()=>{
-    //     api.expPdf();
-    // },[]);
 
+    let showExpandAll=useMemo(()=>{
+        let currPane = ifHasValidTab();
+        if (false === currPane) {
+            return false;
+        }
+        //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
+        let allExpand = newMindmapSvc.isAllNodeExpand(currPane.ds);
+        return !allExpand;
+    },[ifHasValidTab]);
+
+
+    let showRestore=useMemo(()=>{
+        let currPane = ifHasValidTab();
+        if (false === currPane) {
+            return false;
+        }
+        //计算当前选项卡是否有展开状态变化的节点
+        let anyChanged = newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
+        return anyChanged;
+    },[ifHasValidTab]);
+
+
+    
     return (
         <Header css={headerStyle}>
-            <Tooltip color='cyan' placement="bottomLeft" title='新建'>
-                <Button shape='circle' icon={<PlusOutlined />} className='toolbtnFirst' type='default' size='large' onClick={props.onShowNewMapDlg} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='打开'>
-                <Button shape='circle' icon={<FolderOpenOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowSelMapDlg} />
-            </Tooltip>
+            <ToolbarItem title='新建' icon={<PlusOutlined />} className='toolbtnFirst' onClick={props.onShowNewMapDlg}/>
+            <ToolbarItem title='打开' icon={<FolderOpenOutlined />} onClick={props.onShowSelMapDlg}/>           
 
             <Divider type="vertical" className='divider'/>
-            <Tooltip color='cyan' placement="bottomLeft" title='打开目录'>
-                <Button shape='circle' icon={<FolderOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDir} />                                   
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='打开控制台'>
-                <Button shape='circle' icon={<CodeOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowCmd} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='开发者工具'>
-                <Button shape='circle' icon={<ControlOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowDevTool} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='重新载入应用'>
-                <Button shape='circle' icon={<ReloadOutlined />} className='toolbtn' type='default' size='large' onClick={props.onReloadApp}  />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='版本发布说明'>
-                <Button shape='circle' icon={<HistoryOutlined />} className='toolbtn' type='default' size='large' onClick={api.openReleaseNote}  />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='检查更新'>
-                <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCheckUpdate}  />
-            </Tooltip>
+            <ToolbarItem title='打开目录' icon={<FolderOutlined />} onClick={props.onShowDir}/>
+            <ToolbarItem title='打开控制台' icon={<CodeOutlined />} onClick={props.onShowCmd}/>
+            <ToolbarItem title='开发者工具' icon={<ControlOutlined />} onClick={props.onShowDevTool}/>
+            <ToolbarItem title='重新载入应用' icon={<ReloadOutlined />} onClick={props.onReloadApp}/>
+            <ToolbarItem title='版本发布说明' icon={<HistoryOutlined />} onClick={props.openReleaseNote}/>
+            <ToolbarItem title='检查更新' icon={<CloudSyncOutlined />} onClick={props.onCheckUpdate}/>
             
             <Divider type="vertical" className='divider'/>
-            <Tooltip color='cyan' placement="bottomLeft" title='编辑'>
-                <Button shape='circle' icon={<EditOutlined />} className='toolbtn' type='default' size='large' onClick={props.onShowEditMapDlg}/>
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='复制导图链接'>
-                <Button shape='circle' icon={<LinkOutlined />} className='toolbtn' type='default' size='large' onClick={props.onCopyMapLink} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='恢复节点默认状态'>
-                <Button shape='circle' icon={<CompressOutlined />} disabled={!showRestore} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.restoreAll}  />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='展开全部节点'>
-                <Button shape='circle' icon={<ExpandOutlined />} disabled={!showExpandAll} className='toolbtn' type='primary' size='large' onClick={dispatcher.tabs.expandAll}  />
-            </Tooltip>
+            <ToolbarItem title='编辑' icon={<EditOutlined />} onClick={props.onShowEditMapDlg}/>
+            <ToolbarItem title='复制导图链接' icon={<LinkOutlined />} onClick={props.onCopyMapLink}/>
+            <ToolbarItem title='恢复节点默认状态' disabled={!showRestore} icon={<CompressOutlined />} onClick={dispatcher.tabs.restoreAll}/>
+            <ToolbarItem title='展开全部节点' disabled={!showExpandAll} icon={<ExpandOutlined />} onClick={dispatcher.tabs.expandAll}/>
                       
             <Divider type="vertical" className='divider'/>
-            <Tooltip color='cyan' placement="bottomLeft" title='滚动截屏'>
-                <Button shape='circle' icon={<CameraOutlined />} className='toolbtn' type='default' size='large' onClick={props.onScreenShot} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='导出图片'>
-                <Button shape='circle' icon={<FileImageOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpImage} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='导出pdf'>
-                <Button shape='circle' icon={<FilePdfOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpPdf} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='导出word'>
-                <Button shape='circle' icon={<FileWordOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpWord} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='导出markdown'>
-                <Button shape='circle' icon={<FileMarkdownOutlined />} className='toolbtn' type='default' size='large' onClick={props.onExpMarkdown} />
-            </Tooltip>
-            <Tooltip color='cyan' placement="bottomLeft" title='导出html'>
-                <Button shape='circle' icon={<Html5Outlined />} className='toolbtn' type='default' size='large' onClick={props.onExpHtml}/>
-            </Tooltip>
+            <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={props.onScreenShot}/>
+            <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={props.onExpImage}/>
+            <ToolbarItem title='导出pdf' icon={<FilePdfOutlined />} onClick={props.onExpPdf}/>
+            <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={props.onExpWord}/>
+            <ToolbarItem title='导出markdown' icon={<FileMarkdownOutlined />} onClick={props.onExpMarkdown}/>
+            <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={props.onExpHtml}/>
         </Header>
     );
     
 }
 
+const ToolbarItem=({title, icon, disabled=false, className='toolbtn', onClick})=>{
+    return <Tooltip color='cyan' placement="bottomLeft" title={title}>
+        <Button shape='circle' icon={icon} className={className} disabled={disabled} type='default' size='large' onClick={onClick} />
+    </Tooltip>;
+};
 
-const ifShowExpandAll = createSelector(
-    props => props.activeKey,
-    props => props.panes,
-    (key, panes) => {
-        let currPane = ifHasValidTab(key, panes);
-        if (false === currPane) {
-            return false;
-        }
 
-        //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
-        let allExpand = newMindmapSvc.isAllNodeExpand(currPane.ds);
-        return !allExpand;
-    }
-);
 
-const isShowRestore = createSelector(
-    props => props.activeKey,
-    props => props.panes,
-    (key, panes) => {
-        let currPane = ifHasValidTab(key, panes);
-        if (false === currPane) {
-            return false;
-        }
-
-        //计算当前选项卡是否有展开状态变化的节点
-        let anyChanged = newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
-        return anyChanged;
-    }
-);
-
-const ifHasValidTab = (key, panes) => {
-    //不存选项卡或不存在活动选项卡，认为不显示按钮
-    if (null == panes || 0 === panes.length) {
-        return false;
-    }
-    let currPane = panes.filter(pane => pane.key === key);
-    if (null == currPane || 0 === currPane.length) {
-        return false;
-    }
-    currPane = currPane[0];
-
-    //当前选项卡内容解析失败
-    if (currPane.ds && false === currPane.ds.succ) {
-        return false;
-    }
-    return currPane;
-}
 
 //#f0f2f5
 const headerStyle = {
