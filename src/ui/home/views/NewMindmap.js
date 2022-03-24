@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {Alert,Row, Col} from 'antd';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
+import { useRafState } from 'ahooks';
 
 /**
  * 导图组件
@@ -10,7 +11,7 @@ import newMindmapSvc from '../../../service/newMindmapSvc';
  */
 const NewMindmap=(props)=>{
 
-    const [{ndStyles, lineStyles, expBtnStyles, wrapperStyle},setAllStyles]=useState({
+    const [{ndStyles, lineStyles, expBtnStyles, wrapperStyle},setAllStyles]=useRafState({
         ndStyles:{}, 
         lineStyles:{}, 
         expBtnStyles:{}, 
@@ -253,9 +254,8 @@ const defaultWrapperStyle={
 
 
 const putRelaLines=(ndStyles)=>{
-    setTimeout(() => {
-        
-
+    
+    const func=()=>{    
         document.querySelectorAll(".relaLine").forEach(svgEle=>{
             console.log('into putRelaLines');
 
@@ -471,6 +471,10 @@ const putRelaLines=(ndStyles)=>{
             lineEle.setAttribute("y1", pos.y1);
             lineEle.setAttribute("y2", pos.y2);
         });
+    };
+
+    setTimeout(() => {
+        window.requestAnimationFrame(func);
     }, 500);
 };
 
