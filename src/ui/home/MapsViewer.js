@@ -23,6 +23,8 @@ import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
 
+import {useInitRootComponent} from '../../hooks';
+
 const { Content } = Layout;
 
 
@@ -47,9 +49,9 @@ const { Content } = Layout;
  * ]
  */
 const MapsViewer=(props)=>{
-    const {hasPane,installPathValid,activeKey,panes}= useSelector((state)=>({
+    const {hasPane,/**installPathValid,*/activeKey,panes}= useSelector((state)=>({
         hasPane:            state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
-        installPathValid:   state.common.installPathValid,
+        //installPathValid:   state.common.installPathValid,
         activeKey:          state.tabs.activeKey,
         panes:              state.tabs.panes,
     }));
@@ -97,12 +99,14 @@ const MapsViewer=(props)=>{
             progsObj: [],
     });
 
-    useEffect(()=>{
-        if(!installPathValid){
-            api.showNotification('警告', '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常', 'warn');
-            return;
-        }
-    },[installPathValid]);
+    useInitRootComponent();
+
+    // useEffect(()=>{
+    //     if(!installPathValid){
+    //         api.showNotification('警告', '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常', 'warn');
+    //         return;
+    //     }
+    // },[installPathValid]);
 
 
     

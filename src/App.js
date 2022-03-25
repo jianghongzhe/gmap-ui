@@ -3,6 +3,7 @@ import {Global } from '@emotion/react';
 import React from 'react';
 import { view as MapsViewer } from './ui/home';
 import { ConfigProvider } from 'antd';
+import {RecoilRoot} from 'recoil';
 import zhCN from 'antd/es/locale/zh_CN';
 import 'moment/locale/zh-cn';
 import 'antd/dist/antd.css';
@@ -38,7 +39,9 @@ function App() {
                 },
             }}/>
             <ConfigProvider locale={zhCN}>
-                <MapsViewer />
+                <RecoilRoot>
+                    <MapsViewer />
+                </RecoilRoot>
             </ConfigProvider>
         </React.Fragment>
     );

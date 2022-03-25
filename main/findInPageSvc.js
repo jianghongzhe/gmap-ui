@@ -92,7 +92,7 @@ const init=(_mainWindow)=>{
             mainWinX=0;
             mainWinY=0;
         }
-        const x=(w-winW-30)+mainWinX; //水平位置：居右
+        const x=(w-winW-50)+mainWinX; //水平位置：居右
         const y=(winTop+(common.isDevMode()?20:0))+mainWinY; //垂直位置：开发模式有菜单栏，运行模式没有，两者相差20px
         return {x,y};
     };

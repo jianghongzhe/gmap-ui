@@ -7,7 +7,7 @@ const model={
         winW:800,
         winH:600,
         resizeSymbol: Symbol(),
-        installPathValid: true,
+        //installPathValid: true,
         allDirs: [],
     },
     reducers:{
@@ -20,12 +20,12 @@ const model={
         setResizeSymbol:(state,resizeSymbol)=>{
             return {...state, resizeSymbol};
         },
-        setInstallPathValid:(state,payload)=>{
-            return {...state, installPathValid:true,};
-        },
-        setInstallPathInvalid:(state,payload)=>{
-            return {...state, installPathValid:false,};
-        }
+        // setInstallPathValid:(state,payload)=>{
+        //     return {...state, installPathValid:true,};
+        // },
+        // setInstallPathInvalid:(state,payload)=>{
+        //     return {...state, installPathValid:false,};
+        // }
     },
     effects:{
         *loadWinSize(payload,{creater,put}){
@@ -59,26 +59,26 @@ const model={
         },
         init:({dispatcher,gdispatcher})=>{
             //设置标题、加载窗口大小、文件列表加载、目录列表加载
-            const loadAppInfoFun=async ()=>{
-                let titleTxt=await api.loadAppNameAndVersionTxt();
-                const vers=await api.getInnerModuleVersions();
-                document.querySelector("head > title").innerHTML = `${titleTxt}　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
-            };
-            loadAppInfoFun();
+            // const loadAppInfoFun=async ()=>{
+            //     let titleTxt=await api.loadAppNameAndVersionTxt();
+            //     const vers=await api.getInnerModuleVersions();
+            //     document.querySelector("head > title").innerHTML = `${titleTxt}　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
+            // };
+            // loadAppInfoFun();
 
 
             dispatcher.loadWinSize(null);
             gdispatcher.filesel.load();
             dispatcher.reloadAllDirs(null);
 
-            // 检测安装路径合理性
-            api.getBasePath().then(installPath=>{
-                if(!generalSvc.isPathValid(installPath)){
-                    dispatcher.setInstallPathInvalid(null);
-                }
-            });
+            // // 检测安装路径合理性
+            // api.getBasePath().then(installPath=>{
+            //     if(!generalSvc.isPathValid(installPath)){
+            //         dispatcher.setInstallPathInvalid(null);
+            //     }
+            // });
 
-            api.initFindInPageDlg();
+            // api.initFindInPageDlg();
         },
     },
 };
