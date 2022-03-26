@@ -6,18 +6,12 @@ import {withEnh} from '../../common/specialDlg';
 import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
+const dlgW = 900;
 
 /**
  * 进度对话框
  */
 const ProgsViewer=(props)=>{
-    const {winW,winH}=useSelector((state)=>({
-        winW:state.common.winW,
-        winH:state.common.winH,
-    }));
-
-    let dlgW = (winW < 820 ? winW - 20 : 800);
-
     return (
         <EnhDlg noFooter
                 title="查看事项完成进度"
@@ -31,7 +25,7 @@ const ProgsViewer=(props)=>{
                 dataSource={parseDataSource(props)} 
                 columns={columns} 
                 size='small' 
-                scroll={{ y: winH-300 }} />
+                scroll={{ y: 'calc(100vh - 300px)' }} />
         </EnhDlg>
     );
 }

@@ -19,9 +19,7 @@ const { TabPane } = Tabs;
  * @param {*} props 
  */
 const GraphTabs=(props)=>{
-    const {winH,activeKey,panes}= useSelector((state)=>({
-        winW:       state.common.winW,
-        winH:       state.common.winH,
+    const {activeKey,panes}= useSelector((state)=>({
         activeKey:  state.tabs.activeKey,
         panes:      state.tabs.panes,
     }));
@@ -149,7 +147,7 @@ const GraphTabs=(props)=>{
             hideAdd={true}
             type="editable-card"
             activeKey={activeKey}
-            css={{ height:winH-64, 'backgroundColor': 'white' }}
+            css={{ height:'calc(100vh - 64px)', 'backgroundColor': 'white' }}
             onChange={dispatcher.tabs.changeActiveKey}
             onEdit={onEditTab}>
             {
@@ -160,7 +158,7 @@ const GraphTabs=(props)=>{
                             {pane.title}
                         </span>
                     } key={pane.key} closable={true}>
-                        <div css={getTabItemContainerStyle(winH- 64 - 55-1)}>
+                        <div css={getTabItemContainerStyle(tabContentH)}>
                             <NewMindmap
                                 ind={ind}
                                 ds={pane.ds}
@@ -178,7 +176,8 @@ const GraphTabs=(props)=>{
     return result;
 }
 
-
+// 100vh- 64 - 55-1
+const tabContentH='calc(100vh - 120px)';
 
 
 

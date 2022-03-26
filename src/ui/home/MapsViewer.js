@@ -12,7 +12,7 @@ import RefViewer from './views/RefViewer';
 import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
 import StrParamReplaceDlg from './views/StrParamReplaceDlg';
-import {useBoolean} from 'ahooks';
+import {useBoolean, useMount} from 'ahooks';
 
 import {dispatcher} from '../../common/gflow';
 import api from '../../service/api';
@@ -23,7 +23,7 @@ import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
 
-import {useInitRootComponent} from '../../hooks';
+import {useInitRootComponent, useLoadAllDirs} from '../../hooks';
 
 const { Content } = Layout;
 
@@ -55,6 +55,8 @@ const MapsViewer=(props)=>{
         activeKey:          state.tabs.activeKey,
         panes:              state.tabs.panes,
     }));
+
+    const loadAllDirs=useLoadAllDirs();
 
 
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
@@ -100,6 +102,12 @@ const MapsViewer=(props)=>{
     });
 
     useInitRootComponent();
+
+    useMount(()=>{
+        loadAllDirs();
+    });
+
+    
 
     // useEffect(()=>{
     //     if(!installPathValid){

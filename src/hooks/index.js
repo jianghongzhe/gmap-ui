@@ -1,9 +1,13 @@
-import {useSetRecoilState} from 'recoil';
-import {installPathValid} from '../store';
+import {useSetRecoilState, useRecoilState} from 'recoil';
+import {installPathValid, allDirs} from '../store';
 import {useMount} from 'ahooks';
 import api from '../service/api';
 import generalSvc from '../service/generalSvc';
+import { useCallback } from 'react';
 
+
+
+// todo：改为不在hook里控制生命周期（mount等）,只提供功能
 
 /**
  * 初始化根组件的状态：
@@ -36,3 +40,27 @@ export const useInitRootComponent=()=>{
         })();
     });
 };
+
+export const useGetAndLoadAllDirs=()=>{
+    const [dirs, set]=useRecoilState(allDirs);
+    const loadFunc= useCallback(()=>{
+        (async ()=>{
+            const allDirs=await api.listAllDirs();
+            set(allDirs);
+        })();        
+    },[set]);
+    return [dirs, loadFunc];
+};
+
+export const useLoadAllDirs=()=>{
+    const set=useSetRecoilState(allDirs);
+    return useCallback(()=>{
+        (async ()=>{
+            const allDirs=await api.listAllDirs();
+            set(allDirs);
+        })();        
+    },[set]);
+};
+
+
+

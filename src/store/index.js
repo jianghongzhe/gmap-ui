@@ -8,3 +8,11 @@ export const installPathValid=atom({
     default: true,
 });
 
+/**
+ * 全部目录
+ */
+export const allDirs=atom({
+    key:'allDirs',
+    default:[],
+});
+

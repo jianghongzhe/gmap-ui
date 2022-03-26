@@ -32,7 +32,7 @@ const dlgW = 513;
 const offsetX=268;
 const top='208px';
 
-//left = offsetX - (winW - 200px - dlgW) / 2
+//left = offsetX - (100vw - 200px - dlgW) / 2
 const left= `calc(${parseInt(offsetX+100+dlgW/2)}px - 50vw)`; 
 
 

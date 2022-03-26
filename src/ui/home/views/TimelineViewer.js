@@ -6,22 +6,16 @@ import {withEnh} from '../../common/specialDlg';
 import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
+const dlgW= 900;
 
 /**
  * 时间线对话框
  */
 const TimelineViewer=(props)=>{
-    const {winW,winH}=useSelector((state)=>({
-        winW:state.common.winW,
-        winH:state.common.winH,
-    }));
-
-    let dlgW= (winW<820?winW-20:800);
-
     return (
         <EnhDlg noFooter
                 title="查看时间线"
-                size={{w:dlgW, h:winH-300}}
+                size={{w:dlgW, h:'calc(100vh - 300px)'}}
                 visible={props.visible}
                 maskClosable={true}              
                 onCancel={props.onCancel}>

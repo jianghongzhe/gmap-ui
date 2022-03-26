@@ -5,14 +5,15 @@ import {ReloadOutlined } from '@ant-design/icons';
 import {dispatcher} from '../../../common/gflow';
 import {createSelector} from 'reselect';
 import {useSelector } from 'react-redux';
+import {useGetAndLoadAllDirs} from '../../../hooks';
 
 /**
  * 新建图表对话框
  */
 const NewGraphDlg=(props)=>{
-    const {allDirs}=useSelector((state)=>({
-        allDirs: state.common.allDirs,
-    }));
+    const [allDirs, loadAllDirs]=useGetAndLoadAllDirs();
+
+    
 
     const [name, setName]=useState('');
     const [dir, setDir]=useState('');
@@ -30,10 +31,7 @@ const NewGraphDlg=(props)=>{
         }
     },[props.visible]);
 
-    //加载所有目录层次
-    const reloadAllDirs=useCallback(()=>{
-        dispatcher.common.reloadAllDirs();
-    },[]);
+    
 
     /**
      * 修改事件
@@ -87,7 +85,7 @@ const NewGraphDlg=(props)=>{
                                 type="default" 
                                 shape="circle" 
                                 icon={<ReloadOutlined />} 
-                                onClick={reloadAllDirs} />
+                                onClick={loadAllDirs} />
                         </td>
                     </tr>
                     <tr>
