@@ -23,7 +23,7 @@ import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
 
-import {useInitRootComponent, useLoadAllDirs} from '../../hooks';
+import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
 
 const { Content } = Layout;
 
@@ -57,6 +57,10 @@ const MapsViewer=(props)=>{
     }));
 
     const loadAllDirs=useLoadAllDirs();
+    const initFindInPageDlg= useInitFindInPageDlg();
+    const setWindowTitle=useSetWindowTitle();
+    const setPathValidState=useSetPathValidState();
+    const [loadFileList]=useLoadFileList();
 
 
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
@@ -101,20 +105,19 @@ const MapsViewer=(props)=>{
             progsObj: [],
     });
 
-    useInitRootComponent();
+    
 
     useMount(()=>{
+        initFindInPageDlg();
+        setWindowTitle();
         loadAllDirs();
+        loadFileList();
+        setPathValidState();
     });
 
     
 
-    // useEffect(()=>{
-    //     if(!installPathValid){
-    //         api.showNotification('警告', '请不要安装到中文路径或带空格的路径下，否则可能造成某些功能异常', 'warn');
-    //         return;
-    //     }
-    // },[installPathValid]);
+    
 
 
     

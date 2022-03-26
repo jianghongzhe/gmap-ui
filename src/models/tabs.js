@@ -293,7 +293,11 @@ const model={
                 panes:newPanes, 
                 activeKey:mdFullpath,
             }));
-            yield put(gcreater.filesel.loadCurrDir());
+            
+            //yield put(gcreater.filesel.loadCurrDir());
+            // 使用recoil的方式
+            
+
             res();
         },
 

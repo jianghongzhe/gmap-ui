@@ -1,26 +1,19 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import PathSelect from './PathSelect';
-import {dispatcher} from '../../../common/gflow';
-import { useSelector } from 'react-redux';
+import { useGetAndLoadFileList } from '../../../hooks';
 
 
 /**
  * 路径选择组件的包装
  */
 const ConnectedPathSelect=(props)=>{
-    const {filelist, dirs}= useSelector((state)=>{
-        return {
-            filelist:   state.filesel.filelist,
-            dirs:       state.filesel.dirs,
-        }
-    });
-
+    const [filelist, dirs, load, reload]=useGetAndLoadFileList();
     const extProps={...props, filelist, dirs};
 
     return <PathSelect {...extProps} 
-        onloadDir={dispatcher.filesel.load}
-        onloadCurrDir={dispatcher.filesel.loadCurrDir}
+        onloadDir={load}
+        onloadCurrDir={reload}
     />;
 }
 
