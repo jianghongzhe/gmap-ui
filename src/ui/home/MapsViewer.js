@@ -22,6 +22,8 @@ import keyDetector from '../../common/keyDetector';
 import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
+import {tabActiveKey, tabPanes, tabHasPane} from '../../store';
+import {useRecoilValue} from 'recoil';
 
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
 
@@ -49,12 +51,10 @@ const { Content } = Layout;
  * ]
  */
 const MapsViewer=(props)=>{
-    const {hasPane,/**installPathValid,*/activeKey,panes}= useSelector((state)=>({
-        hasPane:            state.tabs && state.tabs.panes && 0 < state.tabs.panes.length,
-        //installPathValid:   state.common.installPathValid,
-        activeKey:          state.tabs.activeKey,
-        panes:              state.tabs.panes,
-    }));
+    const activeKey=useRecoilValue(tabActiveKey);
+    const panes=useRecoilValue(tabPanes);
+    const hasPane=useRecoilValue(tabHasPane);
+
 
     const loadAllDirs=useLoadAllDirs();
     const initFindInPageDlg= useInitFindInPageDlg();

@@ -9,6 +9,8 @@ import {dispatcher} from '../../../common/gflow';
 
 import { useSelector } from 'react-redux';
 import keyDetector from '../../../common/keyDetector';
+import {tabActiveKey, tabPanes} from '../../../store';
+import {useRecoilValue} from 'recoil';
 
 const { TabPane } = Tabs;
 
@@ -19,10 +21,8 @@ const { TabPane } = Tabs;
  * @param {*} props 
  */
 const GraphTabs=(props)=>{
-    const {activeKey,panes}= useSelector((state)=>({
-        activeKey:  state.tabs.activeKey,
-        panes:      state.tabs.panes,
-    }));
+    const activeKey=useRecoilValue(tabActiveKey);
+    const panes=useRecoilValue(tabPanes);
 
     
     

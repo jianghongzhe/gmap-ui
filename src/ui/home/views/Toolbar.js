@@ -5,7 +5,8 @@ import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutl
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
-
+import {tabActiveKey, tabPanes} from '../../../store';
+import {useRecoilValue} from 'recoil';
 
 const { Header } = Layout;
 
@@ -14,10 +15,8 @@ const { Header } = Layout;
  * @param {*} props 
  */
 const Toolbar=(props)=>{
-    const {activeKey,panes}=useSelector((state)=>({
-        activeKey:  state.tabs.activeKey,
-        panes:      state.tabs.panes,
-    }));
+    const activeKey=useRecoilValue(tabActiveKey);
+    const panes=useRecoilValue(tabPanes);
 
     const ifHasValidTab =useCallback(() => {
         //不存选项卡或不存在活动选项卡，认为不显示按钮
