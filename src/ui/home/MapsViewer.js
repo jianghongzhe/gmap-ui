@@ -26,6 +26,7 @@ import {tabActiveKey, tabPanes, tabHasPane} from '../../store';
 import {useRecoilValue} from 'recoil';
 
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
+import { useSelectFileListItem } from '../../hooks/tabs';
 
 const { Content } = Layout;
 
@@ -54,6 +55,8 @@ const MapsViewer=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
     const panes=useRecoilValue(tabPanes);
     const hasPane=useRecoilValue(tabHasPane);
+
+    const selectFileListItem= useSelectFileListItem();
 
 
     const loadAllDirs=useLoadAllDirs();
@@ -242,11 +245,12 @@ const MapsViewer=(props)=>{
     //------------选择文件功能----------------------------------------------------------------------
     const onSelectMapItem =useCallback(async (item) => {
         try{
-            await dispatcher.tabs.onSelItemPromise(item);
+            // await dispatcher.tabs.onSelItemPromise(item);
+            selectFileListItem(item);
             setSelMapDlgVisible(false);
         }catch(e){
         }
-    },[ setSelMapDlgVisible]);
+    },[selectFileListItem, setSelMapDlgVisible]);
 
 
     const showSelMapDlg =useCallback(() => {

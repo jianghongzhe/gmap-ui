@@ -89,7 +89,7 @@ const NewMindmap=(props)=>{
 
     
 
-
+    console.log("popds", props.ds);
 
     const result= (
         <div css={{...defaultWrapperStyle, ...wrapperStyle}}  id={`graphwrapper_${props.ind}`}>
