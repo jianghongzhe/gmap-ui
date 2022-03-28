@@ -47,7 +47,7 @@ export const currFileListDir=selector({
 export const tabPanes=atom({
     key: 'tabPanes',
     default: [],
-    dangerouslyAllowMutability: true,
+    //dangerouslyAllowMutability: true,
 });
 
 export const tabActiveKey=atom({

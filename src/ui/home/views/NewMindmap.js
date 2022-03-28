@@ -3,7 +3,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {Alert,Row, Col} from 'antd';
 import {createSelector} from 'reselect';
 import newMindmapSvc from '../../../service/newMindmapSvc';
+import objectCloneUtil from '../../../common/objectCloneUtil';
 import { useRafState } from 'ahooks';
+
 
 /**
  * 导图组件
@@ -20,6 +22,10 @@ const NewMindmap=(props)=>{
 
     const arrangeNdPositions=useCallback(()=>{
         if(!props.ds){return;}
+
+        console.log("origin ds", props.ds);
+        console.log("clone ds", objectCloneUtil.clone(props.ds))
+
         newMindmapSvc.loadStyles(props.ds);
         setAllStyles({
             ndStyles:       props.ds.ndStyles, 
