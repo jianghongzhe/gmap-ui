@@ -85,7 +85,27 @@ class NewMindmapSvc {
             end = true;
         });
 
-        return [leftH, rightH];
+        // 节点位置改为从1点钟开始顺时针
+        // 左右互换后左侧改为逆序
+        let from=99999;
+        let to=-1;
+        ndsSet.tree.childs.forEach((child,ind) => {
+            child.left=!child.left;
+            if(child.left){
+                if(ind<from){
+                    from=ind;
+                }
+                if(ind>to){
+                    to=ind;
+                }
+            }
+        });
+        for(;from<to;++from,--to){
+            let t=ndsSet.tree.childs[from];
+            ndsSet.tree.childs[from]=ndsSet.tree.childs[to];
+            ndsSet.tree.childs[to]=t;
+        }
+        return [rightH, leftH];
     }
 
     /**
@@ -614,6 +634,7 @@ class NewMindmapSvc {
      */
     loadStyles=(ndsSet)=>{
         if(!ndsSet){return;}
+        console.log("dsds", ndsSet);
 
         //加载节点和折叠按钮所占区域大小
         ndsSet.list.forEach(nd=>{
