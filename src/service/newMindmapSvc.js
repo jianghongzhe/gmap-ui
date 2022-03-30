@@ -19,25 +19,35 @@ class NewMindmapSvc {
     /**
      * 获得节点和其所有子节点整个区域所占的高
      */
-    getNdHeight = (nd,ndsSet) => {
+    getNdHeight = (nd,ndsSet, resultWrapper) => {
+        console.log(nd.id, typeof resultWrapper);
+
         //无子节点或未展开，取本节点的高度
         if (!nd.childs || 0 === nd.childs.length || !nd.expand) {
-            return parseInt(ndsSet.rects[nd.id].height);
+            
+            try{
+            return parseInt(resultWrapper.rects[nd.id].height);
+            }catch(e){
+                //console.log(nd.id);
+                //console.log(typeof(resultWrapper));
+                //console.log(null===resultWrapper.rects);
+                throw e;
+            }
         }
 
         //有子节点，取所有子节点的高度和，中间加上空白的距离
         let sumChildrenH = 0;
         nd.childs.forEach((child,ind) => {
-            sumChildrenH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child,ndsSet);//从第二个子节点开始，要加上空白的距离
+            sumChildrenH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
         });
-        return parseInt(Math.max(ndsSet.rects[nd.id].height, sumChildrenH));
+        return parseInt(Math.max(resultWrapper.rects[nd.id].height, sumChildrenH));
     }
 
 
     /**
      * 对根节点的子树进行左右方向的计算，并返回左右子树的高度
      */
-    setNdDirection = (ndsSet) => {
+    setNdDirection = (ndsSet, resultWrapper) => {
         //先假设所有节点都在右边
         let leftH = 0;
         let rightH = 0;
@@ -49,8 +59,9 @@ class NewMindmapSvc {
 
         let sumNdCnt=0;
         ndsSet.tree.childs.forEach((child,ind) => {
-            child.left = false;//default right
-            rightH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child,ndsSet);
+            //child.left = false;//default right
+            resultWrapper.directions[child.id]=false;
+            rightH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child, ndsSet, resultWrapper);
             ++sumNdCnt;
         });
         let dist = rightH;
@@ -69,13 +80,14 @@ class NewMindmapSvc {
             if (end) {
                 return;
             }
-            let h = this.getNdHeight(child,ndsSet);
+            let h = this.getNdHeight(child,ndsSet, resultWrapper);
             let newLeftH = leftH +(0<leftH?nodePaddingTop:0)+ h;//
             let newRightH = rightH - h- (1<sumNdCnt-leftNdCnt?nodePaddingTop:0);
             let newDist = Math.abs(newRightH - newLeftH);
 
             if (newDist < dist) {
-                child.left = true;
+                //child.left = true;
+                resultWrapper.directions[child.id]=true;
                 leftH = newLeftH;
                 rightH = newRightH;
                 dist = newDist;
@@ -84,72 +96,77 @@ class NewMindmapSvc {
             }
             end = true;
         });
+        
 
-        // 节点位置改为从1点钟开始顺时针
-        // 左右互换后左侧改为逆序
+        // 如果根节点只有一个子节点，则直接返回
+        if(1===ndsSet.tree.childs.length){
+            return [leftH, rightH];
+        }
+
+        console.log("qqqsssssmmmm");
+
+        // 否则，把节点位置改为从1点钟开始顺时针旋转
+        // 1：左右互换
+        // 2：左侧改为逆序：该过程不在此处处理，而是在putNds方法的左侧节点布局时执行。尽量不让节点顺序发生改变，而是在处理时保持一个逻辑的顺序。
         let from=99999;
         let to=-1;
         ndsSet.tree.childs.forEach((child,ind) => {
-            child.left=!child.left;
-            if(child.left){
-                if(ind<from){
-                    from=ind;
-                }
-                if(ind>to){
-                    to=ind;
-                }
-            }
+            //child.left=!child.left;
+            resultWrapper.directions[child.id]=!resultWrapper.directions[child.id];
         });
-        for(;from<to;++from,--to){
-            let t=ndsSet.tree.childs[from];
-            ndsSet.tree.childs[from]=ndsSet.tree.childs[to];
-            ndsSet.tree.childs[to]=t;
-        }
         return [rightH, leftH];
     }
 
     /**
      * 放置折叠按钮的位置
      */
-    putExpBtn=(ndsSet, nd, l, t, left=false)=>{
+    putExpBtn=(ndsSet, nd, l, t, left=false, resultWrapper=null)=>{
         if(!nd.childs || 0===nd.childs.length){return;}
 
-        ndsSet.expBtnStyles[nd.id]={
-            left:parseInt(l+ndsSet.rects[nd.id].width), //先假设横向位置在节点右侧
-            top:parseInt(t+ndsSet.rects[nd.id].height-ndsSet.expBtnRects[nd.id].height+4),
+        resultWrapper.expBtnStyles[nd.id]={
+            left:parseInt(l+resultWrapper.rects[nd.id].width), //先假设横向位置在节点右侧
+            top:parseInt(t+resultWrapper.rects[nd.id].height-resultWrapper.expBtnRects[nd.id].height+4),
         };
         //如果横向位置在左，侧重新设置
         if(left){
-            ndsSet.expBtnStyles[nd.id].left=parseInt(l-ndsSet.expBtnRects[nd.id].width);
+            resultWrapper.expBtnStyles[nd.id].left=parseInt(l-resultWrapper.expBtnRects[nd.id].width);
         }
         //如果是根节点和二级节点，则纵向位置不同，且在展开/折叠状态时纵向位置也不同
         if(0===nd.lev || 1===nd.lev){
             if(nd.expand){
-                ndsSet.expBtnStyles[nd.id].top=parseInt(t+ndsSet.rects[nd.id].height/2-ndsSet.expBtnRects[nd.id].height+4);
+                resultWrapper.expBtnStyles[nd.id].top=parseInt(t+resultWrapper.rects[nd.id].height/2-resultWrapper.expBtnRects[nd.id].height+4);
             }else{
-                ndsSet.expBtnStyles[nd.id].top=parseInt(t+ndsSet.rects[nd.id].height/2-(ndsSet.expBtnRects[nd.id].height/1.5)+4);
+                resultWrapper.expBtnStyles[nd.id].top=parseInt(t+resultWrapper.rects[nd.id].height/2-(resultWrapper.expBtnRects[nd.id].height/1.5)+4);
             }
-            
+        
         }
     }
 
-    putNds = (ndsSet) => {
-        let [leftH, rightH] = this.setNdDirection(ndsSet);
+    /**
+     * 摆放根节点的左右子树
+     * @param {*} ndsSet 
+     * @param {*} resultWrapper 
+     * @returns 
+     */
+    putNds = (ndsSet, resultWrapper) => {
+        console.log("11111");
+        let [leftH, rightH] = this.setNdDirection(ndsSet, resultWrapper);
+        console.log("22222");
         let currLeftTop = (leftH < rightH ? parseInt((rightH - leftH) / 2) : 0);
         let currRightTop = (rightH < leftH ? parseInt((leftH - rightH) / 2) : 0);
         
 
         //根节点位置：x假设为500，y为在左右两边子树中高的一侧居中的位置
-        let rootLoc = [500, parseInt((Math.max(leftH, rightH)-ndsSet.rects[ndsSet.tree.id].height) / 2)];
+        let rootLoc = [500, parseInt((Math.max(leftH, rightH)-resultWrapper.rects[ndsSet.tree.id].height) / 2)];
         
 
-        ndsSet.ndStyles[ndsSet.tree.id] = {
+        resultWrapper.ndStyles[ndsSet.tree.id] = {
             left: rootLoc[0],
             top: rootLoc[1],
         }
         
         
-        this.putExpBtn(ndsSet,ndsSet.tree,rootLoc[0],rootLoc[1],false);
+        this.putExpBtn(ndsSet,ndsSet.tree,rootLoc[0],rootLoc[1],false, resultWrapper);
         
 
 
@@ -157,26 +174,25 @@ class NewMindmapSvc {
         //expBtnRects
 
         if(ndsSet.tree.expand){
-            //依次摆放每个节点的位置
-            //左
-            ndsSet.tree.childs.filter(nd => nd.left).forEach(nd => {
-                let allHeight = this.getNdHeight(nd,ndsSet);
+            //左：由于需要保持1点钟开始顺时针旋转，因此把左侧节点倒序后再摆放
+            ndsSet.tree.childs.filter(nd => nd.left).reverse().forEach(nd => {
+                let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
                 let l = parseInt(rootLoc[0] - ndXDist*3/2 -ndsSet.rects[nd.id].width);//根节点x - 空隙 - 节点本身宽度
                 let t = parseInt(currLeftTop + (allHeight - ndsSet.rects[nd.id].height) / 2);
                 ndsSet.ndStyles[nd.id] = { left: l, top: t }
-                this.putExpBtn(ndsSet,nd,l,t,true);
-                this.putSubNds(currLeftTop, l - ndXDist, nd, ndsSet, true);
+                this.putExpBtn(ndsSet,nd,l,t,true, resultWrapper);
+                this.putSubNds(currLeftTop, l - ndXDist, nd, ndsSet, true, resultWrapper);
                 currLeftTop += allHeight+nodePaddingTop;//
             });
 
             //右
             ndsSet.tree.childs.filter(nd => !nd.left).forEach(nd => {
-                let allHeight = this.getNdHeight(nd,ndsSet);
+                let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
                 let l = parseInt(rootLoc[0] +ndsSet.rects[ndsSet.tree.id].width + ndXDist*3/2);//根节点x + 根节点宽 + 空隙
                 let t = parseInt(currRightTop + (allHeight - ndsSet.rects[nd.id].height) / 2);
                 ndsSet.ndStyles[nd.id] = { left: l, top: t, }
-                this.putExpBtn(ndsSet,nd,l,t,false);
-                this.putSubNds(currRightTop, l + ndsSet.rects[nd.id].width + ndXDist, nd, ndsSet, false);
+                this.putExpBtn(ndsSet,nd,l,t,false, resultWrapper);
+                this.putSubNds(currRightTop, l + ndsSet.rects[nd.id].width + ndXDist, nd, ndsSet, false, resultWrapper);
                 currRightTop += allHeight+nodePaddingTop;//
             });
         }
@@ -184,7 +200,7 @@ class NewMindmapSvc {
         
         
 
-        return this.calcOptNdPos(ndsSet);
+        return this.calcOptNdPos(ndsSet, resultWrapper);
     }
 
     
@@ -194,7 +210,7 @@ class NewMindmapSvc {
     /**
      * @param {*} startL 当向右排序时，表示要放置的左侧位置，向左排列时，表示放置节点的右边位置
      */
-    putSubNds = (startT, startL, parNd, ndsSet, left = false) => {
+    putSubNds = (startT, startL, parNd, ndsSet, left = false, resultWrapper=null) => {
         if(!parNd.expand){return;}
 
         parNd.childs.forEach(nd => {
@@ -207,8 +223,8 @@ class NewMindmapSvc {
                     left: startL,
                     top: t,
                 };
-                this.putExpBtn(ndsSet,nd,startL,t,left);
-                this.putSubNds(startT, startL + ndsSet.rects[nd.id].width + ndXDist, nd, ndsSet, left);//右边节点的位置是当前节点
+                this.putExpBtn(ndsSet,nd,startL,t,left, resultWrapper);
+                this.putSubNds(startT, startL + ndsSet.rects[nd.id].width + ndXDist, nd, ndsSet, left, resultWrapper);//右边节点的位置是当前节点
                 startT += allHeight+nodePaddingTop;
                 return;
             }
@@ -221,8 +237,8 @@ class NewMindmapSvc {
                 left: l,
                 top: t,
             };
-            this.putExpBtn(ndsSet,nd,l,t,left);
-            this.putSubNds(startT, l - ndXDist, nd, ndsSet, left);
+            this.putExpBtn(ndsSet,nd,l,t,left, resultWrapper);
+            this.putSubNds(startT, l - ndXDist, nd, ndsSet, left, resultWrapper);
             startT += allHeight+nodePaddingTop;
             return;
         });
@@ -231,7 +247,7 @@ class NewMindmapSvc {
     /**
      * 计算合适的节点位置与画布大小
      */
-    calcOptNdPos = (ndsSet) => {
+    calcOptNdPos = (ndsSet, resultWrapper) => {
         //计算最小位置与最大位置
         let minX = 9999999;
         let minY = 9999999;
@@ -636,16 +652,26 @@ class NewMindmapSvc {
         if(!ndsSet){return;}
         console.log("dsds", ndsSet);
 
+        let result={
+            rects:{},
+            expBtnRects:{},           
+            directions:{},
+            ndStyles:{},
+            expBtnStyles:{},
+            wrapperStyle:{},
+            lineStyles:{},
+        };
+
         //加载节点和折叠按钮所占区域大小
         ndsSet.list.forEach(nd=>{
-            ndsSet.rects[nd.id]=document.querySelector(`#${nd.id}`).getBoundingClientRect();
+            result.rects[nd.id]=document.querySelector(`#${nd.id}`).getBoundingClientRect();
             if(nd.childs && 0<nd.childs.length){
-                ndsSet.expBtnRects[nd.id]=document.querySelector(`#expbtn_${nd.id}`).getBoundingClientRect();
+                result.expBtnRects[nd.id]=document.querySelector(`#expbtn_${nd.id}`).getBoundingClientRect();
             }
         });
 
         //节点位置与画布大小计算
-        let [w,h]=this.putNds(ndsSet);
+        let [w,h]=this.putNds(ndsSet, result);
         ndsSet.wrapperStyle={
             width:w,
             height:h,
@@ -655,8 +681,8 @@ class NewMindmapSvc {
         let newLineStyles={};
         ndsSet.list.forEach(nd=>{
             if(!nd.parid){return;}
-            let result=this.setLineStyle(ndsSet,nd.par,nd);
-            newLineStyles={...newLineStyles, ...result};
+            let styleResult=this.setLineStyle(ndsSet,nd.par,nd);
+            newLineStyles={...newLineStyles, ...styleResult};
         });
         ndsSet.lineStyles=newLineStyles;
         

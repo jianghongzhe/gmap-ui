@@ -23,8 +23,8 @@ const NewMindmap=(props)=>{
     const arrangeNdPositions=useCallback(()=>{
         if(!props.ds){return;}
 
-        console.log("origin ds", props.ds);
-        console.log("clone ds", objectCloneUtil.clone(props.ds))
+        //console.log("origin ds", props.ds);
+        //console.log("clone ds", objectCloneUtil.clone(props.ds))
 
         newMindmapSvc.loadStyles(props.ds);
         setAllStyles({
