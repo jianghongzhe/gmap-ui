@@ -229,11 +229,12 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
         if(!currRefObj || !currRefObj.txt || !currRefObj.showname){
             return {result:false, refname:'', refCont:'', txt:''};
         }
-        if (null == currRefObj.parsedTxt) {
-            currRefObj.parsedTxt = marked(currRefObj.txt);
-        }
+        // if (null == currRefObj.parsedTxt) {
+        //     currRefObj.parsedTxt = marked(currRefObj.txt);
+        // }
+        const parsedTxt = marked(currRefObj.txt);
         let refname=currRefObj.showname;
-        let refCont=currRefObj.parsedTxt;
+        let refCont=parsedTxt;
         return {result:true, refname, refCont, txt:currRefObj.txt};
     },[currRefObj]);
 

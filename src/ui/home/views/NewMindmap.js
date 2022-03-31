@@ -2,8 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {Alert,Row, Col} from 'antd';
 import {createSelector} from 'reselect';
-import newMindmapSvc from '../../../service/newMindmapSvc';
-import objectCloneUtil from '../../../common/objectCloneUtil';
+import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
 import { useRafState } from 'ahooks';
 
 
@@ -26,14 +25,16 @@ const NewMindmap=(props)=>{
         //console.log("origin ds", props.ds);
         //console.log("clone ds", objectCloneUtil.clone(props.ds))
 
-        newMindmapSvc.loadStyles(props.ds);
+        const styles= mindLayoutSvcFacade.loadStyles(props.ds);
+        console.log(styles);
+        console.log("okok------");
         setAllStyles({
-            ndStyles:       props.ds.ndStyles, 
-            lineStyles:     props.ds.lineStyles, 
-            expBtnStyles:   props.ds.expBtnStyles,
-            wrapperStyle:   props.ds.wrapperStyle,
+            ndStyles:       styles.ndStyles, 
+            lineStyles:     styles.lineStyles, 
+            expBtnStyles:   styles.expBtnStyles,
+            wrapperStyle:   styles.wrapperStyle,
         });
-        putRelaLines(props.ds.ndStyles);
+        putRelaLines(styles.ndStyles);
     },[props.ds]);
 
     const defaultContentRenderer=useCallback((nd)=>{
