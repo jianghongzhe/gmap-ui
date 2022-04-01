@@ -122,7 +122,7 @@ const NewMindmap=(props)=>{
                     {
                         (nd.childs && 0<nd.childs.length) && 
                             <div id={`expbtn_${nd.id}`} className='expBtn' style={getExpBtnStyle({expBtnStyles, nd})}>
-                                {actExpBtnRenderer(nd)}
+                                {actExpBtnRenderer(nd, props.ds.expands)}
                             </div>
                     }
 

@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import keyDetector from '../../../common/keyDetector';
 import {tabActiveKey, tabPanes} from '../../../store';
 import {useRecoilValue} from 'recoil';
+import { useToggleExpand } from '../../../hooks/tabs';
 
 const { TabPane } = Tabs;
 
@@ -23,7 +24,7 @@ const { TabPane } = Tabs;
 const GraphTabs=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
     const panes=useRecoilValue(tabPanes);
-
+    const toggleExpand= useToggleExpand();
     
     
     /**
@@ -42,7 +43,7 @@ const GraphTabs=(props)=>{
     /**
      * 折叠按钮的render props
      */
-    const ndExpBtnRenderer=(nd)=>{
+    const ndExpBtnRenderer=(nd, expands)=>{
         return (
             <Button 
                 type="link" 
@@ -50,12 +51,12 @@ const GraphTabs=(props)=>{
                 title={nd.expand?"折叠":"展开"} 
                 css={styles.expbtn}
                 icon={
-                    nd.expand ?
+                    expands[nd.id] ?
                         <MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>
                             :
                         <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
                 }  
-                onClick={dispatcher.tabs.toggleExpand.bind(this,nd)}/>
+                onClick={toggleExpand.bind(this,nd)}/>
         );
     }
 

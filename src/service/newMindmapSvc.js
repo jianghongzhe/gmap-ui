@@ -597,9 +597,10 @@ class NewMindmapSvc {
             lineStyles:{},
             expBtnStyles:{},
             wrapperStyle:{},
+            expands:{},
         };
 
-        this.flatNds(ndsSet.tree, ndsSet.list, ndsSet.map);
+        this.flatNds(ndsSet.tree, ndsSet.list, ndsSet.map, ndsSet.expands);
         return ndsSet;
     }
 
@@ -633,12 +634,13 @@ class NewMindmapSvc {
 
 
 
-    flatNds = (nd, listContainer,mapContainer) => {
+    flatNds = (nd, listContainer,mapContainer, expands) => {
         listContainer.push(nd);
+        expands[nd.id]=nd.defExp;
         mapContainer[nd.id]=nd;
-        if(nd.childs && 0<nd.childs.length && nd.expand){
+        if(nd.childs && 0<nd.childs.length/* && nd.expand*/){
             nd.childs.forEach(child => {
-                this.flatNds(child,listContainer,mapContainer);
+                this.flatNds(child,listContainer,mapContainer, expands);
             });
         }
     }

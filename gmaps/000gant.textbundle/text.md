@@ -7,7 +7,7 @@
 		- by|[a](openby://D:\c.txt@@emeditor)
 	- 6by|[a](openby://D:\c.txt@@emeditor)|p:100|ref:by2
 	- 7by|[a](openby://D:\c.txt@@emeditor)|p:100
-	- 8by|[a](openby://D:\c.txt@@emeditor)|p:100|c:red
+	- 8by|[a](openby://D:\c.txt@@emeditor)|p:100|c:red|zip:
 		- by|[a](openby://D:\c.txt@@emeditor)|p:100
 			- qqq
 	- 9by|[a](openby://D:\c.txt@@emeditor)|p:100|ref:xx|id:xx

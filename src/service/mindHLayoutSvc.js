@@ -23,7 +23,7 @@ class MindHLayoutSvc {
         
 
         //无子节点或未展开，取本节点的高度
-        if (!nd.childs || 0 === nd.childs.length || !nd.expand) {
+        if (!nd.childs || 0 === nd.childs.length || !ndsSet.expands[nd.id]) {
             return parseInt(resultWrapper.rects[nd.id].height);
         }
 
@@ -45,7 +45,7 @@ class MindHLayoutSvc {
         let rightH = 0;
 
         //如果根节点未展开，则不再继续计算
-        if(!ndsSet.tree.childs || 0===ndsSet.tree.childs.length || !ndsSet.tree.expand){
+        if(!ndsSet.tree.childs || 0===ndsSet.tree.childs.length || !ndsSet.expands[ndsSet.tree.id]){
             return [leftH, rightH];
         }
 
@@ -125,7 +125,7 @@ class MindHLayoutSvc {
         }
         //如果是根节点和二级节点，则纵向位置不同，且在展开/折叠状态时纵向位置也不同
         if(0===nd.lev || 1===nd.lev){
-            if(nd.expand){
+            if(ndsSet.expands[nd.id]){
                 resultWrapper.expBtnStyles[nd.id].top=parseInt(t+resultWrapper.rects[nd.id].height/2-resultWrapper.expBtnRects[nd.id].height+4);
             }else{
                 resultWrapper.expBtnStyles[nd.id].top=parseInt(t+resultWrapper.rects[nd.id].height/2-(resultWrapper.expBtnRects[nd.id].height/1.5)+4);
@@ -165,7 +165,7 @@ class MindHLayoutSvc {
         //expBtnStyles
         //expBtnRects
 
-        if(ndsSet.tree.expand){
+        if(ndsSet.expands[ndsSet.tree.id]){
             //左：由于需要保持1点钟开始顺时针旋转，因此把左侧节点倒序后再摆放
             ndsSet.tree.childs.filter(nd =>resultWrapper.directions[nd.id]).reverse().forEach(nd => {
                 let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
@@ -203,7 +203,7 @@ class MindHLayoutSvc {
      * @param {*} startL 当向右排序时，表示要放置的左侧位置，向左排列时，表示放置节点的右边位置
      */
     putSubNds = (startT, startL, parNd, ndsSet, left = false, resultWrapper=null) => {
-        if(!parNd.expand){return;}
+        if(!ndsSet.expands[parNd.id]){return;}
 
         parNd.childs.forEach(nd => {
             //往右排

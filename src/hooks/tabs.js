@@ -2,13 +2,13 @@ import { message } from "antd";
 import { useCallback } from "react";
 import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
 import api from "../service/api";
-import {tabActiveKey, tabPanes as tabPaneState} from '../store';
+import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState} from '../store';
 import mindmapSvc from '../service/mindmapSvc';
 import newMindmapSvc from '../service/newMindmapSvc';
 
 export const useSelectFileListItem=()=>{
-    const setTabActiveKey= useSetRecoilState(tabActiveKey);
-    const [tabPanes, setTabPanes]= useRecoilState(tabPaneState);
+    const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
 
     return useCallback((item)=>{
         if (!item || !item.isfile) {
@@ -34,7 +34,8 @@ export const useSelectFileListItem=()=>{
             //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
             let rootNd=mindmapSvc.parseRootNode(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
             let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
-    
+            console.log("节点数量", ndsSet.list.length);
+
             //增加新选项卡并设置状态
             console.log("ppp", {
                 title: item.itemsName,// item.showname,
@@ -56,6 +57,35 @@ export const useSelectFileListItem=()=>{
             setTabActiveKey(mdFullpath);
         })();
     },[tabPanes, setTabActiveKey, setTabPanes]);
+};
+
+
+export const useToggleExpand=()=>{
+    const tabActiveKey= useRecoilValue(tabActiveKeyState);
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+
+    return useCallback((nd)=>{
+        const newPanes=[];
+        tabPanes.forEach(pane=>{
+            if(tabActiveKey!==pane.key){
+                newPanes.push(pane);
+                return;
+            }
+            let ds={
+                ...pane.ds,
+                expands:{
+                    ...pane.ds.expands,
+                    [nd.id]: !pane.ds.expands[nd.id]
+                }
+            };
+            newPanes.push({
+                ...pane,
+                ds
+            });
+        });
+        setTabPanes(newPanes);
+
+    },[tabActiveKey, tabPanes, setTabPanes]);
 };
 
 
