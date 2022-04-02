@@ -1,5 +1,6 @@
 import {useSetRecoilState, useRecoilState, useRecoilValue} from 'recoil';
-import {installPathValid, allDirs, filelist, fileListDirLevels, currFileListDir} from '../store';
+import {installPathValid, allDirs} from '../store/common';
+import {filelist, fileListDirLevels, currFileListDir} from '../store/filelist';
 import {useMount} from 'ahooks';
 import api from '../service/api';
 import generalSvc from '../service/generalSvc';

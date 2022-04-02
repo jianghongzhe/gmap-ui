@@ -22,7 +22,7 @@ import keyDetector from '../../common/keyDetector';
 import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
-import {tabActiveKey, tabPanes, tabHasPane} from '../../store';
+import {tabActiveKey, tabPanes, tabHasPane} from '../../store/tabs';
 import {useRecoilValue} from 'recoil';
 
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';

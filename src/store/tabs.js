@@ -1,48 +1,5 @@
 import {atom, selector} from 'recoil';
-
-/**
- * 路径合法性
- */
-export const installPathValid=atom({
-    key: 'installPathValid',
-    default: true,
-});
-
-/**
- * 全部目录
- */
-export const allDirs=atom({
-    key:'allDirs',
-    default:[],
-});
-
-
-export const filelist=atom({
-    key:'filelist',
-    default:[],
-});
-
-export const fileListDirLevels=atom({
-    key:'fileListDirLevels',
-    default:[],
-}); 
-
-
-export const currFileListDir=selector({
-    key:'currFileListDir',
-    get:({get})=>{
-        const dirs=get(fileListDirLevels);
-        if (null == dirs || 0 === dirs.length) {
-            return null;
-        }
-        let list=dirs.filter(dir => dir.iscurr);
-        if(null==list || 0===list.length){
-            return null;
-        }
-        return list[0].fullpath;
-    },
-});
-
+import newMindmapSvc from '../service/newMindmapSvc';
 
 export const tabPanes=atom({
     key: 'tabPanes',
@@ -94,6 +51,36 @@ export const tabCurrPaneContentValid=selector({
     },
 });
 
+export const tabCurrPaneAllNodesExpand=selector({
+    key: 'tabCurrPaneAllNodesExpand',
+    get: ({get})=>{
+        if(!get(tabCurrPaneContentValid)){
+            return false;
+        }
+        const currPane=get(tabCurrPane);
+        if(!currPane){
+            return false;
+        }
+        return newMindmapSvc.isAllNodeExpand(currPane.ds);
+    },
+});
+
+
+export const tabCurrPaneExpandStateChanged=selector({
+    key: 'tabCurrPaneExpandStateChanged',
+    get: ({get})=>{
+        if(!get(tabCurrPaneContentValid)){
+            return false;
+        }
+        const currPane=get(tabCurrPane);
+        if(!currPane){
+            return false;
+        }
+        return newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
+    },
+});
+
+
 export const tabCurrTitle=selector({
     key: 'tabCurrTitle',
     get: ({get})=>{
@@ -129,4 +116,3 @@ export const tabCurrInd=selector({
         return activeInd;
     },
 });
-

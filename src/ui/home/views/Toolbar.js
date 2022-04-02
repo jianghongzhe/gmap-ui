@@ -5,8 +5,9 @@ import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutl
 import newMindmapSvc from '../../../service/newMindmapSvc';
 import {dispatcher} from '../../../common/gflow';
 import { useSelector } from 'react-redux';
-import {tabActiveKey, tabPanes} from '../../../store';
+import {tabActiveKey, tabPanes, tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
+import { useExpandAll, useRestoreDefaultExpandState } from '../../../hooks/tabs';
 
 const { Header } = Layout;
 
@@ -17,6 +18,10 @@ const { Header } = Layout;
 const Toolbar=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
     const panes=useRecoilValue(tabPanes);
+    const allNodesExpand= useRecoilValue(tabCurrPaneAllNodesExpand);
+    const expStateChanged=useRecoilValue(tabCurrPaneExpandStateChanged);
+    const expandAll= useExpandAll();
+    const restoreDefaultExpandState= useRestoreDefaultExpandState();
 
     const ifHasValidTab =useCallback(() => {
         //不存选项卡或不存在活动选项卡，认为不显示按钮
@@ -37,15 +42,7 @@ const Toolbar=(props)=>{
     },[activeKey,panes]);
 
 
-    let showExpandAll=useMemo(()=>{
-        let currPane = ifHasValidTab();
-        if (false === currPane) {
-            return false;
-        }
-        //计算当前选项卡是否全部展开，若不是则显示【展开全部】按钮
-        let allExpand = newMindmapSvc.isAllNodeExpand(currPane.ds);
-        return !allExpand;
-    },[ifHasValidTab]);
+    
 
 
     let showRestore=useMemo(()=>{
@@ -76,8 +73,8 @@ const Toolbar=(props)=>{
             <Divider type="vertical" className='divider'/>
             <ToolbarItem title='编辑' icon={<EditOutlined />} onClick={props.onShowEditMapDlg}/>
             <ToolbarItem title='复制导图链接' icon={<LinkOutlined />} onClick={props.onCopyMapLink}/>
-            <ToolbarItem title='恢复节点默认状态' disabled={!showRestore} icon={<CompressOutlined />} onClick={dispatcher.tabs.restoreAll}/>
-            <ToolbarItem title='展开全部节点' disabled={!showExpandAll} icon={<ExpandOutlined />} onClick={dispatcher.tabs.expandAll}/>
+            <ToolbarItem title='恢复节点默认状态' disabled={!expStateChanged} icon={<CompressOutlined />} onClick={restoreDefaultExpandState}/>
+            <ToolbarItem title='展开全部节点' disabled={allNodesExpand} icon={<ExpandOutlined />} onClick={expandAll}/>
                       
             <Divider type="vertical" className='divider'/>
             <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={props.onScreenShot}/>

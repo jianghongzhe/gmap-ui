@@ -6,14 +6,14 @@ class NewMindmapSvc {
      */
     isAllNodeExpand = (ndsSet) => {
         // let root = this.getRootNodeByCells(cells);
-        return mindmapSvc.isNodeExpandRecursively(ndsSet.tree);
+        return mindmapSvc.isNodeExpandRecursively(ndsSet.tree, ndsSet.expands);
     }
 
     /**
      * 判断所有节点中是否有展开状态变化的
      */
     isAnyNdExpStChanged=(ndsSet)=>{
-        return mindmapSvc.isNdExpStChangedRecursively(ndsSet.tree);
+        return mindmapSvc.isNdExpStChangedRecursively(ndsSet.tree, ndsSet.expands);
     }
 
     /**
@@ -607,13 +607,13 @@ class NewMindmapSvc {
 
 
     expandAll=(ndsSet)=>{
-        mindmapSvc.expandNode(ndsSet.tree);
-        return this.baseLoadNdsSet(ndsSet.tree);
+        return mindmapSvc.expandNode(ndsSet.tree, ndsSet.expands);
+        //return this.baseLoadNdsSet(ndsSet.tree);
     }
 
     restore=(ndsSet)=>{
-        mindmapSvc.restoreNode(ndsSet.tree);
-        return this.baseLoadNdsSet(ndsSet.tree);
+        return mindmapSvc.restoreNode(ndsSet.tree, ndsSet.expands);
+        //return this.baseLoadNdsSet(ndsSet.tree);
     }
 
     toggleExp=(ndsSet, nd)=>{

@@ -2,9 +2,10 @@ import { message } from "antd";
 import { useCallback } from "react";
 import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
 import api from "../service/api";
-import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState} from '../store';
+import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState, tabCurrPane, tabCurrInd} from '../store/tabs';
 import mindmapSvc from '../service/mindmapSvc';
 import newMindmapSvc from '../service/newMindmapSvc';
+import { act } from "react-dom/test-utils";
 
 export const useSelectFileListItem=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
@@ -59,33 +60,260 @@ export const useSelectFileListItem=()=>{
     },[tabPanes, setTabActiveKey, setTabPanes]);
 };
 
-
-export const useToggleExpand=()=>{
-    const tabActiveKey= useRecoilValue(tabActiveKeyState);
+const useCurrPaneState=()=>{
+    const currPane= useRecoilValue(tabCurrPane);
+    const currInd=useRecoilValue(tabCurrInd);
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
 
-    return useCallback((nd)=>{
-        const newPanes=[];
-        tabPanes.forEach(pane=>{
-            if(tabActiveKey!==pane.key){
-                newPanes.push(pane);
-                return;
-            }
-            let ds={
-                ...pane.ds,
-                expands:{
-                    ...pane.ds.expands,
-                    [nd.id]: !pane.ds.expands[nd.id]
-                }
-            };
-            newPanes.push({
-                ...pane,
-                ds
-            });
-        });
+    const set= useCallback((newCurrPane)=>{
+        if(null===currPane || null===currInd){
+            return;
+        }
+        const newPanes=[...tabPanes];
+        newPanes[currInd]=newCurrPane;
         setTabPanes(newPanes);
+    },[currPane, currInd, tabPanes, setTabPanes]);
 
-    },[tabActiveKey, tabPanes, setTabPanes]);
+    return [currPane, set];
+};
+
+
+export const useToggleExpand=()=>{
+    const[currPane, setCurrPane]= useCurrPaneState();
+
+    return useCallback((nd)=>{
+        setCurrPane({
+            ...currPane,
+            ds: {
+                ...currPane.ds,
+                expands:{
+                    ...currPane.ds.expands,
+                    [nd.id]: !currPane.ds.expands[nd.id]
+                }
+            }
+        });
+    },[currPane, setCurrPane]);
+};
+
+export const useExpandAll=()=>{
+    const[currPane, setCurrPane]= useCurrPaneState();
+
+    return useCallback(()=>{
+        let expands={...currPane.ds.expands};
+        newMindmapSvc.expandAll(currPane.ds).forEach(ndId=>{
+            expands[ndId]=true;
+        });
+        setCurrPane({
+            ...currPane,
+            ds: {
+                ...currPane.ds,
+                expands
+            }
+        });
+    },[currPane, setCurrPane]);
+};
+
+export const useRestoreDefaultExpandState=()=>{
+    const[currPane, setCurrPane]= useCurrPaneState();
+
+    return useCallback(()=>{
+        setCurrPane({
+            ...currPane,
+            ds: {
+                ...currPane.ds,
+                expands: {
+                    ...currPane.ds.expands,
+                    ...newMindmapSvc.restore(currPane.ds)
+                }
+            }
+        });
+    },[currPane, setCurrPane]);
+};
+
+
+export const useSetAssignedTabKey=()=>{
+    const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
+    return useCallback((key)=>{
+        setTabActiveKey(key);
+    }, setTabActiveKey);
+};
+
+
+export const useTogglePreTab=()=>{
+    const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
+    const currInd=useRecoilValue(tabCurrInd);
+    const tabPanes= useRecoilValue(tabPanesState);
+
+    return useCallback(()=>{
+        if(null===currInd){
+            return;
+        }
+        if(1===tabPanes.length){
+            return;
+        }
+        if(currInd>0){
+            setTabActiveKey(tabPanes[currInd-1].key);
+            return;
+        }
+        setTabActiveKey(tabPanes[tabPanes.length-1].key);
+    },[currInd, tabPanes, setTabActiveKey]);
+};
+
+
+export const useToggleNextTab=()=>{
+    const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
+    const currInd=useRecoilValue(tabCurrInd);
+    const tabPanes= useRecoilValue(tabPanesState);
+
+    return useCallback(()=>{
+        if(null===currInd){
+            return;
+        }
+        if(1===tabPanes.length){
+            return;
+        }
+        if(currInd<tabPanes.length-1){
+            setTabActiveKey(tabPanes[currInd+1].key);
+            return;
+        }
+        setTabActiveKey(tabPanes[0].key);
+    },[currInd, tabPanes, setTabActiveKey]);
+};
+
+
+const useGetTabIndByKey=()=>{
+    const tabPanes= useRecoilValue(tabPanesState);
+
+    return useCallback((targetKey)=>{
+        let ind=null;
+        tabPanes.forEach((pane, i) => {
+            if (pane.key === targetKey) {
+                ind = i;
+            }
+        });
+        return ind;
+    },[tabPanes]);
+};
+
+export const useRemoveTab=()=>{
+    const [activeKey, setActiveKey]= useRecoilState(tabActiveKeyState);
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    const getTabIndByKey= useGetTabIndByKey();
+
+    return useCallback((targetKey)=>{
+        // 空判断
+        if (0 === tabPanes.length) {
+            return;
+        }
+        //要删除的是唯一一个选项卡
+        if (1 === tabPanes.length) {
+            setTabPanes([]);
+            setActiveKey(null);
+            return;
+        }
+
+        //要删除以外的选项卡集合
+        const panes = tabPanes.filter(pane => pane.key !== targetKey);
+        //要删除的是当前活动的选项卡
+        if (activeKey === targetKey) {
+            let lastIndex = getTabIndByKey(targetKey)-1;
+            const newKey = panes[lastIndex >= 0 ? lastIndex : 0].key;
+            setTabPanes(panes);
+            setActiveKey(newKey);
+            return;
+        }
+        //要删除的不是当前活动的选项卡，则不影响activeKey（即不需要改变）
+        setTabPanes(panes);
+    },[activeKey, tabPanes, setActiveKey, setTabPanes, getTabIndByKey]);
+};
+
+
+export const useRemoveOtherTabs=()=>{
+    const currPane= useRecoilValue(tabCurrPane);
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    
+    return useCallback(()=>{
+        // 没有选项卡或只有一个，则不删除
+        if (0 === tabPanes.length || 1 === tabPanes.length) {
+            return;
+        }
+        setTabPanes([currPane]);
+    },[currPane, tabPanes, setTabPanes]);
+};
+
+export const useRemoveRightTabs=()=>{
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    const currInd=useRecoilValue(tabCurrInd);
+    
+    return useCallback(()=>{
+        if(null==currInd){
+            return;
+        }
+        if(currInd<tabPanes.length-1){
+            setTabPanes([...tabPanes].splice(0, currInd+1));
+        }
+    },[tabPanes, currInd, setTabPanes]);
+};
+
+export const useRemoveLeftTabs=()=>{
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    const currInd=useRecoilValue(tabCurrInd);
+    
+    return useCallback(()=>{
+        if(null==currInd){
+            return;
+        }
+        if(currInd>0){
+            setTabPanes([...tabPanes].splice(currInd));
+        }
+    },[tabPanes, currInd, setTabPanes]);
+};
+
+
+export const useRemoveAllTabs=()=>{
+    const setActiveKey= useSetRecoilState(tabActiveKeyState);
+    const setTabPanes= useSetRecoilState(tabPanesState);
+
+    return useCallback(()=>{
+        setTabPanes([]);
+        setActiveKey(null);
+    },[setActiveKey, setTabPanes]);
+};
+
+
+
+export const useMovePreTab=()=>{
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    const currInd=useRecoilValue(tabCurrInd);
+
+    return useCallback(()=>{
+        if (null==currInd || 0 === tabPanes.length || 1 === tabPanes.length) {
+            return;
+        }
+        const targetInd=(currInd>0 ? currInd-1 : tabPanes.length-1);
+        let newPanes=[...tabPanes];
+        const t=newPanes[currInd];
+        newPanes[currInd]=newPanes[targetInd];
+        newPanes[targetInd]=t;
+        setTabPanes(newPanes);
+    },[currInd, tabPanes, setTabPanes]);
+};
+
+export const useMoveNextTab=()=>{
+    const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    const currInd=useRecoilValue(tabCurrInd);
+
+    return useCallback(()=>{
+        if (null==currInd || 0 === tabPanes.length || 1 === tabPanes.length) {
+            return;
+        }
+        const targetInd=(currInd<tabPanes.length-1 ? currInd+1 : 0);
+        let newPanes=[...tabPanes];
+        const t=newPanes[currInd];
+        newPanes[currInd]=newPanes[targetInd];
+        newPanes[targetInd]=t;
+        setTabPanes(newPanes);
+    },[currInd, tabPanes, setTabPanes]);
 };
 
 

@@ -174,24 +174,42 @@ class MindmapSvc {
 
 
     //----------------如下为非暴露的方法-------------------------------------------------
-    restoreNode=(nd)=>{
+    restoreNode=(nd, expands)=>{
+        let result={};
         if (nd.leaf) {
-            return;
+            return {};
         }
 
-        nd.expand=nd.defExp;
+        if(expands[nd.id]!==nd.defExp){
+            result={
+                ...result,
+                [nd.id]: nd.defExp,
+            };
+        }
         nd.childs.forEach(child => {
-            this.restoreNode(child);
+            result={
+                ...result,
+                ...this.restoreNode(child, expands),
+            };
         });
+        return result;
     }
 
-    expandNode = (nd) => {
-        nd.expand = true;
-        if (!nd.leaf) {
-            nd.childs.forEach(child => {
-                this.expandNode(child);
-            });
+    expandNode = (nd, expands) => {
+        const ndIds=[];
+        if (nd.leaf) {
+            return ndIds;
         }
+
+        if(!expands[nd.id]){
+            ndIds.push(nd.id);
+        }
+        nd.childs.forEach(child => {
+            this.expandNode(child, expands).forEach(ndId=>{
+                ndIds.push(ndId);
+            });
+        });
+        return ndIds;
     }
 
     // getRootNodeByCells = (cells) => {
@@ -220,7 +238,7 @@ class MindmapSvc {
     //     return root;
     // }
 
-    isNdExpStChangedRecursively=(nd)=>{
+    isNdExpStChangedRecursively=(nd, expands)=>{
         if(!nd){
             return false;
         }
@@ -231,13 +249,13 @@ class MindmapSvc {
         }
 
         //如果当前节点的展开状态有变化，则直接返回true
-        if (nd.expand !==nd.defExp) {
+        if (expands[nd.id] !==nd.defExp) {
             return true;
         }
 
         //否则递归判断子节点展开状态有无变化，若有，直接返回true
         for (let i in nd.childs) {
-            if (this.isNdExpStChangedRecursively(nd.childs[i])) {
+            if (this.isNdExpStChangedRecursively(nd.childs[i], expands)) {
                 return true;
             }
         }
@@ -245,7 +263,7 @@ class MindmapSvc {
         return false;
     }
 
-    isNodeExpandRecursively = (nd) => {
+    isNodeExpandRecursively = (nd, expands) => {
         if(!nd){
             return false;
         }
@@ -256,11 +274,11 @@ class MindmapSvc {
         }
 
         //从自己向子节点递归，遇到未展开，就返回false，直到最后返回true
-        if (!nd.expand) {
+        if (!expands[nd.id]) {
             return false;
         }
         for (let i in nd.childs) {
-            if (!this.isNodeExpandRecursively(nd.childs[i])) {
+            if (!this.isNodeExpandRecursively(nd.childs[i], expands)) {
                 return false;
             }
         }

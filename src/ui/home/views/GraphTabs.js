@@ -9,9 +9,9 @@ import {dispatcher} from '../../../common/gflow';
 
 import { useSelector } from 'react-redux';
 import keyDetector from '../../../common/keyDetector';
-import {tabActiveKey, tabPanes} from '../../../store';
+import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
-import { useToggleExpand } from '../../../hooks/tabs';
+import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
 
 const { TabPane } = Tabs;
 
@@ -25,6 +25,16 @@ const GraphTabs=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
     const panes=useRecoilValue(tabPanes);
     const toggleExpand= useToggleExpand();
+    const togglePreTab=useTogglePreTab();
+    const toggleNextTab=useToggleNextTab();
+    const setAssignedTabKey=useSetAssignedTabKey();
+    const removeTab=useRemoveTab();
+    const removeAllTabs=useRemoveAllTabs();
+    const removeOtherTabs=useRemoveOtherTabs();
+    const removeLeftTabs=useRemoveLeftTabs();
+    const removeRightTabs=useRemoveRightTabs();
+    const movePreTab=useMovePreTab();
+    const moveNextTab=useMoveNextTab();
     
     
     /**
@@ -67,9 +77,9 @@ const GraphTabs=(props)=>{
      */
     const onEditTab =useCallback((targetKey, action) => {
         if ("remove" === action) {
-            dispatcher.tabs.removeTab(targetKey);
+            removeTab(targetKey);
         }
-    },[]);
+    },[removeTab]);
 
 
     /**
@@ -90,56 +100,58 @@ const GraphTabs=(props)=>{
                 //alt+shift+w 关闭全部选项卡
                 'alt+shift+w':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.removeAllTabs();
+                    removeAllTabs();
                 },
 
                 //alt+o 关闭其他选项卡
                 'alt+o':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.removeOtherTabs();
+                    removeOtherTabs();
                 },
 
                 //alt+p 关闭右侧选项卡
                 'alt+p':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.removeRightTabs();
+                    removeRightTabs();
                 },
 
                 //alt+i 关闭左侧选项卡
                 'alt+i':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.removeLeftTabs();
+                    removeLeftTabs();
                 },
 
                 //ctrl+PageUp 前一个选项卡
                 'ctrl+pgup':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.togglePreTab();
+                    //dispatcher.tabs.togglePreTab();
+                    togglePreTab();
                 },
 
                 //ctrl+PageDown 后一个选项卡
                 'ctrl+pgdn':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.toggleNextTab();
+                    // dispatcher.tabs.toggleNextTab();
+                    toggleNextTab();
                 },
 
                 //ctrl+Shift+PageUp 选项卡前移
                 'ctrl+shift+pgup':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.movePreTab();
+                    movePreTab();
                 },
 
                 //ctrl+Shift+PageDown 选项卡后移
                 'ctrl+shift+pgdn':(e)=>{
                     if(isExclude){return;}
-                    dispatcher.tabs.moveNextTab();
+                    moveNextTab();
                 },
             });
         }
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[props.hasOpenDlg, activeKey, onEditTab]);
+    },[props.hasOpenDlg, activeKey, onEditTab, togglePreTab, toggleNextTab]);
 
     
     
@@ -149,7 +161,7 @@ const GraphTabs=(props)=>{
             type="editable-card"
             activeKey={activeKey}
             css={{ height:'calc(100vh - 64px)', 'backgroundColor': 'white' }}
-            onChange={dispatcher.tabs.changeActiveKey}
+            onChange={setAssignedTabKey}
             onEdit={onEditTab}>
             {
                 panes.map((pane,ind) => (
