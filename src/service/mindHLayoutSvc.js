@@ -1,21 +1,7 @@
-import mindmapSvc from './mindmapSvc';
+// import mindmapSvc from './mindmapSvc';
 
 class MindHLayoutSvc {
-    /**
-     * 判断是否所有节点都已展开
-     */
-    isAllNodeExpand = (ndsSet) => {
-        // let root = this.getRootNodeByCells(cells);
-        return mindmapSvc.isNodeExpandRecursively(ndsSet.tree);
-    }
-
-    /**
-     * 判断所有节点中是否有展开状态变化的
-     */
-    isAnyNdExpStChanged=(ndsSet)=>{
-        return mindmapSvc.isNdExpStChangedRecursively(ndsSet.tree);
-    }
-
+    
     /**
      * 获得节点和其所有子节点整个区域所占的高
      */
@@ -100,10 +86,7 @@ class MindHLayoutSvc {
         // 否则，把节点位置改为从1点钟开始顺时针旋转
         // 1：左右互换
         // 2：左侧改为逆序：该过程不在此处处理，而是在putNds方法的左侧节点布局时执行。尽量不让节点顺序发生改变，而是在处理时保持一个逻辑的顺序。
-        let from=99999;
-        let to=-1;
         ndsSet.tree.childs.forEach((child,ind) => {
-            //child.left=!child.left;
             resultWrapper.directions[child.id]=!resultWrapper.directions[child.id];
         });
         return [rightH, leftH];
@@ -161,10 +144,6 @@ class MindHLayoutSvc {
         this.putExpBtn(ndsSet,ndsSet.tree,rootLoc[0],rootLoc[1],false, resultWrapper);
         
 
-
-        //expBtnStyles
-        //expBtnRects
-
         if(ndsSet.expands[ndsSet.tree.id]){
             //左：由于需要保持1点钟开始顺时针旋转，因此把左侧节点倒序后再摆放
             ndsSet.tree.childs.filter(nd =>resultWrapper.directions[nd.id]).reverse().forEach(nd => {
@@ -188,9 +167,6 @@ class MindHLayoutSvc {
                 currRightTop += allHeight+nodePaddingTop;//
             });
         }
-
-        
-        
 
         return this.calcOptNdPos(ndsSet, resultWrapper);
     }
@@ -537,105 +513,7 @@ class MindHLayoutSvc {
     }
 
 
-    // {
-    //     tree: {
-    //         id:'root',
-    //         str:'...',
-    //         childs:[
-    //             {
-    //                 id:'sub',
-    //                 str:'...',
-    //                 childs:[...]
-    //             }
-    //         ]
-    //     },
-    //     list:[
-    //         {id:'', str:'', childs:[...]},
-    //         {id:'', str:'', childs:[...]},
-    //         // ...
-    //     ],
-    //     map:{
-    //         'id1': {id:'', str:'', childs:[...]},
-    //         'id2': {id:'', str:'', childs:[...]},
-    //         // ...
-    //     },
-    //     ndStyles:{
-    //            'id1': {...},
-    //            'id2': {...},
-    //     },
-    //     expBtnStyles:{
-    //            'id1': {...},
-    //            'id2': {...},
-    //     },
-    //     lineStyles:{
-    //            'id1': {...},
-    //            'id2': {...},
-    //     },
-    // }
-    /**
-     * 根据节点树结构加载其他信息
-     */
-    baseLoadNdsSet=(tree)=>{
-        let ndsSet={
-            //节点相关数据
-            tree: tree,
-            list: [],
-            map: {},
-
-            //dom操作需要的数据：元素占用空间大小
-            rects:{},
-            expBtnRects:{},
-
-            //样式相关数据
-            ndStyles:{},
-            lineStyles:{},
-            expBtnStyles:{},
-            wrapperStyle:{},
-        };
-
-        this.flatNds(ndsSet.tree, ndsSet.list, ndsSet.map);
-        return ndsSet;
-    }
-
-
-
-    expandAll=(ndsSet)=>{
-        mindmapSvc.expandNode(ndsSet.tree);
-        return this.baseLoadNdsSet(ndsSet.tree);
-    }
-
-    restore=(ndsSet)=>{
-        mindmapSvc.restoreNode(ndsSet.tree);
-        return this.baseLoadNdsSet(ndsSet.tree);
-    }
-
-    toggleExp=(ndsSet, nd)=>{
-        nd.expand=!nd.expand;
-        return this.baseLoadNdsSet(ndsSet.tree);
-    }
-
-
-    loadNdsSet=(treeRoot)=>{
-        //如果是解析失败的信息，则直接返回
-        if(treeRoot && false===treeRoot.succ){
-            return treeRoot;
-        }
-        return this.baseLoadNdsSet(treeRoot);
-    }
-
     
-
-
-
-    flatNds = (nd, listContainer,mapContainer) => {
-        listContainer.push(nd);
-        mapContainer[nd.id]=nd;
-        if(nd.childs && 0<nd.childs.length && nd.expand){
-            nd.childs.forEach(child => {
-                this.flatNds(child,listContainer,mapContainer);
-            });
-        }
-    }
 
 
     /**
@@ -644,7 +522,6 @@ class MindHLayoutSvc {
      */
     loadStyles=(ndsSet)=>{
         if(!ndsSet){return;}
-        console.log("dsds", ndsSet);
 
         let result={
             rects:{},

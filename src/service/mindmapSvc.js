@@ -49,24 +49,24 @@ import api from './api';
  * 
  */
 class MindmapSvc {
-    /**
-     * 切换非叶节点展开状态。为了处理此状态，所有与布局相关的操作都要在调用childs之前检查expand状态，如果未展开，则不再继续执行
-     */
-    toggleExpandNode = (cell,cells) => {
-        // //获取根节点
-        // let root = cell.nd;
-        // while (null != root.par) {
-        //     root = root.par;
-        // }
+    // /**
+    //  * 切换非叶节点展开状态。为了处理此状态，所有与布局相关的操作都要在调用childs之前检查expand状态，如果未展开，则不再继续执行
+    //  */
+    // toggleExpandNode = (cell,cells) => {
+    //     // //获取根节点
+    //     // let root = cell.nd;
+    //     // while (null != root.par) {
+    //     //     root = root.par;
+    //     // }
 
-        //修改当前节点的展开状态
-        if (!cell.nd.leaf) {
-            cell.nd.expand = !cell.nd.expand;
-        }
+    //     //修改当前节点的展开状态
+    //     if (!cell.nd.leaf) {
+    //         cell.nd.expand = !cell.nd.expand;
+    //     }
 
-        //重新解析表格结构
-        return this.parseMindMapDataInner(cells.root);
-    }
+    //     //重新解析表格结构
+    //     return this.parseMindMapDataInner(cells.root);
+    // }
 
     /**
      * 展开所有节点
@@ -105,19 +105,19 @@ class MindmapSvc {
         return this.isNdExpStChangedRecursively(cells.root);
     }
 
-    parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true) => {
-        try{
-            let root=this.parseRootNode(txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true);
-            let cells= this.parseMindMapDataInner(root);
-            return cells;
-        }catch(e){
-            return {
-                succ: false,
-                msg: '内容解析失败',
-                desc: ('string'===typeof(e)? ""+e : "图表内容解析过程中发生错误 ~~~")
-            }
-        }
-    }
+    // parseMindMapData = (txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true) => {
+    //     try{
+    //         let root=this.parseRootNode(txts, defLineColor, theThemeStyles, bordTypesMap, getBorderStyleCallback,defDateColor, shouldValidate = true);
+    //         let cells= this.parseMindMapDataInner(root);
+    //         return cells;
+    //     }catch(e){
+    //         return {
+    //             succ: false,
+    //             msg: '内容解析失败',
+    //             desc: ('string'===typeof(e)? ""+e : "图表内容解析过程中发生错误 ~~~")
+    //         }
+    //     }
+    // }
 
 
     /**
@@ -286,185 +286,185 @@ class MindmapSvc {
     }
 
 
-    parseMindMapDataInner = (nd) => {
-        //计算根节点子树的方向，同时在其中设置虚拟节点（如果需要）
-        let leftAndRightLeafCnt = this.setDirection(nd);
+    // parseMindMapDataInner = (nd) => {
+    //     //计算根节点子树的方向，同时在其中设置虚拟节点（如果需要）
+    //     let leftAndRightLeafCnt = this.setDirection(nd);
 
-        let rows = Math.max(leftAndRightLeafCnt[0], leftAndRightLeafCnt[1]);//行数
-        rows = (0 === rows ? 1 : rows);
-        let leftAndRightCols = this.getLeftRightDeeps(nd);//左右子树深度（不包含根节点）
-        let cols = leftAndRightCols[0] + 1 + leftAndRightCols[1];//列数
-        let rootLoc = [parseInt((rows - 1) / 2), leftAndRightCols[0]];//根节点位置
-
-
-
-        //从根节点向下递归设置各节点的颜色
-        this.setNodeLineColor(nd, defaultLineColor);
+    //     let rows = Math.max(leftAndRightLeafCnt[0], leftAndRightLeafCnt[1]);//行数
+    //     rows = (0 === rows ? 1 : rows);
+    //     let leftAndRightCols = this.getLeftRightDeeps(nd);//左右子树深度（不包含根节点）
+    //     let cols = leftAndRightCols[0] + 1 + leftAndRightCols[1];//列数
+    //     let rootLoc = [parseInt((rows - 1) / 2), leftAndRightCols[0]];//根节点位置
 
 
-        //创建表格结构，其中cls用来存bordtype，在最后会把bordtype解析为实际的样式对象
-        let cells = [];
-        for (let i = 0; i < rows; ++i) {
-            let line = [];
-            for (let j = 0; j < cols; ++j) {
-                line.push({
-                    txt: "　",
-                    cls: 0,
-                    llineColor: null,
-                    rlineColor: null,
-                    tlineColor: null,
-                    blineColor: null,
-                    nd: null,
-                });
-            }
-            cells.push(line);
-        }
 
-        //设置根节点的文本的颜色
-        let rootCell=cells[rootLoc[0]][rootLoc[1]];
-        rootCell.txt = nd.str;
-        rootCell.blineColor = nd.color
-        rootCell.nd = nd;
-        addBord(rootCell, bordType.b);
+    //     //从根节点向下递归设置各节点的颜色
+    //     this.setNodeLineColor(nd, defaultLineColor);
 
 
-        //设置左右子树的起始行号，为了使左右的高度比较对称，叶节点少的一方应该向下移，而不应从0开始
-        let leftCurrPos = 0;
-        let rightCurrPos = 0;
-        if (leftAndRightLeafCnt[0] < leftAndRightLeafCnt[1]) {//为了使结果树的左右调度比较均匀
-            rightCurrPos = 0;
-            leftCurrPos = parseInt((leftAndRightLeafCnt[1] - leftAndRightLeafCnt[0]) / 2);
-        } else {
-            leftCurrPos = 0;
-            rightCurrPos = parseInt((leftAndRightLeafCnt[0] - leftAndRightLeafCnt[1]) / 2);
-        }
+    //     //创建表格结构，其中cls用来存bordtype，在最后会把bordtype解析为实际的样式对象
+    //     let cells = [];
+    //     for (let i = 0; i < rows; ++i) {
+    //         let line = [];
+    //         for (let j = 0; j < cols; ++j) {
+    //             line.push({
+    //                 txt: "　",
+    //                 cls: 0,
+    //                 llineColor: null,
+    //                 rlineColor: null,
+    //                 tlineColor: null,
+    //                 blineColor: null,
+    //                 nd: null,
+    //             });
+    //         }
+    //         cells.push(line);
+    //     }
+
+    //     //设置根节点的文本的颜色
+    //     let rootCell=cells[rootLoc[0]][rootLoc[1]];
+    //     rootCell.txt = nd.str;
+    //     rootCell.blineColor = nd.color
+    //     rootCell.nd = nd;
+    //     addBord(rootCell, bordType.b);
 
 
-        //分别向左右子树递归放置节点
-        if (nd.expand) {
-            let lcnt = 0;
-            let rcnt = 0;
-            nd.childs.forEach(child => {
-                if (child.left) {
-                    ++lcnt;
-                }
-                if (!child.left) {
-                    ++rcnt;
-                }
-            });
+    //     //设置左右子树的起始行号，为了使左右的高度比较对称，叶节点少的一方应该向下移，而不应从0开始
+    //     let leftCurrPos = 0;
+    //     let rightCurrPos = 0;
+    //     if (leftAndRightLeafCnt[0] < leftAndRightLeafCnt[1]) {//为了使结果树的左右调度比较均匀
+    //         rightCurrPos = 0;
+    //         leftCurrPos = parseInt((leftAndRightLeafCnt[1] - leftAndRightLeafCnt[0]) / 2);
+    //     } else {
+    //         leftCurrPos = 0;
+    //         rightCurrPos = parseInt((leftAndRightLeafCnt[0] - leftAndRightLeafCnt[1]) / 2);
+    //     }
 
 
-            nd.childs.forEach(child => {
-                if (child.left) {
-                    this.putCell(cells, child, leftCurrPos, rootLoc[1] - 1, true, rootLoc, nd.color, 1 === lcnt ? rootLoc[0] : null);
-                    leftCurrPos += this.getLeafCnt(child);
-                    return;
-                }
-                if (!child.left) {
-                    this.putCell(cells, child, rightCurrPos, rootLoc[1] + 1, false, rootLoc, nd.color, 1 === rcnt ? rootLoc[0] : null);
-                    rightCurrPos += this.getLeafCnt(child);
-                    return;
-                }
-            });
-        }
+    //     //分别向左右子树递归放置节点
+    //     if (nd.expand) {
+    //         let lcnt = 0;
+    //         let rcnt = 0;
+    //         nd.childs.forEach(child => {
+    //             if (child.left) {
+    //                 ++lcnt;
+    //             }
+    //             if (!child.left) {
+    //                 ++rcnt;
+    //             }
+    //         });
 
 
+    //         nd.childs.forEach(child => {
+    //             if (child.left) {
+    //                 this.putCell(cells, child, leftCurrPos, rootLoc[1] - 1, true, rootLoc, nd.color, 1 === lcnt ? rootLoc[0] : null);
+    //                 leftCurrPos += this.getLeafCnt(child);
+    //                 return;
+    //             }
+    //             if (!child.left) {
+    //                 this.putCell(cells, child, rightCurrPos, rootLoc[1] + 1, false, rootLoc, nd.color, 1 === rcnt ? rootLoc[0] : null);
+    //                 rightCurrPos += this.getLeafCnt(child);
+    //                 return;
+    //             }
+    //         });
+    //     }
 
 
 
 
-        //左边部分圆角设置
-        for (let i = 0; i < leftAndRightCols[0]; ++i) {
-            for (let j = 0; j < rows; ++j) {
-                let item = cells[j][i];
 
-                //有右下边框，且下面格无右边框，且右边无下边框，则设置右下圆角
-                if (
-                    hasBord(item, bordType.r) &&
-                    hasBord(item, bordType.b) &&
-                    (j === rows - 1 || !hasBord(cells[j + 1][i], bordType.r)) &&
-                    (i === cols - 1 || !hasBord(cells[j][i + 1], bordType.b))
-                ) {
-                    addBord(item, bordType.rbRad)
-                }
 
-                //有下边框无右边框，且下面格有右边框，且右边无下边框，则把下格设右上圆角和上边框，同时把当前格下边框去掉，依次向左直到无下边框
-                if (
-                    !hasBord(item, bordType.r) &&
-                    hasBord(item, bordType.b) &&
-                    (j < rows - 1 && hasBord(cells[j + 1][i], bordType.r)) &&
-                    (i < cols - 1 && !hasBord(cells[j][i + 1], bordType.b))
-                ) {
-                    //下面格设置右上圆角和上边框
-                    addBord(cells[j + 1][i], bordType.rtRad);
-                    addBord(cells[j + 1][i], bordType.t);
-                    cells[j + 1][i].tlineColor = cells[j][i].blineColor;
+    //     //左边部分圆角设置
+    //     for (let i = 0; i < leftAndRightCols[0]; ++i) {
+    //         for (let j = 0; j < rows; ++j) {
+    //             let item = cells[j][i];
 
-                    //本格到左边所有有下边框的都去掉，同时在下边格加上边框
-                    for (let k = i; k >= 0; --k) {
-                        if (!hasBord(cells[j][k], bordType.b)) {
-                            break;
-                        }
+    //             //有右下边框，且下面格无右边框，且右边无下边框，则设置右下圆角
+    //             if (
+    //                 hasBord(item, bordType.r) &&
+    //                 hasBord(item, bordType.b) &&
+    //                 (j === rows - 1 || !hasBord(cells[j + 1][i], bordType.r)) &&
+    //                 (i === cols - 1 || !hasBord(cells[j][i + 1], bordType.b))
+    //             ) {
+    //                 addBord(item, bordType.rbRad)
+    //             }
 
-                        //当前行取消下边框
-                        removeBord(cells[j][k], bordType.b);
+    //             //有下边框无右边框，且下面格有右边框，且右边无下边框，则把下格设右上圆角和上边框，同时把当前格下边框去掉，依次向左直到无下边框
+    //             if (
+    //                 !hasBord(item, bordType.r) &&
+    //                 hasBord(item, bordType.b) &&
+    //                 (j < rows - 1 && hasBord(cells[j + 1][i], bordType.r)) &&
+    //                 (i < cols - 1 && !hasBord(cells[j][i + 1], bordType.b))
+    //             ) {
+    //                 //下面格设置右上圆角和上边框
+    //                 addBord(cells[j + 1][i], bordType.rtRad);
+    //                 addBord(cells[j + 1][i], bordType.t);
+    //                 cells[j + 1][i].tlineColor = cells[j][i].blineColor;
 
-                        //下一行增加上边框
-                        if (k !== i) {
-                            addBord(cells[j + 1][k], bordType.t);
-                            cells[j + 1][k].tlineColor = cells[j][k].blineColor;
-                        }
-                    }
-                }
-            }
-        }
+    //                 //本格到左边所有有下边框的都去掉，同时在下边格加上边框
+    //                 for (let k = i; k >= 0; --k) {
+    //                     if (!hasBord(cells[j][k], bordType.b)) {
+    //                         break;
+    //                     }
 
-        //右边部分圆角设置
-        for (let i = leftAndRightCols[0] + 1; i < cols; ++i) {
-            for (let j = 0; j < rows; ++j) {
-                let item = cells[j][i];
+    //                     //当前行取消下边框
+    //                     removeBord(cells[j][k], bordType.b);
 
-                //有左下边框，且下面格无左边框，，且右边无下边框，则设置左下圆角
-                if (
-                    hasBord(item, bordType.l) &&
-                    hasBord(item, bordType.b) &&
-                    (j === rows - 1 || !hasBord(cells[j + 1][i], bordType.l)) &&
-                    (i === 0 || !hasBord(cells[j][i - 1], bordType.b))
-                ) {
-                    addBord(item, bordType.lbRad);
-                }
+    //                     //下一行增加上边框
+    //                     if (k !== i) {
+    //                         addBord(cells[j + 1][k], bordType.t);
+    //                         cells[j + 1][k].tlineColor = cells[j][k].blineColor;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
 
-                //有下边框无左边框，且下面格有左边框，且左边无下边框，则把下格设左上圆角和上边框，同时把当前格下边框去掉，依次向右直到无下边框
-                if (
-                    !hasBord(item, bordType.l) &&
-                    hasBord(item, bordType.b) &&
-                    (j < rows - 1 && hasBord(cells[j + 1][i], bordType.l)) &&
-                    (i > 0 && !hasBord(cells[j][i - 1], bordType.b))
-                ) {
-                    //下面格设置左上圆角和上边框
-                    addBord(cells[j + 1][i], bordType.ltRad);
-                    addBord(cells[j + 1][i], bordType.t);
-                    cells[j + 1][i].tlineColor = cells[j][i].blineColor;
+    //     //右边部分圆角设置
+    //     for (let i = leftAndRightCols[0] + 1; i < cols; ++i) {
+    //         for (let j = 0; j < rows; ++j) {
+    //             let item = cells[j][i];
 
-                    //本格到右边所有有下边框的都去掉，同时在下边格加上边框
-                    for (let k = i; k < cols; ++k) {
-                        if (!hasBord(cells[j][k], bordType.b)) {
-                            break;
-                        }
+    //             //有左下边框，且下面格无左边框，，且右边无下边框，则设置左下圆角
+    //             if (
+    //                 hasBord(item, bordType.l) &&
+    //                 hasBord(item, bordType.b) &&
+    //                 (j === rows - 1 || !hasBord(cells[j + 1][i], bordType.l)) &&
+    //                 (i === 0 || !hasBord(cells[j][i - 1], bordType.b))
+    //             ) {
+    //                 addBord(item, bordType.lbRad);
+    //             }
 
-                        //当前行取消下边框
-                        removeBord(cells[j][k], bordType.b);
+    //             //有下边框无左边框，且下面格有左边框，且左边无下边框，则把下格设左上圆角和上边框，同时把当前格下边框去掉，依次向右直到无下边框
+    //             if (
+    //                 !hasBord(item, bordType.l) &&
+    //                 hasBord(item, bordType.b) &&
+    //                 (j < rows - 1 && hasBord(cells[j + 1][i], bordType.l)) &&
+    //                 (i > 0 && !hasBord(cells[j][i - 1], bordType.b))
+    //             ) {
+    //                 //下面格设置左上圆角和上边框
+    //                 addBord(cells[j + 1][i], bordType.ltRad);
+    //                 addBord(cells[j + 1][i], bordType.t);
+    //                 cells[j + 1][i].tlineColor = cells[j][i].blineColor;
 
-                        //下一行增加上边框
-                        if (k !== i) {
-                            addBord(cells[j + 1][k], bordType.t);
-                            cells[j + 1][k].tlineColor = cells[j][k].blineColor;
-                        }
-                    }
+    //                 //本格到右边所有有下边框的都去掉，同时在下边格加上边框
+    //                 for (let k = i; k < cols; ++k) {
+    //                     if (!hasBord(cells[j][k], bordType.b)) {
+    //                         break;
+    //                     }
 
-                }
-            }
-        }
+    //                     //当前行取消下边框
+    //                     removeBord(cells[j][k], bordType.b);
+
+    //                     //下一行增加上边框
+    //                     if (k !== i) {
+    //                         addBord(cells[j + 1][k], bordType.t);
+    //                         cells[j + 1][k].tlineColor = cells[j][k].blineColor;
+    //                     }
+    //                 }
+
+    //             }
+    //         }
+    //     }
 
 
         
@@ -472,44 +472,44 @@ class MindmapSvc {
         
 
 
-        //把边框样式的记号转换为实际的样式对象
-        for (let i = 0; i < cols; ++i) {
-            for (let j = 0; j < rows; ++j) {
-                let item = cells[j][i];
-                item.cls = this.parseBordStyle(item);
-            }
-        }
+    //     //把边框样式的记号转换为实际的样式对象
+    //     for (let i = 0; i < cols; ++i) {
+    //         for (let j = 0; j < rows; ++j) {
+    //             let item = cells[j][i];
+    //             item.cls = this.parseBordStyle(item);
+    //         }
+    //     }
 
-        //加入中心主题和其他各层主题的样式
-        //当前只支持三种样式，即根主题、二级主题、其他任何层主题
-        for (let r = 0; r < rows; ++r) {
-            for (let c = 0; c < cols; ++c) {
-                if (cells[r][c].nd) {
-                    let themeInd = cells[r][c].nd.lev;
-                    themeInd = (themeInd > 2 ? 2 : themeInd);
-                    cells[r][c].cls.push(themeStyles[themeInd]);
-                }
-            }
-        }
+    //     //加入中心主题和其他各层主题的样式
+    //     //当前只支持三种样式，即根主题、二级主题、其他任何层主题
+    //     for (let r = 0; r < rows; ++r) {
+    //         for (let c = 0; c < cols; ++c) {
+    //             if (cells[r][c].nd) {
+    //                 let themeInd = cells[r][c].nd.lev;
+    //                 themeInd = (themeInd > 2 ? 2 : themeInd);
+    //                 cells[r][c].cls.push(themeStyles[themeInd]);
+    //             }
+    //         }
+    //     }
 
-        // cells[rootLoc[0]][rootLoc[1]].cls.push(centerThemeStyle);
-        cells.root=nd;//绑定单元格集合与根节点的对应关系
-        return cells;
-    }
+    //     // cells[rootLoc[0]][rootLoc[1]].cls.push(centerThemeStyle);
+    //     cells.root=nd;//绑定单元格集合与根节点的对应关系
+    //     return cells;
+    // }
 
-    /**
-     * 移除节点子节点中的
-     */
-    removeVisualNds=(nd)=>{
-        let len=nd.childs.length;
-        for(let i=len-1;i>=0;--i){
-            if(nd.childs[i].visual){
-                nd.childs.splice(i,1);
-                continue;
-            }
-            this.removeVisualNds(nd.childs[i]);
-        }
-    }
+    // /**
+    //  * 移除节点子节点中的
+    //  */
+    // removeVisualNds=(nd)=>{
+    //     let len=nd.childs.length;
+    //     for(let i=len-1;i>=0;--i){
+    //         if(nd.childs[i].visual){
+    //             nd.childs.splice(i,1);
+    //             continue;
+    //         }
+    //         this.removeVisualNds(nd.childs[i]);
+    //     }
+    // }
 
 
 
@@ -1604,15 +1604,15 @@ let themeStyles = [null, null, null];
 const inst=new MindmapSvc();
 
 const expObj={
-    hasUrlPrefix:       inst.hasUrlPrefix,
-    toggleExpandNode:   inst.toggleExpandNode,
-    parseMindMapData:   inst.parseMindMapData,
+    //hasUrlPrefix:       inst.hasUrlPrefix,
+    //toggleExpandNode:   inst.toggleExpandNode,
+    //parseMindMapData:   inst.parseMindMapData,
     parseRootNode:      inst.parseRootNode,
 
-    isAllNodeExpand:    inst.isAllNodeExpand,
-    expandAllNds:       inst.expandAllNds,
-    isAnyNdExpStChanged:inst.isAnyNdExpStChanged,
-    restoreAllNdExpSts: inst.restoreAllNdExpSts,
+    //isAllNodeExpand:    inst.isAllNodeExpand,
+    //expandAllNds:       inst.expandAllNds,
+    //isAnyNdExpStChanged:inst.isAnyNdExpStChanged,
+    //restoreAllNdExpSts: inst.restoreAllNdExpSts,
 
     isNodeExpandRecursively:inst.isNodeExpandRecursively,
     isNdExpStChangedRecursively:inst.isNdExpStChangedRecursively,
