@@ -1,9 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
-import newMindmapSvc from '../../../service/newMindmapSvc';
-import {tabActiveKey, tabPanes, tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
+import { tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useExpandAll, useRestoreDefaultExpandState } from '../../../hooks/tabs';
 
@@ -14,44 +13,11 @@ const { Header } = Layout;
  * @param {*} props 
  */
 const Toolbar=(props)=>{
-    const activeKey=useRecoilValue(tabActiveKey);
-    const panes=useRecoilValue(tabPanes);
     const allNodesExpand= useRecoilValue(tabCurrPaneAllNodesExpand);
     const expStateChanged=useRecoilValue(tabCurrPaneExpandStateChanged);
     const expandAll= useExpandAll();
     const restoreDefaultExpandState= useRestoreDefaultExpandState();
-
-    const ifHasValidTab =useCallback(() => {
-        //不存选项卡或不存在活动选项卡，认为不显示按钮
-        if (null == panes || 0 === panes.length) {
-            return false;
-        }
-        let currPane = panes.filter(pane => pane.key === activeKey);
-        if (null == currPane || 0 === currPane.length) {
-            return false;
-        }
-        currPane = currPane[0];
     
-        //当前选项卡内容解析失败
-        if (currPane.ds && false === currPane.ds.succ) {
-            return false;
-        }
-        return currPane;
-    },[activeKey,panes]);
-
-
-    
-
-
-    let showRestore=useMemo(()=>{
-        let currPane = ifHasValidTab();
-        if (false === currPane) {
-            return false;
-        }
-        //计算当前选项卡是否有展开状态变化的节点
-        let anyChanged = newMindmapSvc.isAnyNdExpStChanged(currPane.ds);
-        return anyChanged;
-    },[ifHasValidTab]);
 
 
     

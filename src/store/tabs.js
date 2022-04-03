@@ -1,5 +1,4 @@
 import {atom, selector} from 'recoil';
-import { select } from 'snapsvg';
 import newMindmapSvc from '../service/newMindmapSvc';
 
 export const tabPanes=atom({

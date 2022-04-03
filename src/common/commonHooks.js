@@ -21,8 +21,37 @@ const useBindInputRef=()=>{
     return [ref, bindInputRef];
 };
 
+const useBindRef=()=>{
+    const ref=useRef(null);
+    const bindRef=useCallback(e=>{
+        if(ref){
+            ref.current=e;
+        }
+    },[ref]);
+    return [ref, bindRef];
+};
+
+
+const useBindAndGetRef=()=>{
+    const ref=useRef(null);
+
+    const bindRef=useCallback(e=>{
+        if(ref){
+            ref.current=e;
+        }
+    },[ref]);
+
+    const getRef=useCallback(()=>{
+        return ref.current;
+    },[ref]);
+    
+    return [ref, bindRef, getRef];
+};
+
 
 export {
     useChange,
     useBindInputRef,
+    useBindRef,
+    useBindAndGetRef,
 };

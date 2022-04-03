@@ -121,14 +121,12 @@ const GraphTabs=(props)=>{
                 //ctrl+PageUp 前一个选项卡
                 'ctrl+pgup':(e)=>{
                     if(isExclude){return;}
-                    //dispatcher.tabs.togglePreTab();
                     togglePreTab();
                 },
 
                 //ctrl+PageDown 后一个选项卡
                 'ctrl+pgdn':(e)=>{
                     if(isExclude){return;}
-                    // dispatcher.tabs.toggleNextTab();
                     toggleNextTab();
                 },
 
@@ -148,7 +146,7 @@ const GraphTabs=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[props.hasOpenDlg, activeKey, onEditTab, togglePreTab, toggleNextTab]);
+    },[props.hasOpenDlg, activeKey, onEditTab, togglePreTab, toggleNextTab,moveNextTab, movePreTab, removeAllTabs, removeLeftTabs, removeOtherTabs, removeRightTabs]);
 
     
     

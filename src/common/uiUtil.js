@@ -1,6 +1,14 @@
 
-
-
+/**
+ * 
+ * @param {*} ref 
+ * @param {*} ele 
+ */
+const bindRef=(ref, ele)=>{
+    if(ref){
+        ref.current=ele;
+    }
+};
 
 
 /**
@@ -27,4 +35,4 @@ const focusRef=(refObj, delay=false)=>{
 
 
 
-export { focusRef};
+export { focusRef, bindRef};

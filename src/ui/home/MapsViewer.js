@@ -14,14 +14,13 @@ import ProgsViewer from './views/ProgsViewer';
 import StrParamReplaceDlg from './views/StrParamReplaceDlg';
 import {useBoolean, useMount} from 'ahooks';
 
-import {dispatcher} from '../../common/gflow';
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
 import keyDetector from '../../common/keyDetector';
 import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
-import {tabActiveKey, tabPanes, tabHasPane, tabCurrTitle, tabCurrPane, tabCurrInd} from '../../store/tabs';
+import {tabActiveKey, tabHasPane,  tabCurrPane, tabCurrInd} from '../../store/tabs';
 import {useRecoilValue} from 'recoil';
 
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
@@ -52,7 +51,6 @@ const { Content } = Layout;
  */
 const MapsViewer=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
-    const panes=useRecoilValue(tabPanes);
     const hasPane=useRecoilValue(tabHasPane);
     const currPane= useRecoilValue(tabCurrPane);
     const currTabInd =useRecoilValue(tabCurrInd);
@@ -84,7 +82,7 @@ const MapsViewer=(props)=>{
 
     const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false); 
 
-    const [graphObj, setGraphObj]=useState([]);
+    
     
 
     const [{currMapName,editTmpTxt,editMapDlgVisible}, setEditDlgState]= useState({
@@ -93,10 +91,7 @@ const MapsViewer=(props)=>{
         editMapDlgVisible: false,
     });
 
-    const [{gantdlgVisible, gantObj}, setGantdlgState]=useState({
-        gantdlgVisible: false,
-        gantObj:null,
-    });
+    
 
     const [{refViewerDlgVisible, currRefObj}, setRefViewerDlgState]=useState({
         refViewerDlgVisible: false,
@@ -138,7 +133,6 @@ const MapsViewer=(props)=>{
         setRefViewerDlgState((state)=>({...state, refViewerDlgVisible:false}));
         setTimelineDlgState((state)=>({...state, timelineDlgVisible:false}));
         setProgsDlgState((state)=>({...state, progsDlgVisible:false}));
-        setGantdlgState((state)=>({...state, gantdlgVisible:false}));
         setRelaChartDlgVisible(false);
         setStrParamReplaceDlgVisible(false);
     },[
@@ -148,7 +142,6 @@ const MapsViewer=(props)=>{
         setRefViewerDlgState,
         setTimelineDlgState,
         setProgsDlgState,
-        setGantdlgState,
         setRelaChartDlgVisible,
         setStrParamReplaceDlgVisible,
     ]);
@@ -247,7 +240,7 @@ const MapsViewer=(props)=>{
             }
         } catch (error) {
         }
-    },[ setEditDlgState, editTmpTxt]);
+    },[ setEditDlgState, editTmpTxt, saveMapPromise]);
 
 
 
@@ -283,20 +276,9 @@ const MapsViewer=(props)=>{
         });
     },[setProgsDlgState]);
 
-    const onShowGant =useCallback((gantObj) => {
-        setGantdlgState({
-            gantdlgVisible: true,
-            gantObj,
-        });
-    },[setGantdlgState]);
+    
 
-    const onShowGraph=(graph)=>{
-        console.log("显示关系图",graph);
-        setGraphObj(graph);
-        setRelaChartDlgVisible(true);
-
-        
-    };
+    
 
     const openRef =useCallback((refObj) => {
         setRefViewerDlgState({
@@ -319,7 +301,7 @@ const MapsViewer=(props)=>{
             console.log(activeKey);
             api.expHtml(activeKey,null,handledContent);
         })();
-    },[activeKey/*, panes*/]);
+    },[activeKey]);
 
     
     const onExpMarkdown=useCallback(()=>{
@@ -460,7 +442,6 @@ const MapsViewer=(props)=>{
         refViewerDlgVisible ||
         timelineDlgVisible ||
         progsDlgVisible ||
-        gantdlgVisible ||
         relaChartDlgVisible
     ),[
         newMapDlgVisible,
@@ -469,7 +450,6 @@ const MapsViewer=(props)=>{
         refViewerDlgVisible,
         timelineDlgVisible,
         progsDlgVisible,
-        gantdlgVisible,
         relaChartDlgVisible
     ]);
     
@@ -502,8 +482,6 @@ const MapsViewer=(props)=>{
                                 onOpenRef={openRef}
                                 onShowTimeline={onShowTimeline}
                                 onShowProgs={onShowProgs}
-                                onShowGant={onShowGant}
-                                onShowGraph={onShowGraph}
                             />
                         </>
 

@@ -19,7 +19,6 @@ import 'codemirror/addon/search/jump-to-line';
 
 
 import editorSvcEx from '../../../../service/editorSvcEx';
-import { useMemo } from 'react';
 import api from '../../../../service/api';
 import { tabActivePaneAssetsDir } from '../../../../store/tabs';
 import { useRecoilValue } from 'recoil';

@@ -5,7 +5,6 @@ import api from "../service/api";
 import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState, tabCurrPane, tabCurrInd, tabCurrTitle, tabActiveKey} from '../store/tabs';
 import mindmapSvc from '../service/mindmapSvc';
 import newMindmapSvc from '../service/newMindmapSvc';
-import { act } from "react-dom/test-utils";
 import mindMapValidateSvc from "../service/mindMapValidateSvc";
 
 export const useSelectFileListItem=()=>{
@@ -136,7 +135,7 @@ export const useSetAssignedTabKey=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
     return useCallback((key)=>{
         setTabActiveKey(key);
-    }, setTabActiveKey);
+    }, [setTabActiveKey]);
 };
 
 
