@@ -3,7 +3,6 @@ import React from 'react';
 import { Modal,  Table,Progress,Tooltip } from 'antd';
 import {createSelector} from 'reselect';
 import {withEnh} from '../../common/specialDlg';
-import { useSelector } from 'react-redux';
 
 const EnhDlg=withEnh(Modal);
 const dlgW = 900;

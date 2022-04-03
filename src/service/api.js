@@ -1,5 +1,3 @@
-import {dispatcher} from '../common/gflow';
-
 const { ipcRenderer } = window.require('electron');
 
 
@@ -208,7 +206,7 @@ class Api{
      * @param {*} url 
      * @returns 
      */
-    openUrl=(url)=>{
+    openUrl=(url, gpamOpener)=>{
         if(url.startsWith("gmap://")){
             (async ()=>{
                 let fn=url.substring("gmap://".length);
@@ -229,7 +227,7 @@ class Api{
                     mdFullpath:     item.mdFullpath,
                     attDir:         item.attDir,
                 };
-                dispatcher.tabs.onSelItemPromise(item).then();
+                gpamOpener(item);
             })();
             return;
         }

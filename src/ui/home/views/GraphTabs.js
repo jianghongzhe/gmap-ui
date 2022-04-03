@@ -5,9 +5,6 @@ import { PlusCircleOutlined,MinusCircleOutlined,FileMarkdownOutlined,FileOutline
 
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
-import {dispatcher} from '../../../common/gflow';
-
-import { useSelector } from 'react-redux';
 import keyDetector from '../../../common/keyDetector';
 import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';

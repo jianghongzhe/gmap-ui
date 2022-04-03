@@ -1,4 +1,5 @@
 import {atom, selector} from 'recoil';
+import { select } from 'snapsvg';
 import newMindmapSvc from '../service/newMindmapSvc';
 
 export const tabPanes=atom({
@@ -116,3 +117,21 @@ export const tabCurrInd=selector({
         return activeInd;
     },
 });
+
+
+export const tabActivePaneAssetsDir=selector({
+    key: 'tabActivePaneAssetsDir',
+    get: ({get})=>{
+        const activeKey=get(tabActiveKey);
+        if(!activeKey){
+            return null;
+        }
+        const to=parseInt(Math.max(activeKey.lastIndexOf("/"), activeKey.lastIndexOf("\\")))+1;
+        const result= activeKey.substring(0, to)+"assets";
+        return result;
+        
+    },
+});
+
+
+

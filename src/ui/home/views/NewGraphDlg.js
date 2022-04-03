@@ -2,9 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {Modal, Input,Button,TreeSelect } from 'antd';
 import {ReloadOutlined } from '@ant-design/icons';
-import {dispatcher} from '../../../common/gflow';
 import {createSelector} from 'reselect';
-import {useSelector } from 'react-redux';
 import {useGetAndLoadAllDirs} from '../../../hooks';
 
 /**

@@ -17,16 +17,15 @@ import {useBoolean, useMount} from 'ahooks';
 import {dispatcher} from '../../common/gflow';
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
-import { useSelector } from 'react-redux';
 import keyDetector from '../../common/keyDetector';
 import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
-import {tabActiveKey, tabPanes, tabHasPane} from '../../store/tabs';
+import {tabActiveKey, tabPanes, tabHasPane, tabCurrTitle, tabCurrPane, tabCurrInd} from '../../store/tabs';
 import {useRecoilValue} from 'recoil';
 
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
-import { useSelectFileListItem } from '../../hooks/tabs';
+import { useCopyCurrMapLink, useCreateNewMapPromise, useSaveMapPromise, useSelectFileListItem } from '../../hooks/tabs';
 
 const { Content } = Layout;
 
@@ -55,6 +54,12 @@ const MapsViewer=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
     const panes=useRecoilValue(tabPanes);
     const hasPane=useRecoilValue(tabHasPane);
+    const currPane= useRecoilValue(tabCurrPane);
+    const currTabInd =useRecoilValue(tabCurrInd);
+   
+    const saveMapPromise= useSaveMapPromise();
+    const createNewMapPromise=useCreateNewMapPromise();
+    const copyCurrMapLink= useCopyCurrMapLink();
 
     const selectFileListItem= useSelectFileListItem();
 
@@ -63,7 +68,7 @@ const MapsViewer=(props)=>{
     const initFindInPageDlg= useInitFindInPageDlg();
     const setWindowTitle=useSetWindowTitle();
     const setPathValidState=useSetPathValidState();
-    const [loadFileList]=useLoadFileList();
+    const [loadFileList, reloadFileList]=useLoadFileList();
 
 
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
@@ -201,28 +206,32 @@ const MapsViewer=(props)=>{
     },[setNewMapDlgVisible]);
 
 
-    const onNewMapDlgOK =useCallback(async ({dir,name}) => {
-        try {
-            await dispatcher.tabs.onNewMapPromise({dir,name});
-            setNewMapDlgVisible(false);
-        } catch (error) {
-        }
-    },[ setNewMapDlgVisible]);
+    const onNewMapDlgOK =useCallback(({dir,name}) => {
+        (async()=>{
+            try {
+                await createNewMapPromise({dir,name});
+                setNewMapDlgVisible(false);
+                reloadFileList();
+            } catch (error) {
+            }
+        })();
+    },[ setNewMapDlgVisible, createNewMapPromise, reloadFileList]);
 
 
     //------------修改导图----------------------------------------------------------------------
-    const onShowEditMapDlg =useCallback(async () => {
-        try {
-            api.closeFindInPageDlg();
-            let currPane=await dispatcher.tabs.selectCurrPanePromise();
-            setEditDlgState({
-                editMapDlgVisible: true,
-                editTmpTxt: currPane.mapTxts,
-                currMapName: currPane.title
-            });
-        } catch (error) {
-        }
-    },[ setEditDlgState]);
+    const onShowEditMapDlg =useCallback(() => {
+        (async()=>{
+            try {
+                api.closeFindInPageDlg();
+                setEditDlgState({
+                    editMapDlgVisible: true,
+                    editTmpTxt: currPane.mapTxts,
+                    currMapName: currPane.title
+                });
+            } catch (error) {
+            }
+        })();
+    },[ currPane]);
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));
@@ -231,7 +240,7 @@ const MapsViewer=(props)=>{
     const onEditMapDlgOK =useCallback(async (closeDlg = true) => {
         try {
             let txt = editTmpTxt;
-            await dispatcher.tabs.onSaveMapPromise(txt);
+            await saveMapPromise(txt);
             setEditDlgState(state=>({...state, editMapDlgVisible: !closeDlg}));
             if (!closeDlg) {
                 message.success("图表内容已保存");
@@ -245,7 +254,6 @@ const MapsViewer=(props)=>{
     //------------选择文件功能----------------------------------------------------------------------
     const onSelectMapItem =useCallback(async (item) => {
         try{
-            // await dispatcher.tabs.onSelItemPromise(item);
             selectFileListItem(item);
             setSelMapDlgVisible(false);
         }catch(e){
@@ -335,6 +343,10 @@ const MapsViewer=(props)=>{
      */
     const onExpImage=useCallback((type='img')=>{
         (async()=>{
+            if(null===currTabInd){
+                return;
+            }
+
             const typeNames={
                 shot: '滚动截屏',
                 img: '导出图片',
@@ -346,22 +358,10 @@ const MapsViewer=(props)=>{
                 img: api.openSaveFileDlg,
                 pdf: api.openSaveFileDlg.bind(this, 'pdf'),
                 word: api.openSaveFileDlg.bind(this, 'word'),
-            };
-
-            // 查找当前tab的索引（与导图div元素的id对应）
-            let currInd=-1;
-            panes.forEach((item,ind)=>{
-                if(activeKey===item.key){
-                    currInd=ind;
-                    return false;
-                }
-            });
-            if(-1===currInd){
-                return;
-            }
-
+            };            
+            
             // 取当前div的父元素作为其容器，并计算容器的位置等信息作为截图的依据
-            let ele=document.querySelector(`#graphwrapper_${currInd}`);
+            let ele=document.querySelector(`#graphwrapper_${currTabInd}`);
             if(!ele){
                 api.showNotification('错误','图表状态异常，无法导出','err');
                 return;
@@ -371,7 +371,7 @@ const MapsViewer=(props)=>{
             maxH=parseInt(maxH);
             let minL=99999;
             let maxB=0;
-            document.querySelectorAll(`#graphwrapper_${currInd} .item`).forEach(ele=>{
+            document.querySelectorAll(`#graphwrapper_${currTabInd} .item`).forEach(ele=>{
                 const ndRect=ele.getBoundingClientRect();
                 const ndLeft=parseInt(ele.style.left.substring(0, ele.style.left.length-2));
                 if(ndLeft<minL){
@@ -410,7 +410,7 @@ const MapsViewer=(props)=>{
                 [maxW, maxH]            // 有效部分最大的宽和高
             );
         })();
-    },[activeKey, panes]);
+    },[currTabInd]);
 
 
     /**
@@ -494,7 +494,7 @@ const MapsViewer=(props)=>{
                                 onExpMarkdown={onExpMarkdown}
                                 onExpHtml={onExpHtml}
                                 onCheckUpdate={api.openUpdateApp}
-                                onCopyMapLink={dispatcher.tabs.copyCurrMapLink}
+                                onCopyMapLink={copyCurrMapLink}
                             />
                             <GraphTabs
                                 hasOpenDlg={hasOpenDlg}

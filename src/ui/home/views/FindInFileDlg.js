@@ -6,6 +6,7 @@ import api from '../../../service/api';
 import {useChange, useBindInputRef} from '../../../common/commonHooks';
 import {focusRef} from '../../../common/uiUtil';
 import {useDebounceEffect} from 'ahooks';
+import { useSelectFileListItem } from '../../../hooks/tabs';
 
 const { Title,Paragraph } = Typography;
 
@@ -16,6 +17,8 @@ const { Title,Paragraph } = Typography;
  * @returns 
  */
 const FindInFileDlg=({visible, onCancel})=>{  
+
+    const selectFileListItem= useSelectFileListItem();
     const [exp, {change: onExpChange, set: setExp}]= useChange('');
     const [searchResults, setSearchResults]= useState([]);
     const [expRef, bindExpRef]= useBindInputRef();
@@ -53,9 +56,9 @@ const FindInFileDlg=({visible, onCancel})=>{
      * @param {*} fullTitle 标题的全路径 a/b/c
      */
     const openMap=useCallback((fullTitle)=>{
-        api.openUrl(`gmap://${fullTitle}`);
+        api.openUrl(`gmap://${fullTitle}`, selectFileListItem);
         onCancel();
-    },[onCancel]);
+    },[onCancel, selectFileListItem]);
 
 
 

@@ -10,7 +10,6 @@ import {marked} from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import 'github-markdown-css/github-markdown.css';
-import { useSelector } from 'react-redux';
 import mermaid from 'mermaid';
 import flowchart from 'flowchart.js';
 import * as echarts from 'echarts';
@@ -26,6 +25,8 @@ import screenShot from '../../../service/screenShot';
 import webfontloader from 'webfontloader';
 import { useEventListener } from 'ahooks';
 import { useMemo } from 'react';
+import { tabActiveKey } from '../../../store/tabs';
+import { useRecoilValue } from 'recoil';
 // import seqDiagram from '../../../common/sequence-diagram';
 //import seqDiagram from 'js-sequence-diagram';
 
@@ -49,9 +50,7 @@ const markedHighlightUtil = new MarkedHighlightUtil();
  * @param {*} props 
  */
 const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
-    const {activeKey}=useSelector((state)=>({
-        activeKey:  state.tabs.activeKey,
-    }));
+    const activeKey= useRecoilValue(tabActiveKey);
     const wrapperId=useCreatedId("refviewercontainer");//   useState(()=>"refviewercontainer"+new Date().getTime());
     const bodyId=useCreatedId("refviewerbody");// useState(()=>"refviewerbody"+new Date().getTime());
     const backtopId=useCreatedId("backtop");//  useState(()=>"backtop"+new Date().getTime());

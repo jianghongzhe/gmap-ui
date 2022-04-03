@@ -3,8 +3,6 @@ import React, { useCallback, useMemo } from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
 import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
 import newMindmapSvc from '../../../service/newMindmapSvc';
-import {dispatcher} from '../../../common/gflow';
-import { useSelector } from 'react-redux';
 import {tabActiveKey, tabPanes, tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useExpandAll, useRestoreDefaultExpandState } from '../../../hooks/tabs';

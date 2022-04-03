@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef } from 'react';
-import {useSelector} from 'react-redux';
 
 import { Controlled as CodeMirror } from 'react-codemirror2';
 
@@ -22,6 +21,8 @@ import 'codemirror/addon/search/jump-to-line';
 import editorSvcEx from '../../../../service/editorSvcEx';
 import { useMemo } from 'react';
 import api from '../../../../service/api';
+import { tabActivePaneAssetsDir } from '../../../../store/tabs';
+import { useRecoilValue } from 'recoil';
 
 
 /**
@@ -29,24 +30,8 @@ import api from '../../../../service/api';
  * @param {*} props 
  */
 const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange})=>{
-    const {activeKey}= useSelector((state)=>({
-        activeKey:  state.tabs.activeKey,
-    }));
+    const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
-
-
-    /**
-     * 计算当前导图文件附件的目录，用于插入图片、附件等
-     */
-    const currAssetsDir=useMemo(()=>{
-        if(!activeKey){
-            return null;
-        }
-        const to=parseInt(Math.max(activeKey.lastIndexOf("/"), activeKey.lastIndexOf("\\")))+1;
-        const result= activeKey.substring(0, to)+"assets";
-        return result;
-    },[activeKey]);
-    
 
     /**
      * 绑定codemirror对象到本组件和父组件（通过回调函数）

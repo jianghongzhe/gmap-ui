@@ -2,10 +2,11 @@ import { message } from "antd";
 import { useCallback } from "react";
 import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
 import api from "../service/api";
-import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState, tabCurrPane, tabCurrInd} from '../store/tabs';
+import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState, tabCurrPane, tabCurrInd, tabCurrTitle, tabActiveKey} from '../store/tabs';
 import mindmapSvc from '../service/mindmapSvc';
 import newMindmapSvc from '../service/newMindmapSvc';
 import { act } from "react-dom/test-utils";
+import mindMapValidateSvc from "../service/mindMapValidateSvc";
 
 export const useSelectFileListItem=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
@@ -315,6 +316,136 @@ export const useMoveNextTab=()=>{
         setTabPanes(newPanes);
     },[currInd, tabPanes, setTabPanes]);
 };
+
+
+export const useCopyCurrMapLink=()=>{
+    const currMapTitle= useRecoilValue(tabCurrTitle);
+
+    return useCallback(()=>{
+        if(!currMapTitle){return;}
+        let cmd=`cp://[跳转到导图 - ${currMapTitle}](gmap://${currMapTitle})`;
+        api.openUrl(cmd);
+    },[currMapTitle]);
+};
+
+
+export const useCreateNewMapPromise=()=>{
+    const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
+    const setTabPanes= useSetRecoilState(tabPanesState);
+
+    return useCallback(({dir,name})=>{
+        return new Promise((res, rej)=>{
+            //验证名称为空和文件是否存在
+            if (!name || '' === name) {
+                message.warning('请输入图表名称');
+                rej();
+                return;
+            }
+            let reg = /^[^ 　\\/\t\b\r\n]+([/][^ 　\\/\t\b\r\n]+)*$/;
+            if (!reg.test(name)) {
+                message.warning('图表名称格式有误，请更换另一名称');
+                rej();
+                return;
+            }
+
+            (async()=>{
+                let joinName=(dir? dir+"/"+name : name);
+                let fnAndFullpath =await api.existsGraph(joinName);//如果存在返回true，如果不存在返回 [文件名, 全路径]
+                if (true === fnAndFullpath) {
+                    message.warning('该图表名称已存在，请更换另一名称');
+                    rej();
+                    return;
+                }
+                let [fn, themeName, fullpath, mdFullpath] = fnAndFullpath;
+
+                //保存文件
+                let defMapTxt = getDefMapTxt(themeName);
+                let ret = await api.createMapBundle(fullpath, defMapTxt);
+                if (ret && false === ret.succ) {
+                    message.error(ret.msg);
+                    rej();
+                    return;
+                }
+
+                //计算导图表格信息并加入新tab      
+                // let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+                let rootNd=mindmapSvc.parseRootNode(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+                let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
+
+                setTabPanes((originPanes)=>([
+                    ...originPanes, 
+                    {
+                        title: fn,
+                        key: mdFullpath,
+                        mapTxts: defMapTxt,
+                        ds: ndsSet,
+                    }
+                ]));
+                setTabActiveKey(mdFullpath);
+                res();
+            })();
+        });
+    },[setTabActiveKey, setTabPanes]);
+}
+
+
+
+
+export const useSaveMapPromise=()=>{
+    const [currPane, setCurrPane]= useCurrPaneState();
+    const activeKey= useRecoilValue(tabActiveKey);
+
+    return useCallback((txt)=>{
+        return new Promise((res, rej)=>{
+            if(!activeKey || !currPane){
+                rej();
+                return;
+            }
+            //校验
+            let valiResult = mindMapValidateSvc.validate(txt);
+            if (true !== valiResult) {
+                message.warning(valiResult);
+                rej();
+                return;
+            }
+
+            (async()=>{
+                //保存并修改状态
+                let ret = await api.save(activeKey, txt);
+                if (ret && false === ret.succ) {
+                    message.error(ret.msg);
+                    rej();
+                    return;
+                }
+
+                let rootNd=mindmapSvc.parseRootNode(txt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
+                let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
+
+                setCurrPane({
+                    ...currPane,
+                    mapTxts: txt,
+                    ds:ndsSet,
+                });
+                res();
+            })();
+        });
+    },[currPane, setCurrPane, activeKey]);
+};
+
+
+const getDefMapTxt = (theleName = "中心主题") => (
+    `- ${theleName}
+\t- 分主题
+\t- c:#1890ff|带颜色的分主题
+\t- 带说明的分主题|m:balabala
+\t- 带链接的分主题|[百度](https://baidu.com)
+\t- 带引用的分主题|ref:长段文字
+
+***
+# ref:长段文字
+这里可以放长段内容，支持markdown格式
+`
+);
 
 
 const defaultLineColor = 'lightgrey';
