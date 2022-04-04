@@ -1,4 +1,4 @@
-- 常用内容|ref:常用内容|toid:xx
+- 常用内容|ref:常用内容|toid:xx|[](cmd://ping {{1}}.{{2}}.{{3}}.{{4}})
 	- 1222|[](urlx://https://baidu.com)|d:22.2.22,green
 	- 2down|[](dirext://d:\down)|d:22.2.23
 	- 3by|[a](openby://D:\c.txt@@emeditor)|p:100
@@ -20,6 +20,69 @@
 前面 内容
 
 ```javascript
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
+
 function aa(){
 	let x="aa \t";
 	console.log(x);

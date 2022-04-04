@@ -7,7 +7,7 @@
  * 对话框的增强：支持无头、无底部、指定宽高、固定高等
  * noTitle
  * noFooter
- * size={w, h, fixh, wrapperId}
+ * size={w, h, fixh, wrapperId, wrapperRef}
  * @param {*} WrappedDlg 
  */
 const withEnh=(WrappedDlg)=>{
@@ -55,6 +55,9 @@ const withEnh=(WrappedDlg)=>{
             //指定包装容器的id
             if(size.wrapperId){
                 wrapperProps.id=size.wrapperId;
+            }
+            if(size.wrapperRef){
+                wrapperProps.ref=size.wrapperRef;
             }
         }
 

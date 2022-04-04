@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Input, Modal} from 'antd';
 import {withEnh} from '../../common/specialDlg';
 import strTmpl from '../../../common/strTmpl';
+import { useBindAndGetRefs } from '../../../common/commonHooks';
 
 const EnhDlg=withEnh(Modal);
 
@@ -23,7 +24,12 @@ const EnhDlg=withEnh(Modal);
  */
 const StrParamReplaceDlg=(props)=>{
     const [items, setItems]=useState([]);
+    const [,bindIptByKey, getIptByKey]= useBindAndGetRefs();
     
+    const setFocusByKey=useCallback((key, delay=0)=>{
+        setFocus(getIptByKey.bind(this, key), delay);
+    },[getIptByKey]);
+
     /**
      * props中给出的初始值转化为state值
      */
@@ -36,9 +42,9 @@ const StrParamReplaceDlg=(props)=>{
      */
     useEffect(()=>{
         if(props.visible){
-            setFocus("paramdlg-0", 500);
+            setFocusByKey("paramdlg-0", 500);
         }
-    },[props.visible]);
+    },[props.visible, setFocusByKey]);
     
 
     /**
@@ -54,11 +60,13 @@ const StrParamReplaceDlg=(props)=>{
      * @param {*} ind 
      * @param {*} e 
      */
-     const onChange=useCallback((ind, e)=>{
+    const onChange=useCallback((ind, e)=>{
         const newItems=[...items];
         newItems[ind].value=e.target.value;
         setItems(newItems);
     },[items, setItems]);
+
+    
 
 
 
@@ -81,8 +89,8 @@ const StrParamReplaceDlg=(props)=>{
                         <div key={ind} css={{marginTop:'15px'}}>
                             <div><span css={{fontWeight:'bold'}}>参数{ind+1} - {item.name}：</span></div>
                             <div css={{marginTop:'5px'}}>
-                                <Input  id={`paramdlg-${ind}`} 
-                                        onPressEnter={ind<items.length-1 ? setFocus.bind(this, `paramdlg-${ind+1}`) : props.onOk.bind(this, previewUrl)} 
+                                <Input  ref={bindIptByKey.bind(this,`paramdlg-${ind}`)}
+                                        onPressEnter={ind<items.length-1 ? setFocusByKey.bind(this, `paramdlg-${ind+1}`, false) : props.onOk.bind(this, previewUrl)} 
                                         css={{width:'96%'}} 
                                         value={item.value} 
                                         onChange={onChange.bind(this, ind)} placeholder="请输入参数值"/>
@@ -98,22 +106,22 @@ const StrParamReplaceDlg=(props)=>{
 /**
  * 使指定id的元素获得焦点。如果指定了延迟时间，则延迟一段时间后再获取；否则直接获取
  */
-const setFocus=(id, delay=0)=>{
-    const doFocus=(id)=>{
-        const ele=document.querySelector(`#${id}`);
-        if(ele){
-            ele.focus();
-            return true;
+const setFocus=(getEleFunc, delay=0)=>{
+    const doFocus=()=>{
+        if(getEleFunc){
+            const ele=getEleFunc();
+            if(ele){
+                ele.focus();
+                return true;
+            }
         }
         return false;
     };
     if(delay){
-        setTimeout(() => {
-            doFocus(id);
-        }, delay);
+        setTimeout(doFocus, delay);
         return;
     }
-    doFocus(id);
+    doFocus();
 };
 
 export default React.memo(StrParamReplaceDlg);

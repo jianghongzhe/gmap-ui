@@ -27,6 +27,7 @@ import { useEventListener } from 'ahooks';
 import { useMemo } from 'react';
 import { tabActiveKey } from '../../../store/tabs';
 import { useRecoilValue } from 'recoil';
+import { useBindAndGetRef } from '../../../common/commonHooks';
 // import seqDiagram from '../../../common/sequence-diagram';
 //import seqDiagram from 'js-sequence-diagram';
 
@@ -54,6 +55,8 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     const wrapperId=useCreatedId("refviewercontainer");//   useState(()=>"refviewercontainer"+new Date().getTime());
     const bodyId=useCreatedId("refviewerbody");// useState(()=>"refviewerbody"+new Date().getTime());
     const backtopId=useCreatedId("backtop");//  useState(()=>"backtop"+new Date().getTime());
+    const [,bindScrollTarget, getScrollTarget]= useBindAndGetRef();
+    
 
     useEffect(()=>{
         markedHighlightUtil.init(marked, hljs, {
@@ -232,7 +235,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     
     
 
-    const getScrollTarget=useCallback(()=>document.getElementById(wrapperId),[wrapperId]);
+    
 
 
     let {result, refname, refCont, txt}=useMemo(()=>{
@@ -335,7 +338,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                         <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={onExpHtml} isFirst={false}/>
                     </div>
                 }
-                size={{w:'calc(100vw - 200px)', h:'calc(100vh - 300px)', fixh:true, wrapperId}}
+                size={{w:'calc(100vw - 200px)', h:'calc(100vh - 300px)', fixh:true, wrapperId, wrapperRef:bindScrollTarget}}
                 visible={visible}
                 maskClosable={true}               
                 onCancel={onCancel}>
