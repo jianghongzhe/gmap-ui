@@ -17,19 +17,20 @@
 
 ***
 # ref:常用内容
-==式工==
-```echart
-bar
-title 柱状图
-w 50%
-h 100%
-x 横轴名称
-y 纵轴名称
-,2018,2019,2020
-食品,500,400,300
-娱乐,600,400,600
-医疗,500,200,300
+前面 内容
+
+```javascript
+function aa(){
+	let x="aa \t";
+	console.log(x);
+}
+
+function bb(){
+	document.querySelector("#qqq");
+}
 ```
+
+后面 内容
 
 # ref:by2
 by2

@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
 import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
@@ -111,7 +111,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
 
     
 
-
+    const cleanupFuncs= useRef([]);
     
 
     /**
@@ -125,6 +125,8 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
      * 7、对所有echart图设置自适应：以防止改变窗口大小后再次打开引用窗口后无法检测到窗口大小已改变
      */
     useEffect(()=>{
+        
+
         if(visible){
             setTimeout(() => {
                 markedHighlightUtil.bindLinkClickEvent(onOpenLink);
@@ -209,15 +211,24 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                     }
                 });
                 resizeEchartGraphs();
+
+                // 对代码片段增加鼠标右键复制代码片段的功能
+                document.querySelectorAll(".markdown-body code.hljs").forEach(ele=>{
+                    const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
+                    ele.parentNode.addEventListener("contextmenu", ctxMenuHandler);
+                    const unbindFuncs=[]
+                    unbindFuncs.push(unbindEvent.bind(this, ele.parentNode, "contextmenu", ctxMenuHandler));
+                    cleanupFuncs.current=unbindFuncs;
+                });
             }, 500);
         }
-    },[visible, onOpenLink]);
+        return ()=>{
+            if(cleanupFuncs.current && cleanupFuncs.current.length>0){
+                cleanupFuncs.current.forEach(unbindFunc=>unbindFunc());
+            }
+        };
+    },[visible, onOpenLink, cleanupFuncs]);
     
-
-    
-    
-
-
     
     
 
@@ -346,6 +357,15 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     </React.Fragment>);
     
 }
+
+const unbindEvent=(ele, evt, func)=>{
+    ele.removeEventListener(evt, func);
+};
+
+const copyTxt=(txt)=>{
+    api.copyTxtQuiet(txt);
+    api.showNotification("内容已复制","代码已复制到剪切板","succ");
+};
 
 
 const ToolbarItem=({title, icon, onClick, isFirst=false})=>(

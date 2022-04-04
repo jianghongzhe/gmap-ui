@@ -37,8 +37,8 @@ const Toolbar=(props)=>{
             <Divider type="vertical" className='divider'/>
             <ToolbarItem title='编辑' icon={<EditOutlined />} onClick={props.onShowEditMapDlg}/>
             <ToolbarItem title='复制导图链接' icon={<LinkOutlined />} onClick={props.onCopyMapLink}/>
-            <ToolbarItem title='恢复节点默认状态' disabled={!expStateChanged} icon={<CompressOutlined />} onClick={restoreDefaultExpandState}/>
-            <ToolbarItem title='展开全部节点' disabled={allNodesExpand} icon={<ExpandOutlined />} onClick={expandAll}/>
+            <ToolbarItem title='恢复节点默认状态' disabled={!expStateChanged} type="primary" icon={<CompressOutlined />} onClick={restoreDefaultExpandState}/>
+            <ToolbarItem title='展开全部节点' disabled={allNodesExpand} type="primary" icon={<ExpandOutlined />} onClick={expandAll}/>
                       
             <Divider type="vertical" className='divider'/>
             <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={props.onScreenShot}/>
@@ -52,9 +52,9 @@ const Toolbar=(props)=>{
     
 }
 
-const ToolbarItem=({title, icon, disabled=false, className='toolbtn', onClick})=>{
+const ToolbarItem=({title, icon, disabled=false, className='toolbtn',type='default', onClick})=>{
     return <Tooltip color='cyan' placement="bottomLeft" title={title}>
-        <Button shape='circle' icon={icon} className={className} disabled={disabled} type='default' size='large' onClick={onClick} />
+        <Button shape='circle' icon={icon} className={className} disabled={disabled} type={type} size='large' onClick={onClick} />
     </Tooltip>;
 };
 

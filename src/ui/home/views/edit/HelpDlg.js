@@ -575,6 +575,12 @@ const shortcuts=[
             ['Ctrl+Shift+PageUp','当前选项卡前移'],
             ['Ctrl+Shift+PageDown','当前选项卡后移'],
         ]
+    },
+    {
+        title:'引用窗口',
+        rows:[
+            ['鼠标右键','在代码片段中右键可复制当前代码片段'],
+        ]
     }
 ];
 
