@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {Alert,Row, Col} from 'antd';
 import {createSelector} from 'reselect';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
@@ -10,7 +10,7 @@ import { useRafState } from 'ahooks';
  * 导图组件
  * @param {*} props 
  */
-const NewMindmap=(props)=>{
+const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
     const [{ndStyles, lineStyles, expBtnStyles, wrapperStyle},setAllStyles]=useRafState({
         ndStyles:{}, 
@@ -19,44 +19,68 @@ const NewMindmap=(props)=>{
         wrapperStyle:{}
     });
 
-    const arrangeNdPositions=useCallback(()=>{
-        if(!props.ds){return;}
 
-        //console.log("origin ds", props.ds);
-        //console.log("clone ds", objectCloneUtil.clone(props.ds))
-
-        const styles= mindLayoutSvcFacade.loadStyles(props.ds);
-        console.log(styles);
-        console.log("okok------");
-        setAllStyles({
-            ndStyles:       styles.ndStyles, 
-            lineStyles:     styles.lineStyles, 
-            expBtnStyles:   styles.expBtnStyles,
-            wrapperStyle:   styles.wrapperStyle,
-        });
-        putRelaLines(styles.ndStyles);
-    },[props.ds]);
-
-    const defaultContentRenderer=useCallback((nd)=>{
-        return ""+nd.str;
-    },[]);
-
-    const defaultExpBtnRenderer=useCallback((nd)=>{
-        return nd.expand? "-":"+";
-    },[]);
-
-
+    /**
+     * 在节点数据变化后，计算节点和连接线的css样式，再设置样式值触发新一次渲染
+     */
     useEffect(()=>{
-        if(props.ds && props.ds.tree && props.ds.list && props.ds.map){
-             setTimeout(arrangeNdPositions, 5);
-            //arrangeNdPositions();
+        if(ds && ds.tree && ds.list && ds.map){
+            setTimeout(()=>{
+                const styles= mindLayoutSvcFacade.loadStyles(ds);
+                setAllStyles({
+                    ndStyles:       styles.ndStyles, 
+                    lineStyles:     styles.lineStyles, 
+                    expBtnStyles:   styles.expBtnStyles,
+                    wrapperStyle:   styles.wrapperStyle,
+                });
+                putRelaLines(styles.ndStyles);
+            }, 5);
         }
-    },[props.ds, arrangeNdPositions]);
+    },[ds, setAllStyles]);
+
+
+    const getExpBtnStyle=useCallback((nd)=>(
+        (nd && expBtnStyles && expBtnStyles[nd.id]) ? expBtnStyles[nd.id] : {}   
+    ),[expBtnStyles]);
+
+
+    const getNdStyle=useCallback((nd)=>{
+        let borderStyle=getNdBorderStyle(nd);
+        let positionStyle=((nd && ndStyles && ndStyles[nd.id]) ? ndStyles[nd.id]: {});
+        return {...borderStyle, ...positionStyle};
+    },[ndStyles]);
+
+
+    const getLineStyle=useCallback((nd,type)=>{
+        return (nd && lineStyles && lineStyles[nd.id] && lineStyles[nd.id][type]) ? 
+            lineStyles[nd.id][type] 
+                : 
+            {};
+    },[lineStyles]);
+
+
+    //如果提供了节点渲染器或扩展按钮渲染器，则使用，否则使用默认的
+    const actNdRenderer=useMemo(()=>{
+        if(ndContentRenderer){
+            return ndContentRenderer;
+        }
+        return (nd)=>(nd ? ""+nd.str : "");
+    },[ndContentRenderer]); 
+    
+
+    const actExpBtnRenderer=useMemo(()=>{
+        if(ndExpBtnRenderer){
+            return ndExpBtnRenderer;
+        }
+        return (nd)=>(nd ? (nd.expand? "-":"+") : "");
+    },[ndExpBtnRenderer])  
+    
+
 
 
     
-    //校验
-    if(!props.ds){
+    // 非正常状态时的渲染
+    if(!ds){
         return (<Row>
             <Col span={8} offset={8}>
                 <Alert
@@ -67,53 +91,38 @@ const NewMindmap=(props)=>{
             </Col>
         </Row>);
     }
-    if(false===props.ds.succ){
+    if(false===ds.succ){
         return (<Row>
             <Col span={8} offset={8}>
                 <Alert
                     css={{marginTop:50}}
-                    message={props.ds.msg}
-                    description={props.ds.desc}
+                    message={ds.msg}
+                    description={ds.desc}
                     type="error"/>
             </Col>
         </Row>);
     }
-    if(!props.ds.list){
+    if(!ds.list){
         return null;
     }
 
-
-    //如果提供了节点渲染器或扩展按钮渲染器，则使用，否则使用默认的
-    let actNdRenderer=defaultContentRenderer;
-    let actExpBtnRenderer=defaultExpBtnRenderer;
-    if(props.ndContentRenderer){
-        actNdRenderer=props.ndContentRenderer;
-    }
-    if(props.ndExpBtnRenderer){
-        actExpBtnRenderer=props.ndExpBtnRenderer;
-    }
-
-
-    
-
-    console.log("popds", props.ds);
-
-    const result= (
-        <div css={{...defaultWrapperStyle, ...wrapperStyle}}  id={`graphwrapper_${props.ind}`}>
+    // 正常渲染
+    return (
+        <div css={{...defaultWrapperStyle, ...wrapperStyle}}  id={`graphwrapper_${tabInd}`}>
             {
-                props.ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
+                ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                     {/* 节点内容  css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}*/}
-                    <div className='item'  id={nd.id} style={getNdStyle({ndStyles, nd})}>
+                    <div className='item'  id={nd.id} style={getNdStyle(nd)}>
                         {actNdRenderer(nd)}
                     </div>
 
                     {/* 节点到父节点的连接线 */}
                     {
                         (nd.parid) && (<>
-                            <div className='linewrapper' id={`line_${nd.id}`} style={getLineStyle({lineStyles, nd, type:'line'})}>
-                                <div className='lineExp' id={`lineExp_${nd.id}`} style={getLineStyle({lineStyles, nd, type:'lineExp'})}></div>
-                                <div className='linefrom' id={`linefrom_${nd.id}`} style={getLineStyle({lineStyles, nd, type:'lineFrom'})}></div>
-                                <div className='lineto' id={`lineto_${nd.id}`} style={getLineStyle({lineStyles, nd, type:'lineTo'})}></div>
+                            <div className='linewrapper' id={`line_${nd.id}`} style={getLineStyle(nd,'line')}>
+                                <div className='lineExp' id={`lineExp_${nd.id}`} style={getLineStyle(nd,'lineExp')}></div>
+                                <div className='linefrom' id={`linefrom_${nd.id}`} style={getLineStyle(nd, 'lineFrom')}></div>
+                                <div className='lineto' id={`lineto_${nd.id}`} style={getLineStyle(nd, 'lineTo')}></div>
                             </div>
                         </>)
                     }
@@ -121,8 +130,8 @@ const NewMindmap=(props)=>{
                     {/* 节点的展开按钮 */}
                     {
                         (nd.childs && 0<nd.childs.length) && 
-                            <div id={`expbtn_${nd.id}`} className='expBtn' style={getExpBtnStyle({expBtnStyles, nd})}>
-                                {actExpBtnRenderer(nd, props.ds.expands)}
+                            <div id={`expbtn_${nd.id}`} className='expBtn' style={getExpBtnStyle(nd)}>
+                                {actExpBtnRenderer(nd, ds.expands)}
                             </div>
                     }
 
@@ -141,31 +150,11 @@ const NewMindmap=(props)=>{
             }
         </div>
     );
-
-
-    return result;
-    
 }
 
-const getExpBtnStyle=createSelector(
-    json=>json.expBtnStyles,
-    json=>json.nd,
-    (expBtnStyles,nd)=>(
-        (nd && expBtnStyles && expBtnStyles[nd.id]) ? expBtnStyles[nd.id] : {}
-    )
-);
 
-const getLineStyle=createSelector(
-    json=>json.lineStyles,
-    json=>json.nd,
-    json=>json.type,
-    (lineStyles,nd,type)=>(
-        (nd && lineStyles && lineStyles[nd.id] && lineStyles[nd.id][type]) ? 
-            lineStyles[nd.id][type] 
-                : 
-            {}
-    )
-);
+
+
 
 const getNdBorderStyle=(nd)=>{
     if(!nd){
@@ -187,15 +176,7 @@ const getNdBorderStyle=(nd)=>{
     return {borderBottom:`1px solid ${nd.color}`};
 }
 
-const getNdStyle=createSelector(
-    json=>json.ndStyles,
-    json=>json.nd,
-    (ndStyles,nd)=>{
-        let borderStyle=getNdBorderStyle(nd);
-        let positionStyle=((nd && ndStyles && ndStyles[nd.id]) ? ndStyles[nd.id]: {});
-        return {...borderStyle, ...positionStyle};
-    }
-);
+
 
 
 

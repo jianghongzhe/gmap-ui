@@ -1,8 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {Modal, Input,Button,TreeSelect } from 'antd';
 import {ReloadOutlined } from '@ant-design/icons';
-import {createSelector} from 'reselect';
 import {useGetAndLoadAllDirs} from '../../../hooks';
 
 /**
@@ -52,9 +51,13 @@ const NewGraphDlg=(props)=>{
         props.onOk({dir:dir.trim(), name:name.trim()});
     }
 
+    const dlgTitle=useMemo(()=>(
+        `新建图表 - ${dir ? dir+"/":""}${name?name:"<空>"}`
+    ),[dir, name]);
+
     
     return (
-        <Modal  title={getDlgTitle({dir, name})}
+        <Modal  title={dlgTitle}
                 visible={props.visible}
                 onOk={onOk}
                 onCancel={props.onCancel}
@@ -109,11 +112,7 @@ const NewGraphDlg=(props)=>{
     
 }
 
-const getDlgTitle=createSelector(
-    props=>props.dir.trim(),
-    props=>props.name.trim(),
-    (dir,name)=>("新建图表 - "+(dir ? dir+"/"+(name?name:"<空>") : (name?name:"<空>")))
-);
+
 
 
 

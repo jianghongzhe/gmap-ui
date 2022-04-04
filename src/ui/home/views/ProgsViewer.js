@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, {  useMemo } from 'react';
 import { Modal,  Table,Progress,Tooltip } from 'antd';
-import {createSelector} from 'reselect';
 import {withEnh} from '../../common/specialDlg';
 
 const EnhDlg=withEnh(Modal);
@@ -10,18 +9,31 @@ const dlgW = 900;
 /**
  * 进度对话框
  */
-const ProgsViewer=(props)=>{
+const ProgsViewer=({visible,progsObj,onCancel})=>{
+    const parsedDataSource=useMemo(()=>{
+        if(!progsObj){
+            return [];
+        }
+        return progsObj.map((each,ind)=>({
+            key: ind,
+            thing: each.txt,
+            prog: each.num,
+            msg:each.msg,
+            err: each.err,
+        }));
+    },[progsObj]);
+
     return (
         <EnhDlg noFooter
                 title="查看事项完成进度"
                 size={{w:dlgW}}                  
-                visible={props.visible}
+                visible={visible}
                 maskClosable={true}
-                onCancel={props.onCancel}>
+                onCancel={onCancel}>
             
             <Table pagination={false} 
                 bordered={true}
-                dataSource={parseDataSource(props)} 
+                dataSource={parsedDataSource} 
                 columns={columns} 
                 size='small' 
                 scroll={{ y: 'calc(100vh - 300px)' }} />
@@ -29,21 +41,7 @@ const ProgsViewer=(props)=>{
     );
 }
 
-const parseDataSource=createSelector(
-    props=>props.progsObj,
-    progs=>{
-        if(!progs){
-            return [];
-        }
-        return progs.map((each,ind)=>({
-            key: ind,
-            thing: each.txt,
-            prog: each.num,
-            msg:each.msg,
-            err: each.err,
-        }));
-    }
-);
+
 
 const columns = [
     {
