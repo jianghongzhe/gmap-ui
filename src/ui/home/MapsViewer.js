@@ -25,6 +25,7 @@ import {useRecoilValue} from 'recoil';
 
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
 import { useCopyCurrMapLink, useCreateNewMapPromise, useSaveMapPromise, useSelectFileListItem } from '../../hooks/tabs';
+import HelpDlg from './views/edit/HelpDlg';
 
 const { Content } = Layout;
 
@@ -68,7 +69,7 @@ const MapsViewer=(props)=>{
     const setPathValidState=useSetPathValidState();
     const [loadFileList, reloadFileList]=useLoadFileList();
 
-
+    const [helpDlgVisible, {setTrue:showHelpDlg, setFalse:hideHelpDlg}]=useBoolean(false);
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
     const [selMapDlgVisible, setSelMapDlgVisible]=useState(false);
 
@@ -154,15 +155,23 @@ const MapsViewer=(props)=>{
     useEffect(()=>{
         const keyHandle=(e)=>{
             //当编辑窗口或新建窗口打开时，不支持查找功能
-            const isExcludeForFindInFile=[editMapDlgVisible, newMapDlgVisible, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible].some(each=>true===each);
+            const isExcludeForFindInFile=[editMapDlgVisible, newMapDlgVisible, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible, helpDlgVisible].some(each=>true===each);
             const isExcludeForFindInPage= [editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible].some(each=>true===each);
-            const isExcludeForEsc= [editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible].some(each=>true===each);
+            const isExcludeForEsc= [editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, helpDlgVisible].some(each=>true===each);
+            const isExcludeForHelpDlg=[editMapDlgVisible, newMapDlgVisible, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible, helpDlgVisible].some(each=>true===each);
 
             keyDetector.on(e,{
                 //ctrl+f 网页内查找
                 'ctrl+f':(e)=>{
                     if(isExcludeForFindInPage){return;}
                     api.showFindInPageDlg();
+                },
+
+
+                //ctrl+h 显示帮助对话框
+                'ctrl+h':(e)=>{
+                    if(isExcludeForHelpDlg){return;}
+                    showHelpDlg();
                 },
 
                 // ctrl+shift+f 在文件中查询
@@ -184,7 +193,7 @@ const MapsViewer=(props)=>{
 
         document.addEventListener('keydown', keyHandle);
         return ()=>document.removeEventListener('keydown',keyHandle);
-    },[editMapDlgVisible, newMapDlgVisible, findInFileDlgVisible, showFindInFileDlg, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible]);
+    },[editMapDlgVisible, newMapDlgVisible,helpDlgVisible, findInFileDlgVisible, showFindInFileDlg, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible, showHelpDlg]);
 
     useEffect(()=>{
         api.closeFindInPageDlg();
@@ -475,6 +484,7 @@ const MapsViewer=(props)=>{
                                 onExpHtml={onExpHtml}
                                 onCheckUpdate={api.openUpdateApp}
                                 onCopyMapLink={copyCurrMapLink}
+                                onOpenHelpDlg={showHelpDlg}
                             />
                             <GraphTabs
                                 hasOpenDlg={hasOpenDlg}
@@ -526,6 +536,7 @@ const MapsViewer=(props)=>{
                 onOk={onEditMapDlgOK.bind(this, true)}
                 onCancel={closeAllDlg}
                 onChangeEditTmpTxt={onChangeEditTmpTxt}
+                onOpenHelpDlg={showHelpDlg}
             />
 
             <OpenGraphDlg
@@ -552,6 +563,11 @@ const MapsViewer=(props)=>{
                 progsObj={progsObj}
                 onCancel={closeAllDlg}
             />
+
+            {/* 帮助对话框 */}
+            <HelpDlg
+                visible={helpDlgVisible}
+                onCancel={hideHelpDlg}/>
         </React.Fragment>
     );
     

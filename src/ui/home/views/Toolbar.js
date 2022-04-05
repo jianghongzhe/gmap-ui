@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
+import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined, QuestionCircleOutlined, QuestionOutlined } from '@ant-design/icons';
 import { tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useExpandAll, useRestoreDefaultExpandState } from '../../../hooks/tabs';
@@ -31,8 +31,7 @@ const Toolbar=(props)=>{
             <ToolbarItem title='打开控制台' icon={<CodeOutlined />} onClick={props.onShowCmd}/>
             <ToolbarItem title='开发者工具' icon={<ControlOutlined />} onClick={props.onShowDevTool}/>
             <ToolbarItem title='重新载入应用' icon={<ReloadOutlined />} onClick={props.onReloadApp}/>
-            <ToolbarItem title='版本发布说明' icon={<HistoryOutlined />} onClick={props.openReleaseNote}/>
-            <ToolbarItem title='检查更新' icon={<CloudSyncOutlined />} onClick={props.onCheckUpdate}/>
+            
             
             <Divider type="vertical" className='divider'/>
             <ToolbarItem title='编辑' icon={<EditOutlined />} onClick={props.onShowEditMapDlg}/>
@@ -40,6 +39,8 @@ const Toolbar=(props)=>{
             <ToolbarItem title='恢复节点默认状态' disabled={!expStateChanged} type="primary" icon={<CompressOutlined />} onClick={restoreDefaultExpandState}/>
             <ToolbarItem title='展开全部节点' disabled={allNodesExpand} type="primary" icon={<ExpandOutlined />} onClick={expandAll}/>
                       
+
+
             <Divider type="vertical" className='divider'/>
             <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={props.onScreenShot}/>
             <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={props.onExpImage}/>
@@ -47,6 +48,11 @@ const Toolbar=(props)=>{
             <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={props.onExpWord}/>
             <ToolbarItem title='导出markdown' icon={<FileMarkdownOutlined />} onClick={props.onExpMarkdown}/>
             <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={props.onExpHtml}/>
+
+            <Divider type="vertical" className='divider'/>
+            <ToolbarItem title='版本发布说明' icon={<HistoryOutlined />} onClick={props.openReleaseNote}/>
+            <ToolbarItem title='检查更新' icon={<CloudSyncOutlined />} onClick={props.onCheckUpdate}/>
+            <ToolbarItem title='帮助' icon={<QuestionOutlined />} onClick={props.onOpenHelpDlg}/>
         </Header>
     );
     

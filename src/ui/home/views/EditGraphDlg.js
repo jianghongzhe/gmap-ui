@@ -22,7 +22,6 @@ const EditGraphDlg=(props)=>{
     const [editorAction, setEditorAction]= useState(null);
     const [colorPickerVisible, setColorPickerVisible]=useState(false);
     const [advColorPickerVisible, setAdvColorPickerVisible]=useState(false);
-    const [helpDlgVisible, setHelpDlgVisible]=useState(false);
     const codeMirrorInstRef=useRef();
     const [refNavDlgVisible, setRefNavDlgVisible]=useState(false);
     const [refNavDlgTitle, setRefNavDlgTitle]=useState("");
@@ -32,13 +31,10 @@ const EditGraphDlg=(props)=>{
     const hideAllDlg =useCallback(() => {
         setColorPickerVisible(false);
         setAdvColorPickerVisible(false);
-        setHelpDlgVisible(false);
         setRefNavDlgVisible(false);
-    },[setColorPickerVisible, setAdvColorPickerVisible, setHelpDlgVisible,  setRefNavDlgVisible]);
+    },[setColorPickerVisible, setAdvColorPickerVisible,   setRefNavDlgVisible]);
 
-    const showHelpPicDlg = useCallback(() => {
-        setHelpDlgVisible(true);
-    },[setHelpDlgVisible]);
+   
 
 
     //-------------------颜色选择相关-----------------------------------
@@ -153,7 +149,7 @@ const EditGraphDlg=(props)=>{
                         <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} /> */}
                         <div css={txtBtnStyle} title='查看引用' onClick={showRefs}>ref</div>
                         <div css={txtBtnStyle} title='查看文本引用' onClick={showTrefs}>tref</div>
-                        <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={showHelpPicDlg} />
+                        <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={props.onOpenHelpDlg} />
                     </div>
                     <Editor
                         value={props.editTmpTxt}
@@ -162,7 +158,7 @@ const EditGraphDlg=(props)=>{
                         onOnlySave={props.onOnlySave}
                         onOk={props.onOk}
                         onSetInst={setCodeMirrorInst}
-                        onShowHelpDlg={showHelpPicDlg}
+                        onShowHelpDlg={props.onOpenHelpDlg}
                     />
                 </div>
             </EnhDlg>
@@ -198,10 +194,7 @@ const EditGraphDlg=(props)=>{
                 onOk={handleColorPickerColorChange}
             />
             
-            {/* 帮助对话框 */}
-            <HelpDlg
-                visible={helpDlgVisible}
-                onCancel={hideAllDlg}/>
+            
         </>
     );
     

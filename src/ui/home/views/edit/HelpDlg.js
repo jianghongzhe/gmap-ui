@@ -27,6 +27,7 @@ const HelpDlg=(props)=>{
                 closable={true}
                 size={{w: 960}}
                 visible={props.visible}
+                zIndex={2000}
                 onCancel={props.onCancel}>
             
             <Tabs tabPosition='left' css={tabsStyle}>
@@ -574,6 +575,7 @@ const shortcuts=[
             ['Ctrl+PageDown','选中后一个选项卡'],
             ['Ctrl+Shift+PageUp','当前选项卡前移'],
             ['Ctrl+Shift+PageDown','当前选项卡后移'],
+            ['Ctrl + H','打开帮助页'],
         ]
     },
     {
