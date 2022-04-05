@@ -1030,6 +1030,7 @@ class MindmapSvc {
         let refNames=[];
 
         let { ndLines, refs, openers} = this.loadParts(arrayOrTxt);
+        const defaultRelaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
 
         ndLines.forEach(str => {           
             //=============数据行开始======================
@@ -1045,8 +1046,8 @@ class MindmapSvc {
             let prog=null;
             let forceRight=false;
             let logicId=null;
-            let logicToId=null;
-            let relaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
+            let logicToIds=[];
+            let relaLineColors=[];
 
             //内容是简单类型，把转换的竖线再恢复回来
             let replTxt=escapeVLine(txt);
@@ -1086,10 +1087,8 @@ class MindmapSvc {
                     [handled,hasVal,val]=this.linePartHandlers.handleToId(item);
                     if(handled){
                         if(hasVal){
-                            logicToId=val.id;
-                            if(val.color){
-                                relaLineColor=val.color;
-                            }
+                            logicToIds.push(val.id);
+                            relaLineColors.push(val.color ? val.color : defaultRelaLineColor);
                         }
                         return;
                     }
@@ -1219,8 +1218,8 @@ class MindmapSvc {
                 prog: prog,
                 forceRight: (0===lev?forceRight:false), //只有根节点才有可能设置forceRight，其他节点一律为false
                 logicId,
-                logicToId,
-                relaLineColor,
+                logicToIds,
+                relaLineColors,
                 isRelaLineFrom: false,
                 isRelaLineTo: false,
             };
@@ -1232,7 +1231,7 @@ class MindmapSvc {
             if (null == root) {
                 root = nd;
                 lastNd = nd;
-                if(null!=logicId || null!=logicToId){
+                if(null!=logicId || 0<logicToIds.length){
                     relaLineNds.push(nd);
                 }
                 return;
@@ -1250,7 +1249,7 @@ class MindmapSvc {
 
             //每次处理完一次记录上个节点
             lastNd = nd;
-            if(null!=logicId || null!=logicToId){
+            if(null!=logicId || 0<logicToIds.length){
                 relaLineNds.push(nd);
             }
             //-------------数据行结束----------------------
@@ -1269,14 +1268,16 @@ class MindmapSvc {
         });
 
         // 关联id与toid
-        relaLineNds.filter(ndFrom=>null!=ndFrom.logicToId).forEach(ndFrom=>{
-            const ndTo=relaLineNds.find(ndTo=>ndTo.logicId===ndFrom.logicToId);
-            if("undefined"===typeof ndTo){
-                return;
-            }
-            ndFrom.toid=ndTo.id;
-            ndFrom.isRelaLineFrom=true;
-            ndTo.isRelaLineTo=true;
+        relaLineNds.filter(ndFrom=>0<ndFrom.logicToIds.length).forEach(ndFrom=>{
+            relaLineNds.filter(ndTo=>ndFrom.logicToIds.includes(ndTo.logicId)).forEach(ndTo=>{
+                if(!ndFrom.toids){
+                    ndFrom.toids=[ndTo.id];
+                }else{
+                    ndFrom.toids.push(ndTo.id);
+                }
+                ndFrom.isRelaLineFrom=true;
+                ndTo.isRelaLineTo=true;
+            });
         });
 
         // 把所有引用的内容合并在一起，如果超过两个引用，则放到根节点中，否则不处理

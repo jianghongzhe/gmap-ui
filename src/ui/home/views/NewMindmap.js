@@ -11,11 +11,12 @@ import { useRafState } from 'ahooks';
  */
 const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
-    const [{ndStyles, lineStyles, expBtnStyles, wrapperStyle},setAllStyles]=useRafState({
+    const [{ndStyles, lineStyles, expBtnStyles, wrapperStyle, relaLineStyles},setAllStyles]=useRafState({
         ndStyles:{}, 
         lineStyles:{}, 
         expBtnStyles:{}, 
-        wrapperStyle:{}
+        wrapperStyle:{},
+        relaLineStyles: {},
     });
 
 
@@ -26,13 +27,14 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         if(ds && ds.tree && ds.list && ds.map){
             setTimeout(()=>{
                 const styles= mindLayoutSvcFacade.loadStyles(ds);
+                const relaLineStyles=getRelaLineStyles(styles.ndStyles);
                 setAllStyles({
                     ndStyles:       styles.ndStyles, 
                     lineStyles:     styles.lineStyles, 
                     expBtnStyles:   styles.expBtnStyles,
                     wrapperStyle:   styles.wrapperStyle,
+                    relaLineStyles,
                 });
-                putRelaLines(styles.ndStyles);
             }, 5);
         }
     },[ds, setAllStyles]);
@@ -56,6 +58,29 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                 : 
             {};
     },[lineStyles]);
+
+
+    const getRelaLineWrapperStyle=useCallback((fromId, toId)=>{
+        if(!relaLineStyles[`${fromId}_${toId}`] || !relaLineStyles[`${fromId}_${toId}`].svgStyle){
+            return {
+                left:"-9999px",
+                top: "-9999px",
+            };
+        }
+        return relaLineStyles[`${fromId}_${toId}`].svgStyle;
+    },[relaLineStyles]);
+
+    const getRelaLinePos=useCallback((fromId, toId)=>{
+        if(!relaLineStyles[`${fromId}_${toId}`] || !relaLineStyles[`${fromId}_${toId}`].linePos){
+            return {
+                x1: 0,
+                y1: 0,
+                x2: 0,
+                y2: 0,
+            };
+        }
+        return relaLineStyles[`${fromId}_${toId}`].linePos;
+    },[relaLineStyles]);
 
 
     //如果提供了节点渲染器或扩展按钮渲染器，则使用，否则使用默认的
@@ -136,14 +161,16 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
                     {/* 关联线 */}
                     {
-                        nd.isRelaLineFrom && (<svg className="relaLine" fromid={nd.id} toid={nd.toid} xmlns="http://www.w3.org/2000/svg" version="1.1" style={{position:"absolute",zIndex:1,width:"200px",height:"200px",left:'-9999px',top:'-9999px',backgroundColor: "#EEEEEE00"}}>
-                            <defs>
-                                <marker id={`${nd.id}_${nd.toid}_arrow`} markerUnits="strokeWidth" markerWidth="12" markerHeight="12" viewBox="0 0 12 12" refX="6" refY="6" orient="auto">
-                                    <path d="M2,2 L10,6 L2,10 L2,2" style={{fill:nd.relaLineColor}} />
-                                </marker>
-                            </defs>
-                            <line x1="0" y1="0" x2="200" y2="200" style={{stroke:nd.relaLineColor, strokeWidth:1, strokeDasharray:"5px"}} markerEnd={`url(#${nd.id}_${nd.toid}_arrow)`}/>
-                        </svg>)
+                        nd.isRelaLineFrom && nd.toids.map((toid, ind)=>(
+                            <svg key={`toid_${toid}`} className="relaLine" fromid={nd.id} toid={toid} xmlns="http://www.w3.org/2000/svg" version="1.1" style={getRelaLineWrapperStyle(nd.id, toid)}>
+                                <defs>
+                                    <marker id={`${nd.id}_${toid}_arrow`} markerUnits="strokeWidth" markerWidth="12" markerHeight="12" viewBox="0 0 12 12" refX="6" refY="6" orient="auto">
+                                        <path d="M2,2 L10,6 L2,10 L2,2" style={{fill:nd.relaLineColors[ind]}} />
+                                    </marker>
+                                </defs>
+                                <line {...getRelaLinePos(nd.id, toid)} style={{stroke:nd.relaLineColors[ind], strokeWidth:1, strokeDasharray:"5px"}} markerEnd={`url(#${nd.id}_${toid}_arrow)`}/>
+                            </svg>
+                        ))
                     }
                 </React.Fragment>))
             }
@@ -236,233 +263,262 @@ const defaultWrapperStyle={
 
     '& .linewrapper .lineto': {
         ...baseFloatBlockStyle,
-    }
+    },
+
+    '& .relaLine':{
+        position:"absolute",
+        zIndex:1,
+        backgroundColor: "#EEEEEE00"
+    },
 };
 
 
-const putRelaLines=(ndStyles)=>{
+/**
+ * 计算连接线的样式，根据之前已经计算好的节点位置来记算
+ * @param {*} ndStyles 
+ * @returns 
+ */
+const getRelaLineStyles=(ndStyles)=>{
+    const styles={};
     
-    const func=()=>{    
-        document.querySelectorAll(".relaLine").forEach(svgEle=>{
-            console.log('into putRelaLines');
-
-            const lineEle=svgEle.querySelector("line");
-            const fromId=svgEle.getAttribute("fromid");
-            const toId=svgEle.getAttribute("toid");
-            const ndFrom=document.querySelector(`#${fromId}`);
-            const ndTo=document.querySelector(`#${toId}`);
-            
-
-            if(!ndFrom || !ndStyles || !ndStyles[fromId] || !ndStyles[fromId].left){
-                svgEle.style.left="-9999px";
-                svgEle.style.top="-9999px";
-                return;
-            }
-            if(!ndTo || !ndStyles || !ndStyles[toId] || !ndStyles[toId].left){
-                svgEle.style.left="-9999px";
-                svgEle.style.top="-9999px";
-                return;
-            }
-
-
-            let tmp=ndFrom.getBoundingClientRect();
-            const rect1= {
-                width: tmp.width,
-                height: tmp.height,
-                left: ndStyles[fromId].left,
-                top: ndStyles[fromId].top,
+    document.querySelectorAll(".relaLine").forEach(svgEle=>{
+        const fromId=svgEle.getAttribute("fromid");
+        const toId=svgEle.getAttribute("toid");
+        const ndFrom=document.querySelector(`#${fromId}`);
+        const ndTo=document.querySelector(`#${toId}`);
+        
+        // 如果没有取得需要的数据，则生成一个屏幕之外的默认样式
+        const noEnoughConditon=(
+            (!ndFrom || !ndStyles || !ndStyles[fromId] || !ndStyles[fromId].left) || 
+            (!ndTo || !ndStyles || !ndStyles[toId] || !ndStyles[toId].left)
+        );
+        if(noEnoughConditon){
+            styles[`${fromId}_${toId}`]={
+                svgStyle: {
+                    left:"-9999px",
+                    top: "-9999px",
+                },
+                linePos:{
+                    x1: 0,
+                    y1: 0,
+                    x2: 0,
+                    y2: 0,
+                },
             };
-
-            
-            console.log("to", ""+ndTo+"");
-            tmp=ndTo.getBoundingClientRect();
-            const rect2= {
-                width: tmp.width,
-                height: tmp.height,
-                left: ndStyles[toId].left,
-                top: ndStyles[toId].top,
-            };
-
-            
-            const fromCenter=[parseInt(rect1.left+rect1.width/2), parseInt(rect1.top+rect1.height/2)];
-            const toCenter=[parseInt(rect2.left+rect2.width/2), parseInt(rect2.top+rect2.height/2)];
-            
-
-            
-
-            // 计算两个元素上下左右关系
-            // 如果上下距离比左右大，连接线从左右中间开始
-            // 如果左右距离比上下大，连接线从上下中间开始
-
-            const pos={
-                l:0,
-                t:0,
-                w:0,
-                h:0,
-                x1:0,
-                x2:0,
-                y1:0,
-                y2:0,
-            };
-
-            let typeX;
-            let typeY;
+            return;
+        }
 
 
-            const moveX=(num)=>{
-                pos.l+=num;
-            };
-            const moveY=(num)=>{
-                pos.t+=num;
-            };
-            const scaleX=(num)=>{
-                pos.w+=num;
-                if(pos.x1<pos.x2){
-                    pos.x2+=num;
-                }else{
-                    pos.x1+=num;
-                }
-            };
-            const scaleY=(num)=>{
-                pos.h+=num;
-                if(pos.y1<pos.y2){
-                    pos.y2+=num;
-                }else{
-                    pos.y1+=num;
-                }
-            };
-            const padX=(num)=>{
-                pos.w+=num*2;
-                pos.l-=num;
-                pos.x1+=num;
+        let tmp=ndFrom.getBoundingClientRect();
+        const rect1= {
+            width: tmp.width,
+            height: tmp.height,
+            left: ndStyles[fromId].left,
+            top: ndStyles[fromId].top,
+        };
+
+        
+        console.log("to", ""+ndTo+"");
+        tmp=ndTo.getBoundingClientRect();
+        const rect2= {
+            width: tmp.width,
+            height: tmp.height,
+            left: ndStyles[toId].left,
+            top: ndStyles[toId].top,
+        };
+
+        
+        const fromCenter=[parseInt(rect1.left+rect1.width/2), parseInt(rect1.top+rect1.height/2)];
+        const toCenter=[parseInt(rect2.left+rect2.width/2), parseInt(rect2.top+rect2.height/2)];
+        
+
+        
+
+        // 计算两个元素上下左右关系
+        // 如果上下距离比左右大，连接线从左右中间开始
+        // 如果左右距离比上下大，连接线从上下中间开始
+
+        const pos={
+            l:0,
+            t:0,
+            w:0,
+            h:0,
+            x1:0,
+            x2:0,
+            y1:0,
+            y2:0,
+        };
+
+        let typeX;
+        let typeY;
+
+
+        const moveX=(num)=>{
+            pos.l+=num;
+        };
+        const moveY=(num)=>{
+            pos.t+=num;
+        };
+        const scaleX=(num)=>{
+            pos.w+=num;
+            if(pos.x1<pos.x2){
                 pos.x2+=num;
-            };
-            const padY=(num)=>{
-                pos.h+=num*2;
-                pos.t-=num;
-                pos.y1+=num;
-                pos.y2+=num;
-            };
-
-            
-            
-
-
-            // 水平方向
-            // 左->右，无重叠部分
-            if(rect1.left+rect1.width<rect2.left){
-                pos.l=rect1.left+rect1.width;
-                pos.w=rect2.left-rect1.left-rect1.width;
-                pos.x1=0;
-                pos.x2=rect2.left-rect1.left-rect1.width;
-                scaleX(-4);
-                typeX=1;
-
-                console.log("左->右，无重叠部分");
-            }
-            // 右->左，无重叠部分
-            else if(rect2.left+rect2.width<rect1.left){
-                pos.l=rect2.left+rect2.width;
-                pos.w=rect1.left-rect2.left-rect2.width;
-                pos.x1=rect1.left-rect2.left-rect2.width;
-                pos.x2=0;
-                scaleX(-4);
-                moveX(4);
-                typeX=2;
-            }
-            // 有重叠
-            else{
-                pos.l=Math.min(fromCenter[0], toCenter[0]);
-                pos.w=Math.abs(toCenter[0]-fromCenter[0]);
-                pos.x1=(fromCenter[0] < toCenter[0] ? 0 : pos.w);
-                pos.x2=pos.w-pos.x1;
-            }
-
-
-            // 垂直方向
-            // 上->下，无重叠部分
-            if(rect1.top+rect1.height<rect2.top){
-                pos.t=rect1.top+rect1.height;
-                pos.h=rect2.top-rect1.top-rect1.height;
-                pos.y1=0;
-                pos.y2=rect2.top-rect1.top-rect1.height;
-                scaleY(-4);
-                typeY=1;
-
-                console.log("上->下，无重叠部分");
-            }
-            // 下->上，无重叠部分
-            else if(rect2.top+rect2.height<rect1.top){
-                pos.t=rect2.top+rect2.height;
-                pos.h=rect1.top-rect2.top-rect2.height;
-                pos.y1=rect1.top-rect2.top-rect2.height;
-                pos.y2=0;
-                scaleY(-4);
-                moveY(4);
-                typeY=2;
             }else{
-                pos.t=Math.min(fromCenter[1],toCenter[1]);
-                pos.h=Math.abs(toCenter[1]-fromCenter[1]);
-                pos.y1=(fromCenter[1]<toCenter[1] ? 0 : pos.h);
-                pos.y2=pos.h-pos.y1;
+                pos.x1+=num;
             }
-
-            if(1===typeY && (1===typeX || 2===typeX) && pos.w>pos.h){
-                pos.t=fromCenter[1];
-                pos.h=toCenter[1]-fromCenter[1];
-                pos.y1=0;
-                pos.y2=toCenter[1]-fromCenter[1];
-
-                console.log("111 "+pos.w+" "+pos.h);
+        };
+        const scaleY=(num)=>{
+            pos.h+=num;
+            if(pos.y1<pos.y2){
+                pos.y2+=num;
+            }else{
+                pos.y1+=num;
             }
-            else if(2===typeY && (1===typeX || 2===typeX) && pos.w>pos.h){
-                pos.t=toCenter[1];
-                pos.h=fromCenter[1]-toCenter[1];
-                pos.y1=fromCenter[1]-toCenter[1];
-                pos.y2=0;
+        };
+        const padX=(num)=>{
+            pos.w+=num*2;
+            pos.l-=num;
+            pos.x1+=num;
+            pos.x2+=num;
+        };
+        const padY=(num)=>{
+            pos.h+=num*2;
+            pos.t-=num;
+            pos.y1+=num;
+            pos.y2+=num;
+        };
 
-                console.log("222");
-            }
-            else if(1===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
-                pos.l=fromCenter[0];
-                pos.w=toCenter[0]-fromCenter[0];
-                pos.x1=0;
-                pos.x2=toCenter[0]-fromCenter[0];
-
-                console.log("333 "+pos.w+" "+pos.h);
-            }
-            else if(2===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
-                pos.l=toCenter[0];
-                pos.w=fromCenter[0]-toCenter[0];
-                pos.x1=fromCenter[0]-toCenter[0];
-                pos.x2=0;
-
-                console.log("444");
-            }
+        
+        
 
 
+        // 水平方向
+        // 左->右，无重叠部分
+        if(rect1.left+rect1.width<rect2.left){
+            pos.l=rect1.left+rect1.width;
+            pos.w=rect2.left-rect1.left-rect1.width;
+            pos.x1=0;
+            pos.x2=rect2.left-rect1.left-rect1.width;
+            scaleX(-4);
+            typeX=1;
 
-            // 留出一些空间用于
-            padX(10);
-            padY(10);
-            
+            console.log("左->右，无重叠部分");
+        }
+        // 右->左，无重叠部分
+        else if(rect2.left+rect2.width<rect1.left){
+            pos.l=rect2.left+rect2.width;
+            pos.w=rect1.left-rect2.left-rect2.width;
+            pos.x1=rect1.left-rect2.left-rect2.width;
+            pos.x2=0;
+            scaleX(-4);
+            moveX(4);
+            typeX=2;
+        }
+        // 有重叠
+        else{
+            pos.l=Math.min(fromCenter[0], toCenter[0]);
+            pos.w=Math.abs(toCenter[0]-fromCenter[0]);
+            pos.x1=(fromCenter[0] < toCenter[0] ? 0 : pos.w);
+            pos.x2=pos.w-pos.x1;
+        }
 
 
-            svgEle.style.left=`${pos.l}px`;
-            svgEle.style.width=`${pos.w}px`;
-            lineEle.setAttribute("x1",pos.x1);
-            lineEle.setAttribute("x2",pos.x2);
+        // 垂直方向
+        // 上->下，无重叠部分
+        if(rect1.top+rect1.height<rect2.top){
+            pos.t=rect1.top+rect1.height;
+            pos.h=rect2.top-rect1.top-rect1.height;
+            pos.y1=0;
+            pos.y2=rect2.top-rect1.top-rect1.height;
+            scaleY(-4);
+            typeY=1;
 
-            svgEle.style.top=`${pos.t}px`;
-            svgEle.style.height=`${pos.h}px`;
-            lineEle.setAttribute("y1", pos.y1);
-            lineEle.setAttribute("y2", pos.y2);
-        });
-    };
+            console.log("上->下，无重叠部分");
+        }
+        // 下->上，无重叠部分
+        else if(rect2.top+rect2.height<rect1.top){
+            pos.t=rect2.top+rect2.height;
+            pos.h=rect1.top-rect2.top-rect2.height;
+            pos.y1=rect1.top-rect2.top-rect2.height;
+            pos.y2=0;
+            scaleY(-4);
+            moveY(4);
+            typeY=2;
+        }else{
+            pos.t=Math.min(fromCenter[1],toCenter[1]);
+            pos.h=Math.abs(toCenter[1]-fromCenter[1]);
+            pos.y1=(fromCenter[1]<toCenter[1] ? 0 : pos.h);
+            pos.y2=pos.h-pos.y1;
+        }
 
-    setTimeout(() => {
-        window.requestAnimationFrame(func);
-    }, 500);
+        if(1===typeY && (1===typeX || 2===typeX) && pos.w>pos.h){
+            pos.t=fromCenter[1];
+            pos.h=toCenter[1]-fromCenter[1];
+            pos.y1=0;
+            pos.y2=toCenter[1]-fromCenter[1];
+
+            console.log("111 "+pos.w+" "+pos.h);
+        }
+        else if(2===typeY && (1===typeX || 2===typeX) && pos.w>pos.h){
+            pos.t=toCenter[1];
+            pos.h=fromCenter[1]-toCenter[1];
+            pos.y1=fromCenter[1]-toCenter[1];
+            pos.y2=0;
+
+            console.log("222");
+        }
+        else if(1===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
+            pos.l=fromCenter[0];
+            pos.w=toCenter[0]-fromCenter[0];
+            pos.x1=0;
+            pos.x2=toCenter[0]-fromCenter[0];
+
+            console.log("333 "+pos.w+" "+pos.h);
+        }
+        else if(2===typeX && (1===typeY || 2===typeY) && pos.w<=pos.h){
+            pos.l=toCenter[0];
+            pos.w=fromCenter[0]-toCenter[0];
+            pos.x1=fromCenter[0]-toCenter[0];
+            pos.x2=0;
+
+            console.log("444");
+        }
+
+
+
+        // 留出一些空间用于
+        padX(10);
+        padY(10);
+        
+
+
+        // svgEle.style.left=`${pos.l}px`;
+        // svgEle.style.width=`${pos.w}px`;
+        // lineEle.setAttribute("x1",pos.x1);
+        // lineEle.setAttribute("x2",pos.x2);
+
+        // svgEle.style.top=`${pos.t}px`;
+        // svgEle.style.height=`${pos.h}px`;
+        // lineEle.setAttribute("y1", pos.y1);
+        // lineEle.setAttribute("y2", pos.y2);
+
+
+        styles[`${fromId}_${toId}`]={
+            svgStyle: {
+                left:`${pos.l}px`,
+                top: `${pos.t}px`,
+                width: `${pos.w}px`,
+                height: `${pos.h}px`,
+            },
+            linePos:{
+                x1: pos.x1,
+                y1: pos.y1,
+                x2: pos.x2,
+                y2: pos.y2,
+            },
+        };
+    });
+    return styles;
 };
 
 

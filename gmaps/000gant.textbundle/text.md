@@ -1,5 +1,5 @@
-- 常用内容|ref:常用内容|toid:xx|[](cmd://ping {{1}}.{{2}}.{{3}}.{{4}})
-	- 1222|[](urlx://https://baidu.com)|d:22.2.22,green
+- 常用内容|ref:常用内容|toid:xx|[](cmd://ping {{1}}.{{2}}.{{3}}.{{4}})|toid:yy
+	- 1222|[](urlx://https://baidu.com)|d:22.2.22,green|id:yy
 	- 2down|[](dirext://d:\down)|d:22.2.23
 	- 3by|[a](openby://D:\c.txt@@emeditor)|p:100
 	- 4@@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)|p:20
