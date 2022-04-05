@@ -28,7 +28,7 @@ import { useRecoilValue } from 'recoil';
  * 编辑器
  * @param {*} props 
  */
-const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange})=>{
+const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange, onEditTable})=>{
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
 
@@ -166,7 +166,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                 "Ctrl-4": setTitle.bind(this,4),
                 "Ctrl-5": setTitle.bind(this,5),
                 "Ctrl-6": setTitle.bind(this,6),
-                // "Ctrl-T": props.onShowDateDlg,
+                "Ctrl-T": onEditTable,
                 
                 "Shift-Ctrl-G": onPreventKey,
                 "Shift-Ctrl-F": onPreventKey,

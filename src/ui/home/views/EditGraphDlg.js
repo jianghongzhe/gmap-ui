@@ -1,11 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, message, Button,List } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, TableOutlined } from '@ant-design/icons';
 
 import {withEnh} from '../../common/specialDlg';
 
-import HelpDlg from './edit/HelpDlg';
 import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
 import ColorPickerDlg from './edit/ColorPickerDlg';
 import Editor from './edit/Editor';
@@ -103,6 +102,12 @@ const EditGraphDlg=(props)=>{
         codeMirrorInstRef.current=inst;
     },[]);
 
+
+    const onEditTable=useCallback(()=>{
+        console.log("edit table cm", codeMirrorInstRef.current);
+        message.warn("该功能正在建设中");
+    },[codeMirrorInstRef]);
+
     
 
     /**
@@ -149,6 +154,7 @@ const EditGraphDlg=(props)=>{
                         <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} /> */}
                         <div css={txtBtnStyle} title='查看引用' onClick={showRefs}>ref</div>
                         <div css={txtBtnStyle} title='查看文本引用' onClick={showTrefs}>tref</div>
+                        <TableOutlined title="编辑表格（ Ctrl + T ）" css={tableStyle} onClick={onEditTable}/>
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={props.onOpenHelpDlg} />
                     </div>
                     <Editor
@@ -159,6 +165,7 @@ const EditGraphDlg=(props)=>{
                         onOk={props.onOk}
                         onSetInst={setCodeMirrorInst}
                         onShowHelpDlg={props.onOpenHelpDlg}
+                        onEditTable={onEditTable}
                     />
                 </div>
             </EnhDlg>
@@ -214,7 +221,7 @@ const baseHoverStyle = {
     cursor: 'pointer',
     transition: 'all 0.2s 0.1s',
     '&:hover': {
-        borderRadius: 4,
+        borderRadius: 6,
         opacity: 0.6,
         // transform:'skew(-15deg)'
     }
@@ -241,7 +248,16 @@ const txtBtnStyle={
     }
 };
 
-
+const tableStyle = {
+    fontSize: 19,
+    marginLeft: 10,
+    color: '#1890ff',
+    ...baseHoverStyle,
+    '&:hover': {
+        opacity: 0.6,
+        transform: 'rotate(180deg)'
+    }
+}
 
 const helpStyle = {
     fontSize: 19,
