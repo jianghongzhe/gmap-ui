@@ -423,13 +423,13 @@ const MapsViewer=(props)=>{
     const onBeforeOpenLink=useCallback((url)=>{
         const replaceItems= strTmpl.parse(url);
         if(null===replaceItems){
-            api.openUrl(url);
+            api.openUrl(url, selectFileListItem);
             return;
         }
         setCurrLinkUrl(url);
         setParamReplItems(replaceItems);
         setStrParamReplaceDlgVisible(true);
-    },[setCurrLinkUrl, setParamReplItems, setStrParamReplaceDlgVisible]);
+    },[setCurrLinkUrl, setParamReplItems, setStrParamReplaceDlgVisible, selectFileListItem]);
 
     /**
      * 参数占位符替换后的回调
@@ -437,8 +437,8 @@ const MapsViewer=(props)=>{
      */
     const onStrParamReplaceDlgOk=useCallback((url)=>{
         setStrParamReplaceDlgVisible(false);
-        api.openUrl(url);
-    },[setStrParamReplaceDlgVisible]);
+        api.openUrl(url, selectFileListItem);
+    },[setStrParamReplaceDlgVisible, selectFileListItem]);
 
 
     /***

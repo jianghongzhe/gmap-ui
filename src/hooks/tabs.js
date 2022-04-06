@@ -12,6 +12,8 @@ export const useSelectFileListItem=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
 
     return useCallback((item)=>{
+        console.log("item item", item);
+
         if (!item || !item.isfile) {
             return;
         }
@@ -38,13 +40,19 @@ export const useSelectFileListItem=()=>{
             console.log("节点数量", ndsSet.list.length);
 
             //增加新选项卡并设置状态
-            console.log("ppp", {
-                title: item.itemsName,// item.showname,
-                key: mdFullpath,
-                mapTxts: origintxts,
-                //mapCells: cells,
-                ds: ndsSet,
-            });
+            console.log("old", tabPanes);
+            let newPanes=[
+                ...tabPanes,
+                {
+                    title: item.itemsName,// item.showname,
+                    key: mdFullpath,
+                    mapTxts: origintxts,
+                    //mapCells: cells,
+                    ds: ndsSet,
+                }
+            ];
+            console.log("new", newPanes);
+
             setTabPanes([
                 ...tabPanes,
                 {

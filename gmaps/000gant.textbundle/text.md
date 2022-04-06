@@ -1,4 +1,4 @@
-- 常用内容|ref:常用内容|toid:xx|[](cmd://ping {{1}}.{{2}}.{{3}}.{{4}})|toid:yy
+- 常用内容|ref:常用内容|toid:xx|[](cmd://ping {{1}}.{{2}}.{{3}}.{{4}})|toid:yy|[跳转到导图 - bbb](gmap://bbb)
 	- 1222|[](urlx://https://baidu.com)|d:22.2.22,green|id:yy
 	- 2down|[](dirext://d:\down)|d:22.2.23
 	- 3by|[a](openby://D:\c.txt@@emeditor)|p:100
