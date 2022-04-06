@@ -1264,6 +1264,165 @@ const editorSvcExInstWrapper=(function(){
         cm.doc.setCursor(sel.anchor);
     };
 
+
+    const appendItems=(array, cnt, valOrCallback)=>{
+        let ind=array.length;
+        for(let i=0;i<cnt;++i){
+            if("function"===typeof valOrCallback){
+                array.push(valOrCallback(ind+i));
+                continue;
+            }
+            array.push(valOrCallback);
+        }
+        return array;
+    };
+    
+    
+    const parseTableAlign=(txts)=>{
+        const flag=txts.map(t=>t.trim()).every(t=>/^[:]?[-]+[:]?$/.test(t));
+        if(!flag){
+            return false;
+        }
+        return txts.map(item=>{
+            if(item.startsWith(":") && item.endsWith(":")){
+                return "center";
+            }
+            if(item.startsWith(":")){
+                return "left";
+            }
+            if(item.endsWith(":")){
+                return "right";
+            }
+            return "center";
+        });
+    };
+    
+    
+    const parseTableLine=(lineTxt)=>{
+        const vline=`___vline_${new Date().getTime()}___`;
+        const vlineReg=new RegExp(vline, "g");
+        const lineTxtRepl=lineTxt.replace(/[\\][|]/g, vline).trim();
+    
+        if(!/^[|]([^|]+[|])+$/.test(lineTxtRepl)){
+            return false;
+        }
+        let result=lineTxtRepl.split("|").map(item=>item.replace(vlineReg, "\\|"));
+        result.splice(result.length-1,1);
+        result.shift();
+        return result;
+    };
+    
+    
+    /**
+     * 
+     * @param {*} cm 
+     * @returns 如果无法解析为表格，返回false；如果能解析为表格，返回如下格式：
+     * {
+     *      hasInitData: false,             // 是否有初始数据，如果光标所在行为空行则为false，否则为true
+     *      data: {
+     *          heads: ['标题1','标题2'],   // 标题名称
+     *          aligns: ['left','right'],   // 对齐方式
+     *          lines: [
+     *              ['', ''],               // 每行的数据
+     *              ['', '']
+     *          ] ,
+     *      },  
+     *      fromPos: {line: 0, ch: 0},      // codemirror中表格部分的起始行及行首位置
+     *      toPos: {line: 10, ch: 15},      // codemirror中表格部分的结束行及行尾位置，用于生成新的markdown后替换
+     *      needExtraBlankLine: true,       // 生成的结果markdown文本中是否包含前后的空行，当光标所在行为空时会指定为true，以与其它部分区别开
+     * }
+     */
+    const parseTable=(cm)=>{
+        const pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        const lineTxt=cm.doc.getLine(pos.line);
+        const lineCnt=cm.doc.lineCount();
+    
+        // 是空行
+        if(''===lineTxt.trim()){
+            return {
+                hasInitData:        false,
+                data:               null,
+                fromPos:            {line: pos.line, ch: 0},
+                toPos:              {line: pos.line, ch: lineTxt.length},
+                needExtraBlankLine: true,
+            };
+        }
+    
+        // 不是表格的行
+        let lines=[];
+        let tmp=parseTableLine(lineTxt)
+        if(false===tmp){
+            return false;
+        }
+        
+        // 是表格的行
+        // 获取光标所在行附件所有符合表格行结构的行
+        let lineIndFrom=99999;
+        let lineIndTo=-1;
+        if(pos.line<lineIndFrom){
+            lineIndFrom=pos.line;
+        }
+        if(pos.line>lineIndTo){
+            lineIndTo=pos.line;
+        }
+        lines.push(tmp);
+        for(let i=pos.line-1; i>=0; --i){
+            tmp=parseTableLine(cm.doc.getLine(i));
+            if(false===tmp){
+                break;
+            }
+            lines.unshift(tmp);
+            if(i<lineIndFrom){
+                lineIndFrom=i;
+            }
+            if(i>lineIndTo){
+                lineIndTo=i;
+            }
+        }
+        for(let i=pos.line+1; i<lineCnt; ++i){
+            tmp=parseTableLine(cm.doc.getLine(i));
+            if(false===tmp){
+                break;
+            }
+            lines.push(tmp);
+            if(i<lineIndFrom){
+                lineIndFrom=i;
+            }
+            if(i>lineIndTo){
+                lineIndTo=i;
+            }
+        }
+    
+        // 列数为列数最多行的列数
+        const colCnt= lines.map(line=>line.length).reduce((accu, curr)=>Math.max(accu, curr),0);
+    
+        // 处理标题行
+        const heads=lines[0];
+        appendItems(heads, colCnt-heads.length, (ind)=>"列头_"+(ind+1));
+        lines.shift();
+    
+        // 处理对齐方式行
+        let aligns=heads.map(h=>"center");
+        if(lines.length>0){
+            tmp=parseTableAlign(lines[0]);
+            if(false!==tmp){
+                aligns=tmp;
+                appendItems(aligns, colCnt-aligns.length, "center");
+                lines.shift();
+            }
+        }
+        
+        // 处理数据行
+        lines=lines.map(lineItems=>appendItems(lineItems, colCnt-lineItems.length, " "));
+        return {
+            hasInitData:        true,
+            data:               {heads, aligns, lines,},
+            fromPos:            {line: lineIndFrom, ch: 0},
+            toPos:              {line: lineIndTo, ch: cm.doc.getLine(lineIndTo).length},
+            needExtraBlankLine: false,
+        };
+    };
+
     return {
         gotoDefinition,
         loadAllRefNames,
@@ -1277,6 +1436,7 @@ const editorSvcExInstWrapper=(function(){
         setItalic,
         setStrikeLine,
         clearSelection,
+        parseTable,
     };
 })();
 

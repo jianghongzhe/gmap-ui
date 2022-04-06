@@ -96,7 +96,9 @@ function bb(){
 后面 内容
 
 # ref:by2
-by2
+|a|b|
+|-|-|
+|xx|yy|
 
 # ref:xx
 aaa

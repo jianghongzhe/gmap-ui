@@ -9,6 +9,8 @@ import AdvColorPickerDlg from './edit/AdvColorPickerDlg';
 import ColorPickerDlg from './edit/ColorPickerDlg';
 import Editor from './edit/Editor';
 import editorSvcEx from '../../../service/editorSvcEx';
+import TableEditDlg from './edit/TableEditDlg';
+import { useBoolean } from 'ahooks';
 
 
 const EnhDlg=withEnh(Modal);
@@ -25,7 +27,9 @@ const EditGraphDlg=(props)=>{
     const [refNavDlgVisible, setRefNavDlgVisible]=useState(false);
     const [refNavDlgTitle, setRefNavDlgTitle]=useState("");
     const [refNavDlgItems, setRefNavDlgItems]=useState([]);
-    
+    const [tableEditDlgVisible, {setTrue: showTableEditDlg, setFalse:hideTableEditDlg}]= useBoolean(false);
+    const [tableEditData,setTableEditData]=useState({});
+
 
     const hideAllDlg =useCallback(() => {
         setColorPickerVisible(false);
@@ -104,9 +108,14 @@ const EditGraphDlg=(props)=>{
 
 
     const onEditTable=useCallback(()=>{
-        console.log("edit table cm", codeMirrorInstRef.current);
-        message.warn("该功能正在建设中");
-    },[codeMirrorInstRef]);
+        const data=editorSvcEx.parseTable(codeMirrorInstRef.current);
+        if(false===data){
+            message.warn("光标所在位置不能解析为表格");
+            return;
+        }
+        setTableEditData(data);
+        showTableEditDlg();
+    },[codeMirrorInstRef, showTableEditDlg]);
 
     
 
@@ -201,7 +210,7 @@ const EditGraphDlg=(props)=>{
                 onOk={handleColorPickerColorChange}
             />
             
-            
+            <TableEditDlg visible={tableEditDlgVisible} onCancel={hideTableEditDlg} data={tableEditData}/>
         </>
     );
     
