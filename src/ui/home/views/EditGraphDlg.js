@@ -118,6 +118,13 @@ const EditGraphDlg=(props)=>{
     },[codeMirrorInstRef, showTableEditDlg]);
 
     
+    const setTableMarkdown=useCallback((md)=>{
+        if(codeMirrorInstRef.current){
+            codeMirrorInstRef.current.doc.replaceRange(md, tableEditData.fromPos, tableEditData.toPos);
+        }
+    },[tableEditData, codeMirrorInstRef]);
+
+    
 
     /**
      * 每次显示后强制子编辑器组件重新渲染
@@ -130,6 +137,8 @@ const EditGraphDlg=(props)=>{
             }, 500);
         }
     },[props.visible, setEditorAction]);
+
+    
 
 
     return (
@@ -210,7 +219,7 @@ const EditGraphDlg=(props)=>{
                 onOk={handleColorPickerColorChange}
             />
             
-            <TableEditDlg visible={tableEditDlgVisible} onCancel={hideTableEditDlg} data={tableEditData}/>
+            <TableEditDlg visible={tableEditDlgVisible} onCancel={hideTableEditDlg} data={tableEditData} onOk={setTableMarkdown}/>
         </>
     );
     

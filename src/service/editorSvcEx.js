@@ -1293,7 +1293,7 @@ const editorSvcExInstWrapper=(function(){
             if(item.endsWith(":")){
                 return "right";
             }
-            return "center";
+            return "left";
         });
     };
     
@@ -1402,12 +1402,12 @@ const editorSvcExInstWrapper=(function(){
         lines.shift();
     
         // 处理对齐方式行
-        let aligns=heads.map(h=>"center");
+        let aligns=heads.map(h=>"left");
         if(lines.length>0){
             tmp=parseTableAlign(lines[0]);
             if(false!==tmp){
                 aligns=tmp;
-                appendItems(aligns, colCnt-aligns.length, "center");
+                appendItems(aligns, colCnt-aligns.length, "left");
                 lines.shift();
             }
         }
