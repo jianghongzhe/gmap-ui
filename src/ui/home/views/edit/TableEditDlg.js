@@ -1,8 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal, Table, Input,Button  } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined,DeleteOutlined, InsertRowAboveOutlined, InsertRowBelowOutlined, InsertRowLeftOutlined, InsertRowRightOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined,DeleteOutlined, InsertRowAboveOutlined, InsertRowBelowOutlined, InsertRowLeftOutlined, InsertRowRightOutlined, ArrowLeftOutlined, ArrowRightOutlined, AlignLeftOutlined, AlignCenterOutlined, AlignRightOutlined } from '@ant-design/icons';
 import {withEnh} from '../../../common/specialDlg';
+import {useEditTableData} from '../../../../hooks/tableEdit';
+import { useBindAndGetRefs } from '../../../../common/commonHooks';
 
 
 const EnhDlg=withEnh(Modal);
@@ -28,67 +30,57 @@ const EnhDlg=withEnh(Modal);
  *  
  */
 const TableEditDlg=({visible, data, onCancel, onOk})=>{
-    const [aligns, setAligns]=useState([]);
-    const [colNames, setColNames]= useState([]);
-    const [lines, setLines]= useState([]);
+    const [
+        {colNames,aligns,lines},
+        {setData, changeCol,changeAlign, changeCell, addLine, addCol, delCol, delRow, swapLine, swapCol, createTableMd}
+    ]= useEditTableData();
+    const [, bindIptRef, getIptRef]= useBindAndGetRefs();
     
 
-    const onChange=useCallback((line, col, e)=>{
-        setLines(originLines=>{
-            let newLines=[...originLines];
-            newLines[line]=[...originLines[line]];
-            newLines[line][col]=e.target.value;
-            return newLines;
-        });
-    },[setLines]);
+    /**
+     * 根据引用的key使对应元素获得焦点
+     */
+    const focusIpt=useCallback((key)=>{
+        const ele=getIptRef(key);
+        if(ele){
+            ele.focus();
+        }
+    },[getIptRef]);
 
 
-    const changeCol=useCallback((col, e)=>{
-        setColNames(originColNames=>{
-            const colNames=[...originColNames];
-            colNames[col]=e.target.value;
-            return colNames;
-        });
-    },[setColNames]);
+    /**
+     * 处理tab键导航
+     */
+    const onKeyDown=useCallback((lineInd,colInd,e)=>{
+        if(!e.altKey && !e.shiftKey && !e.ctrlKey && "Tab"===e.key){
+            e.preventDefault();
+            e.stopPropagation();
 
-
-    const addLine=useCallback((ind=null)=>{
-        if(null===ind){
-            setLines(originLines=>[
-                ...originLines,
-                colNames.map(cn=>" ")
-            ]);
+            // 标题行：如果后面还有列，则焦点到后一列，否则焦点到数据首行首列
+            if(lineInd<0){
+                if(colInd<colNames.length-1){
+                    focusIpt(`head-${colInd+1}`);
+                    return;
+                }
+                focusIpt(`0-0`);
+                return;
+            }
+            // 数据行
+            // 如果后面还有列，则焦点到后一列
+            if(colInd<colNames.length-1){
+                focusIpt(`${lineInd}-${colInd+1}`);
+                return;
+            }
+            // 已是最后一列，且有下一行，则焦点到下一行第一列
+            if(lineInd<lines.length-1){
+                focusIpt(`${lineInd+1}-0`);
+                return;
+            }
+            // 已是最后一列，且无下一行，则焦点到标题行首列
+            focusIpt(`head-0`);
             return;
         }
-        setLines(originLines=>{
-            let newLines=[...originLines];
-            newLines.splice(ind,0,colNames.map(cn=>" "));
-            return newLines;
-        });
-    },[colNames, setLines]);
-
-
-
-    const addCol=useCallback((ind=null)=>{
-        if(null===ind){
-            setLines(originLines=>originLines.map(line=>([...line, " "])));
-            setColNames(originColNames=>([...originColNames, `列头`]));
-            return;
-        }
-        setLines(originLines=>{
-            return originLines.map(line=>{
-                let newLine=[...line];
-                newLine.splice(ind,0," ");
-                return newLine;
-            });
-        });
-        setColNames(originColNames=>{
-            let newColNames=[...originColNames];
-            newColNames.splice(ind,0,`列头`);
-            return newColNames;
-        });
-    },[setLines,setColNames]);
-
+    },[lines,colNames, focusIpt]);
 
     /**
      * 派生数据之表格的列：由原始的一维字符串数组转换为一维对象数组：
@@ -111,36 +103,45 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
      *      }
      * ]
      */
-    const columns = useMemo(()=>{
+     const columns = useMemo(()=>{
         const tmp=colNames.map((col,ind)=>{
             return {
                 title: ()=>{
                     return <div>
                         <div>
-                            <Input value={col} onChange={changeCol.bind(this, ind)} style={{textAlign:'center',fontWeight:'bold',}} bordered={false}/>
+                            <Input  ref={bindIptRef.bind(this,`head-${ind}`)}
+                                    value={col} 
+                                    onChange={changeCol.bind(this, ind)} 
+                                    style={{textAlign:'center',fontWeight:'bold',}} 
+                                    bordered={false}
+                                    onKeyDown={onKeyDown.bind(this,-1,ind)}
+                                    onPressEnter={focusIpt.bind(this, `0-${ind}`)}
+                            />
                         </div>
-                        <div style={{textAlign:'center',}}>
-                        <AlignCenterOutlined />
-                        <AlignLeftOutlined />
-                        <AlignRightOutlined />
-                            {
-                                ind>0 && <Button className='opBtnStyle' shape="circle" icon={<ArrowLeftOutlined />} size='middle' title='左移' ></Button>
-                            }
-                            {
-                                ind<colNames.length-1 && <Button className='opBtnStyle' shape="circle" icon={<ArrowRightOutlined />} size='middle' title='右移' ></Button>
-                            }
-                            <Button className='opBtnStyle' shape="circle" icon={<InsertRowLeftOutlined />} size='middle' title='在左侧插入列'  ></Button>
-                            <Button className='opBtnStyle' shape="circle" icon={<InsertRowRightOutlined />} size='middle' title='在右侧插入列'  ></Button>
-                            {
-                                colNames.length>1 && <Button className='opBtnStyle' shape="circle" icon={<DeleteOutlined />} size='middle' title='删除列'  ></Button>
-                            }
+                        <div style={{textAlign:'center',}}>                            
+                            <BtnItem icon={<AlignLeftOutlined />} title='靠左' enabled={'left'!==aligns[ind]} onClick={changeAlign.bind(this, ind, 'left')}/>
+                            <BtnItem icon={<AlignCenterOutlined  />} title='居中' enabled={'center'!==aligns[ind]} onClick={changeAlign.bind(this, ind, 'center')}/>
+                            <BtnItem icon={<AlignRightOutlined />} title='靠右' enabled={'right'!==aligns[ind]} onClick={changeAlign.bind(this, ind, 'right')}/>
+                            <BtnItem icon={<ArrowLeftOutlined />} title='左移' enabled={ind>0} onClick={swapCol.bind(this, ind, ind-1)}/>
+                            <BtnItem icon={<ArrowRightOutlined />} title='右移' enabled={ind<colNames.length-1} onClick={swapCol.bind(this, ind, ind+1)}/>
+                            <BtnItem icon={<InsertRowLeftOutlined />} title='在左侧插入列' onClick={addCol.bind(this, ind)}/>
+                            <BtnItem icon={<InsertRowRightOutlined />} title='在右侧插入列' onClick={addCol.bind(this, ind+1)}/>
+                            <BtnItem icon={<DeleteOutlined />} title='删除列' enabled={colNames.length>1} onClick={delCol.bind(this, ind)}/>
                         </div>
                     </div>;
                 },
                 dataIndex: `item${ind}`,
+                width:'150px',
                 key: 'col_'+ind,
                 render: (text, record, index)=>{
-                    return <Input value={text.data} style={{textAlign:aligns[text.col]}} onChange={onChange.bind(this, text.line, text.col)}/>;
+                    return <Input   ref={bindIptRef.bind(this,`${text.line}-${text.col}`)} 
+                                    value={text.data} 
+                                    style={{textAlign:aligns[text.col]}} 
+                                    bordered={false} 
+                                    onChange={changeCell.bind(this, text.line, text.col)}
+                                    onKeyDown={onKeyDown.bind(this,text.line,text.col)}
+                                    onPressEnter={focusIpt.bind(this, index<lines.length-1 ? `${text.line+1}-${text.col}` : `head-${text.col}`)}
+                            />;
                 },
             };
         });
@@ -149,25 +150,24 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
             align:'center',
             dataIndex: `op`,
             key: 'col_'+colNames.length,
-            width:'210px',
+            width:'170px',
+            fixed: 'right',
             render: (text, record, index)=>{
-                return <div style={{textAlign:'left',}}>
-                    {
-                        index>0 && <Button className='opBtnStyle' shape="circle" icon={<ArrowUpOutlined />} size='middle' title='上移' ></Button>
-                    }
-                    {
-                        index<lines.length-1 && <Button className='opBtnStyle' shape="circle" icon={<ArrowDownOutlined />} size='middle' title='下移' ></Button>
-                    }
-                    <Button className='opBtnStyle' shape="circle" icon={<InsertRowAboveOutlined />} size='middle'title='在上面插入行'  ></Button>
-                    <Button className='opBtnStyle' shape="circle" icon={<InsertRowBelowOutlined />} size='middle' title='在下面插入行'  ></Button>
-                    {
-                        lines.length>1 && <Button className='opBtnStyle' shape="circle" icon={<DeleteOutlined />} size='middle' title='删除行'></Button>
-                    }
+                return <div style={{textAlign:'center',}}>
+                    <BtnItem icon={<ArrowUpOutlined />} title='上移' enabled={index>0} onClick={swapLine.bind(this, index, index-1)}/>
+                    <BtnItem icon={<ArrowDownOutlined />} title='下移' enabled={index<lines.length-1} onClick={swapLine.bind(this, index, index+1)}/>
+                    <BtnItem icon={<InsertRowAboveOutlined />} title='在上面插入行' onClick={addLine.bind(this,index)}/>
+                    <BtnItem icon={<InsertRowBelowOutlined />} title='在下面插入行' onClick={addLine.bind(this,index+1)}/>
+                    <BtnItem icon={<DeleteOutlined />} title='删除行' enabled={lines.length>1} onClick={delRow.bind(this, index)}/>
                 </div>;
             },
         });
         return tmp;
-    },[colNames,aligns,lines, onChange, changeCol]);
+    },[
+        colNames,aligns,lines, 
+        bindIptRef, focusIpt, onKeyDown,
+        changeCol,changeAlign, changeCell, addLine, addCol, delCol, delRow, swapLine, swapCol,
+    ]);
 
 
         
@@ -213,39 +213,30 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
     
       
 
-
+    /**
+     * 当显示时加载初始数据，如果没有则加载默认表格数据
+     */
     useEffect(()=>{
         if(!visible || !data){
             return;
         }
         if(!data.hasInitData){
-            setAligns(['left','left']);
-            setColNames(['列头1','列头2']);
-            setLines([ ['数据1','数据2'] ]);
+            setData(
+                ['列头1','列头2'],
+                ['left','left'],
+                [ ['数据1','数据2'] ]
+            );
             return;
         }
-
-        console.log(data);
-        setAligns(data.data.aligns);
-        setColNames(data.data.heads);
-        setLines(data.data.lines);
-    },[visible, data, setColNames,setAligns,setLines]);  
+        setData(data.data.heads, data.data.aligns, data.data.lines);
+    },[visible, data, setData]);  
 
 
     const onCommit=useCallback(()=>{
-        let lineSep=`
-`;
-        let tableMarkdown=`|${colNames.join("|")}|${lineSep}`+
-            `|${aligns.map(v=>('center'===v ? ':-:' : ('right'===v ? "-:" : "-"))).join("|")}|${lineSep}`;
-        lines.forEach(line=>{
-            tableMarkdown+=`|${line.join("|")}|${lineSep}`;
-        });
-        if(data.needExtraBlankLine){
-            tableMarkdown=lineSep+tableMarkdown;
-        }
+        const tableMd=createTableMd(data.needExtraBlankLine);
         onCancel();
-        onOk(tableMarkdown);
-    },[aligns, colNames, lines, data, onOk]);
+        onOk(tableMd);
+    },[data, createTableMd, onCancel, onOk]);
 
 
     return (
@@ -258,14 +249,16 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
                 zIndex={2000}
                 width="calc(100vw - 200px)"
                 bodyStyle={{paddingTop:5}}>
-            
-            
-
-            <Table scroll={{x:'100%', y:'calc(100vh - 400px)'}} size='small' bordered pagination={false} dataSource={dataSource} columns={columns} />
+            <Table scroll={{x:'100%', y:'calc(100vh - 450px)'}} size='small' bordered tableLayout="fixed" pagination={false} dataSource={dataSource} columns={columns} />
         </EnhDlg>
     );
     
 }
+
+
+const BtnItem=({icon, title, type='default', enabled=true,  onClick})=>{
+    return <Button style={opBtnStyle} shape="circle" type={type} icon={icon} disabled={enabled?false:true} size='small' title={title} onClick={onClick}/>
+};
 
 const opBtnStyle={
     marginRight:'5px',
