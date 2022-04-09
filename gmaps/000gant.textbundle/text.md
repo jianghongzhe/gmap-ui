@@ -2,7 +2,7 @@
 	- 1222|[](urlx://https://baidu.com)|d:22.2.22,green|id:yy
 	- 2down|[](dirext://d:\down)|d:22.2.23
 	- 3by|[a](openby://D:\c.txt@@emeditor)|p:100
-	- 4@@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)|p:20
+	- 4@@|[](file:///@@cmd.exe)|[跳转到导图 - 22](gmap://22)|p:20|tttd
 	- 5by2|[a](openby://D:\c.txt@@emeditor)|p:100|p:80
 		- by|[a](openby://D:\c.txt@@emeditor)
 	- 6by|[a](openby://D:\c.txt@@emeditor)|p:100|ref:by2

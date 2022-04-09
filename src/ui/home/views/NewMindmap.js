@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {Alert,Row, Col} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';

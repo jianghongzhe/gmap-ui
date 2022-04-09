@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Modal } from 'antd';
 import { CirclePicker } from 'react-color';

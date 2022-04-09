@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, {  useMemo } from 'react';
 import { Modal,  Table,Progress,Tooltip } from 'antd';
 import {withEnh} from '../../common/specialDlg';
@@ -49,8 +48,11 @@ const columns = [
         dataIndex: 'thing',
         key: 'thing',
         render:(txt,line)=>{
-            console.log(typeof(txt),txt.length,txt);
-            return <>{txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>;
+            return <>{
+                txt.map((line,ind)=><React.Fragment key={`progitem_${line}`}>
+                    {0<ind && <br/>}{line}
+                </React.Fragment>)
+            }</>;
         }
     },
     {

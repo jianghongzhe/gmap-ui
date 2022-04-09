@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React from 'react';
 import {  Modal, Timeline } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';

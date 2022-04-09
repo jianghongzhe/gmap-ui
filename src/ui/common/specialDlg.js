@@ -1,7 +1,3 @@
-/** @jsxImportSource @emotion/react */
-
-
-
 
 /**
  * 对话框的增强：支持无头、无底部、指定宽高、固定高等

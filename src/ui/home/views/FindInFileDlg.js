@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect,  useState } from 'react';
 import { Modal, Input, Space, Typography, Empty} from 'antd';
 import {SearchOutlined} from '@ant-design/icons'

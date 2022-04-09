@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
 import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,FileUnknownOutlined,CheckSquareOutlined } from '@ant-design/icons';

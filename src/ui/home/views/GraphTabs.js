@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect} from 'react';
 import {Tabs,  Button} from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';

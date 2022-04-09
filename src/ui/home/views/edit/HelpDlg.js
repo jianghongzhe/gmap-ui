@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Tabs, Modal, Button } from 'antd';
 import {withEnh} from '../../../common/specialDlg';

@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import {Global } from '@emotion/react';
 import React from 'react';
 import { view as MapsViewer } from './ui/home';

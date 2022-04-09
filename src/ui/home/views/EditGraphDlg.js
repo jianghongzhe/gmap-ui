@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, message, Button,List } from 'antd';
 import { QuestionCircleOutlined, TableOutlined } from '@ant-design/icons';

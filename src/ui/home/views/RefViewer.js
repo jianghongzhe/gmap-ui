@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
 import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';

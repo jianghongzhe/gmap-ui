@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import { Controlled as CodeMirror } from 'react-codemirror2';

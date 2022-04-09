@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Layout, message } from 'antd';
 

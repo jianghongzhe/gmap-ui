@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Button, Divider, Calendar  } from 'antd';
 import { DoubleLeftOutlined,LeftOutlined,RightOutlined,DoubleRightOutlined } from '@ant-design/icons';
