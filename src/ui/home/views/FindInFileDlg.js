@@ -4,7 +4,7 @@ import {SearchOutlined} from '@ant-design/icons'
 import api from '../../../service/api';
 import {useChange, useBindInputRef} from '../../../common/commonHooks';
 import {focusRef} from '../../../common/uiUtil';
-import {useDebounceEffect} from 'ahooks';
+import {useDebounceEffect, useRafState} from 'ahooks';
 import { useSelectFileListItem } from '../../../hooks/tabs';
 
 const { Title,Paragraph } = Typography;
@@ -19,7 +19,7 @@ const FindInFileDlg=({visible, onCancel})=>{
 
     const selectFileListItem= useSelectFileListItem();
     const [exp, {change: onExpChange, set: setExp}]= useChange('');
-    const [searchResults, setSearchResults]= useState([]);
+    const [searchResults, setSearchResults]= useRafState([]);
     const [expRef, bindExpRef]= useBindInputRef();
 
 
