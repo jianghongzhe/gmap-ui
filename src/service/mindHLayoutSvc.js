@@ -49,12 +49,16 @@ class MindHLayoutSvc {
         if(ndsSet.tree.forceRight){
             return [leftH, rightH];
         }
-            
 
-        //依次计算如果把节点放到左侧，是否两边高度差比之前小，如果是就移动，否则结束
+        // 如果根节点只有一个子节点，则直接返回
+        if(1===ndsSet.tree.childs.length){
+            return [leftH, rightH];
+        }
+            
+        // 从最后一个节点开始，依次计算如果把节点放到左侧，是否两边高度差比之前小，如果是就移动，否则结束
         let end = false;
         let leftNdCnt=0;
-        ndsSet.tree.childs.forEach(child => {
+        [...ndsSet.tree.childs].reverse().forEach(child => {
             if (end) {
                 return;
             }
@@ -74,22 +78,7 @@ class MindHLayoutSvc {
             }
             end = true;
         });
-        
-
-        // 如果根节点只有一个子节点，则直接返回
-        if(1===ndsSet.tree.childs.length){
-            return [leftH, rightH];
-        }
-
-        console.log("qqqsssssmmmm");
-
-        // 否则，把节点位置改为从1点钟开始顺时针旋转
-        // 1：左右互换
-        // 2：左侧改为逆序：该过程不在此处处理，而是在putNds方法的左侧节点布局时执行。尽量不让节点顺序发生改变，而是在处理时保持一个逻辑的顺序。
-        ndsSet.tree.childs.forEach((child,ind) => {
-            resultWrapper.directions[child.id]=!resultWrapper.directions[child.id];
-        });
-        return [rightH, leftH];
+        return [leftH, rightH];
     }
 
     /**
@@ -124,9 +113,7 @@ class MindHLayoutSvc {
      * @returns 
      */
     putNds = (ndsSet, resultWrapper) => {
-        console.log("11111");
         let [leftH, rightH] = this.setNdDirection(ndsSet, resultWrapper);
-        console.log("22222");
         let currLeftTop = (leftH < rightH ? parseInt((rightH - leftH) / 2) : 0);
         let currRightTop = (rightH < leftH ? parseInt((leftH - rightH) / 2) : 0);
         
@@ -145,8 +132,8 @@ class MindHLayoutSvc {
         
 
         if(ndsSet.expands[ndsSet.tree.id]){
-            //左：由于需要保持1点钟开始顺时针旋转，因此把左侧节点倒序后再摆放
-            ndsSet.tree.childs.filter(nd =>resultWrapper.directions[nd.id]).reverse().forEach(nd => {
+            //左
+            ndsSet.tree.childs.filter(nd =>resultWrapper.directions[nd.id]).forEach(nd => {
                 let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
                 let l = parseInt(rootLoc[0] - ndXDist*3/2 -resultWrapper.rects[nd.id].width);//根节点x - 空隙 - 节点本身宽度
                 let t = parseInt(currLeftTop + (allHeight - resultWrapper.rects[nd.id].height) / 2);

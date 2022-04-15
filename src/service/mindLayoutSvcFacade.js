@@ -11,7 +11,7 @@ class MindLayoutFacade{
      * @returns 
      */
     loadStyles=(ndsSet)=>{
-        // 其它方式布局，待填充
+        // 其它方式布局，待开发
 
         // 默认使用水平布局
         return mindHLayoutSvc.loadStyles(ndsSet);
