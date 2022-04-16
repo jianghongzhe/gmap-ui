@@ -1426,7 +1426,7 @@ const editorSvcExInstWrapper=(function(){
 
 
     /**
-     * 计算标尺应显示的高度：
+     * 判断光标是不顺
      * 1、如果未找到分隔线，则返回false，表示标尺不需要特殊样式；
      * 2、如果分隔线上面没有有效节点（未空行），则返回0，表示不显示标尺；
      * 3、否则以 (最后一个节点的底端的位置 + 校正值) 进行返回
@@ -1434,33 +1434,11 @@ const editorSvcExInstWrapper=(function(){
      * @param {*} asjust 校正值
      * @returns 
      */
-    const getRulerHeight=(cm, asjust=0)=>{
+    const isCursorInNodePart=(cm, asjust=0)=>{
+        const pos=cm.doc.getCursor();// { ch: 3  line: 0}
         const lines=getAllLines(cm);
-        const len=lines.length;
-        let splitLineInd=false;
-        let lastNodeLineInd=false;
-
-        for(let i=0;i<len;++i){          
-            if("***"===lines[i].trim()){
-                splitLineInd=i;
-                break;
-            }
-        }
-        if(false===splitLineInd){
-            return false;
-        }
-        for(let i=splitLineInd-1;i>=0;--i){
-            if(''!==lines[i].trim()){
-                lastNodeLineInd=i;
-                break;
-            }
-        }
-        if(false===lastNodeLineInd){
-            return 0;
-        }
-        // 指定行的底端位置 = 下一行的顶端位置
-        const result= parseInt(cm.heightAtLine(lastNodeLineInd+1, "local")-cm.getScrollInfo().top)+asjust;
-        return result;     
+        const matchedItems=lines.map((txt,ind)=>({txt,ind})).filter(({txt,ind})=>"***"===txt.trim());
+        return (0===matchedItems.length || pos.line<matchedItems[0].ind);
     };
 
     return {
@@ -1477,7 +1455,7 @@ const editorSvcExInstWrapper=(function(){
         setStrikeLine,
         clearSelection,
         parseTable,
-        getRulerHeight,
+        isCursorInNodePart,
     };
 })();
 

@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
-import { Controlled as CodeMirror } from 'react-codemirror2';
+import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.css';
@@ -22,7 +22,10 @@ import editorSvcEx from '../../../../service/editorSvcEx';
 import api from '../../../../service/api';
 import { tabActivePaneAssetsDir } from '../../../../store/tabs';
 import { useRecoilValue } from 'recoil';
-import { useDebounceEffect, useMemoizedFn } from 'ahooks';
+import { Global } from '@emotion/react';
+import { useEditorOperation, useRulerStyle } from '../../../../hooks/editor';
+
+const CodeMirror=React.memo(NotMemoedCodeMirror);
 
 
 /**
@@ -32,17 +35,12 @@ import { useDebounceEffect, useMemoizedFn } from 'ahooks';
 const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
-    const [rulerH, setRulerH]=useState(false);
-
-    useDebounceEffect(()=>{
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        const rulerLineH= editorSvcEx.getRulerHeight(codeMirrorInstRef.current, 50);
-        console.log("rulerLineH", rulerLineH);
-        setRulerH(rulerLineH);
-    },[value, setRulerH, codeMirrorInstRef],{wait: 600,});
-    
+    const {
+        copyLineDown, copyLineUp, 
+        setTitle0,setTitle1,setTitle2,setTitle3,setTitle4,setTitle5,setTitle6,
+        onPreventKey, clearSelection,
+    }= useEditorOperation();
+    const {rulerStyle, calcRulerStyle}= useRulerStyle();
 
     /**
      * 绑定codemirror对象到本组件和父组件（通过回调函数）
@@ -51,17 +49,6 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
         codeMirrorInstRef.current=ele;
         onSetInst(ele);
     },[onSetInst, codeMirrorInstRef]);
-
-
-    /**
-     * 防止默认事件触发的处理
-     */
-    const onPreventKey =useCallback(() => {
-        if(window.event){
-            window.event.stopPropagation();
-            window.event.preventDefault();
-        }
-    },[]);
 
 
     /**
@@ -86,39 +73,13 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
             }
         };
         codeMirrorInstRef.current.on("keydown", keyDownHandler);
+        codeMirrorInstRef.current.on("cursorActivity", calcRulerStyle);        
+
         return ()=>{
             codeMirrorInstRef.current.off("keydown", keyDownHandler);
+            codeMirrorInstRef.current.off("cursorActivity", calcRulerStyle);
         };
-    },[currAssetsDir]);
-
-
-    const copyLine=useCallback((down=true, cm=null)=>{
-        window.event.preventDefault();
-        editorSvcEx.copyLine(cm, down);
-    },[]);
-
-
-    const setTitle=useCallback((lev)=>{
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        editorSvcEx.setTitle(codeMirrorInstRef.current, lev);
-    },[]);
-
-    const setWrapperMark=useCallback((func)=>{
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        func(codeMirrorInstRef.current);
-    },[]);
-
-    const clearSelection=useCallback(()=>{
-        if(!codeMirrorInstRef.current){
-            return;
-        }
-        onPreventKey();
-        editorSvcEx.clearSelection(codeMirrorInstRef.current);
-    },[onPreventKey]);
+    },[currAssetsDir, calcRulerStyle]);
 
 
     /**
@@ -149,53 +110,58 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
     },[action, codeMirrorInstRef]);
 
     
-    return <CodeMirror
-        css={[codeEditorStyle, getRulerHStyle(rulerH)]}
-        editorDidMount={bindCodeMirrorInstRef}
-        value={value}
-        options={{
-            lineNumbers: true,
-            theme: 'default',
-            mode: 'markdown',
-            styleActiveLine: true,
-            indentWithTabs: true,
-            indentUnit: 4,
-            keyMap: "sublime",
-            rulers,
-            extraKeys: {
-                "Ctrl-F": "findPersistent",
-                "Ctrl-G": "jumpToLine",
-                "Ctrl-S": onOnlySave,
-                "Shift-Ctrl-S": onOk,                                  
-                // "Ctrl-P": props.onShowInsertPicDlg,               
-                "Ctrl-B": setWrapperMark.bind(this,editorSvcEx.setBold),
-                "Ctrl-I": setWrapperMark.bind(this,editorSvcEx.setItalic),
-                "Ctrl-D": setWrapperMark.bind(this,editorSvcEx.setStrikeLine),
-                "Ctrl-H": onShowHelpDlg,
-                "Ctrl-0": setTitle.bind(this,0),
-                "Ctrl-1": setTitle.bind(this,1),
-                "Ctrl-2": setTitle.bind(this,2),
-                "Ctrl-3": setTitle.bind(this,3),
-                "Ctrl-4": setTitle.bind(this,4),
-                "Ctrl-5": setTitle.bind(this,5),
-                "Ctrl-6": setTitle.bind(this,6),
-                "Ctrl-T": onEditTable,
-                
-                "Shift-Ctrl-G": onPreventKey,
-                "Shift-Ctrl-F": onPreventKey,
-                "Shift-Ctrl-R": onPreventKey,
-                "Esc":          clearSelection,
-                "Alt-G":        onPreventKey,
-                "Ctrl-Alt-Up": copyLine.bind(this,false),
-                "Ctrl-Alt-Down": copyLine.bind(this,true),
-            }
-        }}
-        onBeforeChange={onChange} />;
+    return <React.Fragment>
+        <Global styles={rulerStyle}/>
+        <CodeMirror
+            css={codeEditorStyle}
+            editorDidMount={bindCodeMirrorInstRef}
+            value={value}
+            options={{
+                lineNumbers: true,
+                theme: 'default',
+                mode: 'markdown',
+                styleActiveLine: true,
+                indentWithTabs: true,
+                indentUnit: 4,
+                keyMap: "sublime",
+                rulers,
+                extraKeys: {
+                    "Ctrl-F": "findPersistent",
+                    "Ctrl-G": "jumpToLine",
+                    "Ctrl-S": onOnlySave,
+                    "Shift-Ctrl-S": onOk,                                  
+                    // "Ctrl-P": props.onShowInsertPicDlg,               
+                    "Ctrl-B": editorSvcEx.setBold,
+                    "Ctrl-I": editorSvcEx.setItalic,
+                    "Ctrl-D": editorSvcEx.setStrikeLine,
+                    "Ctrl-H": onShowHelpDlg,
+                    "Ctrl-0": setTitle0,
+                    "Ctrl-1": setTitle1,
+                    "Ctrl-2": setTitle2,
+                    "Ctrl-3": setTitle3,
+                    "Ctrl-4": setTitle4,
+                    "Ctrl-5": setTitle5,
+                    "Ctrl-6": setTitle6,
+                    "Ctrl-T": onEditTable,
+                    
+                    "Shift-Ctrl-G": onPreventKey,
+                    "Shift-Ctrl-F": onPreventKey,
+                    "Shift-Ctrl-R": onPreventKey,
+                    "Esc":          clearSelection,
+                    "Alt-G":        onPreventKey,
+                    "Ctrl-Alt-Up":  copyLineUp,
+                    "Ctrl-Alt-Down": copyLineDown,
+                }
+            }}
+            onBeforeChange={onChange} />
+    </React.Fragment>;
 };
 
 
+/**
+ * 标尺的默认样式
+ */
 const rulerColors=["#fcc", "#f5f577", "#cfc", "#aff", "#ccf", "#fcf"];
-
 const rulers=[...rulerColors, ...rulerColors].map((color,ind)=>({
     color,
     column:4*(ind+1),
@@ -203,16 +169,7 @@ const rulers=[...rulerColors, ...rulerColors].map((color,ind)=>({
     className: 'rulerH',
 }));
 
-const getRulerHStyle=(rulerH)=>{
-    if(false===rulerH){
-        return {};
-    }
-    return {
-        '& .CodeMirror .rulerH': {
-            height: `${rulerH}px`
-        },
-    };
-};
+
 
 
 const codeEditorStyle = {
