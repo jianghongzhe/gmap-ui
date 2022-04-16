@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Controlled as CodeMirror } from 'react-codemirror2';
 
@@ -15,21 +15,34 @@ import 'codemirror/addon/search/search';
 import 'codemirror/addon/scroll/annotatescrollbar';
 import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
+import 'codemirror/addon/display/rulers';
 
 
 import editorSvcEx from '../../../../service/editorSvcEx';
 import api from '../../../../service/api';
 import { tabActivePaneAssetsDir } from '../../../../store/tabs';
 import { useRecoilValue } from 'recoil';
+import { useDebounceEffect, useMemoizedFn } from 'ahooks';
 
 
 /**
  * 编辑器
  * @param {*} props 
  */
-const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange, onEditTable})=>{
+const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
+    const [rulerH, setRulerH]=useState(false);
+
+    useDebounceEffect(()=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const rulerLineH= editorSvcEx.getRulerHeight(codeMirrorInstRef.current, 50);
+        console.log("rulerLineH", rulerLineH);
+        setRulerH(rulerLineH);
+    },[value, setRulerH, codeMirrorInstRef],{wait: 600,});
+    
 
     /**
      * 绑定codemirror对象到本组件和父组件（通过回调函数）
@@ -137,7 +150,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
 
     
     return <CodeMirror
-        css={codeEditorStyle}
+        css={[codeEditorStyle, getRulerHStyle(rulerH)]}
         editorDidMount={bindCodeMirrorInstRef}
         value={value}
         options={{
@@ -148,6 +161,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
             indentWithTabs: true,
             indentUnit: 4,
             keyMap: "sublime",
+            rulers,
             extraKeys: {
                 "Ctrl-F": "findPersistent",
                 "Ctrl-G": "jumpToLine",
@@ -180,6 +194,25 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
 };
 
 
+const rulerColors=["#fcc", "#f5f577", "#cfc", "#aff", "#ccf", "#fcf"];
+
+const rulers=[...rulerColors, ...rulerColors].map((color,ind)=>({
+    color,
+    column:4*(ind+1),
+    lineStyle: "dashed",
+    className: 'rulerH',
+}));
+
+const getRulerHStyle=(rulerH)=>{
+    if(false===rulerH){
+        return {};
+    }
+    return {
+        '& .CodeMirror .rulerH': {
+            height: `${rulerH}px`
+        },
+    };
+};
 
 
 const codeEditorStyle = {
