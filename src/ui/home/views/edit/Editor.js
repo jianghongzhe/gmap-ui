@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.css';
 import 'codemirror/addon/search/matchesonscrollbar.css';
+import 'codemirror/addon/lint/lint.css'
 
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/keymap/sublime';
@@ -16,6 +17,9 @@ import 'codemirror/addon/scroll/annotatescrollbar';
 import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
 import 'codemirror/addon/display/rulers';
+import 'codemirror/addon/lint/lint';
+
+import '../../../../service/gmap-lint';
 
 
 import editorSvcEx from '../../../../service/editorSvcEx';
@@ -109,9 +113,19 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
         }
     },[action, codeMirrorInstRef]);
 
+
+
+    /**
+     * 标尺的样式和语法检查tooltip的样式
+     */
+    const globalStyle=useMemo(()=>({
+        ...rulerStyle,
+        'body .CodeMirror-lint-tooltip':{zIndex: 1000,}
+    }),[rulerStyle]);
+
     
     return <React.Fragment>
-        <Global styles={rulerStyle}/>
+        <Global styles={globalStyle}/>
         <CodeMirror
             css={codeEditorStyle}
             editorDidMount={bindCodeMirrorInstRef}
@@ -124,6 +138,11 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                 indentWithTabs: true,
                 indentUnit: 4,
                 keyMap: "sublime",
+                gutters: ["CodeMirror-lint-markers"],
+                // lint: true, selfContain: true
+                selfContain: true,
+                highlightLines:true,
+                lint: {options: {selfContain: true, highlightLines:true,}},
                 rulers,
                 extraKeys: {
                     "Ctrl-F": "findPersistent",
