@@ -44,7 +44,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
         setTitle0,setTitle1,setTitle2,setTitle3,setTitle4,setTitle5,setTitle6,
         onPreventKey, clearSelection,
     }= useEditorOperation();
-    const {rulerStyle, calcRulerStyle}= useRulerStyle();
+    const [rulerStyle, calcRulerStyle]= useRulerStyle(rulers.length);
 
     /**
      * 绑定codemirror对象到本组件和父组件（通过回调函数）
@@ -76,6 +76,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                 return;
             }
         };
+
         codeMirrorInstRef.current.on("keydown", keyDownHandler);
         codeMirrorInstRef.current.on("cursorActivity", calcRulerStyle);        
 
@@ -118,10 +119,16 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
     /**
      * 标尺的样式和语法检查tooltip的样式
      */
-    const globalStyle=useMemo(()=>({
-        ...rulerStyle,
-        'body .CodeMirror-lint-tooltip':{zIndex: 1000,}
-    }),[rulerStyle]);
+    const globalStyle=useMemo(()=>{
+        let result={
+            ...rulerStyle,
+            'body .CodeMirror-lint-tooltip':{zIndex: 1000,}
+        };
+
+        console.log("global ruler memo",rulerStyle);
+        return result;
+    },[rulerStyle]);
+
 
     
     return <React.Fragment>
@@ -181,11 +188,11 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
  * 标尺的默认样式
  */
 const rulerColors=["#fcc", "#f5f577", "#cfc", "#aff", "#ccf", "#fcf"];
-const rulers=[...rulerColors, ...rulerColors].map((color,ind)=>({
+const rulers=[...rulerColors, ...rulerColors, ...rulerColors].map((color,ind)=>({
     color,
     column:4*(ind+1),
     lineStyle: "dashed",
-    className: 'rulerH',
+    className: `rulerItem ruler${ind}`,
 }));
 
 

@@ -54,24 +54,27 @@ export const useEditorOperation=()=>{
  * 标尺样式相关的操作
  * @returns 
  */
-export const useRulerStyle=()=>{
-    const [rulerVisible, setRulerVisible]=useState(false);
+export const useRulerStyle=(rulerLineCnt)=>{
+    const [rulerVisible, setRulerVisible]=useState({'.CodeMirror .rulerItem': {height:0, maxHeight:0, minHeight:0},});
+    
 
     /**
-     * 根据光标位置计算是否需要显示标尺，支持防抖：
-     * 如果光标在节点部分则显示，如果在引用部分则不显示
+     * 根据光标位置计算标尺线的样式
      */
     const {run: calcRulerStyle} = useDebounceFn((cm)=>{
-        setRulerVisible(editorSvcEx.isCursorInNodePart(cm));
+        let tmp={};
+        editorSvcEx.getRulerState(cm, rulerLineCnt).forEach((sty,ind)=>{
+            if(!sty.show){
+                tmp={...tmp, [`.CodeMirror .rulerItem.ruler${ind}`]: {height:0, maxHeight:0, minHeight:0},};
+                return;
+            }
+            if(sty.highlight){
+                tmp={...tmp, [`.CodeMirror .rulerItem.ruler${ind}`]: {borderColor:'grey!important',},};
+                return;
+            }
+        });
+        setRulerVisible(tmp);
     },{wait: 600});
 
-
-    /**
-     * 根据标尺的显示状态计算对应的样式
-     */
-    const rulerShowStyleRef= useRef({'.CodeMirror .rulerH': {},});
-    const rulerHideStyleRef= useRef({'.CodeMirror .rulerH': {height:0, maxHeight:0, minHeight:0},});
-    const rulerStyle=useMemo(()=>(rulerVisible ? rulerShowStyleRef.current: rulerHideStyleRef.current),[rulerVisible]);
-
-    return {rulerStyle, calcRulerStyle};
+    return [rulerVisible, calcRulerStyle];
 };

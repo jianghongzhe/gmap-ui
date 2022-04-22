@@ -1441,6 +1441,57 @@ const editorSvcExInstWrapper=(function(){
         return (0===matchedItems.length || pos.line<matchedItems[0].ind);
     };
 
+
+
+    /**
+     * 计算标尺线的状态
+     * @param {*} cm 
+     * @param {*} rulerLineCnt  标尺线的总数量
+     * @returns [
+     *  {
+     *      show: true/false,
+     *      highlight: true/false,
+     *  }
+     * ]
+     */
+    const getRulerState=(cm, rulerLineCnt)=>{
+        // 先默认设置为都不显示
+        let result=[];
+        for(let i=0;i<rulerLineCnt;++i){
+            result.push({
+                show: false,
+                highlight: false,
+            });
+        }
+
+        const pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        const lines=getAllLines(cm);
+        const matchedItems=lines.map((txt,ind)=>({txt,ind})).filter(({txt,ind})=>"***"===txt.trim());
+        const cursorInNodePart=(0===matchedItems.length || pos.line<matchedItems[0].ind);
+        const maxNodeLindInd=(0===matchedItems.length ? lines.length-1 : matchedItems[0].ind-1);
+
+        // 如果光标没在节点当中，则不显示标尺线
+        if(!cursorInNodePart){
+            return result;
+        }
+
+        // 计算每个节点对应的标尺线样式：
+        // 如果不是以tab开头，或该行为空白字符，则跳过；
+        // 否则置为显示，同时如果是当前行，则突出显示
+        lines.filter((line,ind)=>ind<=maxNodeLindInd).forEach((line,ind)=>{
+            const groups=line.match(/^([\t]+).*$/);
+            if(!groups || ''===line.trim()){
+                return;
+            }
+            result[groups[1].length-1].show=true;
+            if(pos.line===ind){
+                result[groups[1].length-1].highlight=true;
+            }
+        });
+        return result;
+    };
+
+
     return {
         gotoDefinition,
         loadAllRefNames,
@@ -1456,6 +1507,7 @@ const editorSvcExInstWrapper=(function(){
         clearSelection,
         parseTable,
         isCursorInNodePart,
+        getRulerState,
     };
 })();
 
