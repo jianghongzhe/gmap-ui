@@ -8,8 +8,16 @@
 # testing
 /coverage
 
+/work
+
 # production
 /build
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
 
 # misc
 .DS_Store

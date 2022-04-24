@@ -10,6 +10,9 @@ import Editor from './edit/Editor';
 import editorSvcEx from '../../../service/editorSvcEx';
 import TableEditDlg from './edit/TableEditDlg';
 import { useBoolean } from 'ahooks';
+import {useTableEditDlg} from "../../../hooks/tableEditDlg";
+import {useRefNavDlg} from "../../../hooks/refNavDlg";
+import {useColorPicker} from "../../../hooks/colorPicker";
 
 
 const EnhDlg=withEnh(Modal);
@@ -19,80 +22,24 @@ const EnhDlg=withEnh(Modal);
  * 编辑图表对话框
  */
 const EditGraphDlg=(props)=>{
-    const [editorAction, setEditorAction]= useState(null);
-    const [colorPickerVisible, setColorPickerVisible]=useState(false);
-    const [advColorPickerVisible, setAdvColorPickerVisible]=useState(false);
     const codeMirrorInstRef=useRef();
-    const [refNavDlgVisible, setRefNavDlgVisible]=useState(false);
-    const [refNavDlgTitle, setRefNavDlgTitle]=useState("");
-    const [refNavDlgItems, setRefNavDlgItems]=useState([]);
-    const [tableEditDlgVisible, {setTrue: showTableEditDlg, setFalse:hideTableEditDlg}]= useBoolean(false);
-    const [tableEditData,setTableEditData]=useState({});
+    const [editorAction, setEditorAction]= useState(null);
+    const [colorPickerVisible, advColorPickerVisible, onAddColor, onClearColor, showColorPicker, showAdvColorPicker, handleColorPickerColorChange, hideColorPicker, hideAdvColorPicker]=useColorPicker(setEditorAction);
+    const [refNavDlgVisible,refNavDlgTitle,refNavDlgItems, showRefs, showTrefs, hideRefNavDlg]=useRefNavDlg(codeMirrorInstRef);
+    const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
+
+
+    const setCodeMirrorInst=useCallback((inst)=>{
+        codeMirrorInstRef.current=inst;
+    },[]);
 
 
     const hideAllDlg =useCallback(() => {
-        setColorPickerVisible(false);
-        setAdvColorPickerVisible(false);
-        setRefNavDlgVisible(false);
-    },[setColorPickerVisible, setAdvColorPickerVisible,   setRefNavDlgVisible]);
+        hideColorPicker();
+        hideAdvColorPicker();
+        hideRefNavDlg();
+    },[hideColorPicker, hideAdvColorPicker,   hideRefNavDlg]);
 
-   
-
-
-    //-------------------颜色选择相关-----------------------------------
-    const onAddColor =useCallback((color = null, delayFocus = false) => {
-        setEditorAction({
-            type: 'addColor',
-            color,
-            delayFocus
-        });
-    },[setEditorAction]);
-
-    const onClearColor =useCallback(() => {
-        onAddColor(null);
-    },[onAddColor]);
-
-    const handleColorPickerColorChange =useCallback((color) => {
-        hideAllDlg();
-        onAddColor(color.hex, true);
-    },[hideAllDlg, onAddColor]);
-
-    const showColorPicker =useCallback(() => {
-        setColorPickerVisible(true);
-    },[setColorPickerVisible]);
-
-    const showAdvColorPicker =useCallback(() => {
-        setAdvColorPickerVisible(true);
-    },[setAdvColorPickerVisible]);
-
-
-
-    
-    
-
-
-    //-------------------显示引用对话框与跳转功能-----------------------------------    
-    const showRefs=useCallback(()=>{
-        const items=editorSvcEx.loadAllRefNames(codeMirrorInstRef.current);
-        if(null==items || 0===items.length){
-            message.info("当前文档不存在引用");
-            return;
-        }
-        setRefNavDlgItems(items);
-        setRefNavDlgTitle("引用");
-        setRefNavDlgVisible(true);
-    },[setRefNavDlgItems, setRefNavDlgTitle, setRefNavDlgVisible]);
-
-    const showTrefs=useCallback(()=>{
-        const items=editorSvcEx.loadAllTrefNames(codeMirrorInstRef.current);
-        if(null==items || 0===items.length){
-            message.info("当前文档不存在文本引用");
-            return;
-        }
-        setRefNavDlgItems(items);
-        setRefNavDlgTitle("文本引用");
-        setRefNavDlgVisible(true);
-    },[setRefNavDlgItems, setRefNavDlgTitle, setRefNavDlgVisible]);
 
     const gotoRefDefinition=useCallback((ref)=>{
         hideAllDlg();
@@ -101,29 +48,6 @@ const EditGraphDlg=(props)=>{
         }, 400);
     },[hideAllDlg]);
 
-    const setCodeMirrorInst=useCallback((inst)=>{
-        codeMirrorInstRef.current=inst;
-    },[]);
-
-
-    const onEditTable=useCallback(()=>{
-        const data=editorSvcEx.parseTable(codeMirrorInstRef.current);
-        if(false===data){
-            message.warn("光标所在位置不能解析为表格");
-            return;
-        }
-        setTableEditData(data);
-        showTableEditDlg();
-    },[codeMirrorInstRef, showTableEditDlg]);
-
-    
-    const setTableMarkdown=useCallback((md)=>{
-        if(codeMirrorInstRef.current){
-            codeMirrorInstRef.current.doc.replaceRange(md, tableEditData.fromPos, tableEditData.toPos);
-        }
-    },[tableEditData, codeMirrorInstRef]);
-
-    
 
     /**
      * 每次显示后强制子编辑器组件重新渲染
@@ -136,8 +60,6 @@ const EditGraphDlg=(props)=>{
             }, 500);
         }
     },[props.visible, setEditorAction]);
-
-    
 
 
     return (
@@ -218,7 +140,7 @@ const EditGraphDlg=(props)=>{
                 onOk={handleColorPickerColorChange}
             />
             
-            <TableEditDlg visible={tableEditDlgVisible} onCancel={hideTableEditDlg} data={tableEditData} onOk={setTableMarkdown}/>
+            <TableEditDlg visible={tableEditDlgVisible} onCancel={hideTableEditDlg} data={tableEditData} onOk={onSetTableMarkdown}/>
         </>
     );
     
