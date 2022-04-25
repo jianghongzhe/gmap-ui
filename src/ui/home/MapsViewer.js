@@ -15,7 +15,7 @@ import {useBoolean, useMount} from 'ahooks';
 
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
-import keyDetector from '../../common/keyDetector';
+import keyDetector from 'key-detector/src';
 import strTmpl from '../../common/strTmpl';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';

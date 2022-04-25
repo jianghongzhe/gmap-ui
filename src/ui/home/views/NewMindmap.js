@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import {Alert,Row, Col} from 'antd';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {Alert, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
-import { useRafState } from 'ahooks';
+import {useRafState} from 'ahooks';
 
 
 /**

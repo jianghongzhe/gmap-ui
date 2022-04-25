@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect,  useState } from 'react';
-import { Modal, Input, Space, Typography, Empty} from 'antd';
+import React, {useCallback, useEffect} from 'react';
+import {Empty, Input, Modal, Space, Typography} from 'antd';
 import {SearchOutlined} from '@ant-design/icons'
 import api from '../../../service/api';
-import {useChange, useBindInputRef} from '../../../common/commonHooks';
+import {useBindInputRef, useChange} from '../../../common/commonHooks';
 import {focusRef} from '../../../common/uiUtil';
 import {useDebounceEffect, useRafState} from 'ahooks';
-import { useSelectFileListItem } from '../../../hooks/tabs';
+import {useSelectFileListItem} from '../../../hooks/tabs';
 
 const { Title,Paragraph } = Typography;
 

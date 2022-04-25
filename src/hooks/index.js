@@ -1,11 +1,9 @@
-import {useSetRecoilState, useRecoilState, useRecoilValue} from 'recoil';
-import {installPathValid, allDirs} from '../store/common';
-import {filelist, fileListDirLevels, currFileListDir} from '../store/filelist';
-import {useMount} from 'ahooks';
+import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
+import {allDirs, installPathValid} from '../store/common';
+import {currFileListDir, filelist, fileListDirLevels} from '../store/filelist';
 import api from '../service/api';
 import generalSvc from '../service/generalSvc';
-import { useCallback } from 'react';
-
+import {useCallback} from 'react';
 
 
 /**

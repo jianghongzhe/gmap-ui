@@ -1,9 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal, Table, Input,Button  } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined,DeleteOutlined, InsertRowAboveOutlined, InsertRowBelowOutlined, InsertRowLeftOutlined, InsertRowRightOutlined, ArrowLeftOutlined, ArrowRightOutlined, AlignLeftOutlined, AlignCenterOutlined, AlignRightOutlined } from '@ant-design/icons';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {Button, Input, Modal, Table} from 'antd';
+import {
+    AlignCenterOutlined,
+    AlignLeftOutlined,
+    AlignRightOutlined,
+    ArrowDownOutlined,
+    ArrowLeftOutlined,
+    ArrowRightOutlined,
+    ArrowUpOutlined,
+    DeleteOutlined,
+    InsertRowAboveOutlined,
+    InsertRowBelowOutlined,
+    InsertRowLeftOutlined,
+    InsertRowRightOutlined
+} from '@ant-design/icons';
 import {withEnh} from '../../../common/specialDlg';
 import {useEditTableData} from '../../../../hooks/tableEdit';
-import { useBindAndGetRefs } from '../../../../common/commonHooks';
+import {useBindAndGetRefs} from '../../../../common/commonHooks';
 
 
 const EnhDlg=withEnh(Modal);

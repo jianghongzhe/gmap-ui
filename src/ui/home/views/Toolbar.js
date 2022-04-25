@@ -1,9 +1,29 @@
 import React from 'react';
-import { Layout,   Button, Divider,Tooltip } from 'antd';
-import { PlusOutlined, FolderOpenOutlined, EditOutlined,LinkOutlined, FolderOutlined,CodeOutlined,CompressOutlined,ExpandOutlined,HistoryOutlined,FilePdfOutlined,ControlOutlined,ReloadOutlined,FileImageOutlined,FileMarkdownOutlined,Html5Outlined,CloudSyncOutlined,FileWordOutlined,CameraOutlined, QuestionCircleOutlined, QuestionOutlined } from '@ant-design/icons';
-import { tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
+import {Button, Divider, Layout, Tooltip} from 'antd';
+import {
+    CameraOutlined,
+    CloudSyncOutlined,
+    CodeOutlined,
+    CompressOutlined,
+    ControlOutlined,
+    EditOutlined,
+    ExpandOutlined,
+    FileImageOutlined,
+    FileMarkdownOutlined,
+    FilePdfOutlined,
+    FileWordOutlined,
+    FolderOpenOutlined,
+    FolderOutlined,
+    HistoryOutlined,
+    Html5Outlined,
+    LinkOutlined,
+    PlusOutlined,
+    QuestionOutlined,
+    ReloadOutlined
+} from '@ant-design/icons';
+import {tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
-import { useExpandAll, useRestoreDefaultExpandState } from '../../../hooks/tabs';
+import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
 
 const { Header } = Layout;

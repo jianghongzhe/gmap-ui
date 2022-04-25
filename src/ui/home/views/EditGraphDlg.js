@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal, message, Button,List } from 'antd';
-import { QuestionCircleOutlined, TableOutlined } from '@ant-design/icons';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Button, List, Modal} from 'antd';
+import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
 
 import {withEnh} from '../../common/specialDlg';
 
@@ -9,7 +9,6 @@ import ColorPickerDlg from './edit/ColorPickerDlg';
 import Editor from './edit/Editor';
 import editorSvcEx from '../../../service/editorSvcEx';
 import TableEditDlg from './edit/TableEditDlg';
-import { useBoolean } from 'ahooks';
 import {useTableEditDlg} from "../../../hooks/tableEditDlg";
 import {useRefNavDlg} from "../../../hooks/refNavDlg";
 import {useColorPicker} from "../../../hooks/colorPicker";

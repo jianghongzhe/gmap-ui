@@ -4,7 +4,7 @@ import { PlusCircleOutlined,MinusCircleOutlined,FileMarkdownOutlined,FileOutline
 
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
-import keyDetector from '../../../common/keyDetector';
+import keyDetector from 'key-detector/src';
 import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
