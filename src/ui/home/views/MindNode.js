@@ -4,6 +4,8 @@ import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlin
 import {marked} from 'marked';
 import NodeLinkIcon from './NodeLinkIcon';
 import './markdown-node.css';
+import {useMemoizedFn} from "ahooks";
+import strTmpl from "../../../common/strTmpl";
 
 /**
  * 导图的节点
@@ -39,6 +41,16 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
         return allLevelStyles[nd.lev>2 ? 2 : nd.lev];
     },[nd, centerThemeStyle]);
 
+
+    const [generalLinks,grouplinks]=useMemo(()=>{
+        if(!nd){
+            return [[],[]];
+        }
+        return [
+            nd.links.filter(link=>!link.addr.startsWith("grp://")),
+            nd.links.filter(link=>link.addr.startsWith("grp://")),
+        ];
+    },[nd])
 
     
     if(!nd){return null;}
@@ -119,13 +131,14 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
             )
         }
 
-        {/* 链接按钮 */}
+        {/* 链接按钮：普通链接和组链接 */}
         {
-            (nd && nd.links && 0<nd.links.length) && <React.Fragment>{
-                nd.links.map((link,linkInd)=> 
-                    <LinkComplexItem key={`link_complex_${linkInd}`} link={link} linkInd={linkInd} onOpenLink={onOpenLink}/>
-                )
-            }</React.Fragment>
+            generalLinks.map((link,linkInd)=>
+                <LinkComplexItem key={`link_complex_${linkInd}`} link={link} linkInd={linkInd} onOpenLink={onOpenLink}/>
+            )
+        }
+        {
+            grouplinks.length>0 && <GroupLinkItem links={grouplinks} openLinkFunc={onOpenLink}/>
         }
     </span>);
 }
@@ -286,6 +299,48 @@ const LinkItem=({tooltip, addr, openLinkFunc})=>(
         </span>
     </Tooltip>
 );
+
+
+/**
+ * 组合链接：
+ * 同一节点上的多个组合链接显示为一个整体的组合链接，
+ * 组合链接中不支持占位符，如果出现则跳过该项
+ * @param links
+ * @param openLinkFunc
+ * @returns {JSX.Element|null}
+ */
+const GroupLinkItem=({links, openLinkFunc})=>{
+    /**
+     * 排除掉带有占位符的项，增加trimedAddr项，表示原始链接
+     */
+    const validLinks=useMemo(
+        ()=> links.filter(lk=>!strTmpl.containsParam(lk.addr)).map(lk=>({...lk, trimedAddr: lk.addr.substring("grp://".length)})),
+        [links]
+    );
+
+    /**
+     * tooptip：有名称且不是[打开]就显示名字，否则显示链接地址
+     */
+    const title=useMemo(
+        ()=> validLinks.map(lk=>(lk.name && '打开'!==lk.name ? lk.name : lk.trimedAddr)).join(" + "),
+        [validLinks]
+    );
+
+    /**
+     * 点击事件，相当于每个链接分别点一次
+     * @type {function(): *}
+     */
+    const openMultiLinks=useMemoizedFn(()=>validLinks.forEach(lk=> openLinkFunc(lk.trimedAddr)));
+
+    if(null===validLinks || 0===validLinks.length){
+        return null;
+    }
+    return <Tooltip  color='cyan' placement="top" title={title}>
+        <span css={themeBtnWrapperStyle} >
+            <NodeLinkIcon lindAddr="group_links" onClick={openMultiLinks}/>
+        </span>
+    </Tooltip>
+};
 
 
 

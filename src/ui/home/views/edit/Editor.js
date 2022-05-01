@@ -124,8 +124,6 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
             ...rulerStyle,
             'body .CodeMirror-lint-tooltip':{zIndex: 1000,}
         };
-
-        console.log("global ruler memo",rulerStyle);
         return result;
     },[rulerStyle]);
 

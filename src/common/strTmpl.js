@@ -2,6 +2,14 @@
  * 字符串模板的解析、替换工具类
  */
 class StrTmpl{
+
+    /**
+     * 是否包含占位符
+     * @param txt
+     * @returns {boolean}
+     */
+    containsParam=(txt)=>(/[{][{][^{}]+?[}][}]/g).test(txt);
+
     /**
      * 解析字符串中的模板参数：
      * abc{{name}}def - 不带默认值
