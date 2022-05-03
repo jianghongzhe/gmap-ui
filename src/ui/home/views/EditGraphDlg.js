@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Button, List, Modal} from 'antd';
 import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
+import {tw} from 'gstyle-creater/src';
 
 import {withEnh} from '../../common/specialDlg';
 
@@ -75,7 +76,7 @@ const EditGraphDlg=(props)=>{
                     ]}
                     onCancel={props.onCancel}>              
                 <div>
-                    <div css={{ 'marginBottom': "10px" }}>
+                    <div css={toolbarStyle}>
                         {/* 颜色选择器 */}
                         {
                             commonColors.map((eachcolor, colorInd) => (
@@ -142,7 +143,6 @@ const EditGraphDlg=(props)=>{
             <TableEditDlg visible={tableEditDlgVisible} onCancel={hideTableEditDlg} data={tableEditData} onOk={onSetTableMarkdown}/>
         </>
     );
-    
 }
 
 
@@ -152,88 +152,57 @@ const commonColors=[
     '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'
 ];
 
-
+const toolbarStyle=tw('mb-6');
 
 
 const baseHoverStyle = {
-    cursor: 'pointer',
-    transition: 'all 0.2s 0.1s',
-    '&:hover': {
-        borderRadius: 6,
-        opacity: 0.6,
-        // transform:'skew(-15deg)'
-    }
+    ...tw("cursor-pointer transition-all duration-0.2s delay:0.1s"),
+    '&:hover': tw("rounded-6 opacity-0.6"),
 }
 
 const txtBtnStyle={
-    width: 30,
-    height: 16,
-    fontSize:'14px',
-    lineHeight:'16px',
-    textAlign:'center',
-    display: 'inline-block',
-    marginLeft: 10,
-    borderRadius: 7,
-    border:'1px solid grey',
-    cursor: 'pointer',
-    transition: 'all 0.2s 0.1s',
-    '&:hover': {
-        color: '#1890ff',
-        borderRadius: 7,
-        opacity: 0.8,
-        border:'1px solid #1890ff',
-        // transform:'skew(-15deg)'
-    }
+    ...tw(`
+        w-30 h-18 text-14 leading-18 text-center align-top inline-block ml-10 rounded-7 cursor-pointer
+        transition-all duration-0.5s delay:2.5s
+        border-1 border-solid border-grey
+    `),
+    '&:hover': tw('text-#1890ff rounded-7 opacity-0.8 border-1 border-solid border-#1890ff')
 };
 
 const tableStyle = {
-    fontSize: 19,
-    marginLeft: 10,
-    color: '#1890ff',
+    ...tw('text-19 ml-10 text-#1890ff'),
     ...baseHoverStyle,
-    '&:hover': {
-        opacity: 0.6,
-        transform: 'rotate(180deg)'
-    }
+    '&:hover': tw('opacity-0.6 rotate-180'),
 }
 
 const helpStyle = {
-    fontSize: 19,
-    marginLeft: 10,
-    color: '#1890ff',
+    ...tw('text-19 ml-10 text-#1890ff'),
     ...baseHoverStyle,
-    '&:hover': {
-        opacity: 0.6,
-        transform: 'rotate(45deg)'
-    }
+    '&:hover': tw('opacity-0.6 rotate-45')
 }
 
 const colorBoxhoverStyle = {
-    width: 16,
-    height: 16,
-    display: 'inline-block',
-    marginRight: 10,
+    ...tw("w-16 h-16 inline-block mr-10"),
     ...baseHoverStyle
 }
 
 const selColorStyle = {
-    backgroundImage: 'linear-gradient(135deg,orange 20%,green 100%)',
+    ...tw("bg-[linear-gradient(135deg,orange 20%,green 100%)]"),
     ...colorBoxhoverStyle
 };
 
 const selColorStyleAdv = {
-    backgroundImage: 'linear-gradient(135deg,orange 20%,pink 40%,green 100%)',
+    ...tw('bg-[linear-gradient(135deg,orange 20%,pink 40%,green 100%)]'),
     ...colorBoxhoverStyle
 };
 
 const clearColorStyle = {
-    backgroundColor: 'white',
-    border: '1px solid gray',
+    ...tw('bg-white border-1 border-solid border-gray'),
     ...colorBoxhoverStyle
 };
 
 const getEditDlgColorBoxStyle = (color) => ({
-    backgroundColor: color,
+    ...tw(`bg-${color}`),
     ...colorBoxhoverStyle
 });
 
