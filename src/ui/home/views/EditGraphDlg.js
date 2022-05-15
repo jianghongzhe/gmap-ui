@@ -155,55 +155,60 @@ const commonColors=[
 const toolbarStyle=tw('mb-6');
 
 
-const baseHoverStyle = {
-    ...tw("cursor-pointer transition-all duration-0.2s delay:0.1s"),
-    '&:hover': tw("rounded-6 opacity-0.6"),
-}
+const baseHoverStyle = tw(
+    "cursor-pointer transition-all duration-0.2s delay:0.1s",
+    {'&:hover': "rounded-6 opacity-0.6"},
+);
 
-const txtBtnStyle={
-    ...tw(`
+const txtBtnStyle=tw(
+    `
         w-30 h-18 text-14 leading-18 text-center align-top inline-block ml-10 rounded-7 cursor-pointer
         transition-all duration-0.5s delay:2.5s
         border-1 border-solid border-grey
-    `),
-    '&:hover': tw('text-#1890ff rounded-7 opacity-0.8 border-1 border-solid border-#1890ff')
-};
+    `,
+    {'&:hover': 'text-#1890ff rounded-7 opacity-0.8 border-1 border-solid border-#1890ff'},
+);
 
 const tableStyle = {
-    ...tw('text-19 ml-10 text-#1890ff'),
     ...baseHoverStyle,
-    '&:hover': tw('opacity-0.6 rotate-180'),
+    ...tw(
+        'text-19 ml-10 text-#1890ff',
+        {'&:hover': 'opacity-0.6 rotate-180'},
+    ),
 }
 
 const helpStyle = {
-    ...tw('text-19 ml-10 text-#1890ff'),
     ...baseHoverStyle,
-    '&:hover': tw('opacity-0.6 rotate-45')
+    ...tw(
+        'text-19 ml-10 text-#1890ff',
+        {'&:hover': 'opacity-0.6 rotate-45'},
+    ),
 }
 
 const colorBoxhoverStyle = {
+    ...baseHoverStyle,
     ...tw("w-16 h-16 inline-block mr-10"),
-    ...baseHoverStyle
 }
 
 const selColorStyle = {
+    ...colorBoxhoverStyle,
     ...tw("bg-[linear-gradient(135deg,orange 20%,green 100%)]"),
-    ...colorBoxhoverStyle
+
 };
 
 const selColorStyleAdv = {
+    ...colorBoxhoverStyle,
     ...tw('bg-[linear-gradient(135deg,orange 20%,pink 40%,green 100%)]'),
-    ...colorBoxhoverStyle
 };
 
 const clearColorStyle = {
+    ...colorBoxhoverStyle,
     ...tw('bg-white border-1 border-solid border-gray'),
-    ...colorBoxhoverStyle
 };
 
 const getEditDlgColorBoxStyle = (color) => ({
+    ...colorBoxhoverStyle,
     ...tw(`bg-${color}`),
-    ...colorBoxhoverStyle
 });
 
 
