@@ -127,6 +127,9 @@ const getLinkIcon=(addr ,onClick)=>{
     if(addr.startsWith("cmdp://")){
         return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
     }
+    if(addr.startsWith("start://")){
+        return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
+    }
     // 命令行打开目录图标
     if(addr.startsWith("cmdopen://")){
         return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
