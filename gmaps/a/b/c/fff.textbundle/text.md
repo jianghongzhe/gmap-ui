@@ -1,5 +1,5 @@
 - fff|tref:xxx
-	- 分主题|toid:xx,c:gray
+	- 分主题|toid:xx,c:red
 	- c:#1890ff|带颜色的分主题|toid:xx
 	- 带说明的分主题|m:balabala|toid:xx,c:#1890ff
 	- 带链接的分主题|[](diropenby://F:\workspace2\front\ims@@code)
