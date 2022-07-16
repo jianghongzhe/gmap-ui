@@ -4,6 +4,7 @@
 	- 带说明的分主题|m:balabala|toid:xx,c:#1890ff
 	- 带链接的分主题|[](diropenby://F:\workspace2\front\ims@@code)
 	- 带引用的分主题|ref:长段文字|id:xx
+	- 分组|[链接](grp://file:///notepad)|[链接](grp://file:///control)
 
 ***
 # tref:xxx

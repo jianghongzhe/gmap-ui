@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Avatar  } from 'antd';
-import { LinkOutlined,CodeOutlined,CopyOutlined,FolderOutlined,DeploymentUnitOutlined,AppstoreOutlined,FileUnknownOutlined,CheckSquareOutlined } from '@ant-design/icons';
+import {
+    LinkOutlined,
+    CodeOutlined,
+    CopyOutlined,
+    FolderOutlined,
+    DeploymentUnitOutlined,
+    AppstoreOutlined,
+    FileUnknownOutlined,
+    CheckSquareOutlined,
+    TeamOutlined
+} from '@ant-design/icons';
 import api from '../../../service/api';
 
 const NodeLinkIcon=(props)=>{
@@ -133,6 +143,9 @@ const getLinkIcon=(addr ,onClick)=>{
     // 命令行打开目录图标
     if(addr.startsWith("cmdopen://")){
         return getBtn(<CodeOutlined className='themebtnicon' css={colors.cmd}/>, onClick);
+    }
+    if("group_links"===addr){
+        return getBtn(<TeamOutlined className='themebtnicon' css={colors.link}/>, onClick);
     }
     // 其他情况认为是默认的类型，使用链接图标
     return getBtn(<LinkOutlined className='themebtnicon' css={colors.link}/>, onClick);
