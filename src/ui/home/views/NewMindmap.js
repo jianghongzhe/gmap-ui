@@ -46,8 +46,19 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
     const getNdStyle=useCallback((nd)=>{
         let borderStyle=getNdBorderStyle(nd);
-        let positionStyle=((nd && ndStyles && ndStyles[nd.id]) ? ndStyles[nd.id]: {});
-        return {...borderStyle, ...positionStyle};
+        const hasNdStyle=(nd && ndStyles && ndStyles[nd.id]);
+        let positionStyle=(hasNdStyle ? ndStyles[nd.id]: {});
+        let result={...borderStyle, ...positionStyle};
+
+        // 如果节点样式中不包含位置信息，说明是不显示的节点，则增加visibility:hidden样式，以防止被网页内查找搜索到
+        const hasPos=(result.left && result.left>0 && result.top && result.top>0);
+        if(!hasPos){
+            result={
+                ...result,
+                visibility:"hidden",
+            };
+        }
+        return result;
     },[ndStyles]);
 
 
