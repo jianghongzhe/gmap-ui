@@ -208,6 +208,14 @@ const init=(_mainWindow)=>{
     }
 
 
+    /**
+     * 从主页触发网页内查找
+     */
+    const refindInPage=()=>{
+        findWin.webContents.send("fire-refind-in-page");
+    };
+
+
 
     /**
      * 注册ipc事件
@@ -221,6 +229,7 @@ const init=(_mainWindow)=>{
         findNext,
         findPre,
         getFindInPageVisible,
+        refindInPage,
     };
 
     const baseHandler=async (handler, evt, ...args)=>{

@@ -63,6 +63,7 @@ const closeWin=()=>{
  * 初始化ipc事件：
  * 1、清空事件：清空输入框和匹配位置
  * 2、获得焦点事件：每次打开对话框时使输入框获得焦点
+ * 3、重新查找事件：主页面渲染进程 -> 主进程 -> 查找页渲染进程
  */
 const initIpcEvent=()=>{
     ipcRenderer.on("clear-find",(e, result)=>{
@@ -71,6 +72,9 @@ const initIpcEvent=()=>{
     });
     ipcRenderer.on("focus-input",(e, result)=>{
         eleIpt.focus();
+    });
+    ipcRenderer.on("fire-refind-in-page",()=>{
+        find();
     });
 };
 

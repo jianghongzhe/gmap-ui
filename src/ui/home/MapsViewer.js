@@ -53,6 +53,7 @@ const MapsViewer=(props)=>{
     const activeKey=useRecoilValue(tabActiveKey);
     const hasPane=useRecoilValue(tabHasPane);
     const currPane= useRecoilValue(tabCurrPane);
+
     const currTabInd =useRecoilValue(tabCurrInd);
    
     const saveMapPromise= useSaveMapPromise();
@@ -71,6 +72,8 @@ const MapsViewer=(props)=>{
     const [helpDlgVisible, {setTrue:showHelpDlg, setFalse:hideHelpDlg}]=useBoolean(false);
     const [newMapDlgVisible, setNewMapDlgVisible]=useState(false);
     const [selMapDlgVisible, setSelMapDlgVisible]=useState(false);
+
+
 
     const [strParamReplaceDlgVisible, setStrParamReplaceDlgVisible]=useState(false);
     const [currLinkUrl, setCurrLinkUrl]=useState(null);
@@ -194,9 +197,21 @@ const MapsViewer=(props)=>{
         return ()=>document.removeEventListener('keydown',keyHandle);
     },[editMapDlgVisible, newMapDlgVisible,helpDlgVisible, findInFileDlgVisible, showFindInFileDlg, refViewerDlgVisible, selMapDlgVisible, timelineDlgVisible, progsDlgVisible, showHelpDlg]);
 
+
+
+
+    /**
+     * 当前选项卡有变化时进行处理：
+     * 1、当没有当前选项卡时：表示回到首页，关闭查找框
+     * 2、当当前选项卡有变化时，表示有选项卡切换操作或节点展开/折叠操作，进行重新查找
+     */
     useEffect(()=>{
-        api.closeFindInPageDlg();
-    },[hasPane]);
+        if(null===currPane){
+            api.closeFindInPageDlg();
+            return;
+        }
+        setTimeout(api.refindInPage, 600);
+    },[currPane]);
 
 
 

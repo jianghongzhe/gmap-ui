@@ -37,6 +37,18 @@ class Api{
         return ipcRenderer.invoke('getFindInPageVisible');
     };
 
+    /**
+     * 重新触发页面中查找
+     */
+    refindInPage=()=>{
+        (async ()=>{
+            const findInPageDlgVisible =await this.getFindInPageDlgVisible();
+            if(findInPageDlgVisible){
+                await ipcRenderer.invoke("refindInPage");
+            }
+        })();
+    };
+
     /***
      * 打开版本历史
      */
