@@ -419,6 +419,10 @@ const nodes=[
         ['aaa|bbb','// 多行用 <span style="color:black;">|</span> 分隔'],
         ['ls \\| grep aa','// 使用 <span style="color:black;">\\|</span> 来显示竖线'],
         ['press `ctrl` + `c`','// 支持markdown语法'],
+    ]],
+    ['链接',[
+        ['http://aa.bb','// 普通链接，不建议使用，建议使用 <span style="color:black;">[xx](yy)</span> 的方式'],
+        ['[某网](http://cc.dd)','// markdown格式链接'],
         ['[打开](file:///d:\\a\\b.txt)','// 执行文件或打开目录'],
         ['[打开](file:///%java_home%\\bin)','// 从环境变量匹配路径并执行'],
         ['[打开](file:///control)','// 从path环境变量或注册表app path匹配路径并执行'],
@@ -431,9 +435,9 @@ const nodes=[
         ['[打开](dirx://d:\\a\\b\\c)','// 相当于file、dir、cppath的组合'],
         ['[打开](urlx://http://xxx)','// 相当于普通链接、cp的组合'],
         ['[执行](cmd://dir d:\\)','// 执行命令，使用 <span style="color:black;">[space]\\</span> 表示换行'],
-        ['[执行](start://code d:\\ws\\xxx)','// 以start "win"方式执行命令（命令窗口自动关闭）'],
-        ['[执行](start://ping 127.0.0.1)','// 执行命令并在结尾加一条 pause 指令'],
+        ['[执行](cmdp://ping 127.0.0.1)','// 执行命令并在结尾加一条 pause 指令'],
         ['[执行](cmdopen://d:\\abc)','// 从命令提示符打开指定目录'],
+        ['[执行](start://code d:\\ws\\xxx)','// 以start "win"方式执行命令（命令窗口自动关闭）'],
         ['[复制](cp://这是一段文本)','// 复制内容，使用 <span style="color:black;">[space]\\</span> 表示换行'],
         ['[复制](cppath://这是一段文本)','// 复制路径，如果路径无效则提示错误'],
         ['[打开](grp://https://baidu.com)','// 同一节点上可指定多个组链接，以一起打开'],
@@ -477,10 +481,7 @@ const nodes=[
     ['长段独立引用',[
         ['ref:xxx','// 对应引用部分 # ref:xxx'],
     ]],
-    ['链接',[
-        ['http://aa.bb','// 普通链接'],
-        ['[某网](http://cc.dd)','// markdown格式链接'],
-    ]],
+
     ['关联线',[
         ['toid:xx','// 起始位置，默认线条为灰色'],
         ['toid:xx,c:red','// 起始位置，指定线条颜色'],
