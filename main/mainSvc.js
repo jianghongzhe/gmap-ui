@@ -1245,8 +1245,15 @@ const loadAppInfo=()=>{
     if(appInfoCache){
         return appInfoCache;
     }
-    let {name,showname,version}=JSON.parse(fs.readFileSync(packageJsonPath,'utf-8'));
-    appInfoCache={name,showname,version};
+    // dependencies react antd
+    let {name,showname,version,dependencies:{react,antd}}=JSON.parse(fs.readFileSync(packageJsonPath,'utf-8'));
+    if(react.startsWith("^")){
+        react=react.substring(1);
+    }
+    if(antd.startsWith("^")){
+        antd=antd.substring(1);
+    }
+    appInfoCache={name,showname,version,react,antd};
     return appInfoCache;
 }
 

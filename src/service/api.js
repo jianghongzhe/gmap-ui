@@ -118,6 +118,10 @@ class Api{
         return this.loadAppInfo().then(({showname,version})=>showname+"　V"+version);
     }
 
+    loadDepsVersion=()=>{
+        return this.loadAppInfo().then(({react,antd})=>({react,antd}));
+    };
+
     /**
      * 打开命令行窗口
      * @returns 

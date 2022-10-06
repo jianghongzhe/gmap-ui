@@ -35,8 +35,9 @@ export const useSetWindowTitle=()=>{
     return useCallback(()=>{
         (async ()=>{
             let titleTxt=await api.loadAppNameAndVersionTxt();
+            let {react,antd}=await api.loadDepsVersion();
             const vers=await api.getInnerModuleVersions();
-            document.querySelector("head > title").innerHTML = `${titleTxt}　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8} )`;
+            document.querySelector("head > title").innerHTML = `${titleTxt}　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8}, react ${react}, antd ${antd} )`;
         })();
     },[]);
 };
