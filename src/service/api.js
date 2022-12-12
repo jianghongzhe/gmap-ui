@@ -67,6 +67,12 @@ class Api{
         return ipcRenderer.invoke('searchInFile', {exp});
     };
 
+    searchAllTags=()=>{
+        return ipcRenderer.invoke('searchAllTags');
+    };
+
+
+
 
     /**
      * 静默复制文本

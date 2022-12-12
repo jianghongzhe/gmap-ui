@@ -863,6 +863,10 @@ const searchInFile=({exp})=>{
     return sendCmdToServer("search", {exp});
 };
 
+const searchAllTags=()=>{
+    return sendCmdToServer("search", {onlyTags:true});
+};
+
 
 /**
  * 
@@ -1527,6 +1531,7 @@ const ipcHandlers={
     copyTxtQuiet,
     isDevMode: common.isDevMode,
     searchInFile,
+    searchAllTags,
     saveFileFromClipboard,
     getUrlFromClipboard,
 };
