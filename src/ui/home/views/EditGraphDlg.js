@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Button, List, Modal} from 'antd';
-import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
+import {Button, Input, List, Modal, Tag} from 'antd';
+import {QuestionCircleOutlined, TableOutlined, TagOutlined} from '@ant-design/icons';
 import {tw} from 'gstyle-creater/src';
 
 import {withEnh} from '../../common/specialDlg';
@@ -13,6 +13,8 @@ import TableEditDlg from './edit/TableEditDlg';
 import {useTableEditDlg} from "../../../hooks/tableEditDlg";
 import {useRefNavDlg} from "../../../hooks/refNavDlg";
 import {useColorPicker} from "../../../hooks/colorPicker";
+import {useMemoizedFn} from "ahooks";
+import {useChange} from "../../../common/commonHooks";
 
 
 const EnhDlg=withEnh(Modal);
@@ -27,7 +29,23 @@ const EditGraphDlg=(props)=>{
     const [colorPickerVisible, advColorPickerVisible, onAddColor, onClearColor, showColorPicker, showAdvColorPicker, handleColorPickerColorChange, hideColorPicker, hideAdvColorPicker]=useColorPicker(setEditorAction);
     const [refNavDlgVisible,refNavDlgTitle,refNavDlgItems, showRefs, showTrefs, hideRefNavDlg]=useRefNavDlg(codeMirrorInstRef);
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
+    const [tags, setTags]= useState([]);
+    const [tagVal,{set:setTagVal, change:changeTagVal}]= useChange('');
 
+    const removeTagByInd= useMemoizedFn((ind, e)=>{
+        e.preventDefault();
+        setTags(oldTags=>oldTags.filter((_nouse,eachInd)=>eachInd!==ind));
+    });
+
+    const addTag= useMemoizedFn((tag)=>{
+        if(null!==tag && ''!==tag.trim()){
+            tag=tag.trim();
+            if(!tags.includes(tag)){
+                setTags(oldTags=>[...oldTags, tag]);
+            }
+        }
+        setTagVal('');
+    });
 
     const setCodeMirrorInst=useCallback((inst)=>{
         codeMirrorInstRef.current=inst;
@@ -65,7 +83,26 @@ const EditGraphDlg=(props)=>{
     return (
         <>
             <EnhDlg
-                    title={"编辑图表 - " + props.currMapName}
+                    title={<div>
+                        <span>{"编辑图表 - " + props.currMapName}</span>
+                        <span style={{marginLeft:'40px'}}>
+                            {
+                                tags.map((tag,ind)=>
+                                    <TagItem key={`taglist-item${ind}`}
+                                             tag={tag}
+                                             onClose={removeTagByInd.bind(this,ind)}
+                                    />
+                                )
+                            }
+                        </span>
+                        <Input style={{width:'100px'}}
+                               size="small"
+                               placeholder='设置标签'
+                               value={tagVal}
+                               bordered={false}
+                               onChange={changeTagVal}
+                               onPressEnter={addTag.bind(this, tagVal)}/>
+                    </div>}
                     size={{w:'calc(100vw - 200px)'}}
                     maskClosable={false}
                     visible={props.visible}
@@ -144,6 +181,19 @@ const EditGraphDlg=(props)=>{
         </>
     );
 }
+
+
+const TagItem=({tag, onClose})=>{
+    return (
+        <Tag color="success"
+                style={{borderRadius:'10px'}}
+                icon={<TagOutlined/>}
+                closable={true}
+                onClose={onClose}>
+            {tag}
+        </Tag>
+    );
+};
 
 
 
