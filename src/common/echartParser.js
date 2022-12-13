@@ -1,3 +1,5 @@
+import json5 from 'json5';
+
 class EchartParser{
     constructor(){
         this.typeHandlerMap={
@@ -33,12 +35,16 @@ class EchartParser{
     };
 
     /**
-     * 加载json形式的echart配置
+     * 加载json形式的echart配置:
+     * 使用json5代替原来的Function或eval方式，提高安全性
+     * json5方式：json5.parse(`${txt}`);  // 该方式不需要像如下两种方式一样以 ( ) 包裹
+     * (deprecated) Function方式：new Function(`return (${txt});`)();  // 该方式本质上也是eval，与下面等价
+     * (deprecated) eval方式：eval(`(${txt})`);
      * @param {*} txt 
      * @returns 
      */
     loadJsonConfig=(txt)=>{
-        let json=new Function(`return (${txt});`)(); //eval(`(${txt})`);
+        let json=  json5.parse(`${txt}`);
         let {w,h,...opt}=json;
         if(!w){
             w="100%";
@@ -103,7 +109,7 @@ class EchartParser{
                 formatter:line[2] ? line[2] : "",
             },
             tooltip:{
-                show:line[2] ? true : false,
+                show:!!line[2],
                 formatter:line[2] ? line[2] : "",
             },
         }));
@@ -214,7 +220,7 @@ class EchartParser{
                 formatter: (param)=>{
                     return `
                         ${param.marker}
-                        <span style="display:inline-block;margin-left:0px;">${param.name}</span>
+                        <span style="display:inline-block;margin-left:0;">${param.name}</span>
                         <span style="display:inline-block;margin-left:4px;">${param.value}</span>
                         <span style="display:inline-block;margin-left:4px;">(${param.percent}%)</span>
                     `;
@@ -319,7 +325,7 @@ class EchartParser{
                 formatter: (param)=>{
                     return `
                         ${param.marker}
-                        <span style="display:inline-block;margin-left:0px;">${param.seriesName}</span>
+                        <span style="display:inline-block;margin-left:0;">${param.seriesName}</span>
                         <span style="display:inline-block;margin-left:10px;">( ${param.value[0]}, ${param.value[1]} )</span>
                     `;
                 }
