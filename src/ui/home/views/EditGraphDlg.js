@@ -29,23 +29,10 @@ const EditGraphDlg=(props)=>{
     const [colorPickerVisible, advColorPickerVisible, onAddColor, onClearColor, showColorPicker, showAdvColorPicker, handleColorPickerColorChange, hideColorPicker, hideAdvColorPicker]=useColorPicker(setEditorAction);
     const [refNavDlgVisible,refNavDlgTitle,refNavDlgItems, showRefs, showTrefs, hideRefNavDlg]=useRefNavDlg(codeMirrorInstRef);
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
-    const [tags, setTags]= useState([]);
-    const [tagVal,{set:setTagVal, change:changeTagVal}]= useChange('');
 
-    const removeTagByInd= useMemoizedFn((ind, e)=>{
-        e.preventDefault();
-        setTags(oldTags=>oldTags.filter((_nouse,eachInd)=>eachInd!==ind));
-    });
 
-    const addTag= useMemoizedFn((tag)=>{
-        if(null!==tag && ''!==tag.trim()){
-            tag=tag.trim();
-            if(!tags.includes(tag)){
-                setTags(oldTags=>[...oldTags, tag]);
-            }
-        }
-        setTagVal('');
-    });
+
+
 
     const setCodeMirrorInst=useCallback((inst)=>{
         codeMirrorInstRef.current=inst;
@@ -87,10 +74,10 @@ const EditGraphDlg=(props)=>{
                         <span>{"编辑图表 - " + props.currMapName}</span>
                         <span style={{marginLeft:'40px'}}>
                             {
-                                tags.map((tag,ind)=>
+                                props.tags.map((tag,ind)=>
                                     <TagItem key={`taglist-item${ind}`}
                                              tag={tag}
-                                             onClose={removeTagByInd.bind(this,ind)}
+                                             onClose={props.onRemoveTagByInd.bind(this,ind)}
                                     />
                                 )
                             }
@@ -98,10 +85,10 @@ const EditGraphDlg=(props)=>{
                         <Input style={{width:'100px'}}
                                size="small"
                                placeholder='设置标签'
-                               value={tagVal}
+                               value={props.tagVal}
                                bordered={false}
-                               onChange={changeTagVal}
-                               onPressEnter={addTag.bind(this, tagVal)}/>
+                               onChange={props.onChangeTagVal}
+                               onPressEnter={props.onAddTag.bind(this, props.tagVal)}/>
                     </div>}
                     size={{w:'calc(100vw - 200px)'}}
                     maskClosable={false}

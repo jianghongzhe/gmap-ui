@@ -25,6 +25,9 @@ import {useRecoilValue} from 'recoil';
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
 import { useCopyCurrMapLink, useCreateNewMapPromise, useSaveMapPromise, useSelectFileListItem } from '../../hooks/tabs';
 import HelpDlg from './views/edit/HelpDlg';
+import {useChange} from "../../common/commonHooks";
+import {useMemoizedFn} from "_ahooks@3.7.1@ahooks";
+import {useEditTags} from "../../hooks/tags";
 
 const { Content } = Layout;
 
@@ -93,6 +96,8 @@ const MapsViewer=(props)=>{
         editTmpTxt: '',
         editMapDlgVisible: false,
     });
+
+    const [tags, tagVal, {setTags, removeTagByInd, addTag, setTagVal, changeTagVal}]= useEditTags();
 
     
 
@@ -256,14 +261,14 @@ const MapsViewer=(props)=>{
     const onEditMapDlgOK =useCallback(async (closeDlg = true) => {
         try {
             let txt = editTmpTxt;
-            await saveMapPromise(txt);
+            await saveMapPromise(txt, tags);
             setEditDlgState(state=>({...state, editMapDlgVisible: !closeDlg}));
             if (!closeDlg) {
                 message.success("图表内容已保存");
             }
         } catch (error) {
         }
-    },[ setEditDlgState, editTmpTxt, saveMapPromise]);
+    },[ setEditDlgState, editTmpTxt, saveMapPromise, tags]);
 
 
 
@@ -546,6 +551,11 @@ const MapsViewer=(props)=>{
                 visible={editMapDlgVisible}
                 currMapName={currMapName}
                 editTmpTxt={editTmpTxt}
+                tags={tags}
+                tagVal={tagVal}
+                onChangeTagVal={changeTagVal}
+                onAddTag={addTag}
+                onRemoveTagByInd={removeTagByInd}
                 onOnlySave={onEditMapDlgOK.bind(this, false)}
                 onOk={onEditMapDlgOK.bind(this, true)}
                 onCancel={closeAllDlg}

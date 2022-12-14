@@ -402,7 +402,7 @@ export const useSaveMapPromise=()=>{
     const [currPane, setCurrPane]= useCurrPaneState();
     const activeKey= useRecoilValue(tabActiveKey);
 
-    return useCallback((txt)=>{
+    return useCallback((txt, tags)=>{
         return new Promise((res, rej)=>{
             if(!activeKey || !currPane){
                 rej();
@@ -418,7 +418,7 @@ export const useSaveMapPromise=()=>{
 
             (async()=>{
                 //保存并修改状态
-                let ret = await api.save(activeKey, txt);
+                let ret = await api.save(activeKey, txt, tags);
                 if (ret && false === ret.succ) {
                     message.error(ret.msg);
                     rej();

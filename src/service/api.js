@@ -288,8 +288,8 @@ class Api{
     /**
      * 保存文件
      */
-    save=(fullpath,content)=>{
-        return ipcRenderer.invoke('saveFile', fullpath, content.replace(/\r/g,'').trim());
+    save=(fullpath,content, tags)=>{
+        return ipcRenderer.invoke('saveFile', fullpath, content.replace(/\r/g,'').trim(), tags);
     }
 
     /**

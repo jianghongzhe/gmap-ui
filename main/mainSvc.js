@@ -928,16 +928,24 @@ const readFile = (fullpath) => {
 
 /**
  * 写入文件内容，以utf-8编码写入
- * @param {*} fullpath 全路径
- * @param {*} content 内容
+ * @param {*} fullpath text.md文件全路径
+ * @param {*} content 文本内容
+ * @param {*} tags 标签信息列表
  */
-const saveFile = (fullpath, content) => {
+const saveFile = (fullpath, content, tags=[]) => {
     try{
+        // 保存text.md
         let dir=path.dirname(fullpath);
         if(!fs.existsSync(dir)){
             fs.mkdirSync(dir,{recursive:true});
         }
         fs.writeFileSync(fullpath, content, 'utf-8');
+
+        // 保存标签信息到info.json文件中
+        const jsonFilePath= path.join(path.dirname(fullpath), "info.json");
+        const json=JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+        json.tags=(tags || []);
+        fs.writeFileSync(jsonFilePath, JSON.stringify(json), 'utf-8')
         return true;
     }catch(e){
         return {
