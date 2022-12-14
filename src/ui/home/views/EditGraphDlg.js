@@ -84,7 +84,7 @@ const EditGraphDlg=(props)=>{
                         </span>
                         <Input style={{width:'100px'}}
                                size="small"
-                               placeholder='设置标签'
+                               placeholder='+ 标签'
                                value={props.tagVal}
                                bordered={false}
                                onChange={props.onChangeTagVal}

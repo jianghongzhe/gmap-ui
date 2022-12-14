@@ -25,8 +25,6 @@ import {useRecoilValue} from 'recoil';
 import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindowTitle, useLoadFileList} from '../../hooks';
 import { useCopyCurrMapLink, useCreateNewMapPromise, useSaveMapPromise, useSelectFileListItem } from '../../hooks/tabs';
 import HelpDlg from './views/edit/HelpDlg';
-import {useChange} from "../../common/commonHooks";
-import {useMemoizedFn} from "_ahooks@3.7.1@ahooks";
 import {useEditTags} from "../../hooks/tags";
 
 const { Content } = Layout;
@@ -249,6 +247,8 @@ const MapsViewer=(props)=>{
                     editTmpTxt: currPane.mapTxts,
                     currMapName: currPane.title
                 });
+                setTags(currPane.tags);
+                setTagVal("");
             } catch (error) {
             }
         })();

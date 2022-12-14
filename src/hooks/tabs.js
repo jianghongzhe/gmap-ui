@@ -39,19 +39,7 @@ export const useSelectFileListItem=()=>{
             let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
             console.log("节点数量", ndsSet.list.length);
 
-            //增加新选项卡并设置状态
-            console.log("old", tabPanes);
-            let newPanes=[
-                ...tabPanes,
-                {
-                    title: item.itemsName,// item.showname,
-                    key: mdFullpath,
-                    mapTxts: origintxts,
-                    //mapCells: cells,
-                    ds: ndsSet,
-                }
-            ];
-            console.log("new", newPanes);
+
 
             setTabPanes([
                 ...tabPanes,
@@ -61,6 +49,7 @@ export const useSelectFileListItem=()=>{
                     mapTxts: origintxts,
                     //mapCells: cells,
                     ds: ndsSet,
+                    tags: item.tags,
                 }
             ]);
             setTabActiveKey(mdFullpath);
@@ -386,6 +375,7 @@ export const useCreateNewMapPromise=()=>{
                         key: mdFullpath,
                         mapTxts: defMapTxt,
                         ds: ndsSet,
+                        tags: [],
                     }
                 ]));
                 setTabActiveKey(mdFullpath);

@@ -107,7 +107,7 @@ const FindInFileDlg=({visible, onCancel})=>{
                 <div ref={refcondPart}>
                     {/* <label>标题和内容：</label> */}
                     <Input className='ipt' prefix={<SearchOutlined />} 
-                        placeholder="请输入搜索关键词：  t:标题 、 c:正文 、 f:全文 、 全文 、 !不匹配 、 并列条件1 并列条件2"
+                        placeholder="搜索关键词：  t:标题 、 c:正文 、 f:全文 、 tag:标签 、 全文 、 !不匹配 、 并列条件1 并列条件2"
                         size="large"  allowClear={true} value={exp} onChange={onExpChange} ref={bindExpRef} onPressEnter={setExp.bind(this,'')}/>
                     {
                         (searchResults && searchResults.length>0) &&

@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 import { useBindAndGetRef } from '../../../common/commonHooks';
+import TagItem from "../../common/TagItem";
 
 /**
  * 路径选择
@@ -75,7 +76,16 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
                                         css={{ "backgroundColor": (item.isfile?'#40a9ff':'orange') }} />
                                 }
                                 title={item.showname}
-                                description={item.size}/>
+                                description={<div>
+                                    <span style={{display:'inline-block', width:'70px'}}>{item.size}</span>
+                                    {
+                                        (item.isfile && item.tags && item.tags.length>0) && <span>
+                                            {item.tags.map((tag,tagInd)=>
+                                                <TagItem key={`filelist-tag-${tagInd}`} tag={tag} colored={true}/>
+                                            )}
+                                        </span>
+                                    }
+                                </div>}/>
                         </List.Item>
                     )}
                 />

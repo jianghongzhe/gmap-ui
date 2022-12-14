@@ -248,6 +248,7 @@ class Api{
                     pic:            item.pic,
                     mdFullpath:     item.mdFullpath,
                     attDir:         item.attDir,
+                    tags:           item.tags,
                 };
                 gpamOpener(item);
             })();
@@ -316,6 +317,7 @@ class Api{
                 pic:            item.pic,
                 mdFullpath:     item.mdFullpath,
                 attDir:         item.attDir,
+                tags:           item.tags,
             }));
         });
     }

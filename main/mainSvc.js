@@ -502,8 +502,10 @@ const listFiles = (assignedDir = null) => {
             let mdFullpath=null;
             let attDir=null;
             let pic=null;
+            let tags=[];
             if(isfile){
                 mdFullpath=path.join(fullpath,'text.md');
+                tags= getTagsByMdFullPath(mdFullpath);
                 attDir=path.join(fullpath,'assets');
                 const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
                     const tmpFn=ent.name.toLowerCase().trim();
@@ -535,6 +537,7 @@ const listFiles = (assignedDir = null) => {
                 emptyDir:   isEmptyDir,
                 size:       (isfile ? fs.statSync(mdFullpath).size : 0),
                 pic:        pic,
+                tags,
             };
         });//.filter(each=>each.fullpath!==imgsDir && each.fullpath!==attsDir);//不包括图片目录
     }catch(e){
@@ -560,6 +563,8 @@ const getFileItem=(fn)=>{
     const attDir=path.join(bundleFullpath,'assets');
     const showName=trimEndOnce(toSlash(path.relative(mapsPath,bundleFullpath)), ".textbundle");
     const name=path.basename(bundleFullpath, ".textbundle");
+    const tags= getTagsByMdFullPath(mdFullpath);
+
     console.log({
         name,
         itemsName:  showName,//显示在选项卡上的名称：eg. front/css3.md
@@ -570,6 +575,7 @@ const getFileItem=(fn)=>{
         emptyDir:   false,
         size:       0,
         pic:        null,
+        tags,
     });
     return {
         name,
@@ -581,6 +587,7 @@ const getFileItem=(fn)=>{
         emptyDir:   false,
         size:       0,
         pic:        null,
+        tags,
     };
 };
 
@@ -954,6 +961,12 @@ const saveFile = (fullpath, content, tags=[]) => {
         };
     }
 }
+
+const getTagsByMdFullPath=(mdFullpath)=>{
+    const jsonFilePath= path.join(path.dirname(mdFullpath), "info.json");
+    const json=JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+    return json.tags || [];
+};
 
 /**
  * 创建导图的包
