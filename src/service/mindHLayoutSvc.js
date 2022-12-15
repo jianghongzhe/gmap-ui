@@ -104,6 +104,11 @@ class MindHLayoutSvc {
             }
         
         }
+
+        // 在之前基础上，对于三级以上（>=2）节点，且是折叠的时候，高度减去5
+        if(nd.lev>=2 && !ndsSet.expands[nd.id]){
+            resultWrapper.expBtnStyles[nd.id].top-=5;
+        }
     }
 
     /**

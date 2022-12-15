@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect} from 'react';
-import {Tabs,  Button} from 'antd';
+import {Tabs, Button, Badge} from 'antd';
 import { PlusCircleOutlined,MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
 
 import NewMindmap from './NewMindmap';
@@ -48,21 +48,29 @@ const GraphTabs=(props)=>{
 
     /**
      * 折叠按钮的render props
+     *
+     * <MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>
+     * <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
      */
     const ndExpBtnRenderer=(nd, expands)=>{
+        // 按钮已展开，显示为折叠
+        if(expands && expands[nd.id]){
+            return (
+                <Button
+                    type="link"
+                    size='small'
+                    title={nd.expand?"折叠":"展开"}
+                    css={styles.expbtn}
+                    icon={<MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>}
+                    onClick={toggleExpand.bind(this,nd)}/>
+            );
+        }
+
+        // 按钮已折叠，显示为展开，同时显示子节点数量
         return (
-            <Button 
-                type="link" 
-                size='small' 
-                title={nd.expand?"折叠":"展开"} 
-                css={styles.expbtn}
-                icon={
-                    expands[nd.id] ?
-                        <MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>
-                            :
-                        <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
-                }  
-                onClick={toggleExpand.bind(this,nd)}/>
+            <span style={collapsedExpBtnStyle} onClick={toggleExpand.bind(this,nd)} title='展开'>
+                {nd.childs.length}
+            </span>
         );
     }
 
@@ -185,9 +193,35 @@ const GraphTabs=(props)=>{
     return result;
 }
 
+
+
 // 100vh- 64 - 55-1
 const tabContentH='calc(100vh - 120px)';
 
+const colors={
+    toggle: {color:'#7cb305'},
+    toggle2: {color:'#eb2f96'},//#eb2f96 #9254de
+};
+
+
+const collapsedExpBtnStyle={
+    marginLeft:'5px',
+    marginRight:'5px',
+    display:'block',
+    cursor:'pointer',
+    boxSizing:'border-box',
+    color: colors.toggle2.color,
+    border:`1px solid ${ colors.toggle2.color}`,
+    borderRadius:'50%',
+    width:'16px',
+    height:'16px',
+    lineHeight:'12px',
+    fontSize:'12px',
+    overflow:'hidden',
+    padding:0,
+    textAlign:'center',
+    verticalAlign:'top',
+};
 
 
 const styles={
@@ -208,10 +242,7 @@ const styles={
 };
 
 
-const colors={
-    toggle: {color:'#7cb305'},
-    toggle2: {color:'#eb2f96'},//#eb2f96 #9254de
-};
+
 
 const getTabItemContainerStyle=(h)=>({
     height: h,
