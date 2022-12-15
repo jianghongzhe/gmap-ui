@@ -15,6 +15,7 @@ import {useRefNavDlg} from "../../../hooks/refNavDlg";
 import {useColorPicker} from "../../../hooks/colorPicker";
 import {useMemoizedFn} from "ahooks";
 import {useChange} from "../../../common/commonHooks";
+import TagItem from "../../common/TagItem";
 
 
 const EnhDlg=withEnh(Modal);
@@ -77,6 +78,7 @@ const EditGraphDlg=(props)=>{
                                 props.tags.map((tag,ind)=>
                                     <TagItem key={`taglist-item${ind}`}
                                              tag={tag}
+                                             colored
                                              onClose={props.onRemoveTagByInd.bind(this,ind)}
                                     />
                                 )
@@ -170,17 +172,7 @@ const EditGraphDlg=(props)=>{
 }
 
 
-const TagItem=({tag, onClose})=>{
-    return (
-        <Tag color="success"
-                style={{borderRadius:'10px'}}
-                icon={<TagOutlined/>}
-                closable={true}
-                onClose={onClose}>
-            {tag}
-        </Tag>
-    );
-};
+
 
 
 

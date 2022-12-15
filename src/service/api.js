@@ -63,6 +63,28 @@ class Api{
         ipcRenderer.invoke('openUpdateApp');
     };
 
+
+    /**
+     * 文件中查找
+     * @param exp
+     * @returns Promise {
+     *     "reqId": 18,
+     *     "succ": true,
+     *     "msg": "",
+     *     "data": [
+     *         {
+     *             "titleParts": [
+     *                 "新建文件夹 / ", {"keyword": true, "txt": "新建3"}
+     *             ],
+     *             "contParts": [
+     *                 {"keyword": true, "txt": "新建3"}, "blabla"
+     *             ],
+     *             "tags": ["标签3"],
+     *             "fullTitle": "新建文件夹/新建3"
+     *         }
+     *     ]
+     * }
+     */
     searchInFile=(exp)=>{
         return ipcRenderer.invoke('searchInFile', {exp});
     };

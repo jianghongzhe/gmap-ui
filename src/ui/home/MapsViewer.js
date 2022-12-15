@@ -11,7 +11,7 @@ import RefViewer from './views/RefViewer';
 import TimelineViewer from './views/TimelineViewer';
 import ProgsViewer from './views/ProgsViewer';
 import StrParamReplaceDlg from './views/StrParamReplaceDlg';
-import {useBoolean, useMount} from 'ahooks';
+import {useBoolean, useMemoizedFn, useMount} from 'ahooks';
 
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
@@ -238,7 +238,7 @@ const MapsViewer=(props)=>{
 
 
     //------------修改导图----------------------------------------------------------------------
-    const onShowEditMapDlg =useCallback(() => {
+    const onShowEditMapDlg =useMemoizedFn(() => {
         (async()=>{
             try {
                 api.closeFindInPageDlg();
@@ -252,7 +252,7 @@ const MapsViewer=(props)=>{
             } catch (error) {
             }
         })();
-    },[ currPane]);
+    });
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));

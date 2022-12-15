@@ -1,11 +1,12 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react';
-import {Empty, Input, Modal, Space, Typography, Tag} from 'antd';
-import {SearchOutlined, TagOutlined} from '@ant-design/icons';
+import {Empty, Input, Modal, Space, Typography} from 'antd';
+import {SearchOutlined} from '@ant-design/icons';
 import api from '../../../service/api';
 import {useBindInputRef, useChange} from '../../../common/commonHooks';
 import {focusRef} from '../../../common/uiUtil';
 import {useDebounceEffect, useMemoizedFn, useRafState, useSize} from 'ahooks';
 import {useSelectFileListItem} from '../../../hooks/tabs';
+import TagItem from "../../common/TagItem";
 
 const { Title,Paragraph } = Typography;
 
@@ -25,7 +26,7 @@ const FindInFileDlg=({visible, onCancel})=>{
 
     const refcondPart = useRef(null);
     const condPartSize = useSize(refcondPart);
-    const searchResultHeight= useMemo(()=>`calc(100vh - 360px - ${condPartSize ? condPartSize.height: 0}px)`,[condPartSize]);
+    const searchResultHeight= useMemo(()=>`calc(100vh - 360px - ${condPartSize?.height || 0}px)`,[condPartSize]);
 
 
     // 当显示时使第一个输入框获得焦点，同时加载所有标签
@@ -53,7 +54,6 @@ const FindInFileDlg=({visible, onCancel})=>{
             return;
         }
         (async () => {
-            console.log("文件中查找");
             const result=await api.searchInFile(exp);
             if(result && true===result.succ){
                 setSearchResults(result.data);
@@ -119,7 +119,7 @@ const FindInFileDlg=({visible, onCancel})=>{
                         allTags.map((tag,ind)=>
                             <TagItem key={`tag-${ind}`}
                                      tag={tag}
-                                     inExp={isTagInExp(tag)}
+                                     colored={isTagInExp(tag)}
                                      onClick={appendOrRemoveTag.bind(this,tag)}
                             />
                         )
@@ -128,7 +128,7 @@ const FindInFileDlg=({visible, onCancel})=>{
             </Space>
             <div css={{marginTop:'40px', maxHeight: searchResultHeight,height: searchResultHeight, overflowY:'auto'}}>
                 {
-                    searchResults.map((searchItem, ind)=><div css={{marginBottom:'30px'}} >
+                    searchResults.map((searchItem, ind)=><div key={`resultitem-${ind}`} css={{marginBottom:'30px'}} >
                         <div style={{cursor:'pointer', }} onClick={openMap.bind(this, searchItem.fullTitle)}>
                             <Title level={5} >
                                 { searchItem.titleParts.map((item,ind)=><ResultItem key={"title-"+ind} data={item}/>) }
@@ -146,7 +146,7 @@ const FindInFileDlg=({visible, onCancel})=>{
                                     searchItem.tags.map((tag,ind)=>
                                         <TagItem key={`tag-${ind}`}
                                                  tag={tag}
-                                                 inExp={isTagInExp(tag)}
+                                                 colored={isTagInExp(tag)}
                                                  onClick={appendOrRemoveTag.bind(this,tag)}
                                         />
                                     )
@@ -163,17 +163,7 @@ const FindInFileDlg=({visible, onCancel})=>{
     </Modal>;
 };
 
-const TagItem=({tag, inExp, onClick})=>{
-    const extraAttr= inExp ? {color:'success'} : {};
-    return (
-        <Tag    {...extraAttr}
-                icon={<TagOutlined />}
-                style={{borderRadius:'10px',cursor:'pointer', }}
-                onClick={onClick} >
-            <span style={{fontWeight:'400'}}>{tag}</span>
-        </Tag>
-    );
-};
+
 
 
 const ResultItem=({data, bold})=>{
@@ -185,7 +175,7 @@ const ResultItem=({data, bold})=>{
     return <React.Fragment>
         {
             true===data.keyword ? 
-                <span css={highlightStyle}>{data.txt}</span>
+                <span style={highlightStyle}>{data.txt}</span>
                     :
                 <span>{data}</span>
         }
