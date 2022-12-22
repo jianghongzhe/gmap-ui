@@ -93,7 +93,7 @@ const Toolbar=({
 }
 
 const ToolbarItem=({title, icon, disabled=false, className='toolbtn',type='default', onClick})=>{
-    return <Tooltip color='cyan' placement="bottomLeft" title={title}>
+    return <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={title}>
         <Button shape='circle' icon={icon} className={className} disabled={disabled} type={type} size='large' onClick={onClick} />
     </Tooltip>;
 };

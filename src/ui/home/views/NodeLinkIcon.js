@@ -152,12 +152,13 @@ const getLinkIcon=(addr ,onClick)=>{
 }
 
 const getBtn=(icon, onClick)=>{
-    return <Button 
+    return <Button
         type="link" 
         size='small' 
         className='themebtn'
         icon={icon}  
-        onClick={onClick}/>;
+        onClick={onClick}
+    />;
 };
 
 const avatarStyle={

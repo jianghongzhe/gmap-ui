@@ -4,7 +4,7 @@ import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlin
 import {marked} from 'marked';
 import NodeLinkIcon from './NodeLinkIcon';
 import './markdown-node.css';
-import {useMemoizedFn} from "ahooks";
+import {useMemoizedFn, useRafState} from "ahooks";
 import strTmpl from "../../../common/strTmpl";
 
 /**
@@ -58,7 +58,7 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
         {/* 日期部分 */}
         {
             (nd && nd.dateItem) && (
-                <Tooltip color='cyan' title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
+                <Tooltip color='cyan' mouseEnterDelay={0.4} title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
                     <div css={dateStyle} onClick={onShowTimeline.bind(this,nd.dateItem.timeline)}>
                         <ClockCircleOutlined className='themeicon' css={{color:nd.dateItem.color}}/>
                         <span className='themedatetxt' css={{color:nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
@@ -83,7 +83,7 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
 
         {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}
         {(nd && nd.prog) && (
-            <Tooltip color='cyan' title={nd.prog.msg}>
+            <Tooltip color='cyan' mouseEnterDelay={0.4} title={nd.prog.msg}>
                 <Progress type="circle" 
                     trailColor={progStyle.trailColor}
                     format={progressFormater.bind(this,nd.prog.st)}
@@ -101,7 +101,7 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
         {/* 短备注，多个用div叠起来 */}
         {
             (nd && nd.memo && 0<nd.memo.length) && (
-                <Tooltip color='cyan' title={
+                <Tooltip color='cyan' mouseEnterDelay={0.4} title={
                     <div>
                         {
                             nd.memo.map((eachmemo,memoInd)=><div key={memoInd}>{eachmemo}</div>)
@@ -117,7 +117,7 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
         {
             (nd && nd.refs && 0<nd.refs.length) && (
                 nd.refs.map((refItem,refInd)=>(                
-                    <Tooltip key={refInd} color='cyan' placement="top" title={'查看引用 - '+refItem.showname}>
+                    <Tooltip key={refInd} color='cyan' placement="top" title={'查看引用 - '+refItem.showname} mouseEnterDelay={0.4}>
                         <span css={themeBtnWrapperStyle}>
                             <Button 
                                 type="link" 
@@ -292,13 +292,50 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
 
 
 
-const LinkItem=({tooltip, addr, openLinkFunc})=>(
-    <Tooltip  color='cyan' placement="top" title={tooltip}>
-        <span css={themeBtnWrapperStyle} >
-            <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
-        </span>
-    </Tooltip>
-);
+const LinkItem=({tooltip, addr, openLinkFunc})=> {
+    const [ctxMenuItems, setCtxMenuItems] = useRafState([]);
+
+
+    // TODO 改为从后台获取实际的右键菜单项，只对file类型且没有插值参数的链接有效
+
+    const onOpenChange=useMemoizedFn((open)=>{
+        if(!open){
+            return;
+        }
+
+        setTimeout(()=>{
+            setCtxMenuItems(['复制','打开目录']);
+        },2000);
+
+    });
+
+    const onCtxMenuClick=useMemoizedFn((txt)=>{
+        console.log("clicked", txt);
+    });
+
+    return (
+        <Tooltip color='cyan' placement="top" mouseEnterDelay={0.4} onOpenChange={onOpenChange} title={
+            <div>
+                <div>{tooltip}</div>
+                {
+                    (ctxMenuItems && ctxMenuItems.length>0) && <div>
+                        {
+                            ctxMenuItems.map((ctxMenu,menuInd)=>(
+                                <Button key={`menu-${menuInd}`} type='link'
+                                        style={{color:'white',textDecoration:'underline'}}
+                                        onClick={onCtxMenuClick.bind(this, ctxMenu)}>{ctxMenu}</Button>
+                            ))
+                        }
+                    </div>
+                }
+            </div>
+        } >
+            <span css={themeBtnWrapperStyle}>
+                <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
+            </span>
+        </Tooltip>
+    );
+};
 
 
 /**

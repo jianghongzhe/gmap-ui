@@ -65,7 +65,7 @@ const Welcome=(props)=>{
 
 
 const ButtonItem=({title, className, icon, onClick})=>(
-    <Tooltip color='cyan' placement="top" title={title}>
+    <Tooltip color='cyan' placement="top" mouseEnterDelay={0.4} title={title}>
         <Button type="default" className={className} shape='circle' icon={icon} size='large' onClick={onClick}></Button>
     </Tooltip>
 );
