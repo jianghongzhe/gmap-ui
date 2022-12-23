@@ -6,6 +6,7 @@ import NodeLinkIcon from './NodeLinkIcon';
 import './markdown-node.css';
 import {useMemoizedFn, useRafState} from "ahooks";
 import strTmpl from "../../../common/strTmpl";
+import api from "../../../service/api";
 
 /**
  * 导图的节点
@@ -319,9 +320,13 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
         }
 
         // 异步查询右键菜单
-        setTimeout(()=>{
-            setCtxMenuItems(['复制','打开目录']);
-        },2000);
+        (async ()=>{
+            const result= await api.loadCtxMenu(addr);
+            if(result && true===result.succ){
+                setCtxMenuItems(result.data);
+            }
+            // console.log('ctx menu result', result);
+        })();
     });
 
 
@@ -331,12 +336,19 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
             <div>
                 <div>{tooltip}</div>
                 {
-                    (ctxMenuItems && ctxMenuItems.length>0) && <div>
+                    (ctxMenuItems && ctxMenuItems.length>0) && <div style={{marginTop:'10px'}}>
                         {
                             ctxMenuItems.map((ctxMenu,menuInd)=>(
-                                <Button key={`menu-${menuInd}`} type='link'
-                                        style={{color:'white',textDecoration:'underline'}}
-                                        onClick={onCtxMenuClick.bind(this, ctxMenu)}>{ctxMenu}</Button>
+                                <Button key={`menu-${menuInd}`}
+                                        type='dashed'
+                                        ghost
+                                        size='small'
+                                        shape='round'
+                                        style={{
+                                            marginRight:"8px",
+                                            marginBottom:'8px',
+                                        }}
+                                        onClick={api.openUrl.bind(this, ctxMenu.url)}>{ctxMenu.name}</Button>
                             ))
                         }
                     </div>

@@ -1500,7 +1500,9 @@ const sendCmdToServer=(action, data)=>{
 };
 
 
-
+const loadCtxMenu=(url)=>{
+    return sendCmdToServer("loadCtxMenu",{url});
+};
 
 
 
@@ -1509,6 +1511,7 @@ const sendCmdToServer=(action, data)=>{
  * 进程通信暴露的方法
  */
 const ipcHandlers={
+    loadCtxMenu,
     takeScreenShot,
     screenShotCombine,
     loadIcon,

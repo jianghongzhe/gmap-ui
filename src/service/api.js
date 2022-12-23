@@ -93,7 +93,9 @@ class Api{
         return ipcRenderer.invoke('searchAllTags');
     };
 
-
+    loadCtxMenu=(url)=>{
+        return  ipcRenderer.invoke('loadCtxMenu', url);
+    };
 
 
     /**
