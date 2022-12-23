@@ -309,7 +309,7 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
     });
 
 
-    // TODO 改为从后台获取实际的右键菜单项，只对file类型且没有插值参数的链接有效
+
     const onOpenChange=useMemoizedFn((open)=>{
         // 当tooltip关闭时、或地址中包含插值参数时，不设置右键菜单项
         if(!open){
