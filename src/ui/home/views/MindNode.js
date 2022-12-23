@@ -293,25 +293,38 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
 
 
 const LinkItem=({tooltip, addr, openLinkFunc})=> {
+    /**
+     * 右键菜单相关的数据项
+     */
     const [ctxMenuItems, setCtxMenuItems] = useRafState([]);
 
 
-    // TODO 改为从后台获取实际的右键菜单项，只对file类型且没有插值参数的链接有效
-
-    const onOpenChange=useMemoizedFn((open)=>{
-        if(!open){
-            return;
-        }
-
-        setTimeout(()=>{
-            setCtxMenuItems(['复制','打开目录']);
-        },2000);
-
-    });
-
+    /**
+     * 右键菜单的点击事件
+     * @type {(function(*): void)|*}
+     */
     const onCtxMenuClick=useMemoizedFn((txt)=>{
         console.log("clicked", txt);
     });
+
+
+    // TODO 改为从后台获取实际的右键菜单项，只对file类型且没有插值参数的链接有效
+    const onOpenChange=useMemoizedFn((open)=>{
+        // 当tooltip关闭时、或地址中包含插值参数时，不设置右键菜单项
+        if(!open){
+            return;
+        }
+        if(strTmpl.containsParam(addr)){
+            return;
+        }
+
+        // 异步查询右键菜单
+        setTimeout(()=>{
+            setCtxMenuItems(['复制','打开目录']);
+        },2000);
+    });
+
+
 
     return (
         <Tooltip color='cyan' placement="top" mouseEnterDelay={0.4} onOpenChange={onOpenChange} title={
