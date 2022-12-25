@@ -829,6 +829,24 @@ class MindmapSvc {
             return [true,true,true];
         },
 
+        handleDownLayout: (item)=>{
+            if ('down:' !== item) {
+                return [false,false,null];
+            }
+
+            return [true,true,true];
+        },
+
+        handleUpLayout: (item)=>{
+            if ('up:' !== item) {
+                return [false,false,null];
+            }
+
+            return [true,true,true];
+        },
+
+
+
         /**
          * 节点默认是折叠状态
          * @param {*} item 
@@ -1028,6 +1046,8 @@ class MindmapSvc {
         let nodeIdPrefix="nd_"+new Date().getTime()+"_";
         const relaLineNds=[];
         let refNames=[];
+        let down=false;
+        let up=false;
 
         let { ndLines, refs, openers} = this.loadParts(arrayOrTxt);
         const defaultRelaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
@@ -1073,6 +1093,27 @@ class MindmapSvc {
                         }
                         return;
                     }
+
+                    // down layout
+                    [handled,hasVal,val]=this.linePartHandlers.handleDownLayout(item);
+                    if(handled){
+                        if(hasVal){
+                            down=val;
+                        }
+                        return;
+                    }
+                    // up layout
+                    [handled,hasVal,val]=this.linePartHandlers.handleUpLayout(item);
+                    if(handled){
+                        if(hasVal){
+                            up=val;
+                        }
+                        return;
+                    }
+
+
+
+
 
                     // id
                     [handled,hasVal,val]=this.linePartHandlers.handleId(item);
@@ -1217,6 +1258,8 @@ class MindmapSvc {
                 dateItem: dateItem,
                 prog: prog,
                 forceRight: (0===lev?forceRight:false), //只有根节点才有可能设置forceRight，其他节点一律为false
+                up: (0===lev?up:null),
+                down: (0===lev?down:null),
                 logicId,
                 logicToIds,
                 relaLineColors,

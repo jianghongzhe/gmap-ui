@@ -1,4 +1,6 @@
 import mindHLayoutSvc from './mindHLayoutSvc';
+import mindDownLayoutSvc from './mindDownLayoutSvc';
+import mindUpLayoutSvc from './mindUpLayoutSvc';
 
 
 /**
@@ -11,11 +13,20 @@ class MindLayoutFacade{
      * @returns 
      */
     loadStyles=(ndsSet)=>{
-        // 其它方式布局，待开发
-
-        // 默认使用水平布局
-        return mindHLayoutSvc.loadStyles(ndsSet);
+        return getSvcInst(ndsSet).loadStyles(ndsSet);
     }
 }
+
+
+const getSvcInst=(ndsSet)=>{
+    if(true===ndsSet?.tree?.down){
+        return mindDownLayoutSvc;
+    }
+    if(true===ndsSet?.tree?.up){
+        return mindUpLayoutSvc;
+    }
+    return mindHLayoutSvc;
+};
+
 
 export default new MindLayoutFacade();
