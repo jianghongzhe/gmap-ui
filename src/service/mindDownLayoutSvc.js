@@ -1,4 +1,10 @@
 class MindDownLayoutSvc{
+
+    /**
+     * 加载样式
+     * @param ndsSet
+     * @returns {{expBtnRects: {}, expBtnStyles: {}, directions: {}, ndStyles: {}, wrapperStyle: {}, lineStyles: {}, rects: {}}}
+     */
     loadStyles=(ndsSet)=> {
         if (!ndsSet) {
             return;
@@ -29,6 +35,8 @@ class MindDownLayoutSvc{
             height:h,
         };
 
+        // 折叠按钮位置
+        this.putExpBtnRecursively(ndsSet.tree, ndsSet, result);
 
         //连线位置计算
         let newLineStyles={};
@@ -65,6 +73,34 @@ class MindDownLayoutSvc{
         const x2=parseInt(resultWrapper.ndStyles[toNd.id].left+resultWrapper.rects[toNd.id].width/2);
         const distX=Math.abs(x1-x2)+1;
         const l2r=(x1<x2);
+        const height1=parseInt(distY/2);
+        const height2=distY-height1;
+
+        // 如果父节点有唯一一个子节点，且水平位置距离不超过3像素，则不使用两段式的边框，而改为直接使用外层div的背景表示连线
+        if(fromNd.childs && 1===fromNd.childs.length && distX<=3){
+            return {
+                [toNd.id]: {
+                    line: {
+                        boxSizing:'border-box',
+                        left: parseInt((x1+x2)/2),
+                        top: y1,
+                        width: '1px',
+                        height: distY,
+                        backgroundColor: `${color}`,
+                    },
+                    lineFrom: {
+                        display:'none',
+                    },
+                    lineTo:{
+                        display:'none',
+                    },
+                    lineExp:{
+                        display:'none',
+                    },
+                }
+            };
+        }
+
 
         let result={};
         result[toNd.id] = {
@@ -74,24 +110,29 @@ class MindDownLayoutSvc{
                 top: y1,
                 width: distX,
                 height: distY,
-                //backgroundColor:'lightgreen',
             },
+            // 上面部分
+            // 父子节点为左右，需要左下边框
+            // 父子节点为右左，需要右下边框
             lineFrom:{
                 boxSizing:'border-box',
                 left:0,
                 top:0,
                 width:'100%',
-                height: distY/2,
+                height: `${height1}px`,
                 borderBottom:`1px solid ${color}`,
-                borderLeft: l2r ? `1px solid ${color}` : "0px",
-                borderRight: l2r ?  "0px" :`1px solid ${color}`,
+                borderLeft: l2r ? `1px solid ${color}` : "0",
+                borderRight: l2r ?  "0" :`1px solid ${color}`,
             },
+            // 下面部分
+            // 父子节点为左右，需要右边框
+            // 父子节点为右左，需要左边框
             lineTo:{
                 boxSizing:'border-box',
-                width:'100%',
-                top: `${distY/2}px`,
                 left:0,
-                height: `${distY/2}px`,
+                top: `${height1}px`,
+                width:'100%',
+                height: `${height2}px`,
                 borderRight: l2r ? `1px solid ${color}` : "0px",
                 borderLeft: l2r ?  "0px" :`1px solid ${color}`,
             },
@@ -100,106 +141,6 @@ class MindDownLayoutSvc{
             },
         };
         return result;
-
-
-
-
-
-        //
-        // //rect只用于获取宽高
-        // let r1 = getRelaRect(resultWrapper.rects[fromNd.id]);
-        // let r2 = getRelaRect(resultWrapper.rects[toNd.id]);
-        //
-        // //其他四个位置需要进行样式计算
-        // r1.left = resultWrapper.ndStyles[fromNd.id].left;
-        // r1.top = resultWrapper.ndStyles[fromNd.id].top;
-        // r1.right = r1.left + r1.width;
-        // r1.bottom = r1.top + r1.height;
-        //
-        // r2.left = resultWrapper.ndStyles[toNd.id].left;
-        // r2.top = resultWrapper.ndStyles[toNd.id].top;
-        // r2.right = r2.left + r2.width;
-        // r2.bottom = r2.top + r2.height;
-        //
-        // //根节点->二级节点，连接线的纵向位置应该是中间->中间
-        // if(0===fromNd.lev){
-        //     r1.height=parseInt(r1.height/2);//+(nodePaddingTop/2);
-        //     r1.bottom=r1.top+r1.height;
-        //
-        //     r2.height=parseInt(r2.height/2);//+(nodePaddingTop/2);
-        //     r2.bottom=r2.top+r2.height;
-        // }
-        // //二级节点->三级节点，连接线的纵向位置应该是中间->下边
-        // if(1===fromNd.lev){
-        //     r1.height=parseInt(r1.height/2);//+(nodePaddingTop/2);
-        //     r1.bottom=r1.top+r1.height;
-        // }
-        //
-        //
-        // //左边r1 右边r2
-        // let reverseW = false;
-        // if (r1.left > r2.left) {
-        //     let t = null;
-        //     t = r1;
-        //     r1 = r2;
-        //     r2 = t;
-        //     reverseW = true;//子节点在父节点左边
-        // }
-        //
-        // let w = r2.left - r1.right;
-        // let t1 = r1.bottom - lineWid;
-        // let t2 = r2.bottom - lineWid;
-        //
-        // let line = {};
-        // let lineFrom = {};
-        // let lineTo = {};
-        // let lineExp={};
-        //
-        // //连接线起始与末尾高度一样，不需要其中的两个div
-        // if (t1 === t2) {
-        //     line = {
-        //         width: w,
-        //         left: r1.right,
-        //         height: lineWid,
-        //         top: t1,
-        //         borderBottom: `${lineWid}px solid ${color}`,
-        //     };
-        //
-        //     let result = {};
-        //     result[toNd.id] = { line, lineFrom, lineTo };
-        //     return result;
-        // }
-        //
-        //
-        // //高度不一致，但容器矩形位置可以确定
-        // line = {
-        //     width: w,
-        //     left: r1.right,
-        //     top: Math.min(t1, t2),
-        //     height: Math.abs(t1 - t2) + lineWid,
-        // };
-        //
-        //
-        //
-        // //左下右上
-        // if (t1 > t2) {
-        //     let result = {};
-        //     this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, false, reverseW);
-        //     result[toNd.id] = { line, lineFrom, lineTo, lineExp };
-        //     // console.log(result);
-        //     return result;
-        // }
-        //
-        // //左上右下
-        // if (t1 < t2) {
-        //     let result = {};
-        //     this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, true, reverseW);
-        //     result[toNd.id] = { line, lineFrom, lineTo, lineExp };
-        //     // console.log(result);
-        //     return result;
-        // }
-
-        return {};
     };
 
 
@@ -211,51 +152,43 @@ class MindDownLayoutSvc{
      */
     putNds = (ndsSet, resultWrapper) => {
         this.putNdsRecursively(ndsSet.tree, ndsSet, resultWrapper,0, 0);
-
-        // let [leftH, rightH] = this.setNdDirection(ndsSet, resultWrapper);
-        // let currLeftTop = (leftH < rightH ? parseInt((rightH - leftH) / 2) : 0);
-        // let currRightTop = (rightH < leftH ? parseInt((leftH - rightH) / 2) : 0);
-        //
-        //
-        // //根节点位置：x假设为500，y为在左右两边子树中高的一侧居中的位置
-        // let rootLoc = [500, parseInt((Math.max(leftH, rightH)-resultWrapper.rects[ndsSet.tree.id].height) / 2)];
-        //
-        //
-        // resultWrapper.ndStyles[ndsSet.tree.id] = {
-        //     left: rootLoc[0],
-        //     top: rootLoc[1],
-        // }
-        //
-        //
-        // this.putExpBtn(ndsSet,ndsSet.tree,rootLoc[0],rootLoc[1],false, resultWrapper);
-        //
-        //
-        // if(ndsSet.expands[ndsSet.tree.id]){
-        //     //左
-        //     ndsSet.tree.childs.filter(nd =>resultWrapper.directions[nd.id]).forEach(nd => {
-        //         let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
-        //         let l = parseInt(rootLoc[0] - ndXDist*3/2 -resultWrapper.rects[nd.id].width);//根节点x - 空隙 - 节点本身宽度
-        //         let t = parseInt(currLeftTop + (allHeight - resultWrapper.rects[nd.id].height) / 2);
-        //         resultWrapper.ndStyles[nd.id] = { left: l, top: t }
-        //         this.putExpBtn(ndsSet,nd,l,t,true, resultWrapper);
-        //         this.putSubNds(currLeftTop, l - ndXDist, nd, ndsSet, true, resultWrapper);
-        //         currLeftTop += allHeight+nodePaddingTop;//
-        //     });
-        //
-        //     //右
-        //     ndsSet.tree.childs.filter(nd => !resultWrapper.directions[nd.id]).forEach(nd => {
-        //         let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
-        //         let l = parseInt(rootLoc[0] +resultWrapper.rects[ndsSet.tree.id].width + ndXDist*3/2);//根节点x + 根节点宽 + 空隙
-        //         let t = parseInt(currRightTop + (allHeight - resultWrapper.rects[nd.id].height) / 2);
-        //         resultWrapper.ndStyles[nd.id] = { left: l, top: t, }
-        //         this.putExpBtn(ndsSet,nd,l,t,false, resultWrapper);
-        //         this.putSubNds(currRightTop, l + resultWrapper.rects[nd.id].width + ndXDist, nd, ndsSet, false, resultWrapper);
-        //         currRightTop += allHeight+nodePaddingTop;//
-        //     });
-        // }
-        //
         return this.calcOptNdPos(ndsSet, resultWrapper);
     }
+
+    /**
+     * 递归计算展开按钮的样式
+     * @param nd
+     * @param ndsSet
+     * @param resultWrapper
+     */
+    putExpBtnRecursively =(nd, ndsSet, resultWrapper)=>{
+        if (!nd.childs || 0 === nd.childs.length) {
+            return;
+        }
+
+        const expended=ndsSet.expands[nd.id];
+        let baseLeft=parseInt(resultWrapper.ndStyles[nd.id].left + resultWrapper.rects[nd.id].width/2);
+        let baseTop=parseInt(resultWrapper.ndStyles[nd.id].top + resultWrapper.rects[nd.id].height);
+
+        // 根据是展开还是折叠状态，对位置进行校正
+        if(expended){
+            baseLeft-=2;
+            baseTop-=2;
+        }else{
+            baseLeft-=10;
+            baseTop+=3;
+        }
+
+        resultWrapper.expBtnStyles[nd.id]={
+            left: `${baseLeft}px`,
+            top: `${baseTop}px`,
+        };
+
+        // 如果是展开状态，则继续计算子节点的展开按钮样式
+        if(expended) {
+            nd.childs.forEach(subNd => this.putExpBtnRecursively(subNd, ndsSet, resultWrapper));
+        }
+    };
 
     putNdsRecursively=(nd, ndsSet, resultWrapper, beginLeft=0, beginTop=0)=>{
 
@@ -272,19 +205,25 @@ class MindDownLayoutSvc{
 
         // 子节点的样式，高度的起始位置为父节点的下面加上空白的距离
         const subBeginTop= beginTop+resultWrapper.rects[nd.id].height+ndXDist;
-        if (nd.childs && 0 < nd.childs.length || ndsSet.expands[nd.id]) {
+
+
+        if (nd.childs && 0 < nd.childs.length && ndsSet.expands[nd.id]) {
             let accuBeginLeft=beginLeft;
+
+            // 如果子节点所占用的全部宽度比父节点本身宽度还小，则增加一些偏移量（宽度差的一半）
+            let childSumW=0;
+            for(let i=0;i<nd.childs.length;++i){
+                childSumW+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+(i>0 ? ndXDist : 0);
+            }
+            if(childSumW<selfW){
+                accuBeginLeft+=parseInt((selfW-childSumW)/2);
+            }
+
             for(let i=0;i<nd.childs.length;++i){
                 this.putNdsRecursively(nd.childs[i], ndsSet, resultWrapper, accuBeginLeft, subBeginTop);
                 accuBeginLeft+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+ndXDist;
             }
         }
-
-
-
-        console.log("nd", nd);
-        console.log("nd pos", posStyle);
-
     }
 
 
@@ -308,64 +247,7 @@ class MindDownLayoutSvc{
 
 
 
-    /**
-     * 对根节点的子树进行左右方向的计算，并返回左右子树的高度
-     */
-    setNdDirection = (ndsSet, resultWrapper) => {
-        //先假设所有节点都在右边
-        let leftH = 0;
-        let rightH = 0;
 
-        //如果根节点未展开，则不再继续计算
-        if(!ndsSet.tree.childs || 0===ndsSet.tree.childs.length || !ndsSet.expands[ndsSet.tree.id]){
-            return [leftH, rightH];
-        }
-
-        let sumNdCnt=0;
-        ndsSet.tree.childs.forEach((child,ind) => {
-            //child.left = false;//default right
-            resultWrapper.directions[child.id]=false;
-            rightH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child, ndsSet, resultWrapper);
-            ++sumNdCnt;
-        });
-        let dist = rightH;
-
-
-        //如果设置了强制所有节点都在右侧，则直接返回
-        if(ndsSet.tree.forceRight){
-            return [leftH, rightH];
-        }
-
-        // 如果根节点只有一个子节点，则直接返回
-        if(1===ndsSet.tree.childs.length){
-            return [leftH, rightH];
-        }
-
-        // 从最后一个节点开始，依次计算如果把节点放到左侧，是否两边高度差比之前小，如果是就移动，否则结束
-        let end = false;
-        let leftNdCnt=0;
-        [...ndsSet.tree.childs].reverse().forEach(child => {
-            if (end) {
-                return;
-            }
-            let h = this.getNdHeight(child,ndsSet, resultWrapper);
-            let newLeftH = leftH +(0<leftH?nodePaddingTop:0)+ h;//
-            let newRightH = rightH - h- (1<sumNdCnt-leftNdCnt?nodePaddingTop:0);
-            let newDist = Math.abs(newRightH - newLeftH);
-
-            if (newDist < dist) {
-                //child.left = true;
-                resultWrapper.directions[child.id]=true;
-                leftH = newLeftH;
-                rightH = newRightH;
-                dist = newDist;
-                ++leftNdCnt;
-                return;
-            }
-            end = true;
-        });
-        return [leftH, rightH];
-    }
 
     /**
      * 计算合适的节点位置与画布大小
