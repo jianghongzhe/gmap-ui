@@ -175,7 +175,7 @@ class MindDownLayoutSvc{
             baseLeft-=2;
             baseTop-=2;
         }else{
-            baseLeft-=10;
+            baseLeft-=12;
             baseTop+=3;
         }
 
