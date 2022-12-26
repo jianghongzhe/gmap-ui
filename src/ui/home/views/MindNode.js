@@ -12,7 +12,7 @@ import api from "../../../service/api";
  * 导图的节点
  * @param {*} props 
  */
-const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
+const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
 
     //根主题的样式，根据是否有文本之外的内容显示不同样式
     //有额外内容：显示一个边框
@@ -38,6 +38,7 @@ const MindNode=({nd, onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
         if(!nd){
             return {};
         }
+
         const allLevelStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
         return allLevelStyles[nd.lev>2 ? 2 : nd.lev];
     },[nd, centerThemeStyle]);

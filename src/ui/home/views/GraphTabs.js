@@ -36,7 +36,7 @@ const GraphTabs=(props)=>{
     /**
      * 节点内容的render props
      */
-    const ndContentRenderer=(nd)=>{
+    const ndContentRenderer=(nd, rootNd)=>{
         return <MindNode key={nd.id} nd={nd}
             onOpenLink={props.onOpenLink} 
             onOpenRef={props.onOpenRef}

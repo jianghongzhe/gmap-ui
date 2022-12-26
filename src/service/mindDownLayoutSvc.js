@@ -29,12 +29,178 @@ class MindDownLayoutSvc{
             height:h,
         };
 
+
+        //连线位置计算
+        let newLineStyles={};
+        ndsSet.list.forEach(nd=>{
+            if(!nd.parid){return;}
+            let styleResult=this.setLineStyle(ndsSet,nd.par,nd,result);
+            newLineStyles={...newLineStyles, ...styleResult};
+        });
+        result.lineStyles=newLineStyles;
+
         console.log("load style for down layout: ", result);
-
-
-
         return result;
     }
+
+
+
+    /**
+     * 设置节点之间的连接线
+     * @param {*} ndsSet
+     * @param {*} fromNd 父节点
+     * @param {*} toNd   子节点
+     * @param {*} resultWrapper
+     */
+    setLineStyle = (ndsSet, fromNd, toNd, resultWrapper) => {
+        if (!resultWrapper || !resultWrapper.ndStyles[fromNd.id] || !resultWrapper.ndStyles[toNd.id]) {
+            return {};
+        }
+
+        let color=toNd.color;// fromNd.color;
+        const y1 = parseInt(resultWrapper.ndStyles[fromNd.id].top+resultWrapper.rects[fromNd.id].height);
+        const y2 = parseInt(resultWrapper.ndStyles[toNd.id].top);
+        const distY=y2-y1;
+        const x1=parseInt(resultWrapper.ndStyles[fromNd.id].left+resultWrapper.rects[fromNd.id].width/2);
+        const x2=parseInt(resultWrapper.ndStyles[toNd.id].left+resultWrapper.rects[toNd.id].width/2);
+        const distX=Math.abs(x1-x2)+1;
+        const l2r=(x1<x2);
+
+        let result={};
+        result[toNd.id] = {
+            line:{
+                boxSizing:'border-box',
+                left: Math.min(x1,x2),
+                top: y1,
+                width: distX,
+                height: distY,
+                //backgroundColor:'lightgreen',
+            },
+            lineFrom:{
+                boxSizing:'border-box',
+                left:0,
+                top:0,
+                width:'100%',
+                height: distY/2,
+                borderBottom:`1px solid ${color}`,
+                borderLeft: l2r ? `1px solid ${color}` : "0px",
+                borderRight: l2r ?  "0px" :`1px solid ${color}`,
+            },
+            lineTo:{
+                boxSizing:'border-box',
+                width:'100%',
+                top: `${distY/2}px`,
+                left:0,
+                height: `${distY/2}px`,
+                borderRight: l2r ? `1px solid ${color}` : "0px",
+                borderLeft: l2r ?  "0px" :`1px solid ${color}`,
+            },
+            lineExp:{
+                display:'none',
+            },
+        };
+        return result;
+
+
+
+
+
+        //
+        // //rect只用于获取宽高
+        // let r1 = getRelaRect(resultWrapper.rects[fromNd.id]);
+        // let r2 = getRelaRect(resultWrapper.rects[toNd.id]);
+        //
+        // //其他四个位置需要进行样式计算
+        // r1.left = resultWrapper.ndStyles[fromNd.id].left;
+        // r1.top = resultWrapper.ndStyles[fromNd.id].top;
+        // r1.right = r1.left + r1.width;
+        // r1.bottom = r1.top + r1.height;
+        //
+        // r2.left = resultWrapper.ndStyles[toNd.id].left;
+        // r2.top = resultWrapper.ndStyles[toNd.id].top;
+        // r2.right = r2.left + r2.width;
+        // r2.bottom = r2.top + r2.height;
+        //
+        // //根节点->二级节点，连接线的纵向位置应该是中间->中间
+        // if(0===fromNd.lev){
+        //     r1.height=parseInt(r1.height/2);//+(nodePaddingTop/2);
+        //     r1.bottom=r1.top+r1.height;
+        //
+        //     r2.height=parseInt(r2.height/2);//+(nodePaddingTop/2);
+        //     r2.bottom=r2.top+r2.height;
+        // }
+        // //二级节点->三级节点，连接线的纵向位置应该是中间->下边
+        // if(1===fromNd.lev){
+        //     r1.height=parseInt(r1.height/2);//+(nodePaddingTop/2);
+        //     r1.bottom=r1.top+r1.height;
+        // }
+        //
+        //
+        // //左边r1 右边r2
+        // let reverseW = false;
+        // if (r1.left > r2.left) {
+        //     let t = null;
+        //     t = r1;
+        //     r1 = r2;
+        //     r2 = t;
+        //     reverseW = true;//子节点在父节点左边
+        // }
+        //
+        // let w = r2.left - r1.right;
+        // let t1 = r1.bottom - lineWid;
+        // let t2 = r2.bottom - lineWid;
+        //
+        // let line = {};
+        // let lineFrom = {};
+        // let lineTo = {};
+        // let lineExp={};
+        //
+        // //连接线起始与末尾高度一样，不需要其中的两个div
+        // if (t1 === t2) {
+        //     line = {
+        //         width: w,
+        //         left: r1.right,
+        //         height: lineWid,
+        //         top: t1,
+        //         borderBottom: `${lineWid}px solid ${color}`,
+        //     };
+        //
+        //     let result = {};
+        //     result[toNd.id] = { line, lineFrom, lineTo };
+        //     return result;
+        // }
+        //
+        //
+        // //高度不一致，但容器矩形位置可以确定
+        // line = {
+        //     width: w,
+        //     left: r1.right,
+        //     top: Math.min(t1, t2),
+        //     height: Math.abs(t1 - t2) + lineWid,
+        // };
+        //
+        //
+        //
+        // //左下右上
+        // if (t1 > t2) {
+        //     let result = {};
+        //     this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, false, reverseW);
+        //     result[toNd.id] = { line, lineFrom, lineTo, lineExp };
+        //     // console.log(result);
+        //     return result;
+        // }
+        //
+        // //左上右下
+        // if (t1 < t2) {
+        //     let result = {};
+        //     this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, true, reverseW);
+        //     result[toNd.id] = { line, lineFrom, lineTo, lineExp };
+        //     // console.log(result);
+        //     return result;
+        // }
+
+        return {};
+    };
 
 
     /**

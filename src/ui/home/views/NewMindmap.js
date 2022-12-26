@@ -45,7 +45,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
 
     const getNdStyle=useCallback((nd)=>{
-        let borderStyle=getNdBorderStyle(nd);
+        let borderStyle=getNdBorderStyle(nd, ds.tree);
         const hasNdStyle=(nd && ndStyles && ndStyles[nd.id]);
         let positionStyle=(hasNdStyle ? ndStyles[nd.id]: {});
         let result={...borderStyle, ...positionStyle};
@@ -59,7 +59,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
             };
         }
         return result;
-    },[ndStyles]);
+    },[ndStyles, ds]);
 
 
     const getLineStyle=useCallback((nd,type)=>{
@@ -147,7 +147,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                 ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                     {/* 节点内容  css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}*/}
                     <div className='item'  id={nd.id} style={getNdStyle(nd)}>
-                        {actNdRenderer(nd)}
+                        {actNdRenderer(nd, ds.tree)}
                     </div>
 
                     {/* 节点到父节点的连接线 */}
@@ -192,7 +192,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
 
 
-const getNdBorderStyle=(nd)=>{
+const getNdBorderStyle=(nd, rootNd)=>{
     if(!nd){
         return {};
     }
@@ -208,7 +208,14 @@ const getNdBorderStyle=(nd)=>{
             border:`1px solid ${nd.color}`
         };
     }
-    //其他节点使用下边框
+    // 其他节点
+    // 若为上下结构，使用四面边框，否则使用下边框
+    if(true===rootNd.down || true===rootNd.up){
+        return {
+            borderRadius: 2,
+            border:`1px solid ${nd.color}`
+        };
+    }
     return {borderBottom:`1px solid ${nd.color}`};
 }
 

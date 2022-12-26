@@ -548,6 +548,7 @@ class MindHLayoutSvc {
             newLineStyles={...newLineStyles, ...styleResult};
         });
         result.lineStyles=newLineStyles;
+        console.log("hlayout lineStyles", result.lineStyles)
         return result;
     }
 }
