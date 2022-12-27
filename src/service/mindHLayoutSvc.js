@@ -173,6 +173,17 @@ class MindHLayoutSvc {
     putSubNds = (startT, startL, parNd, ndsSet, left = false, resultWrapper=null) => {
         if(!ndsSet.expands[parNd.id]){return;}
 
+        // 子节点y坐标起始位置校正
+        // 如果子节点高度之和小于父节点本身高度，则起始位置增加两者差值的一半
+        const parHeight= parseInt(resultWrapper.rects[parNd.id].height);
+        let childAllHeight=0;
+        parNd.childs.forEach((nd, childInd) => {
+            childAllHeight+=this.getNdHeight(nd,ndsSet,resultWrapper)+(0<childInd ? nodePaddingTop : 0);
+        });
+        if(childAllHeight<parHeight){
+            startT=parseInt(startT+(parHeight-childAllHeight)/2);
+        }
+
         parNd.childs.forEach(nd => {
             //往右排
             if (!left) {
