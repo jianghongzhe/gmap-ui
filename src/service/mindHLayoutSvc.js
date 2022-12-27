@@ -1,7 +1,53 @@
 // import mindmapSvc from './mindmapSvc';
 
+import {parseInt} from "lodash";
+
 class MindHLayoutSvc {
-    
+
+    /**
+     * 加载样式信息：需要在第一次渲染之后再调用，否则dom还没生成
+     * @param {*} ndsSet
+     */
+    loadStyles=(ndsSet)=>{
+        if(!ndsSet){return;}
+
+        let result={
+            rects:{},
+            expBtnRects:{},
+            directions:{},
+            ndStyles:{},
+            expBtnStyles:{},
+            wrapperStyle:{},
+            lineStyles:{},
+        };
+
+        //加载节点和折叠按钮所占区域大小
+        ndsSet.list.forEach(nd=>{
+            result.rects[nd.id]=document.querySelector(`#${nd.id}`).getBoundingClientRect();
+            if(nd.childs && 0<nd.childs.length){
+                result.expBtnRects[nd.id]=document.querySelector(`#expbtn_${nd.id}`).getBoundingClientRect();
+            }
+        });
+
+        //节点位置与画布大小计算
+        let [w,h]=this.putNds(ndsSet, result);
+        result.wrapperStyle={
+            width:w,
+            height:h,
+        };
+
+        //连线位置计算
+        let newLineStyles={};
+        ndsSet.list.forEach(nd=>{
+            if(!nd.parid){return;}
+            let styleResult=this.setLineStyle(ndsSet,nd.par,nd,result);
+            newLineStyles={...newLineStyles, ...styleResult};
+        });
+        result.lineStyles=newLineStyles;
+        console.log("hlayout lineStyles", result.lineStyles)
+        return result;
+    }
+
     /**
      * 获得节点和其所有子节点整个区域所占的高
      */
@@ -288,7 +334,6 @@ class MindHLayoutSvc {
      */
     setLineStyle = (ndsSet, fromNd, toNd, resultWrapper) => {
         if (!resultWrapper || !resultWrapper.ndStyles[fromNd.id] || !resultWrapper.ndStyles[toNd.id]) {
-            console.log("没有ndStyles");
             return {};
         }
         let color=toNd.color;// fromNd.color;
@@ -307,6 +352,84 @@ class MindHLayoutSvc {
         r2.top = resultWrapper.ndStyles[toNd.id].top;
         r2.right = r2.left + r2.width;
         r2.bottom = r2.top + r2.height;
+
+
+        // 根节点->二级节点
+        if(0===fromNd.lev){
+            // 根节点的中心点
+            const x1 = parseInt((r1.left+r1.right)/2);
+            const y1 = parseInt((r1.top+r1.bottom)/2);
+
+            // 子节点垂直的中心点
+            // 子节点水平位置：子节点在根节点右侧时为子节点左侧位置，子节点在根节点右侧时为子节点右侧位置
+            const x2 = r1.left<r2.left ? parseInt(r2.left+1) : parseInt(r2.right);//  parseInt((r2.left+r2.right)/2);
+            const y2 = parseInt((r2.top+r2.bottom)/2);
+
+            const w=Math.abs(x2-x1);
+            const h=Math.abs(y2-y1);
+            const top= Math.min(y1,y2);
+            const left=Math.min(x1,x2);
+            const middleTop=parseInt((y1+y2)/2-1);
+            const borderExp=`1px solid ${color}`;
+
+            // 起始结束位置高度差比较小，特殊处理，使用一个1px高的div表示连接线
+            if(h<=3){
+                return {
+                    [toNd.id]: {
+                        line:{
+                            boxSizing:'border-box',
+                            top:`${middleTop}px`,
+                            left:`${left}px`,
+                            width:`${w}px`,
+                            height:`1px`,
+                            backgroundColor: color,
+                        },
+                        lineFrom: {display:'none',},
+                        lineTo: {display:'none',},
+                        lineExp: {display:'none',},
+                    }
+                };
+            }
+
+            const baseLinePart={
+                boxSizing:'border-box',
+                top:`${top}px`,
+                left:`${left}px`,
+                width:`${w}px`,
+                height:`${h}px`,
+            };
+
+            // 通过边框设置连接线
+            // 左->右，有左边框
+            // 右->左，有右边框
+            // 上->下，有下边框
+            // 下->上，有上边框
+            // 左上->右下，设置左下边框半径
+            // 左下->右上，设置左上边框半径
+            // 右上->左下，设置右下边框半径
+            // 右下->左上，设置右上边框半径
+            const result={
+                [toNd.id]: {
+                    line:   {
+                        ...baseLinePart,
+                        borderLeft: x1<x2 ? borderExp : '0',
+                        borderRight: x1>x2 ? borderExp : '0',
+                        borderBottom: ( y1<y2) ? borderExp : '0',
+                        borderTop: (y1>y2) ? borderExp : '0',
+
+                        borderBottomLeftRadius: (x1<x2 && y1<y2) ? '100% 100%' : "0",
+                        borderTopLeftRadius: (x1<x2 && y1>y2) ? '100% 100%' : '0',
+                        borderBottomRightRadius: (x1>x2 && y1<y2) ? '100% 100%' : '0',
+                        borderTopRightRadius: (x1>x2 && y1>y2) ? '100% 100%' : '0',
+                    },
+                    lineFrom: {display:'none',},
+                    lineTo: {display:'none',},
+                    lineExp: {display:'none',},
+                }
+            };
+            return result;
+        }
+
 
         //根节点->二级节点，连接线的纵向位置应该是中间->中间
         if(0===fromNd.lev){
@@ -519,49 +642,7 @@ class MindHLayoutSvc {
     
 
 
-    /**
-     * 加载样式信息：需要在第一次渲染之后再调用，否则dom还没生成
-     * @param {*} ndsSet
-     */
-    loadStyles=(ndsSet)=>{
-        if(!ndsSet){return;}
 
-        let result={
-            rects:{},
-            expBtnRects:{},           
-            directions:{},
-            ndStyles:{},
-            expBtnStyles:{},
-            wrapperStyle:{},
-            lineStyles:{},
-        };
-
-        //加载节点和折叠按钮所占区域大小
-        ndsSet.list.forEach(nd=>{
-            result.rects[nd.id]=document.querySelector(`#${nd.id}`).getBoundingClientRect();
-            if(nd.childs && 0<nd.childs.length){
-                result.expBtnRects[nd.id]=document.querySelector(`#expbtn_${nd.id}`).getBoundingClientRect();
-            }
-        });
-
-        //节点位置与画布大小计算
-        let [w,h]=this.putNds(ndsSet, result);
-        result.wrapperStyle={
-            width:w,
-            height:h,
-        };
-
-        //连线位置计算
-        let newLineStyles={};
-        ndsSet.list.forEach(nd=>{
-            if(!nd.parid){return;}
-            let styleResult=this.setLineStyle(ndsSet,nd.par,nd,result);
-            newLineStyles={...newLineStyles, ...styleResult};
-        });
-        result.lineStyles=newLineStyles;
-        console.log("hlayout lineStyles", result.lineStyles)
-        return result;
-    }
 }
 
 

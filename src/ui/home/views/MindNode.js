@@ -538,6 +538,7 @@ const getCenterThemeStyle =(hasExtraItems) =>  {
     //除了文本内容，还有别的项
     if(hasExtraItems){
         baseStyle.border='2px solid #108ee9';
+        baseStyle.backgroundColor= '#FFF';
         return baseStyle;
     }
 
