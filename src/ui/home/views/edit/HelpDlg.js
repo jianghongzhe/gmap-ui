@@ -13,8 +13,6 @@ import imgUrlEchart from '../../../../assets/graph_echart.png';
 
 const EnhDlg=withEnh(Modal);
 
-const { TabPane } = Tabs;
-
 /**
  * 帮助对话框
  * @param {*} props 
@@ -29,381 +27,414 @@ const HelpDlg=(props)=>{
                 zIndex={2000}
                 onCancel={props.onCancel}>
             
-            <Tabs tabPosition='left' css={tabsStyle}>
-                <TabPane tab="节点部分" key="1" className='tabitem'>
-                    <div className='wrapper'>
-                        <table css={helpTableStyle}>
-                            <tbody>
-                            <tr>
-                                <th>类型</th>
-                                <th>用法示例</th>
-                            </tr>
-                            {
-                                nodes.map((item,ind)=>(
-                                    <tr key={ind}>
-                                        <td>{item[0]}</td>
-                                        <td>
-                                            {
-                                                item[1].map((subitem,subInd)=>(
-                                                    <div key={''+ind+"_"+subInd}>
+            <Tabs tabPosition='left' css={tabsStyle}
+                items={[
+                    {
+                        label:'节点部分',
+                        key:"1",
+                        className:'tabitem',
+                        children: (
+                            <div className='wrapper'>
+                                <table css={helpTableStyle}>
+                                    <tbody>
+                                    <tr>
+                                        <th>类型</th>
+                                        <th>用法示例</th>
+                                    </tr>
+                                    {
+                                        nodes.map((item,ind)=>(
+                                            <tr key={ind}>
+                                                <td>{item[0]}</td>
+                                                <td>
+                                                    {
+                                                        item[1].map((subitem,subInd)=>(
+                                                            <div key={''+ind+"_"+subInd}>
+                                                                <div>
+                                                                    <div>{subitem[0]}</div>
+                                                                    <div dangerouslySetInnerHTML={{__html:subitem[1]}}></div>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    }
+
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    },
+                    {
+                        label:'引用部分',
+                        key:"2",
+                        className:'tabitem',
+                        children: (
+                            <div className='wrapper'>
+                                <table css={helpTableStyle}>
+                                    <tbody>
+                                    <tr>
+                                        <th>类型</th>
+                                        <th>用法示例</th>
+                                    </tr>
+                                    {
+                                        refs.map((item,ind)=>(
+                                            <tr key={ind}>
+                                                <td>{item[0]}</td>
+                                                <td>
+                                                    <div>
                                                         <div>
-                                                            <div>{subitem[0]}</div>
-                                                            <div dangerouslySetInnerHTML={{__html:subitem[1]}}></div>
+                                                            <div>{item[1]}</div>
+                                                            <div>{item[2]}</div>
                                                         </div>
                                                     </div>
-                                                ))
-                                            }
-                                            
-                                        </td>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                    </tbody>
+                                </table>
+                                <div css={{marginTop:'10px',}}>
+                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
+                                </div>
+                                <div>
+                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex```）</Button>
+                                </div>
+                                <div>
+                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid```）</Button>
+                                </div>
+                                <div>
+                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow```）</Button>
+                                </div>
+                                <div>
+                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence```）</Button>
+                                </div>
+                            </div>
+                        )
+                    },
+                    {
+                        label: 'markdown扩展',
+                        key: "3",
+                        className: 'tabitem',
+                        children: (
+                            <div className='wrapper'>
+                                <table css={helpTableStyle}>
+                                    <tbody>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>用法示例</th>
                                     </tr>
-                                ))
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </TabPane>
-                <TabPane tab="引用部分" key="2" className='tabitem'>
-                    <div className='wrapper'>
-                        <table css={helpTableStyle}>
-                            <tbody>
-                            <tr>
-                                <th>类型</th>
-                                <th>用法示例</th>
-                            </tr>
-                            {
-                                refs.map((item,ind)=>(
-                                    <tr key={ind}>
-                                        <td>{item[0]}</td>
-                                        <td>
-                                            <div>
-                                                <div>
-                                                    <div>{item[1]}</div>
-                                                    <div>{item[2]}</div>
-                                                </div>
-                                            </div>
-                                        </td>
+                                    {
+                                        markdownExts.map((item, ind) => (
+                                            <tr key={ind}>
+                                                <td>{item[0]}</td>
+                                                <td>
+                                                    <div>
+                                                        <div>
+                                                            <div>{item[1]}</div>
+                                                            <div>{item[2]}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    },
+                    {
+                        label: '自动完成',
+                        key: "4",
+                        className: 'tabitem',
+                        children: (
+                            <div className='wrapper'>
+                                <table css={helpTableStyle}>
+                                    <tbody>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>用法示例</th>
                                     </tr>
-                                ))
-                            }
-                            </tbody>
-                        </table>
-                        <div css={{marginTop:'10px',}}>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
-                        </div>
-                        <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex```）</Button>
-                        </div>
-                        <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid```）</Button>
-                        </div>
-                        <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow```）</Button>
-                        </div>
-                        <div>
-                            <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence```）</Button>
-                        </div>
-                    </div>
-                </TabPane>
-                <TabPane tab="markdown扩展" key="3" className='tabitem'>
-                    <div className='wrapper'>
-                        <table css={helpTableStyle}>
-                            <tbody>
-                            <tr>
-                                <th>名称</th>
-                                <th>用法示例</th>
-                            </tr>
-                            {
-                                markdownExts.map((item,ind)=>(
-                                    <tr key={ind}>
-                                        <td>{item[0]}</td>
-                                        <td>
-                                            <div>
-                                                <div>
-                                                    <div>{item[1]}</div>
-                                                    <div>{item[2]}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </TabPane>
-                <TabPane tab="自动完成" key="4" className='tabitem'>
-                    <div className='wrapper'>
-                        <table css={helpTableStyle}>
-                            <tbody>
-                            <tr>
-                                <th>名称</th>
-                                <th>用法示例</th>
-                            </tr>
-                            {
-                                autoCompletes.map((item,ind)=>(
-                                    <tr key={ind}>
-                                        <td>{item[0]}</td>
-                                        <td>
-                                            <div>
-                                                <div>
-                                                    <div dangerouslySetInnerHTML={{__html:item[1]}}></div>
-                                                    <div>{item[2]}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </TabPane>
-                <TabPane tab="Echart图" key="5" className='tabitem'>
-                    <div className='wrapper'>
-                    <table css={helpTableStyle}>
-                            <tbody>
-                            <tr>
-                                <th style={{width:'100px'}}>图表名称</th>
-                                <th>用法示例</th>
-                                <th>图示</th>
-                            </tr>
-                            <tr>
-                                <td>饼图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem' style={{width:'200px'}}> 
-                                                ```echart<br/>
-                                                pie<br/>
-                                                title 饼图<br/>
-                                                w 50%<br/>
-                                                h 200px<br/>
-                                                "食品": 500<br/>
-                                                "娱乐": 600<br/>
-                                                "医疗": 500<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlPie} style={{width:'320px'}} alt="饼图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>柱状图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>
-                                                ```echart<br/>
-                                                bar<br/>
-                                                title 柱状图<br/>
-                                                w 50%<br/>
-                                                h 200px<br/>
-                                                x 横轴名称<br/>
-                                                y 纵轴名称<br/>
-                                                ,2018,2019,2020<br/>
-                                                食品,500,400,300<br/>
-                                                娱乐,600,400,600<br/>
-                                                医疗,500,200,300<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlBar} style={{width:'320px'}} alt="柱状图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>折线图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>
-                                                ```echart<br/>
-                                                line<br/>
-                                                title 折线图<br/>
-                                                w 50%<br/>
-                                                h 200px<br/>
-                                                x 横轴名称<br/>
-                                                y 纵轴名称<br/>
-                                                ,2018,2019,2020<br/>
-                                                食品,500,400,300<br/>
-                                                娱乐,600,400,600<br/>
-                                                医疗,500,200,300<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlLine} style={{width:'320px'}} alt="折线图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>堆积图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>
-                                                ```echart<br/>
-                                                stack<br/>
-                                                title 堆积图<br/>
-                                                w 50%<br/>
-                                                h 200px<br/>
-                                                x 横轴名称<br/>
-                                                y 纵轴名称<br/>
-                                                ,2018,2019,2020<br/>
-                                                食品,500,400,300<br/>
-                                                娱乐,600,400,600<br/>
-                                                医疗,500,200,300<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlStack} style={{width:'320px'}} alt="堆积图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>柱线混合图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>
-                                                ```echart<br/>
-                                                bar-line<br/>
-                                                title 柱线混合图<br/>
-                                                w 50%<br/>
-                                                h 200px<br/>
-                                                x 横轴名称<br/>
-                                                y 纵轴名称<br/>
-                                                ,2018,2019,2020<br/>
-                                                stack 食品<br/>
-                                                - bar,三餐,500,400,300<br/>
-                                                - bar,食品,500,400,300<br/>
-                                                bar,娱乐,600,400,600<br/>
-                                                line,参考值,500,200,300<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlMix} style={{width:'320px'}} alt="柱线混合图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>散点图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>
-                                                ```echart<br/>
-                                                scatter<br/>
-                                                title 散点图<br/>
-                                                w 50%<br/>
-                                                h 200px<br/>
-                                                x 横轴名称<br/>
-                                                y 纵轴名称<br/>
-                                                第一类, 15.0 8.04, 8.07 7.97, 13.0 7.58<br/>
-                                                第二类, 9.05 8.81, 11.0 8.33, 14.0 7.96<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlScatter} style={{width:'320px'}} alt="散点图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>关系图</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>     
-                                                ```echart<br/>
-                                                graph<br/>
-                                                title 关系图<br/>
-                                                w 100%<br/>
-                                                h 400px<br/>
-                                                张三,李四,同学<br/>
-                                                李四,王五,夫妻<br/>
-                                                张三,王五,发小<br/>
-                                                张三,小明<br/>
-                                                张三,小华<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlRela} style={{width:'320px'}} alt="关系图"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>使用json配置</td>
-                                <td>
-                                    <div>
-                                        <div>
-                                            <div className='chartItem'>
-                                                ```echart<br/>
-                                                {'{'}<br/>
-                                                    <div css={{marginLeft:'20px'}}>w: '50%',</div>
-                                                    <div css={{marginLeft:'20px'}}>h: '200px',</div>
-                                                    <div css={{marginLeft:'20px'}}>{'//'} echart官方配置项</div>
-                                                {'}'}<br/>
-                                                ```
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style={{textAlign:'center'}}>
-                                    <img src={imgUrlEchart} style={{width:'100px'}} alt="自定义json配置"/>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </TabPane>
-                <TabPane tab="快捷键" key="6" className='tabitem'>
-                    <div className='wrapper'>
-                        <table css={helpTableStyle}>
-                            <tbody>
-                            {
-                                shortcuts.map((item,ind)=><React.Fragment key={ind}>
-                                    <tr key={ind}>
-                                        <th colSpan='2' css={{fontWeight:'bold',}}>{item.title}</th>
+                                    {
+                                        autoCompletes.map((item,ind)=>(
+                                            <tr key={ind}>
+                                                <td>{item[0]}</td>
+                                                <td>
+                                                    <div>
+                                                        <div>
+                                                            <div dangerouslySetInnerHTML={{__html:item[1]}}></div>
+                                                            <div>{item[2]}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    },
+                    {
+                        label: 'Echart图',
+                        key: "5",
+                        className: 'tabitem',
+                        children: (
+                            <div className='wrapper'>
+                                <table css={helpTableStyle}>
+                                    <tbody>
+                                    <tr>
+                                        <th style={{width:'100px'}}>图表名称</th>
+                                        <th>用法示例</th>
+                                        <th>图示</th>
                                     </tr>
                                     <tr>
-                                        <th>按键</th>
-                                        <th>功能</th>
-                                    </tr>
-                                    <React.Fragment>
-                                    {
-                                        item.rows.map((row,rowInd)=><tr key={ind+"_"+rowInd}>
-                                            <td>{row[0]}</td>
-                                            <td>
+                                        <td>饼图</td>
+                                        <td>
+                                            <div>
                                                 <div>
-                                                    <div>
-                                                        <div>{row[1]}</div>
-                                                        <div></div>
+                                                    <div className='chartItem' style={{width:'200px'}}>
+                                                        ```echart<br/>
+                                                        pie<br/>
+                                                        title 饼图<br/>
+                                                        w 50%<br/>
+                                                        h 200px<br/>
+                                                        "食品": 500<br/>
+                                                        "娱乐": 600<br/>
+                                                        "医疗": 500<br/>
+                                                        ```
                                                     </div>
                                                 </div>
-                                            </td>
-                                        </tr>)
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlPie} style={{width:'320px'}} alt="饼图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>柱状图</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        bar<br/>
+                                                        title 柱状图<br/>
+                                                        w 50%<br/>
+                                                        h 200px<br/>
+                                                        x 横轴名称<br/>
+                                                        y 纵轴名称<br/>
+                                                        ,2018,2019,2020<br/>
+                                                        食品,500,400,300<br/>
+                                                        娱乐,600,400,600<br/>
+                                                        医疗,500,200,300<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlBar} style={{width:'320px'}} alt="柱状图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>折线图</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        line<br/>
+                                                        title 折线图<br/>
+                                                        w 50%<br/>
+                                                        h 200px<br/>
+                                                        x 横轴名称<br/>
+                                                        y 纵轴名称<br/>
+                                                        ,2018,2019,2020<br/>
+                                                        食品,500,400,300<br/>
+                                                        娱乐,600,400,600<br/>
+                                                        医疗,500,200,300<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlLine} style={{width:'320px'}} alt="折线图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>堆积图</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        stack<br/>
+                                                        title 堆积图<br/>
+                                                        w 50%<br/>
+                                                        h 200px<br/>
+                                                        x 横轴名称<br/>
+                                                        y 纵轴名称<br/>
+                                                        ,2018,2019,2020<br/>
+                                                        食品,500,400,300<br/>
+                                                        娱乐,600,400,600<br/>
+                                                        医疗,500,200,300<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlStack} style={{width:'320px'}} alt="堆积图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>柱线混合图</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        bar-line<br/>
+                                                        title 柱线混合图<br/>
+                                                        w 50%<br/>
+                                                        h 200px<br/>
+                                                        x 横轴名称<br/>
+                                                        y 纵轴名称<br/>
+                                                        ,2018,2019,2020<br/>
+                                                        stack 食品<br/>
+                                                        - bar,三餐,500,400,300<br/>
+                                                        - bar,食品,500,400,300<br/>
+                                                        bar,娱乐,600,400,600<br/>
+                                                        line,参考值,500,200,300<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlMix} style={{width:'320px'}} alt="柱线混合图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>散点图</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        scatter<br/>
+                                                        title 散点图<br/>
+                                                        w 50%<br/>
+                                                        h 200px<br/>
+                                                        x 横轴名称<br/>
+                                                        y 纵轴名称<br/>
+                                                        第一类, 15.0 8.04, 8.07 7.97, 13.0 7.58<br/>
+                                                        第二类, 9.05 8.81, 11.0 8.33, 14.0 7.96<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlScatter} style={{width:'320px'}} alt="散点图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>关系图</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        graph<br/>
+                                                        title 关系图<br/>
+                                                        w 100%<br/>
+                                                        h 400px<br/>
+                                                        张三,李四,同学<br/>
+                                                        李四,王五,夫妻<br/>
+                                                        张三,王五,发小<br/>
+                                                        张三,小明<br/>
+                                                        张三,小华<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlRela} style={{width:'320px'}} alt="关系图"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>使用json配置</td>
+                                        <td>
+                                            <div>
+                                                <div>
+                                                    <div className='chartItem'>
+                                                        ```echart<br/>
+                                                        {'{'}<br/>
+                                                        <div css={{marginLeft:'20px'}}>w: '50%',</div>
+                                                        <div css={{marginLeft:'20px'}}>h: '200px',</div>
+                                                        <div css={{marginLeft:'20px'}}>{'//'} echart官方配置项</div>
+                                                        {'}'}<br/>
+                                                        ```
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{textAlign:'center'}}>
+                                            <img src={imgUrlEchart} style={{width:'100px'}} alt="自定义json配置"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    },
+                    {
+                        label: '快捷键',
+                        key: "6",
+                        className: 'tabitem',
+                        children: (
+                            <div className='wrapper'>
+                                <table css={helpTableStyle}>
+                                    <tbody>
+                                    {
+                                        shortcuts.map((item,ind)=><React.Fragment key={ind}>
+                                            <tr key={ind}>
+                                                <th colSpan='2' css={{fontWeight:'bold',}}>{item.title}</th>
+                                            </tr>
+                                            <tr>
+                                                <th>按键</th>
+                                                <th>功能</th>
+                                            </tr>
+                                            <React.Fragment>
+                                                {
+                                                    item.rows.map((row,rowInd)=><tr key={ind+"_"+rowInd}>
+                                                        <td>{row[0]}</td>
+                                                        <td>
+                                                            <div>
+                                                                <div>
+                                                                    <div>{row[1]}</div>
+                                                                    <div></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>)
+                                                }
+                                            </React.Fragment>
+                                        </React.Fragment>)
                                     }
-                                    </React.Fragment>
-                                </React.Fragment>)
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </TabPane>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    }
+                ]}
+            >
             </Tabs>
         </EnhDlg>
     );

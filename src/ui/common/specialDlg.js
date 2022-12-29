@@ -9,6 +9,15 @@
 const withEnh=(WrappedDlg)=>{
     return (props)=>{
         const {title,footer,noTitle,noFooter,size,backtop,children, ...otherProps} =props;
+
+        // 对话框中visible属性已弃用，改为open
+        let otherPropsEx=otherProps;
+        if('undefined'!==typeof (otherProps.visible)){
+            let {visible, ...tmp}=otherProps;
+            otherPropsEx={...tmp, open:visible};
+        }
+
+
         let enhProps={};
 
         //标题和底部
@@ -58,9 +67,9 @@ const withEnh=(WrappedDlg)=>{
         }
 
         if(wrapperProps){
-            return <WrappedDlg {...enhProps} {...otherProps}><div {...wrapperProps}>{children}</div></WrappedDlg>;
+            return <WrappedDlg {...enhProps} {...otherPropsEx}><div {...wrapperProps}>{children}</div></WrappedDlg>;
         }
-        return <WrappedDlg {...enhProps} {...otherProps}>{children}</WrappedDlg>;
+        return <WrappedDlg {...enhProps} {...otherPropsEx}>{children}</WrappedDlg>;
     }
 };
 

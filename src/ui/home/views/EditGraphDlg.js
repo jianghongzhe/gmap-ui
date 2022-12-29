@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Button, Input, List, Modal, Tag} from 'antd';
-import {QuestionCircleOutlined, TableOutlined, TagOutlined} from '@ant-design/icons';
+import {Button, Input, List, Modal} from 'antd';
+import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
 import {tw} from 'gstyle-creater/src';
 
 import {withEnh} from '../../common/specialDlg';
@@ -13,8 +13,6 @@ import TableEditDlg from './edit/TableEditDlg';
 import {useTableEditDlg} from "../../../hooks/tableEditDlg";
 import {useRefNavDlg} from "../../../hooks/refNavDlg";
 import {useColorPicker} from "../../../hooks/colorPicker";
-import {useMemoizedFn} from "ahooks";
-import {useChange} from "../../../common/commonHooks";
 import TagItem from "../../common/TagItem";
 
 
@@ -137,7 +135,7 @@ const EditGraphDlg=(props)=>{
 
             <Modal
                 title={refNavDlgTitle}
-                visible={refNavDlgVisible}
+                open={refNavDlgVisible}
                 onCancel={hideAllDlg}
                 width={800}
                 footer={null}>

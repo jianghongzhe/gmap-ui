@@ -57,7 +57,7 @@ const NewGraphDlg=(props)=>{
     
     return (
         <Modal  title={dlgTitle}
-                visible={props.visible}
+                open={props.visible}
                 onOk={onOk}
                 onCancel={props.onCancel}
                 width={700}>

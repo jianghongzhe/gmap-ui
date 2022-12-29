@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect} from 'react';
-import {Tabs, Button, Badge} from 'antd';
-import { PlusCircleOutlined,MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
+import {Tabs, Button} from 'antd';
+import { MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
 
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
@@ -8,9 +8,6 @@ import keyDetector from 'key-detector/src';
 import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
-
-const { TabPane } = Tabs;
-
 
 
 /**
@@ -159,22 +156,25 @@ const GraphTabs=(props)=>{
 
     
     
-    const result= <React.Fragment>
+    return (<React.Fragment>
         <Tabs
             hideAdd={true}
             type="editable-card"
             activeKey={activeKey}
             css={{ height:'calc(100vh - 64px)', 'backgroundColor': 'white' }}
             onChange={setAssignedTabKey}
-            onEdit={onEditTab}>
-            {
-                panes.map((pane,ind) => (
-                    <TabPane tab={
+            onEdit={onEditTab}
+            items={
+                panes.map((pane,ind) => ({
+                    key: pane.key,
+                    label: (
                         <span>
-                            {pane.key===activeKey ? <FileMarkdownOutlined /> : <FileOutlined/>}
+                            {pane.key === activeKey ? <FileMarkdownOutlined/> : <FileOutlined/>}
                             {pane.title}
                         </span>
-                    } key={pane.key} closable={true}>
+                    ),
+                    closable: true,
+                    children: (
                         <div css={getTabItemContainerStyle(tabContentH)}>
                             <NewMindmap
                                 ind={ind}
@@ -183,14 +183,11 @@ const GraphTabs=(props)=>{
                                 ndExpBtnRenderer={ndExpBtnRenderer}
                             />
                         </div>
-                    </TabPane>
-                ))
+                    )
+                }))
             }
-        </Tabs>
-    </React.Fragment>;
-
-    
-    return result;
+        />
+    </React.Fragment>);
 }
 
 

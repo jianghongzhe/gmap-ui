@@ -301,15 +301,6 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
     const [ctxMenuItems, setCtxMenuItems] = useRafState([]);
 
 
-    /**
-     * 右键菜单的点击事件
-     * @type {(function(*): void)|*}
-     */
-    const onCtxMenuClick=useMemoizedFn((txt)=>{
-        console.log("clicked", txt);
-    });
-
-
 
     const onOpenChange=useMemoizedFn((open)=>{
         // 当tooltip关闭时、或地址中包含插值参数时，不设置右键菜单项
