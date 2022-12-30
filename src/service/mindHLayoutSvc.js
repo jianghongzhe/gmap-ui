@@ -157,16 +157,7 @@ class MindHLayoutSvc {
         }
     }
 
-    /**
-     * 计算指定节点与其子节点间的水平距离
-     * @param nd 指定节点
-     * @param ndsSet 节点对象集合
-     * @param resultWrapper 节点相关参数
-     * @param ndLev 节点层级：0、1、2...
-     */
-    calcXDist=(nd, ndsSet, resultWrapper, ndLev)=>{
-        // TODO 优化：取节点实际占用的高度部分，而不是节点子树占用的部分，计算高度差时考虑连接线时从节点中心发出还是节点底部发出
-    }
+
 
 
     /**
@@ -178,12 +169,8 @@ class MindHLayoutSvc {
     putNds = (ndsSet, resultWrapper) => {
         let [leftH, rightH] = this.setNdDirection(ndsSet, resultWrapper);
 
-
-
-
-        const xDist = calcNodeXDist(Math.max(leftH, rightH), 0);
-        // console.log("leftH, rightH",leftH+" "+ rightH);
-        // console.log("根距离",xDist);
+        // 计算根节点与其子节点间的水平距离
+        const xDist =this.calcXDist(ndsSet.tree, ndsSet, resultWrapper);
 
         let currLeftTop = (leftH < rightH ? parseInt((rightH - leftH) / 2) : 0);
         let currRightTop = (rightH < leftH ? parseInt((leftH - rightH) / 2) : 0);
@@ -205,34 +192,29 @@ class MindHLayoutSvc {
         if(ndsSet.expands[ndsSet.tree.id]){
             //左
             ndsSet.tree.childs.filter(nd =>resultWrapper.directions[nd.id]).forEach(nd => {
+                // 设置根节点的子节点的位置，并递归设置再下层节点的位置
                 let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
-                let l = parseInt(rootLoc[0] - xDist/*ndXDistRoot*/ -resultWrapper.rects[nd.id].width);//根节点x - 空隙 - 节点本身宽度
+                let l = parseInt(rootLoc[0] - xDist -resultWrapper.rects[nd.id].width);//根节点x - 空隙 - 节点本身宽度
                 let t = parseInt(currLeftTop + (allHeight - resultWrapper.rects[nd.id].height) / 2);
                 resultWrapper.ndStyles[nd.id] = { left: l, top: t }
                 this.putExpBtn(ndsSet,nd,l,t,true, resultWrapper);
 
-
-
-                const subXDist = calcNodeXDist(this.getAllChildHeight(nd, ndsSet, resultWrapper), 1);
-                //
-                // if(nd.str.includes("常用")){
-                //     console.log("常用h", this.getAllChildHeight(nd, ndsSet, resultWrapper)+" "+subXDist);
-                // }
-
-                this.putSubNds(currLeftTop, l - subXDist/*ndXDist*/, nd, ndsSet, true, resultWrapper);
+                const subXDist =this.calcXDist(nd, ndsSet, resultWrapper);
+                this.putSubNds(currLeftTop, l - subXDist, nd, ndsSet, true, resultWrapper);
                 currLeftTop += allHeight+nodePaddingTop;//
             });
 
             //右
             ndsSet.tree.childs.filter(nd => !resultWrapper.directions[nd.id]).forEach(nd => {
+                // 设置根节点的子节点的位置，并递归设置再下层节点的位置
                 let allHeight = this.getNdHeight(nd,ndsSet,resultWrapper);
-                let l = parseInt(rootLoc[0] +resultWrapper.rects[ndsSet.tree.id].width + xDist/*ndXDistRoot*/);//根节点x + 根节点宽 + 空隙
+                let l = parseInt(rootLoc[0] +resultWrapper.rects[ndsSet.tree.id].width + xDist);//根节点x + 根节点宽 + 空隙
                 let t = parseInt(currRightTop + (allHeight - resultWrapper.rects[nd.id].height) / 2);
                 resultWrapper.ndStyles[nd.id] = { left: l, top: t, }
                 this.putExpBtn(ndsSet,nd,l,t,false, resultWrapper);
 
-                const subXDist = calcNodeXDist(this.getAllChildHeight(nd, ndsSet, resultWrapper), 1);
-                this.putSubNds(currRightTop, l + resultWrapper.rects[nd.id].width + subXDist/*ndXDist*/, nd, ndsSet, false, resultWrapper);
+                const subXDist = this.calcXDist(nd, ndsSet, resultWrapper);
+                this.putSubNds(currRightTop, l + resultWrapper.rects[nd.id].width + subXDist, nd, ndsSet, false, resultWrapper);
                 currRightTop += allHeight+nodePaddingTop;//
             });
         }
@@ -241,15 +223,59 @@ class MindHLayoutSvc {
     }
 
     
-    getAllChildHeight=(parNd, ndsSet, resultWrapper)=>{
-        if(!ndsSet.expands[parNd.id]){return 0;}
-        let childAllHeight=0;
-        parNd.childs.forEach((nd, childInd) => {
-            childAllHeight+=this.getNdHeight(nd,ndsSet,resultWrapper)+(0<childInd ? nodePaddingTop : 0);
-        });
-        return childAllHeight;
-    }
 
+
+
+
+    /**
+     * 计算指定节点与其子节点间的水平距离
+     * @param nd 指定节点
+     * @param ndsSet 节点对象集合
+     * @param resultWrapper 节点相关参数
+     * @param ndLev 节点层级：0、1、2...
+     */
+    calcXDist=(nd, ndsSet, resultWrapper)=>{
+        // 节点未展开或没有子节点，返回0
+        if(!ndsSet.expands[nd.id]){return 0;}
+        if(!nd.childs || 0===nd.childs.length){return 0;}
+
+        // 如果是根节点到子节点，则为固定宽度（60px）
+        if(0===nd.lev){
+            return ndXDistRoot;
+        }
+
+        const allHeight = this.getNdHeight(nd, ndsSet, resultWrapper);
+        let hDist=0;
+
+        // 起始纵坐标位置：
+        // 如果为根节点或二级节点到其子节点的连接线，起始位置为节点中间
+        // 否则，起始位置为节点底部
+        let fromY=parseInt(allHeight/2);
+        if(nd.lev>=2){
+            fromY+=parseInt(resultWrapper.rects[nd.id].height/2);
+        }
+
+        // 第一个子节点，位置从头算
+        let subNd=nd.childs[0];
+        let subAllHeight= this.getNdHeight(subNd, ndsSet, resultWrapper);
+        let subSelfHeight= resultWrapper.rects[subNd.id].height;
+        let toY= (subAllHeight-subSelfHeight)/2+(0===nd.lev ? subSelfHeight/2 : subSelfHeight);
+        let tmpHDist=parseInt(Math.abs(toY-fromY));
+        hDist=(tmpHDist>hDist ? tmpHDist : hDist);
+
+        // 最后一个子节点，位置从末尾高度减去空白开始算
+        subNd=nd.childs[nd.childs.length-1];
+        subAllHeight= this.getNdHeight(subNd, ndsSet, resultWrapper);
+        subSelfHeight= resultWrapper.rects[subNd.id].height;
+        toY= allHeight-(subAllHeight-subSelfHeight)/2-subSelfHeight+(0===nd.lev ? subSelfHeight/2 : subSelfHeight);
+        tmpHDist=parseInt(Math.abs(toY-fromY));
+        hDist=(tmpHDist>hDist ? tmpHDist : hDist);
+
+        // 取按夹角计算的水平距离与指定最小距离（60px）中的较大者
+        const minXDist= ndXDist;
+        const calcXDist=parseInt(hDist*Math.tan(dynDdXDistAngleDegree*Math.PI/180));
+        return parseInt(Math.max(minXDist, calcXDist));
+    }
 
     /**
      * @param {*} startL 当向右排序时，表示要放置的左侧位置，向左排列时，表示放置节点的右边位置
@@ -270,9 +296,9 @@ class MindHLayoutSvc {
 
 
 
-
         parNd.childs.forEach(nd => {
-            const xDist=calcNodeXDist(this.getAllChildHeight(nd, ndsSet, resultWrapper), 1);
+            // 子节点与下级节点间的水平距离
+            const xDist= this.calcXDist(nd, ndsSet, resultWrapper);
 
             //往右排
             if (!left) {
@@ -284,28 +310,8 @@ class MindHLayoutSvc {
                     top: t,
                 };
 
-
-                if(parNd.str.includes("仓库")){
-                    console.log("仓库l", startL+" "+resultWrapper.ndStyles[parNd.id].left);
-                }
-                // if(parNd.par?.str?.includes("仓库")){
-                //     console.log("仓库子l "+parNd.str[0], startL);
-                // }
-
                 this.putExpBtn(ndsSet,nd,startL,t,left, resultWrapper);
-                // console.log("xdidddd", xDist);
-
-                // if(parNd.str.includes("仓库")) {
-                //     console.log("仓库下级l1", startL);
-                //     console.log("仓库下级l2", resultWrapper.rects[nd.id].width);
-                //     console.log("仓库下级l3", xDist/*ndXDist*/);
-                //     console.log("仓库下级l4", ndXDist);
-                // }
-
-
-
-
-                this.putSubNds(startT, startL + resultWrapper.rects[nd.id].width + xDist/*ndXDist*/, nd, ndsSet, left, resultWrapper);//右边节点的位置是当前节点
+                this.putSubNds(startT, startL + resultWrapper.rects[nd.id].width + xDist, nd, ndsSet, left, resultWrapper);//右边节点的位置是当前节点
                 startT += allHeight+nodePaddingTop;
                 return;
             }
@@ -319,7 +325,7 @@ class MindHLayoutSvc {
                 top: t,
             };
             this.putExpBtn(ndsSet,nd,l,t,left, resultWrapper);
-            this.putSubNds(startT, l - xDist/*ndXDist*/, nd, ndsSet, left, resultWrapper);
+            this.putSubNds(startT, l - xDist, nd, ndsSet, left, resultWrapper);
             startT += allHeight+nodePaddingTop;
             return;
         });
@@ -742,32 +748,17 @@ const containerMinH=600;    //导图容器最小高
 const lineWid = 1;          //连接线宽度，与节点的下边框宽度一致
 const ndXDistRoot = 60;     //根节点到子节点之间水平距离
 // const ndXDistSec = 60;      //二级节点到子节点之间水平距离
-const ndXDist = 40;         //三级或以下节点到子节点之间水平距离
+const ndXDist = 60;//40;         //三级或以下节点到子节点之间水平距离
 const lineExpDist=16;       //父子节点水平距离中的留给折叠按钮的距离
 const fromXRatio = 0.3;     //起始弧线水平占比
 const fromYRatio = 0.3;     //终止弧线水平占比
 const graphPadding = 40;    //图表内容与容器边缘之间的距离
 
 // 节点之间水平距离动态计算，该值指定夹角的最小大小
-const dynDdXDistAngleDegree=10;
+const dynDdXDistAngleDegree=13;
 
 
-/**
- * 计算节点之间的水平距离：
- * 1、如果是根节点到子节点，则为固定宽度（60px）
- * 2、否则：取按夹角计算的水平距离与指定最小距离（40px）中的较大者
- * @param subAllHeight
- * @param ndLev
- */
-const calcNodeXDist=(subAllHeight=0, ndLev=0)=>{
-    if(0===ndLev){
-        return ndXDistRoot;
-    }
 
-    const minXDist= ndXDist;
-    const calcXDist=parseInt(subAllHeight/2*Math.tan(dynDdXDistAngleDegree*Math.PI/180));
-    return parseInt(Math.max(minXDist, calcXDist));
-};
 
 
 
