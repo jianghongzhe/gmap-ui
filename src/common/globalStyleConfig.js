@@ -37,14 +37,16 @@ const config= {
 
     /**
      * 水平布局相关属性：
-     * ndXDistRoot - 根节点到子节点之间水平距离，固定为该值
+     * ndXDistRoot - 根节点到子节点之间最小水平距离（该值还要与根据夹角角度的计算值比较后取最大）
      * ndXDist - 二级或以下节点到子节点之间最小水平距离（该值还要与根据夹角角度的计算值比较后取最大）
      * dynDdXDistAngleDegree - 节点与子树夹角的大小，单位为度
+     * nodePaddingTop - 节点垂直方向的间距
      */
     hlayout: {
         ndXDistRoot: 60,
         ndXDist: 40,//40,
         dynDdXDistAngleDegree: 13,
+        nodePaddingTop: 10,
     },
 };
 

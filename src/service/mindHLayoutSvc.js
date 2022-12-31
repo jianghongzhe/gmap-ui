@@ -50,6 +50,24 @@ class MindHLayoutSvc {
     }
 
     /**
+     * 获得节点子树的高度，如果无子树或未展开，则返回0
+     * @param nd
+     * @param ndsSet
+     * @param resultWrapper
+     * @returns {number}
+     */
+    getSubTreeHeight=(nd,ndsSet, resultWrapper)=>{
+        if (!nd.childs || 0 === nd.childs.length || !ndsSet.expands[nd.id]) {
+            return 0;
+        }
+        let sumChildrenH = 0;
+        nd.childs.forEach((child,ind) => {
+            sumChildrenH +=(0<ind?globalStyleConfig.hlayout.nodePaddingTop:0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
+        });
+        return sumChildrenH;
+    }
+
+    /**
      * 获得节点和其所有子节点整个区域所占的高
      */
     getNdHeight = (nd,ndsSet, resultWrapper) => {
@@ -63,7 +81,7 @@ class MindHLayoutSvc {
         //有子节点，取所有子节点的高度和，中间加上空白的距离
         let sumChildrenH = 0;
         nd.childs.forEach((child,ind) => {
-            sumChildrenH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
+            sumChildrenH +=(0<ind?globalStyleConfig.hlayout.nodePaddingTop:0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
         });
         return parseInt(Math.max(resultWrapper.rects[nd.id].height, sumChildrenH));
     }
@@ -86,7 +104,7 @@ class MindHLayoutSvc {
         ndsSet.tree.childs.forEach((child,ind) => {
             //child.left = false;//default right
             resultWrapper.directions[child.id]=false;
-            rightH +=(0<ind?nodePaddingTop:0)+ this.getNdHeight(child, ndsSet, resultWrapper);
+            rightH +=(0<ind?globalStyleConfig.hlayout.nodePaddingTop:0)+ this.getNdHeight(child, ndsSet, resultWrapper);
             ++sumNdCnt;
         });
         let dist = rightH;
@@ -110,8 +128,8 @@ class MindHLayoutSvc {
                 return;
             }
             let h = this.getNdHeight(child,ndsSet, resultWrapper);
-            let newLeftH = leftH +(0<leftH?nodePaddingTop:0)+ h;//
-            let newRightH = rightH - h- (1<sumNdCnt-leftNdCnt?nodePaddingTop:0);
+            let newLeftH = leftH +(0<leftH?globalStyleConfig.hlayout.nodePaddingTop:0)+ h;//
+            let newRightH = rightH - h- (1<sumNdCnt-leftNdCnt?globalStyleConfig.hlayout.nodePaddingTop:0);
             let newDist = Math.abs(newRightH - newLeftH);
 
             if (newDist < dist) {
@@ -171,7 +189,7 @@ class MindHLayoutSvc {
         let [leftH, rightH] = this.setNdDirection(ndsSet, resultWrapper);
 
         // 计算根节点与其子节点间的水平距离
-        const xDist =this.calcXDist(ndsSet.tree, ndsSet, resultWrapper);
+        const xDist =this.calcXDist(ndsSet.tree, ndsSet, resultWrapper, [leftH, rightH]);
 
         let currLeftTop = (leftH < rightH ? parseInt((rightH - leftH) / 2) : 0);
         let currRightTop = (rightH < leftH ? parseInt((leftH - rightH) / 2) : 0);
@@ -202,7 +220,7 @@ class MindHLayoutSvc {
 
                 const subXDist =this.calcXDist(nd, ndsSet, resultWrapper);
                 this.putSubNds(currLeftTop, l - subXDist, nd, ndsSet, true, resultWrapper);
-                currLeftTop += allHeight+nodePaddingTop;//
+                currLeftTop += allHeight+globalStyleConfig.hlayout.nodePaddingTop;//
             });
 
             //右
@@ -216,7 +234,7 @@ class MindHLayoutSvc {
 
                 const subXDist = this.calcXDist(nd, ndsSet, resultWrapper);
                 this.putSubNds(currRightTop, l + resultWrapper.rects[nd.id].width + subXDist, nd, ndsSet, false, resultWrapper);
-                currRightTop += allHeight+nodePaddingTop;//
+                currRightTop += allHeight+globalStyleConfig.hlayout.nodePaddingTop;//
             });
         }
 
@@ -230,53 +248,106 @@ class MindHLayoutSvc {
 
     /**
      * 计算指定节点与其子节点间的水平距离
+     *
+     *              /|   -> 子节点位置          ---
+     *             / |                         ^
+     *            / x|   -> x为夹角的大小        |
+     *           /   |                         |
+     *          /    |                         |  h - 垂直高度
+     *         /     |                         |
+     *        /      |                         |
+     *       /       |                         v
+     *      /________|                        ---
+     *      ^        ^
+     *    父节点   角度垂直
+     *
+     * 由上图可知，父子节点的水平距离为：h*tan(x*PI/180)，其中x单位为度
+     * 把公式计算结果与指定的最小值比较后取较大者，即为最终结果
+     *
      * @param nd 指定节点
      * @param ndsSet 节点对象集合
      * @param resultWrapper 节点相关参数
-     * @param ndLev 节点层级：0、1、2...
+     * @param rootLeftRightH [根节点左子树高， 右子树高] 只有根节点时才需要传入
      */
-    calcXDist=(nd, ndsSet, resultWrapper)=>{
+    calcXDist=(nd, ndsSet, resultWrapper, rootLeftRightH=null)=>{
         // 节点未展开或没有子节点，返回0
         if(!ndsSet.expands[nd.id]){return 0;}
         if(!nd.childs || 0===nd.childs.length){return 0;}
-
-        // 如果是根节点到子节点，则为固定宽度（60px）
-        if(0===nd.lev){
-            return globalStyleConfig.hlayout.ndXDistRoot;
-        }
-
-        const allHeight = this.getNdHeight(nd, ndsSet, resultWrapper);
         let hDist=0;
 
+        // 如果是根节点到子节点，则分别计算左子树的第一个节点与最后一个节点和右子树的第一个节点与最后一个节点中最大的高度差；
+        // 然后根据公式计算得到水平距离并与指定最小值取较大者
+        if(0===nd.lev){
+            const [leftH, rightH]=rootLeftRightH;
+
+            if(leftH>0){
+                const leftNds = nd.childs.filter(subNd=>resultWrapper.directions[subNd.id]);
+                let fromY=parseInt(leftH/2);
+                let tmpHDist=this.getVDist(leftH, fromY, leftNds[0], ndsSet, resultWrapper, true);
+                hDist=Math.max(tmpHDist, hDist);
+                tmpHDist=this.getVDist(leftH, fromY, leftNds[leftNds.length-1], ndsSet, resultWrapper, false);
+                hDist=Math.max(tmpHDist, hDist);
+            }
+            if(rightH>0){
+                const rightNds = nd.childs.filter(subNd=>!resultWrapper.directions[subNd.id]);
+                let fromY=parseInt(rightH/2);
+                let tmpHDist=this.getVDist(rightH, fromY, rightNds[0], ndsSet, resultWrapper, true);
+                hDist=Math.max(tmpHDist, hDist);
+                tmpHDist=this.getVDist(rightH, fromY, rightNds[rightNds.length-1], ndsSet, resultWrapper, false);
+                hDist=Math.max(tmpHDist, hDist);
+            }
+
+            const calcXDist=parseInt(hDist*Math.tan(globalStyleConfig.hlayout.dynDdXDistAngleDegree*Math.PI/180));
+            return parseInt(Math.max(globalStyleConfig.hlayout.ndXDistRoot, calcXDist));
+        }
+
+
+        // 二级或以下节点到子节点的情况
+        const allHeight =this.getSubTreeHeight(nd, ndsSet, resultWrapper);
+
         // 起始纵坐标位置：
-        // 如果为根节点或二级节点到其子节点的连接线，起始位置为节点中间
-        // 否则，起始位置为节点底部
+        // 如果为根节点或二级节点到其子节点的连接线，起始位置为节点中间；否则，起始位置为节点底部
         let fromY=parseInt(allHeight/2);
         if(nd.lev>=2){
             fromY+=parseInt(resultWrapper.rects[nd.id].height/2);
         }
 
+        // 以第一个子节点和最后一个子节点为代表计算与起始位置的高度差，取较大者
         // 第一个子节点，位置从头算
-        let subNd=nd.childs[0];
+        // 最后一个子节点，位置从末尾高度减去空白开始算
+        let tmpHDist=this.getVDist(allHeight, fromY, nd.childs[0], ndsSet, resultWrapper, true);
+        hDist=Math.max(tmpHDist, hDist);
+        tmpHDist=this.getVDist(allHeight, fromY, nd.childs[nd.childs.length-1], ndsSet, resultWrapper, false);
+        hDist=Math.max(tmpHDist, hDist);
+
+        // 取按夹角计算的水平距离与指定最小距离中的较大者
+        const calcXDist=parseInt(hDist*Math.tan(globalStyleConfig.hlayout.dynDdXDistAngleDegree*Math.PI/180));
+        return parseInt(Math.max(globalStyleConfig.hlayout.ndXDist, calcXDist));
+    }
+
+    /**
+     *
+     * @param allHeight
+     * @param fromY
+     * @param subNd
+     * @param ndsSet
+     * @param resultWrapper
+     * @param topDown true-从上向下算，false-从下向上
+     * @returns {number}
+     */
+    getVDist=( allHeight, fromY, subNd, ndsSet, resultWrapper, topDown=true)=>{
         let subAllHeight= this.getNdHeight(subNd, ndsSet, resultWrapper);
         let subSelfHeight= resultWrapper.rects[subNd.id].height;
-        let toY= (subAllHeight-subSelfHeight)/2+(0===nd.lev ? subSelfHeight/2 : subSelfHeight);
+        let toY= (subAllHeight-subSelfHeight)/2+(0===subNd.par.lev ? subSelfHeight/2 : subSelfHeight);
+        if(!topDown){
+            toY= allHeight-(subAllHeight-subSelfHeight)/2-subSelfHeight+(0===subNd.par.lev ? subSelfHeight/2 : subSelfHeight);
+        }
         let tmpHDist=parseInt(Math.abs(toY-fromY));
-        hDist=(tmpHDist>hDist ? tmpHDist : hDist);
-
-        // 最后一个子节点，位置从末尾高度减去空白开始算
-        subNd=nd.childs[nd.childs.length-1];
-        subAllHeight= this.getNdHeight(subNd, ndsSet, resultWrapper);
-        subSelfHeight= resultWrapper.rects[subNd.id].height;
-        toY= allHeight-(subAllHeight-subSelfHeight)/2-subSelfHeight+(0===nd.lev ? subSelfHeight/2 : subSelfHeight);
-        tmpHDist=parseInt(Math.abs(toY-fromY));
-        hDist=(tmpHDist>hDist ? tmpHDist : hDist);
-
-        // 取按夹角计算的水平距离与指定最小距离（60px）中的较大者
-        const minXDist= globalStyleConfig.hlayout.ndXDist;
-        const calcXDist=parseInt(hDist*Math.tan(globalStyleConfig.hlayout.dynDdXDistAngleDegree*Math.PI/180));
-        return parseInt(Math.max(minXDist, calcXDist));
+        return tmpHDist;
     }
+
+
+
 
     /**
      * @param {*} startL 当向右排序时，表示要放置的左侧位置，向左排列时，表示放置节点的右边位置
@@ -289,7 +360,7 @@ class MindHLayoutSvc {
         const parHeight= parseInt(resultWrapper.rects[parNd.id].height);
         let childAllHeight=0;
         parNd.childs.forEach((nd, childInd) => {
-            childAllHeight+=this.getNdHeight(nd,ndsSet,resultWrapper)+(0<childInd ? nodePaddingTop : 0);
+            childAllHeight+=this.getNdHeight(nd,ndsSet,resultWrapper)+(0<childInd ? globalStyleConfig.hlayout.nodePaddingTop : 0);
         });
         if(childAllHeight<parHeight){
             startT=parseInt(startT+(parHeight-childAllHeight)/2);
@@ -313,7 +384,7 @@ class MindHLayoutSvc {
 
                 this.putExpBtn(ndsSet,nd,startL,t,left, resultWrapper);
                 this.putSubNds(startT, startL + resultWrapper.rects[nd.id].width + xDist, nd, ndsSet, left, resultWrapper);//右边节点的位置是当前节点
-                startT += allHeight+nodePaddingTop;
+                startT += allHeight+globalStyleConfig.hlayout.nodePaddingTop;
                 return;
             }
 
@@ -327,7 +398,7 @@ class MindHLayoutSvc {
             };
             this.putExpBtn(ndsSet,nd,l,t,left, resultWrapper);
             this.putSubNds(startT, l - xDist, nd, ndsSet, left, resultWrapper);
-            startT += allHeight+nodePaddingTop;
+            startT += allHeight+globalStyleConfig.hlayout.nodePaddingTop;
             return;
         });
     }
@@ -509,15 +580,15 @@ class MindHLayoutSvc {
 
         //根节点->二级节点，连接线的纵向位置应该是中间->中间
         if(0===fromNd.lev){
-            r1.height=parseInt(r1.height/2);//+(nodePaddingTop/2);
+            r1.height=parseInt(r1.height/2);//+(globalStyleConfig.hlayout.nodePaddingTop/2);
             r1.bottom=r1.top+r1.height;
 
-            r2.height=parseInt(r2.height/2);//+(nodePaddingTop/2);
+            r2.height=parseInt(r2.height/2);//+(globalStyleConfig.hlayout.nodePaddingTop/2);
             r2.bottom=r2.top+r2.height;
         }
         //二级节点->三级节点，连接线的纵向位置应该是中间->下边
         if(1===fromNd.lev){
-            r1.height=parseInt(r1.height/2);//+(nodePaddingTop/2);
+            r1.height=parseInt(r1.height/2);//+(globalStyleConfig.hlayout.nodePaddingTop/2);
             r1.bottom=r1.top+r1.height;
         }
 
@@ -748,7 +819,6 @@ const getRelaRect = (rect, refRect = null) => {
 
 
 //常量值
-const nodePaddingTop=10;    //节点垂直方向的间距
 const containerMinW=800;    //导图容器最小宽
 const containerMinH=600;    //导图容器最小高
 const lineWid = 1;          //连接线宽度，与节点的下边框宽度一致
