@@ -1,4 +1,4 @@
-// import mindmapSvc from './mindmapSvc';
+import globalStyleConfig from '../common/globalStyleConfig';
 
 import {parseInt} from "lodash";
 
@@ -408,6 +408,17 @@ class MindHLayoutSvc {
         }
         let color=toNd.color;// fromNd.color;
 
+        // 取父节点到所有子节点的连接线颜色中，最后一个不是默认颜色的子节点，使该节点的连接线zIndex增加以突出显示颜色
+        let promoteZIndexNd=null;
+        fromNd.childs.forEach(subNd=>{
+            if(globalStyleConfig.defaultLineColor!==subNd.color){
+                promoteZIndexNd=subNd;
+            }
+        });
+        const shouldPromoteZIndex=(toNd.id===promoteZIndexNd?.id);
+        console.log("shouldPromoteZIndex "+toNd.str[0], shouldPromoteZIndex);
+
+
         //rect只用于获取宽高
         let r1 = getRelaRect(resultWrapper.rects[fromNd.id]);
         let r2 = getRelaRect(resultWrapper.rects[toNd.id]);
@@ -543,6 +554,7 @@ class MindHLayoutSvc {
                 height: lineWid,
                 top: t1,
                 borderBottom: `${lineWid}px solid ${color}`,
+                zIndex: shouldPromoteZIndex ? globalStyleConfig.lineZIndex.promote: globalStyleConfig.lineZIndex.general,
             };
 
             let result = {};
@@ -557,6 +569,7 @@ class MindHLayoutSvc {
             left: r1.right,
             top: Math.min(t1, t2),
             height: Math.abs(t1 - t2) + lineWid,
+            zIndex: shouldPromoteZIndex ? globalStyleConfig.lineZIndex.promote: globalStyleConfig.lineZIndex.general,
         };
 
 
@@ -564,7 +577,7 @@ class MindHLayoutSvc {
         //左下右上
         if (t1 > t2) {
             let result = {};
-            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, false, reverseW);
+            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color,  false, reverseW);
             result[toNd.id] = { line, lineFrom, lineTo, lineExp };
             // console.log(result);
             return result;
@@ -573,7 +586,7 @@ class MindHLayoutSvc {
         //左上右下
         if (t1 < t2) {
             let result = {};
-            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color, true, reverseW);
+            this.setLinePartsStyle(line.width, line.height, lineFrom, lineTo,lineExp, color,  true, reverseW);
             result[toNd.id] = { line, lineFrom, lineTo, lineExp };
             // console.log(result);
             return result;
@@ -588,7 +601,7 @@ class MindHLayoutSvc {
      * 2、结束部分
      * 3、留给折叠按钮的部分
      */
-    setLinePartsStyle = (w, h, lineFrom, lineTo,lineExp, color, reverseV = false, reverseW = false) => {
+    setLinePartsStyle = (w, h, lineFrom, lineTo,lineExp, color,  reverseV = false, reverseW = false) => {
         //两个div水平与垂直高度
         let toW = parseInt((w-lineExpDist) * (reverseW ? fromXRatio : 1 - fromXRatio));
         let fromW = (w-lineExpDist) - toW + lineWid;//水平位置要重叠一部分（即连接的宽度）   
@@ -658,8 +671,6 @@ class MindHLayoutSvc {
                 lineExp.width=lineExpDist;
                 lineExp.borderBottom= `${lineWid}px solid ${color}`;
             }
-
-
             return;
         }
 
@@ -704,7 +715,7 @@ class MindHLayoutSvc {
             lineExp.left = (w-lineExpDist) + "px";
             lineExp.height = lineWid + "px";
             lineExp.width=lineExpDist;
-            lineExp.borderBottom= `${lineWid}px solid ${color}`;      
+            lineExp.borderBottom= `${lineWid}px solid ${color}`;
         }
     }
 
