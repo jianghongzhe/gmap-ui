@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {Alert, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
 import {useRafState} from 'ahooks';
+import globalStyleConfig from '../../../common/globalStyleConfig';
 
 
 /**
@@ -256,13 +257,13 @@ const defaultWrapperStyle={
         verticalAlign: 'bottom',
         // backgroundColor: 'lightblue',
         ...outOfViewStyle,
-        zIndex:2,
+        zIndex: globalStyleConfig.nodeZIndex,
     },
 
     '& .expBtn':{
         ...baseFloatBlockStyle,
         ...outOfViewStyle,
-        zIndex:2,   //折叠按钮显示在连接线的上层
+        zIndex: globalStyleConfig.expBtnZIndex,   //折叠按钮显示在连接线的上层
     },
 
     '& .linewrapper': {
@@ -284,7 +285,7 @@ const defaultWrapperStyle={
 
     '& .relaLine':{
         position:"absolute",
-        zIndex:1,
+        zIndex: globalStyleConfig.relaLineZIndex,
         backgroundColor: "#EEEEEE00"
     },
 };

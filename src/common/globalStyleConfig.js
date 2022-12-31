@@ -1,4 +1,4 @@
-export default {
+const config= {
 
     /**
      * 导图连接线的默认颜色
@@ -15,6 +15,37 @@ export default {
         promote: 1,
     },
 
+    /**
+     * 节点的z轴位置
+     */
+    nodeZIndex: 2,
 
+    /**
+     * 展开/折叠按钮z轴位置
+     */
+    expBtnZIndex: 2,
 
+    /**
+     * 关联线z轴位置
+     */
+    relaLineZIndex: 1,
+
+    /**
+     * 帮助对话框z轴位置
+     */
+    helpDlgZIndex: 2000,
+
+    /**
+     * 水平布局相关属性：
+     * ndXDistRoot - 根节点到子节点之间水平距离，固定为该值
+     * ndXDist - 二级或以下节点到子节点之间最小水平距离（该值还要与根据夹角角度的计算值比较后取最大）
+     * dynDdXDistAngleDegree - 节点与子树夹角的大小，单位为度
+     */
+    hlayout: {
+        ndXDistRoot: 60,
+        ndXDist: 40,//40,
+        dynDdXDistAngleDegree: 13,
+    },
 };
+
+export default config;

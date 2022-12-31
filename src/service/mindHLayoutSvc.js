@@ -1,6 +1,7 @@
 import globalStyleConfig from '../common/globalStyleConfig';
+import baseLayoutSvc from './baseLayoutSvc';
 
-import {parseInt} from "lodash";
+
 
 class MindHLayoutSvc {
 
@@ -241,7 +242,7 @@ class MindHLayoutSvc {
 
         // 如果是根节点到子节点，则为固定宽度（60px）
         if(0===nd.lev){
-            return ndXDistRoot;
+            return globalStyleConfig.hlayout.ndXDistRoot;
         }
 
         const allHeight = this.getNdHeight(nd, ndsSet, resultWrapper);
@@ -272,8 +273,8 @@ class MindHLayoutSvc {
         hDist=(tmpHDist>hDist ? tmpHDist : hDist);
 
         // 取按夹角计算的水平距离与指定最小距离（60px）中的较大者
-        const minXDist= ndXDist;
-        const calcXDist=parseInt(hDist*Math.tan(dynDdXDistAngleDegree*Math.PI/180));
+        const minXDist= globalStyleConfig.hlayout.ndXDist;
+        const calcXDist=parseInt(hDist*Math.tan(globalStyleConfig.hlayout.dynDdXDistAngleDegree*Math.PI/180));
         return parseInt(Math.max(minXDist, calcXDist));
     }
 
@@ -409,14 +410,8 @@ class MindHLayoutSvc {
         let color=toNd.color;// fromNd.color;
 
         // 取父节点到所有子节点的连接线颜色中，最后一个不是默认颜色的子节点，使该节点的连接线zIndex增加以突出显示颜色
-        let promoteZIndexNd=null;
-        fromNd.childs.forEach(subNd=>{
-            if(globalStyleConfig.defaultLineColor!==subNd.color){
-                promoteZIndexNd=subNd;
-            }
-        });
-        const shouldPromoteZIndex=(toNd.id===promoteZIndexNd?.id);
-        console.log("shouldPromoteZIndex "+toNd.str[0], shouldPromoteZIndex);
+        const shouldPromoteZIndex=baseLayoutSvc.shouldPromoteLineZIndex(toNd,fromNd);
+
 
 
         //rect只用于获取宽高
@@ -757,16 +752,16 @@ const nodePaddingTop=10;    //节点垂直方向的间距
 const containerMinW=800;    //导图容器最小宽
 const containerMinH=600;    //导图容器最小高
 const lineWid = 1;          //连接线宽度，与节点的下边框宽度一致
-const ndXDistRoot = 60;     //根节点到子节点之间水平距离
-// const ndXDistSec = 60;      //二级节点到子节点之间水平距离
-const ndXDist = 60;//40;         //三级或以下节点到子节点之间水平距离
+
+
+
 const lineExpDist=16;       //父子节点水平距离中的留给折叠按钮的距离
 const fromXRatio = 0.3;     //起始弧线水平占比
 const fromYRatio = 0.3;     //终止弧线水平占比
 const graphPadding = 40;    //图表内容与容器边缘之间的距离
 
-// 节点之间水平距离动态计算，该值指定夹角的最小大小
-const dynDdXDistAngleDegree=13;
+
+
 
 
 

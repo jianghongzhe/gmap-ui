@@ -1,3 +1,6 @@
+import baseLayoutSvc from "./baseLayoutSvc";
+import globalStyleConfig from "../common/globalStyleConfig";
+
 class MindUpLayoutSvc{
     /**
      * 加载样式
@@ -65,6 +68,8 @@ class MindUpLayoutSvc{
         }
 
         let color=toNd.color;// fromNd.color;
+        const promoteLine = baseLayoutSvc.shouldPromoteLineZIndex(toNd, fromNd);
+
         const y1 = parseInt(resultWrapper.ndStyles[fromNd.id].top);
         const y2 = parseInt(resultWrapper.ndStyles[toNd.id].top+resultWrapper.rects[toNd.id].height);
         const distY=y1-y2;
@@ -86,6 +91,7 @@ class MindUpLayoutSvc{
                         width: '1px',
                         height: distY,
                         backgroundColor: `${color}`,
+                        zIndex: promoteLine ? globalStyleConfig.lineZIndex.promote : globalStyleConfig.lineZIndex.general,
                     },
                     lineFrom: {
                         display:'none',
@@ -109,6 +115,7 @@ class MindUpLayoutSvc{
                 top: y2,
                 width: distX,
                 height: distY,
+                zIndex: promoteLine ? globalStyleConfig.lineZIndex.promote : globalStyleConfig.lineZIndex.general,
             },
             // 上面部分
             // 父子节点为左右，需要左下边框

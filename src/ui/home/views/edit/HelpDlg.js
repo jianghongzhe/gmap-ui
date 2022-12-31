@@ -10,6 +10,7 @@ import imgUrlMix from '../../../../assets/graph_mix.png';
 import imgUrlScatter from '../../../../assets/graph_scatter.png';
 import imgUrlRela from '../../../../assets/graph_rela.png';
 import imgUrlEchart from '../../../../assets/graph_echart.png';
+import globalStyleConfig from '../../../../common/globalStyleConfig';
 
 const EnhDlg=withEnh(Modal);
 
@@ -24,7 +25,7 @@ const HelpDlg=(props)=>{
                 closable={true}
                 size={{w: 960}}
                 visible={props.visible}
-                zIndex={2000}
+                zIndex={globalStyleConfig.helpDlgZIndex}
                 onCancel={props.onCancel}>
             
             <Tabs tabPosition='left' css={tabsStyle}
