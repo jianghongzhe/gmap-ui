@@ -6,6 +6,15 @@ const config= {
     defaultLineColor: 'lightgrey',
 
     /**
+     * 日期图标的颜色
+     */
+    defaultDateColor: {
+        expired: '#f5222d',//red', //过期
+        near: '#fa8c16',//'orange',    //近几天
+        future: '#389e0d',//'#73d13d',//'green'   //以后
+    },
+
+    /**
      * 导图连接线的z轴位置，
      * general: 默认
      * promote: 用于突出显示带颜色的连接线，以免被覆盖

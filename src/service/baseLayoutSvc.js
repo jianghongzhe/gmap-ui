@@ -3,7 +3,8 @@ import globalStyleConfig from "../common/globalStyleConfig";
 class BaseLayoutSvc{
 
     /**
-     * 判断到指定节点的连接线是否需要提升zindex
+     * 判断到指定节点的连接线是否需要提升zindex；
+     * 如果指定节点是其所有兄弟节点中最后一个非默认颜色的节点，则需要提升zindex，否则不需要
      * @param nd 指定节点
      * @param parNd 指定节点的父节点
      */

@@ -36,7 +36,7 @@ export const useSelectFileListItem=()=>{
             }
     
             //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-            let rootNd=mindmapSvc.parseRootNode(origintxts, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+            let rootNd=mindmapSvc.parseRootNode(origintxts, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
             let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
             console.log("节点数量", ndsSet.list.length);
 
@@ -366,7 +366,7 @@ export const useCreateNewMapPromise=()=>{
 
                 //计算导图表格信息并加入新tab      
                 // let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-                let rootNd=mindmapSvc.parseRootNode(defMapTxt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
+                let rootNd=mindmapSvc.parseRootNode(defMapTxt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
                 let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
 
                 setTabPanes((originPanes)=>([
@@ -416,7 +416,7 @@ export const useSaveMapPromise=()=>{
                     return;
                 }
 
-                let rootNd=mindmapSvc.parseRootNode(txt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor, false);
+                let rootNd=mindmapSvc.parseRootNode(txt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor, false);
                 let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
 
                 setCurrPane({
@@ -448,11 +448,7 @@ const getDefMapTxt = (theleName = "中心主题") => (
 
 
 
-const defaultDateColor = {
-    expired: '#f5222d',//red', //过期
-    near: '#fa8c16',//'orange',    //近几天
-    future: '#389e0d',//'#73d13d',//'green'   //以后
-};
+
 
 //根据边框类型动态生成对应的样式
 const getBorderStyle = (type, color = 'lightgrey') => {
