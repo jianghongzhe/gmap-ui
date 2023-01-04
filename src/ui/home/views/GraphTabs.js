@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect} from 'react';
-import {Tabs, Button} from 'antd';
+import {Tabs, Button, Card} from 'antd';
 import { MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
 
 import NewMindmap from './NewMindmap';
@@ -8,6 +8,7 @@ import keyDetector from 'key-detector/src';
 import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
+import NodeLinkIcon from "./NodeLinkIcon";
 
 
 /**
@@ -176,6 +177,14 @@ const GraphTabs=(props)=>{
                     closable: true,
                     children: (
                         <div css={getTabItemContainerStyle(tabContentH)}>
+                            {/*<div style={{position:'absolute',top:'-110px',right:25,zIndex:5,backgroundColor:'transparent'}}>*/}
+
+                            {/*    /!*<Card size='small' style={{borderRadius:'10px',padding:0,margin:0,}}>*!/*/}
+                            {/*        <NodeLinkIcon lindAddr={"https://baidu.com"} onClick={()=>{}}/>*/}
+                            {/*        <NodeLinkIcon lindAddr={"https://baidu.com"} onClick={()=>{}}/>*/}
+                            {/*    /!*</Card>*!/*/}
+
+                            {/*</div>*/}
                             <NewMindmap
                                 ind={ind}
                                 ds={pane.ds}

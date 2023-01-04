@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Divider, Layout, Tooltip} from 'antd';
+import {Avatar, Button, Divider, Layout, Tooltip} from 'antd';
 import {
     CameraOutlined,
     CloudSyncOutlined,
@@ -87,6 +87,21 @@ const Toolbar=({
             <ToolbarItem title='版本发布说明' icon={<HistoryOutlined />} onClick={api.openReleaseNote}/>
             <ToolbarItem title='检查更新' icon={<CloudSyncOutlined />} onClick={onCheckUpdate}/>
             <ToolbarItem title='帮助' icon={<QuestionOutlined />} onClick={onOpenHelpDlg}/>
+
+
+            {/*
+            TODO 改为真实快捷方式的处理
+            */}
+            {
+                1<2 && <React.Fragment>
+                    <Divider type="vertical" className='divider'/>
+                    <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />
+                    <Button shape='circle' className='toolbtn'  size='large' >
+                        <Avatar src='https://www.baidu.com/favicon.ico' size='small'/>
+                    </Button>
+                    <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />
+                </React.Fragment>
+            }
         </Header>
     );
     
