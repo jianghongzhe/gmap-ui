@@ -25,7 +25,7 @@ import {tabCurrPane, tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} f
 import {useRecoilValue} from 'recoil';
 import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
-import {useMemoizedFn} from "ahooks";
+import {useLoadIcon} from "../../../hooks/loadIcon";
 
 const { Header } = Layout;
 
@@ -49,7 +49,8 @@ const Toolbar=({
         onExpMarkdown,
         onExpHtml,
         onCheckUpdate,
-        onOpenHelpDlg })=>{
+        onOpenHelpDlg,
+        onOpenLink})=>{
 
     const allNodesExpand= useRecoilValue(tabCurrPaneAllNodesExpand);
     const expStateChanged=useRecoilValue(tabCurrPaneExpandStateChanged);
@@ -57,10 +58,7 @@ const Toolbar=({
     const restoreDefaultExpandState= useRestoreDefaultExpandState();
     const currPane= useRecoilValue(tabCurrPane);
 
-    // TODO 处理点击事件，包括带参数的情况
-    const onShortcutClick=useMemoizedFn((addr)=>{
-        console.log("link addr", addr);
-    });
+
 
 
     return (
@@ -96,33 +94,64 @@ const Toolbar=({
             <ToolbarItem title='检查更新' icon={<CloudSyncOutlined />} onClick={onCheckUpdate}/>
             <ToolbarItem title='帮助' icon={<QuestionOutlined />} onClick={onOpenHelpDlg}/>
 
-
-            {/*
-            TODO 处理图标获取
-            */}
-
+            {/* 快捷方式：随当前导图而变化 */}
             {
                 (currPane?.ds?.tree?.shortcuts && currPane.ds.tree.shortcuts.length>0) && <React.Fragment>
                     <Divider type="vertical" className='divider'/>
                     {
                         currPane.ds.tree.shortcuts.map((shortItem, shortInd)=>(
-                            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={shortItem.name}>
-                                <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' onClick={onShortcutClick.bind(this, shortItem.url)}/>
-                            </Tooltip>
+                            <ShortcutItem key={`shortcutbtn-${shortInd}`} name={shortItem.name} url={shortItem.url} onClick={onOpenLink}/>
                         ))
                     }
-
-                    {/*<Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />*/}
-                    {/*<Button shape='circle' className='toolbtn'  size='large' >*/}
-                    {/*    <Avatar src='https://www.baidu.com/favicon.ico' size='small'/>*/}
-                    {/*</Button>*/}
-                    {/*<Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />*/}
                 </React.Fragment>
             }
         </Header>
     );
-    
 }
+
+const ShortcutItem=({name, url, onClick})=>{
+    const [localIcon] = useLoadIcon({lindAddr: url});
+
+    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
+        return null;
+    }
+
+    /*
+        图标类型
+        {
+            type: 'icon',
+            color: 'red',
+            compType: MyComp,
+        }
+     */
+    if('icon'===localIcon.type){
+        const IconComp=localIcon.compType;
+        return (
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={name}>
+                <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClick.bind(this, url)}/>
+            </Tooltip>
+        );
+    }
+
+    /*
+        图片类型
+        {
+            type: 'image',
+            url: 'file:///a/b/c.jpg',
+        }
+     */
+    if('image'===localIcon.type){
+        return (
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={name}>
+                <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url)}>
+                    <Avatar src={localIcon.url} size='small'/>
+                </Button>
+            </Tooltip>
+        );
+    }
+};
+
+
 
 const ToolbarItem=({title, icon, disabled=false, className='toolbtn',type='default', onClick})=>{
     return <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={title}>

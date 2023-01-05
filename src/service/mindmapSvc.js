@@ -471,9 +471,6 @@ class MindmapSvc {
      * @returns {nd} 包含各层节点信息的根节点
      */
     load = (arrayOrTxt) => {
-
-        // TODO 增加对快捷方式的提取处理
-
         let lastNd = null;
         let root = null;
         let timeline = [];//时间线对象，后面会往里放

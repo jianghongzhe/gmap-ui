@@ -439,7 +439,7 @@ const MapsViewer=(props)=>{
      * @param {*} url 
      * @returns 
      */
-    const onBeforeOpenLink=useCallback((url)=>{
+    const onBeforeOpenLink=useMemoizedFn((url)=>{
         const replaceItems= strTmpl.parse(url);
         if(null===replaceItems){
             api.openUrl(url, selectFileListItem);
@@ -448,7 +448,7 @@ const MapsViewer=(props)=>{
         setCurrLinkUrl(url);
         setParamReplItems(replaceItems);
         setStrParamReplaceDlgVisible(true);
-    },[setCurrLinkUrl, setParamReplItems, setStrParamReplaceDlgVisible, selectFileListItem]);
+    });
 
     /**
      * 参数占位符替换后的回调
@@ -504,6 +504,7 @@ const MapsViewer=(props)=>{
                                 onCheckUpdate={api.openUpdateApp}
                                 onCopyMapLink={copyCurrMapLink}
                                 onOpenHelpDlg={showHelpDlg}
+                                onOpenLink={onBeforeOpenLink}
                             />
                             <GraphTabs
                                 hasOpenDlg={hasOpenDlg}
