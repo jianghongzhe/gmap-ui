@@ -485,7 +485,7 @@ class MindmapSvc {
         let down=false;
         let up=false;
 
-        let { ndLines, refs, openers} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, openers, shortcuts} = this.loadParts(arrayOrTxt);
         const defaultRelaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
 
         ndLines.forEach(str => {           
@@ -778,6 +778,7 @@ class MindmapSvc {
             };
             root.refs.push(sumRef);
         }
+        root.shortcuts=shortcuts;
         return root;
     }
 
@@ -850,6 +851,7 @@ class MindmapSvc {
      */
     loadParts = (alltxts) => {
         let openers={};
+        let shortcuts=[];
         let refs = {};
         let trefs = {};
         let graphs = {};
@@ -884,7 +886,10 @@ class MindmapSvc {
             }
             if("# openers"===trimLine){
                 currRefName="openers";
-            }   
+            }
+            if("# shortcuts"===trimLine){
+                currRefName="shortcuts";
+            }
 
             //还没有当前标识符
             if (null == currRefName) {
@@ -892,9 +897,18 @@ class MindmapSvc {
             }
 
             //已有当前标识符
-            if("openers"===currRefName){
-                // [haha]: d:\\a\\b.exe
-                const matchResult=trimLine.match(/^\[([^[\]]+)\][:](.+)$/);
+            if("shortcuts"===currRefName){
+                // - [链接名称](链接地址)
+                const matchResult=trimLine.match(/^[-] \[(.+)\]\((.+)\)$/);
+                if(matchResult && matchResult[1] && matchResult[2]){
+                    const name=matchResult[1].trim();
+                    const url=matchResult[2].trim();
+                    shortcuts.push({name,url});
+                }
+            }
+            else if("openers"===currRefName){
+                // - [haha]: d:\\a\\b.exe
+                const matchResult=trimLine.match(/^[-] \[([^[\]]+)\][:](.+)$/);
                 if(matchResult && matchResult[1] && matchResult[2]){
                     const openerId=matchResult[1].trim();
                     const openerContent=matchResult[2].trim();
@@ -978,7 +992,7 @@ class MindmapSvc {
         });
 
 
-        return { ndLines, refs, graphs, openers};
+        return { ndLines, refs, graphs, openers, shortcuts};
     }
 
     setLeaf = (nd) => {

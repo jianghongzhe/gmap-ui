@@ -21,10 +21,11 @@ import {
     QuestionOutlined,
     ReloadOutlined
 } from '@ant-design/icons';
-import {tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
+import {tabCurrPane, tabCurrPaneAllNodesExpand, tabCurrPaneExpandStateChanged} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
+import {useMemoizedFn} from "ahooks";
 
 const { Header } = Layout;
 
@@ -54,7 +55,14 @@ const Toolbar=({
     const expStateChanged=useRecoilValue(tabCurrPaneExpandStateChanged);
     const expandAll= useExpandAll();
     const restoreDefaultExpandState= useRestoreDefaultExpandState();
-    
+    const currPane= useRecoilValue(tabCurrPane);
+
+    // TODO 处理点击事件，包括带参数的情况
+    const onShortcutClick=useMemoizedFn((addr)=>{
+        console.log("link addr", addr);
+    });
+
+
     return (
         <Header css={headerStyle}>
             <ToolbarItem title='新建' icon={<PlusOutlined />} className='toolbtnFirst' onClick={onShowNewMapDlg}/>
@@ -90,16 +98,25 @@ const Toolbar=({
 
 
             {/*
-            TODO 改为真实快捷方式的处理
+            TODO 处理图标获取
             */}
+
             {
-                1<2 && <React.Fragment>
+                (currPane?.ds?.tree?.shortcuts && currPane.ds.tree.shortcuts.length>0) && <React.Fragment>
                     <Divider type="vertical" className='divider'/>
-                    <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />
-                    <Button shape='circle' className='toolbtn'  size='large' >
-                        <Avatar src='https://www.baidu.com/favicon.ico' size='small'/>
-                    </Button>
-                    <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />
+                    {
+                        currPane.ds.tree.shortcuts.map((shortItem, shortInd)=>(
+                            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={shortItem.name}>
+                                <Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' onClick={onShortcutClick.bind(this, shortItem.url)}/>
+                            </Tooltip>
+                        ))
+                    }
+
+                    {/*<Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />*/}
+                    {/*<Button shape='circle' className='toolbtn'  size='large' >*/}
+                    {/*    <Avatar src='https://www.baidu.com/favicon.ico' size='small'/>*/}
+                    {/*</Button>*/}
+                    {/*<Button shape='circle' icon={<CloudSyncOutlined />} className='toolbtn'  size='large' />*/}
                 </React.Fragment>
             }
         </Header>
