@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import * as CodeMirrorCls from 'codemirror';
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
@@ -41,6 +41,18 @@ const CodeMirror=React.memo(NotMemoedCodeMirror);
  * @param {*} props 
  */
 const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
+    /**
+     * [
+     *      {
+     *          selected: true/false,
+     *          label: '',
+     *          option: {}
+     *      }
+     * ]
+     */
+    const [hintMenus, setHintMenus]= useState([]);
+    const [hintMenuPos, setHintMenuPos]= useState({left:-99999, top:-99999});
+
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
     const {
@@ -138,8 +150,30 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
      */
     const onAutoComplete=useMemoizedFn((cm)=>{
 
-        console.log(CodeMirrorCls.hint.markdown) ;
-        cm.showHint({hint: CodeMirrorCls.hint.markdown});
+        // console.log(CodeMirrorCls.hint.markdown) ;
+        //cm.showHint({hint: CodeMirrorCls.hint.markdown});
+
+        const cur = cm.getCursor();
+        console.log("位置",cm.cursorCoords(cur, "page"));
+        let {left,top}=cm.cursorCoords(cur, "page");
+        left-=100;
+        top-=75;
+
+        setHintMenuPos({left,top});
+        setHintMenus([
+
+                {
+                    selected: true,
+                    label: '菜单1',
+                    option: {}
+                },
+                {
+                    selected: false,
+                    label: '菜单1',
+                    option: {}
+                }
+
+        ]);
 
         // console.log("args",args);
     });
@@ -198,6 +232,31 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                 }
             }}
             onBeforeChange={onChange} />
+
+        {
+            (hintMenus && hintMenus.length>0) && (
+                <ul  className="CodeMirror-hints default"
+                        style={{left: `${hintMenuPos.left}px`, top: `${hintMenuPos.top}px`,}}>
+                    {
+                        hintMenus.map((eachMenu, menuInd)=>(
+                            <li key={`hintmenu-${menuInd}`} className={`CodeMirror-hint ${eachMenu.selected ? "CodeMirror-hint-active" : ""}`} >
+                                p - 保存剪切板图片到本地
+                            </li>
+                        ))
+                    }
+                </ul>
+            )
+
+
+        }
+        {/*<ul role="listbox" aria-expanded="true" id="cm-complete-0" className="CodeMirror-hints default"*/}
+        {/*    style={{left: '17px', top: '56px',}}>*/}
+        {/*   <li className="CodeMirror-hint CodeMirror-hint-active" aria-selected="true" id="cm-complete-0-0"
+                                role="option">p - 保存剪切板图片到本地
+                            </li>  */}
+        {/*    <li className="CodeMirror-hint" id="cm-complete-0-1" role="option">p + - 保存剪切板图片到图床</li>*/}
+        {/*    <li className="CodeMirror-hint" id="cm-complete-0-2" role="option">![]() - 图片</li>*/}
+        {/*</ul>*/}
     </React.Fragment>;
 };
 

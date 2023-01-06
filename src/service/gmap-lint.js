@@ -26,10 +26,11 @@ import mindMapValidateSvc from './mindMapValidateSvc';
 
 
 
-    CodeMirror.registerHelper("hint", "markdown",(editor, options)=>{
-        const cur = editor.getCursor();
+    CodeMirror.registerHelper("hint", "markdown",(cm, options)=>{
+        const cur = cm.getCursor();
+        console.log("位置",cm.cursorCoords(cur, "page"));
 
-
+        console.log("cursor", cur);
 
 
 
@@ -92,7 +93,11 @@ import mindMapValidateSvc from './mindMapValidateSvc';
                     ,
             from: cur/*CodeMirror.Pos(cur.line, start)*/, to: cur/*CodeMirror.Pos(cur.line, end)*/
         };
-        console.log("hint pos", cur);
+
+        // setTimeout(()=>{
+        //     console.log("ele", document.querySelector("ul[role=listbox]").outerHTML);
+        // },2000);
+
 
         return result;
     });
