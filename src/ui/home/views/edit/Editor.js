@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import * as CodeMirrorCls from 'codemirror';
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.css';
 import 'codemirror/addon/search/matchesonscrollbar.css';
 import 'codemirror/addon/lint/lint.css'
+import 'codemirror/addon/hint/show-hint.css'
 
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/keymap/sublime';
@@ -18,6 +20,7 @@ import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
 import 'codemirror/addon/display/rulers';
 import 'codemirror/addon/lint/lint';
+import 'codemirror/addon/hint/show-hint';
 
 import '../../../../service/gmap-lint';
 
@@ -28,6 +31,7 @@ import { tabActivePaneAssetsDir } from '../../../../store/tabs';
 import { useRecoilValue } from 'recoil';
 import { Global } from '@emotion/react';
 import { useEditorOperation, useRulerStyle } from '../../../../hooks/editor';
+import {useMemoizedFn} from "ahooks";
 
 const CodeMirror=React.memo(NotMemoedCodeMirror);
 
@@ -122,11 +126,23 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
     const globalStyle=useMemo(()=>{
         let result={
             ...rulerStyle,
-            'body .CodeMirror-lint-tooltip':{zIndex: 1000,}
+            'body .CodeMirror-lint-tooltip':{zIndex: 1000,},
+            'body .CodeMirror-hints':{zIndex: 1000,},
         };
         return result;
     },[rulerStyle]);
 
+    /**
+     * cm, options
+     * @type {(function(*, *))|*}
+     */
+    const onAutoComplete=useMemoizedFn((cm)=>{
+
+        console.log(CodeMirrorCls.hint.markdown) ;
+        cm.showHint({hint: CodeMirrorCls.hint.markdown});
+
+        // console.log("args",args);
+    });
 
     
     return <React.Fragment>
@@ -175,6 +191,10 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                     "Alt-G":        onPreventKey,
                     "Ctrl-Alt-Up":  copyLineUp,
                     "Ctrl-Alt-Down": copyLineDown,
+
+                    // 自动完成：Alt-/为eclipse风格，Alt-Enter为idea风格
+                    "Alt-/":        onAutoComplete,
+                    "Alt-Enter":    onAutoComplete,
                 }
             }}
             onBeforeChange={onChange} />
