@@ -306,12 +306,19 @@ const hintContMenus=[
  */
 const hintMenuList=[
     {
-        label: '剪切板 -> url',
+        label: '剪切板内容 -> url',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.getUrlFromClipboard,
         }
     },
+
+    // TODO 剪切板内容 -> 图片引用
+    // 验证:
+    // 如果是网址，则直接生成标记 ![图片](https://xxx)
+    // 如果是文件且能解析为图片，则生成标记 ![图片](file:///xxx)
+    // 否则报错
+
     {
         label: '剪切板图片 -> 本地',
         option: {
