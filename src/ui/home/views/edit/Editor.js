@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import * as CodeMirrorCls from 'codemirror';
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
 
 import 'codemirror/lib/codemirror.css';
@@ -32,6 +31,9 @@ import { useRecoilValue } from 'recoil';
 import { Global } from '@emotion/react';
 import { useEditorOperation, useRulerStyle } from '../../../../hooks/editor';
 import {useMemoizedFn} from "ahooks";
+import HintDlg from "./HintDlg";
+import {useHintMenu} from "../../../../hooks/hintMenu";
+import {useAutoComplateFuncs} from "../../../../hooks/autoComplete";
 
 const CodeMirror=React.memo(NotMemoedCodeMirror);
 
@@ -40,18 +42,25 @@ const CodeMirror=React.memo(NotMemoedCodeMirror);
  * 编辑器
  * @param {*} props 
  */
-const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
-    /**
-     * [
-     *      {
-     *          selected: true/false,
-     *          label: '',
-     *          option: {}
-     *      }
-     * ]
-     */
-    const [hintMenus, setHintMenus]= useState([]);
-    const [hintMenuPos, setHintMenuPos]= useState({left:-99999, top:-99999});
+const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
+
+    const {
+        hintMenus,
+        hintMenuPos,
+        currMenu,
+        hintMenuOpen,
+        showMenu,
+        closeHintMenu,
+        moveHintMenuDown,
+        moveHintMenuUp,
+    }= useHintMenu({forceCloseSymbol: openSymbol});
+
+    const {
+        getUrlFromClipboard,
+    }=useAutoComplateFuncs();
+
+
+
 
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
@@ -71,6 +80,29 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
     },[onSetInst, codeMirrorInstRef]);
 
 
+
+    const onEsc= useMemoizedFn((cm)=>{
+        clearSelection(cm);
+        closeHintMenu();
+    });
+
+
+
+
+
+    const hintMenuOk=useMemoizedFn((cm, event)=>{
+        const type= currMenu?.option?.type;
+        // const data= currMenu?.option?.data;
+        closeHintMenu();
+
+        if('get-url-from-clipboard'===type){
+            getUrlFromClipboard(cm);
+            return;
+        }
+
+        // console.log("结果", selectedMenu);
+    });
+
     /**
      * 绑定键盘事件
      */
@@ -87,7 +119,47 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
          * @returns 
          */
         const keyDownHandler=(instance, event)=>{
-            if("Tab"===event.code && !event.altKey && !event.shiftKey && !event.ctrlKey){
+            const noOtherCombKey=(!event.altKey && !event.shiftKey && !event.ctrlKey);
+            const isOnlyTab=("Tab"===event.code && noOtherCombKey);
+            const isOnlyEnter=("Enter"===event.code && noOtherCombKey);
+            const isOnlySpace=("Space"===event.code && noOtherCombKey);
+            const isOnlyUp=("ArrowUp"===event.code && noOtherCombKey);
+            const isOnlyDown=("ArrowDown"===event.code && noOtherCombKey);
+            const isOnlyLeft=("ArrowLeft"===event.code && noOtherCombKey);
+            const isOnlyRight=("ArrowRight"===event.code && noOtherCombKey);
+
+            // 如果已打开了自动完成对话框，则优先按它处理
+            if(hintMenuOpen){
+                // 左右键只触发自动提示关闭，不影光标本身的移动，即不需stopPropagation和preventDefault
+                if(isOnlyLeft || isOnlyRight){
+                    closeHintMenu();
+                    return;
+                }
+                // tab、回车、空格会触发菜单确定事件
+                if(isOnlyTab || isOnlyEnter || isOnlySpace){
+                    event.stopPropagation();
+                    event.preventDefault();
+                    hintMenuOk(instance, event);
+                    return;
+                }
+                // 上下移动菜单选中项
+                if(isOnlyUp){
+                    event.stopPropagation();
+                    event.preventDefault();
+                    moveHintMenuUp();
+                    return;
+                }
+                if(isOnlyDown){
+                    event.stopPropagation();
+                    event.preventDefault();
+                    moveHintMenuDown();
+                    return;
+                }
+                return;
+            }
+
+            // 否则如果是tab键，则按自动完成处理方式
+            if(isOnlyTab){
                 editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
                 return;
             }
@@ -100,7 +172,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
             codeMirrorInstRef.current.off("keydown", keyDownHandler);
             codeMirrorInstRef.current.off("cursorActivity", calcRulerStyle);
         };
-    },[currAssetsDir, calcRulerStyle]);
+    },[currAssetsDir, calcRulerStyle, hintMenuOpen, moveHintMenuUp, moveHintMenuDown, hintMenuOk, closeHintMenu]);
 
 
     /**
@@ -149,31 +221,27 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
      * @type {(function(*, *))|*}
      */
     const onAutoComplete=useMemoizedFn((cm)=>{
-
-        // console.log(CodeMirrorCls.hint.markdown) ;
-        //cm.showHint({hint: CodeMirrorCls.hint.markdown});
-
-        const cur = cm.getCursor();
-        console.log("位置",cm.cursorCoords(cur, "page"));
-        let {left,top}=cm.cursorCoords(cur, "page");
-        left-=100;
-        top-=75;
-
-        setHintMenuPos({left,top});
-        setHintMenus([
-
-                {
-                    selected: true,
-                    label: '菜单1',
-                    option: {}
-                },
-                {
-                    selected: false,
-                    label: '菜单1',
-                    option: {}
+        showMenu([
+            {
+                selected: true,
+                label: '从剪切板获取url链接',
+                option: {
+                    type: 'get-url-from-clipboard',
                 }
+            },
+            {
+                selected: false,
+                label: '菜单1',
+                option: {}
+            },
+            {
+                selected: false,
+                label: '从剪切板。。。。',
+                option: {}
+            }
 
-        ]);
+        ], getHintMenuPos(cm))
+
 
         // console.log("args",args);
     });
@@ -221,7 +289,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
                     "Shift-Ctrl-G": onPreventKey,
                     "Shift-Ctrl-F": onPreventKey,
                     "Shift-Ctrl-R": onPreventKey,
-                    "Esc":          clearSelection,
+                    "Esc":          onEsc,
                     "Alt-G":        onPreventKey,
                     "Ctrl-Alt-Up":  copyLineUp,
                     "Ctrl-Alt-Down": copyLineDown,
@@ -233,22 +301,7 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
             }}
             onBeforeChange={onChange} />
 
-        {
-            (hintMenus && hintMenus.length>0) && (
-                <ul  className="CodeMirror-hints default"
-                        style={{left: `${hintMenuPos.left}px`, top: `${hintMenuPos.top}px`,}}>
-                    {
-                        hintMenus.map((eachMenu, menuInd)=>(
-                            <li key={`hintmenu-${menuInd}`} className={`CodeMirror-hint ${eachMenu.selected ? "CodeMirror-hint-active" : ""}`} >
-                                p - 保存剪切板图片到本地
-                            </li>
-                        ))
-                    }
-                </ul>
-            )
-
-
-        }
+        <HintDlg pos={hintMenuPos} menus={hintMenus}/>
         {/*<ul role="listbox" aria-expanded="true" id="cm-complete-0" className="CodeMirror-hints default"*/}
         {/*    style={{left: '17px', top: '56px',}}>*/}
         {/*   <li className="CodeMirror-hint CodeMirror-hint-active" aria-selected="true" id="cm-complete-0-0"
@@ -258,6 +311,27 @@ const Editor=({onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChan
         {/*    <li className="CodeMirror-hint" id="cm-complete-0-2" role="option">![]() - 图片</li>*/}
         {/*</ul>*/}
     </React.Fragment>;
+};
+
+
+/**
+ * 计算自动完成菜单的位置
+ * @param cm
+ * @return {{top: *, left: *}}
+ */
+const getHintMenuPos=(cm)=>{
+    const cur = cm.getCursor();
+    const {left,top}=cm.cursorCoords(cur, "page");
+    return {
+        left: left+hintMenuAdjust.x,
+        top: top+hintMenuAdjust.y
+    };
+};
+
+
+const hintMenuAdjust={
+    x: -100,
+    y: -75,
 };
 
 

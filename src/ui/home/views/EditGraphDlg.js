@@ -30,6 +30,8 @@ const EditGraphDlg=(props)=>{
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
 
 
+    const [openSymbol, setOpenSymbol]= useState(Symbol());
+
 
 
 
@@ -59,6 +61,7 @@ const EditGraphDlg=(props)=>{
     useEffect(()=>{
         if(props.visible){
             setEditorAction({type: 'refresh',});
+            setOpenSymbol(Symbol());
             setTimeout(() => {
                 setEditorAction({type: 'refresh',});
             }, 500);
@@ -121,6 +124,7 @@ const EditGraphDlg=(props)=>{
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={props.onOpenHelpDlg} />
                     </div>
                     <Editor
+                        openSymbol={openSymbol}
                         value={props.editTmpTxt}
                         action={editorAction}
                         onChange={props.onChangeEditTmpTxt}

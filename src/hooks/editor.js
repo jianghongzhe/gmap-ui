@@ -29,13 +29,20 @@ export const useEditorOperation=()=>{
      * 防止默认事件触发的处理
      */
      const onPreventKey =useMemoizedFn(() => {
+        console.log("esc click")
         if(window.event){
+
+
             window.event.stopPropagation();
             window.event.preventDefault();
+
+            console.log("event found");
         }
     });
 
-    const clearSelection=useMemoizedFn((cm=null)=>{
+    const clearSelection=useMemoizedFn((cm=null, ...otherArgs)=>{
+        console.log("clearSelection args", [cm, ...otherArgs]);
+
         onPreventKey();
         editorSvcEx.clearSelection(cm);
     });

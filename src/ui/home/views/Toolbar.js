@@ -127,7 +127,7 @@ const ShortcutItem=({name, url, onClick})=>{
     if('icon'===localIcon.type){
         const IconComp=localIcon.compType;
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={name}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${url}`}>
                 <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClick.bind(this, url)}/>
             </Tooltip>
         );
@@ -142,7 +142,7 @@ const ShortcutItem=({name, url, onClick})=>{
      */
     if('image'===localIcon.type){
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={name}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${url}`}>
                 <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url)}>
                     <Avatar src={localIcon.url} size='small'/>
                 </Button>
