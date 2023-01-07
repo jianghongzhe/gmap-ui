@@ -34,6 +34,7 @@ import {useMemoizedFn} from "ahooks";
 import HintDlg from "./HintDlg";
 import {useHintMenu} from "../../../../hooks/hintMenu";
 import {useAutoComplateFuncs} from "../../../../hooks/autoComplete";
+import {actionTypes} from "../../../../common/hintMenuConfig";
 
 const CodeMirror=React.memo(NotMemoedCodeMirror);
 
@@ -49,18 +50,22 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
         hintMenuPos,
         currMenu,
         hintMenuOpen,
-        showMenu,
+        bindRefFunc,
+        showMenu: onAutoComplete,
         closeHintMenu,
         moveHintMenuDown,
         moveHintMenuUp,
+        moveHintMenuTo,
     }= useHintMenu({forceCloseSymbol: openSymbol});
 
     const {
-        getUrlFromClipboard,
+        doClipboardAction,
+        doLiteralAction,
+        doDateTimeAction,
+        doRefAction,
+        shouldShowRefMenu,
+        shouldShowContMenu,
     }=useAutoComplateFuncs();
-
-
-
 
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
     const codeMirrorInstRef=useRef(null);
@@ -72,35 +77,67 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
     const [rulerStyle, calcRulerStyle]= useRulerStyle(rulers.length);
 
     /**
-     * 绑定codemirror对象到本组件和父组件（通过回调函数）
+     * 绑定codemirror对象到本组件和父组件（通过回调函数），以给上层组件使用
      */
-    const bindCodeMirrorInstRef=useCallback((ele)=>{
+    const bindCodeMirrorInstRef=useMemoizedFn((ele)=>{
         codeMirrorInstRef.current=ele;
         onSetInst(ele);
-    },[onSetInst, codeMirrorInstRef]);
+    });
 
 
+    /**
+     * 处理光标位置有变化的函数：
+     * 1、设置标尺线
+     * 2、关闭自动提示菜单
+     * @type {(function(): void)|*}
+     */
+    const onCursorActivity=useMemoizedFn(()=>{
+        calcRulerStyle(codeMirrorInstRef.current);
+        closeHintMenu();
+    });
 
+    /**
+     * esc键的处理
+     * 1、清空选择的文本
+     * 2、关闭自动提示菜单
+     * @type {(function(*): void)|*}
+     */
     const onEsc= useMemoizedFn((cm)=>{
         clearSelection(cm);
         closeHintMenu();
     });
 
 
-
-
-
+    /**
+     * 自动完成菜单的处理函数
+     * @type {(function(*, *): void)|*}
+     */
     const hintMenuOk=useMemoizedFn((cm, event)=>{
+        cm=(cm??codeMirrorInstRef.current);
         const type= currMenu?.option?.type;
-        // const data= currMenu?.option?.data;
+        const data= currMenu?.option?.data;
         closeHintMenu();
 
-        if('get-url-from-clipboard'===type){
-            getUrlFromClipboard(cm);
+        if(actionTypes.editTable===type){
+            onEditTable();
             return;
         }
-
-        // console.log("结果", selectedMenu);
+        if(actionTypes.clipboardAction===type){
+            doClipboardAction(data, cm, currAssetsDir);
+            return;
+        }
+        if(actionTypes.literal===type){
+            doLiteralAction(data, cm);
+            return;
+        }
+        if(actionTypes.dateTimeAction===type){
+            doDateTimeAction(data, cm);
+            return;
+        }
+        if(actionTypes.refAction===type){
+            doRefAction(data, cm);
+            return;
+        }
     });
 
     /**
@@ -125,33 +162,30 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
             const isOnlySpace=("Space"===event.code && noOtherCombKey);
             const isOnlyUp=("ArrowUp"===event.code && noOtherCombKey);
             const isOnlyDown=("ArrowDown"===event.code && noOtherCombKey);
-            const isOnlyLeft=("ArrowLeft"===event.code && noOtherCombKey);
-            const isOnlyRight=("ArrowRight"===event.code && noOtherCombKey);
 
             // 如果已打开了自动完成对话框，则优先按它处理
             if(hintMenuOpen){
-                // 左右键只触发自动提示关闭，不影光标本身的移动，即不需stopPropagation和preventDefault
-                if(isOnlyLeft || isOnlyRight){
-                    closeHintMenu();
-                    return;
-                }
+                const func=()=>{
+                    try{
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }catch (e){}
+                };
+
                 // tab、回车、空格会触发菜单确定事件
                 if(isOnlyTab || isOnlyEnter || isOnlySpace){
-                    event.stopPropagation();
-                    event.preventDefault();
+                    func();
                     hintMenuOk(instance, event);
                     return;
                 }
                 // 上下移动菜单选中项
                 if(isOnlyUp){
-                    event.stopPropagation();
-                    event.preventDefault();
+                    func();
                     moveHintMenuUp();
                     return;
                 }
                 if(isOnlyDown){
-                    event.stopPropagation();
-                    event.preventDefault();
+                    func();
                     moveHintMenuDown();
                     return;
                 }
@@ -166,13 +200,13 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
         };
 
         codeMirrorInstRef.current.on("keydown", keyDownHandler);
-        codeMirrorInstRef.current.on("cursorActivity", calcRulerStyle);        
+        codeMirrorInstRef.current.on("cursorActivity", onCursorActivity);
 
         return ()=>{
             codeMirrorInstRef.current.off("keydown", keyDownHandler);
-            codeMirrorInstRef.current.off("cursorActivity", calcRulerStyle);
+            codeMirrorInstRef.current.off("cursorActivity", onCursorActivity);
         };
-    },[currAssetsDir, calcRulerStyle, hintMenuOpen, moveHintMenuUp, moveHintMenuDown, hintMenuOk, closeHintMenu]);
+    },[currAssetsDir, onCursorActivity, hintMenuOpen, moveHintMenuUp, moveHintMenuDown, hintMenuOk, closeHintMenu]);
 
 
     /**
@@ -216,35 +250,7 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
         return result;
     },[rulerStyle]);
 
-    /**
-     * cm, options
-     * @type {(function(*, *))|*}
-     */
-    const onAutoComplete=useMemoizedFn((cm)=>{
-        showMenu([
-            {
-                selected: true,
-                label: '从剪切板获取url链接',
-                option: {
-                    type: 'get-url-from-clipboard',
-                }
-            },
-            {
-                selected: false,
-                label: '菜单1',
-                option: {}
-            },
-            {
-                selected: false,
-                label: '从剪切板。。。。',
-                option: {}
-            }
 
-        ], getHintMenuPos(cm))
-
-
-        // console.log("args",args);
-    });
 
     
     return <React.Fragment>
@@ -299,47 +305,24 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
                     "Alt-Enter":    onAutoComplete,
                 }
             }}
-            onBeforeChange={onChange} />
-
-        <HintDlg pos={hintMenuPos} menus={hintMenus}/>
-        {/*<ul role="listbox" aria-expanded="true" id="cm-complete-0" className="CodeMirror-hints default"*/}
-        {/*    style={{left: '17px', top: '56px',}}>*/}
-        {/*   <li className="CodeMirror-hint CodeMirror-hint-active" aria-selected="true" id="cm-complete-0-0"
-                                role="option">p - 保存剪切板图片到本地
-                            </li>  */}
-        {/*    <li className="CodeMirror-hint" id="cm-complete-0-1" role="option">p + - 保存剪切板图片到图床</li>*/}
-        {/*    <li className="CodeMirror-hint" id="cm-complete-0-2" role="option">![]() - 图片</li>*/}
-        {/*</ul>*/}
+            onBeforeChange={onChange}
+        />
+        <HintDlg pos={hintMenuPos} menus={hintMenus}
+                 bindRefFunc={bindRefFunc}
+                 onClick={hintMenuOk}
+                 onSelect={moveHintMenuTo}
+        />
     </React.Fragment>;
 };
 
 
-/**
- * 计算自动完成菜单的位置
- * @param cm
- * @return {{top: *, left: *}}
- */
-const getHintMenuPos=(cm)=>{
-    const cur = cm.getCursor();
-    const {left,top}=cm.cursorCoords(cur, "page");
-    return {
-        left: left+hintMenuAdjust.x,
-        top: top+hintMenuAdjust.y
-    };
-};
-
-
-const hintMenuAdjust={
-    x: -100,
-    y: -75,
-};
 
 
 /**
  * 标尺的默认样式
  */
 const rulerColors=["#fcc", "#f5f577", "#cfc", "#aff", "#ccf", "#fcf"];
-const rulers=[...rulerColors, ...rulerColors, ...rulerColors].map((color,ind)=>({
+const rulers=[...rulerColors, ...rulerColors, ...rulerColors, ...rulerColors].map((color,ind)=>({
     color,
     column:4*(ind+1),
     lineStyle: "dashed",

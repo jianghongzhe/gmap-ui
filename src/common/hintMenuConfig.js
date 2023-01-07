@@ -1,0 +1,18 @@
+
+export const actionTypes={
+
+    clipboardAction: 'clipboardAction',
+    getUrlFromClipboard: 'get-url-from-clipboard',
+    clipboardImgToLocal: 'clipboardImgToLocal',
+    clipboardImgToPicHost: 'clipboardImgToPicHost',
+    clipboardFileToLocal: 'clipboardFileToLocal',
+    clipboardFileToPicHost: 'clipboardFileToPicHost',
+
+    dateTimeAction: 'dateTimeAction',
+
+    editTable: 'edit-table',
+
+    literal:'literal',
+
+    refAction: 'refAction',
+};

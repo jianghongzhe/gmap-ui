@@ -2,6 +2,7 @@ import {useBoolean, useMemoizedFn} from "ahooks";
 import {useState} from "react";
 import editorSvcEx from "../service/editorSvcEx";
 import {message} from "antd";
+import api from "../service/api";
 
 
 export const useTableEditDlg=(codeMirrorInstRef)=>{
@@ -17,10 +18,11 @@ export const useTableEditDlg=(codeMirrorInstRef)=>{
             return;
         }
         const data=editorSvcEx.parseTable(codeMirrorInstRef.current);
-        if(false===data){
-            message.warn("光标所在位置不能解析为表格");
+        if(false===data || editorSvcEx.isCursorInNodePart(codeMirrorInstRef.current)){
+            api.showNotification("警告", "光标所在位置不能解析为表格", "warn");
             return;
         }
+
         setTableEditData(data);
         showTableEditDlg();
     });

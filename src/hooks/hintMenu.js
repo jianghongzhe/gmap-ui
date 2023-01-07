@@ -1,5 +1,8 @@
-import {useReducer,useEffect, useMemo, } from "react";
+import {useReducer, useEffect, useMemo, useRef,} from "react";
 import {useMemoizedFn} from "ahooks";
+import {actionTypes} from "../common/hintMenuConfig";
+import editorSvcEx from "../service/editorSvcEx";
+import {message} from "_antd@4.24.6@antd";
 
 
 export const useHintMenu=({forceCloseSymbol})=>{
@@ -17,6 +20,7 @@ export const useHintMenu=({forceCloseSymbol})=>{
         hintMenus: [],
         hintMenuPos: {left:-99999, top:-99999},
     });
+    const eleRef= useRef(null);
 
 
     /**
@@ -40,26 +44,50 @@ export const useHintMenu=({forceCloseSymbol})=>{
     });
 
     const moveHintMenu= useMemoizedFn((delta)=>{
+        // 记录分隔符的位置然后生成一个不带分隔符的数组
+        const splitInds= hintMenus.map((m,i)=>"-"===m ? i : null).filter(i=>null!==i);
+        const validItems= hintMenus.filter(m=>"-"!==m);
+
+        // 从不带分隔符的数组中计算当前选项的索引
         let selInd=-1;
-        hintMenus.forEach((m,i)=>{if(m.selected){selInd=i;}});
+        validItems.forEach((m,i)=>{if(m.selected){selInd=i;}});
         if(-1===selInd){
             return;
         }
+
+        // 索引前后移并保证不越界
         selInd+=delta;
-        if(selInd>=hintMenus.length){
+        if(selInd>=validItems.length){
             selInd=0;
         }
         if(selInd<0){
-            selInd=hintMenus.length-1;
+            selInd=validItems.length-1;
         }
-        const newMenus= hintMenus.map((m,i)=>({
+
+        // 设置新的选中项位置并把原分隔符插入回去
+        const newMenus= validItems.map((m,i)=>({
             ...m,
             selected: (i===selInd)
         }));
+        splitInds.forEach(i=>newMenus.splice(i,0,"-"));
+
+
         dispatch({
             type: 'update-menu',
             data: newMenus,
         });
+
+        // 当前选中的项移入可见区域
+        if(eleRef.current){
+            selInd=-1;
+            newMenus.forEach((m,i)=>{if(m.selected){selInd=i;}});
+            setTimeout(()=>{
+                eleRef?.current?.querySelectorAll("li")?.[selInd]?.scrollIntoViewIfNeeded({
+                    behavior: 'smooth',
+                    block: 'center',
+                });
+            },50);
+        }
     });
 
 
@@ -79,6 +107,22 @@ export const useHintMenu=({forceCloseSymbol})=>{
         moveHintMenu(-1);
     });
 
+    const moveHintMenuTo=useMemoizedFn((ind)=>{
+        const newMenus= hintMenus.map((m,i)=>{
+            if("-"===m){
+                return m;
+            }
+            return {
+                ...m,
+                selected: (i===ind),
+            };
+        });
+        dispatch({
+            type: 'update-menu',
+            data: newMenus,
+        });
+    });
+
 
     /**
      * 显示自动完成对话框
@@ -92,11 +136,20 @@ export const useHintMenu=({forceCloseSymbol})=>{
      * @param pos {left,top}
      *
      */
-    const showMenu=useMemoizedFn((menus, pos)=>{
-        // 如果没有选中项，则默认让第一项选中
+    const showMenuInner=useMemoizedFn((menus, pos)=>{
+        // 预处理
+        // 如果没有选中项，则默认让第一个不是分隔符的项选中
         if(!menus.some(m=>m.selected)){
-            menus=menus.map((m,i)=>({...m, selected:(0===i)}));
+            let handled=false;
+            menus=menus.map((m,i)=>{
+                if("-"!==m && !handled){
+                    handled=true;
+                    return {...m, selected:true,};
+                }
+                return m;
+            });
         }
+
         dispatch({
             type: 'update-all',
             data: {
@@ -104,6 +157,49 @@ export const useHintMenu=({forceCloseSymbol})=>{
                 hintMenuPos: pos,
             },
         });
+    });
+
+    const shouldShowRefMenu=useMemoizedFn((cm)=>{
+        const cursor= cm.doc.getCursor();
+        const lineTxt=cm.doc.getLine(cursor.line);
+
+        if(!editorSvcEx.isCursorInNodePart(cm) || null==lineTxt || ""==lineTxt.trim()){
+            return false;
+        }
+
+        const refName=editorSvcEx.getFirstGeneralTxt(lineTxt);
+        if(false===refName || ""===refName.trim()){
+            return false;
+        }
+        return true;
+    });
+
+    const shouldShowContMenu=useMemoizedFn((cm)=>{
+        return !editorSvcEx.isCursorInNodePart(cm);
+    });
+
+    const shouldShowEditTableMenu=useMemoizedFn((cm)=>{
+        const data=editorSvcEx.parseTable(cm);
+        return !(false===data) && !editorSvcEx.isCursorInNodePart(cm);
+    });
+
+    const showMenu=useMemoizedFn((cm)=>{
+        let list=[...hintMenuList];
+        let shouldAppendSplitter=true;
+
+        if(shouldShowEditTableMenu(cm)){
+            list=[...list, (shouldAppendSplitter ? "-" : null), ...editTableMenus];
+            shouldAppendSplitter=false;
+        }
+        if(shouldShowRefMenu(cm)){
+            list=[...list, (shouldAppendSplitter ? "-" : null), ...hintRefMenus];
+            shouldAppendSplitter=false;
+        }
+        if(shouldShowContMenu(cm)){
+            list=[...list, (shouldAppendSplitter ? "-" : null), ...hintContMenus];
+            shouldAppendSplitter=false;
+        }
+        showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm))
     });
 
     /**
@@ -121,12 +217,257 @@ export const useHintMenu=({forceCloseSymbol})=>{
         hintMenuOpen,
 
         // 函数
+        bindRefFunc: eleRef,
         showMenu,
         closeHintMenu,
         moveHintMenuDown,
         moveHintMenuUp,
+        moveHintMenuTo,
     };
 };
+
+
+const openersSampleLine2="- [txt]: notepad";
+const openersSample=`# openers
+${openersSampleLine2}`;
+
+const shortcutsSampleLine2="- [百度](https://baidu.com)";
+const shortcutsSample=`# shortcuts
+${shortcutsSampleLine2}`;
+
+
+const editTableMenus=[
+    {
+        label: '可视化表格编辑',
+        option: {
+            type: actionTypes.editTable,
+        }
+    },
+];
+
+
+/**
+ * 动态生成的自动提示菜单项 - 节点部分
+ * @type
+ */
+const hintRefMenus=[
+    {
+        label: '引用符号 ref:xx',
+        option: {
+            type: actionTypes.refAction,
+            data: {
+                ref:true,
+                tref:false,
+            }
+        }
+    },
+    {
+        label: '文本引用符号 tref:yy',
+        option: {
+            type: actionTypes.refAction,
+            data:{
+                ref:false,
+                tref:true,
+            }
+        }
+    },
+];
+
+/**
+ * 动态生成的自动提示菜单项 - 引用部分
+ * @type
+ */
+const hintContMenus=[
+    {
+        label: '打开方式设置 # openers',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: openersSample,
+                cursorOffset: [1, openersSampleLine2.length],
+            }
+        }
+    },
+    {
+        label: '快捷方式设置 # shortcuts',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: shortcutsSample,
+                cursorOffset: [1, shortcutsSampleLine2.length],
+            }
+        }
+    },
+];
+
+/**
+ * 固定的自动提示菜单项
+ * @type
+ */
+const hintMenuList=[
+    {
+        label: '剪切板 -> url',
+        option: {
+            type: actionTypes.clipboardAction,
+            data: actionTypes.getUrlFromClipboard,
+        }
+    },
+    {
+        label: '剪切板图片 -> 本地',
+        option: {
+            type: actionTypes.clipboardAction,
+            data: actionTypes.clipboardImgToLocal,
+        }
+    },
+    {
+        label: '剪切板图片 -> 图床',
+        option: {
+            type: actionTypes.clipboardAction,
+            data: actionTypes.clipboardImgToPicHost,
+        }
+    },
+    {
+        label: '剪切板文件 -> 本地',
+        option: {
+            type: actionTypes.clipboardAction,
+            data: actionTypes.clipboardFileToLocal,
+        }
+    },
+    {
+        label: '剪切板文件 -> 图床',
+        option: {
+            type: actionTypes.clipboardAction,
+            data: actionTypes.clipboardFileToPicHost,
+        }
+    },
+    "-",
+    {
+        label: '当前时间',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:false,
+                time:true,
+            },
+        }
+    },
+    {
+        label: '当前日期和时间',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:true,
+                time:true,
+            },
+        }
+    },
+    {
+        label: '今天的日期',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:true,
+                time:false,
+                dateOffset:0,
+            },
+        }
+    },
+    {
+        label: '明天的日期',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:true,
+                time:false,
+                dateOffset:1,
+            },
+        }
+    },
+    {
+        label: '后天的日期',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:true,
+                time:false,
+                dateOffset:2,
+            },
+        }
+    },
+    {
+        label: '今天以后的日期 {d+}',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: '{d+}',
+                cursorOffset: '{d+}'.length-1,
+            }
+        }
+    },
+    {
+        label: '昨天的日期',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:true,
+                time:false,
+                dateOffset:-1,
+            },
+        }
+    },
+    {
+        label: '前天的日期',
+        option: {
+            type: actionTypes.dateTimeAction,
+            data:{
+                date:true,
+                time:false,
+                dateOffset:-2,
+            },
+        }
+    },
+    {
+        label: '今天以前的日期 {d-}',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: '{d-}',
+                cursorOffset: '{d-}'.length-1,
+            }
+        }
+    },
+
+
+];
+
+
+
+
+
+
+/**
+ * 计算自动完成菜单的位置:
+ * 从codemirror中获取位置后还需要增加校准值
+ * @param cm
+ * @return {{top: *, left: *}}
+ */
+const getHintMenuPos=(cm)=>{
+    const cur = cm.getCursor();
+    const {left,top}=cm.cursorCoords(cur, "page");
+    return {
+        left: left+hintMenuAdjust.x,
+        top: top+hintMenuAdjust.y
+    };
+};
+
+
+const hintMenuAdjust={
+    x: -100,
+    y: -75,
+};
+
+
+
 
 
 const reducer=(state, action)=>{

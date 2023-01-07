@@ -1508,6 +1508,7 @@ const editorSvcExInstWrapper=(function(){
         parseTable,
         isCursorInNodePart,
         getRulerState,
+        getFirstGeneralTxt,
     };
 })();
 
