@@ -184,21 +184,20 @@ export const useHintMenu=({forceCloseSymbol})=>{
     });
 
     const showMenu=useMemoizedFn((cm)=>{
-        let list=[...hintMenuList];
-        let shouldAppendSplitter=true;
-
-        if(shouldShowEditTableMenu(cm)){
-            list=[...list, (shouldAppendSplitter ? "-" : null), ...editTableMenus];
-            shouldAppendSplitter=false;
-        }
+        let list=[];
         if(shouldShowRefMenu(cm)){
-            list=[...list, (shouldAppendSplitter ? "-" : null), ...hintRefMenus];
-            shouldAppendSplitter=false;
+            list=[...list, ...hintRefMenus];
+        }
+        if(shouldShowEditTableMenu(cm)){
+            list=[...list, ...editTableMenus];
         }
         if(shouldShowContMenu(cm)){
-            list=[...list, (shouldAppendSplitter ? "-" : null), ...hintContMenus];
-            shouldAppendSplitter=false;
+            list=[...list, ...hintContMenus];
         }
+        if(0<list.length){
+            list=[...list, "-"];
+        }
+        list=[...list, ...fixedHintMenuList];
         showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm))
     });
 
@@ -236,9 +235,13 @@ const shortcutsSample=`# shortcuts
 ${shortcutsSampleLine2}`;
 
 
+/**
+ * 动态生成的自动提示菜单项 - 表格编辑
+ * @type {[{label: string, option: {type: string}}]}
+ */
 const editTableMenus=[
     {
-        label: '可视化表格编辑',
+        label: '表格编辑（可视化）',
         option: {
             type: actionTypes.editTable,
         }
@@ -252,7 +255,7 @@ const editTableMenus=[
  */
 const hintRefMenus=[
     {
-        label: '引用符号 ref:xx',
+        label: '引用 ref:xx',
         option: {
             type: actionTypes.refAction,
             data: {
@@ -262,7 +265,7 @@ const hintRefMenus=[
         }
     },
     {
-        label: '文本引用符号 tref:yy',
+        label: '文本引用 tref:yy',
         option: {
             type: actionTypes.refAction,
             data:{
@@ -304,21 +307,21 @@ const hintContMenus=[
  * 固定的自动提示菜单项
  * @type
  */
-const hintMenuList=[
+const fixedHintMenuList=[
     {
-        label: '剪切板内容 -> url',
+        label: '剪切板 -> url',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.getUrlFromClipboard,
         }
     },
-
-    // TODO 剪切板内容 -> 图片引用
-    // 验证:
-    // 如果是网址，则直接生成标记 ![图片](https://xxx)
-    // 如果是文件且能解析为图片，则生成标记 ![图片](file:///xxx)
-    // 否则报错
-
+    {
+        label: '剪切板 -> 图片引用',
+        option: {
+            type: actionTypes.clipboardAction,
+            data: actionTypes.getImgUrlFromClipboard,
+        }
+    },
     {
         label: '剪切板图片 -> 本地',
         option: {
@@ -443,8 +446,6 @@ const hintMenuList=[
             }
         }
     },
-
-
 ];
 
 
@@ -467,7 +468,10 @@ const getHintMenuPos=(cm)=>{
     };
 };
 
-
+/**
+ * 自动完成菜单位置校正
+ * @type {{x: number, y: number}}
+ */
 const hintMenuAdjust={
     x: -100,
     y: -75,

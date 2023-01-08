@@ -3,6 +3,7 @@ export const actionTypes={
 
     clipboardAction: 'clipboardAction',
     getUrlFromClipboard: 'get-url-from-clipboard',
+    getImgUrlFromClipboard: 'get-img-url-from-clipboard',
     clipboardImgToLocal: 'clipboardImgToLocal',
     clipboardImgToPicHost: 'clipboardImgToPicHost',
     clipboardFileToLocal: 'clipboardFileToLocal',

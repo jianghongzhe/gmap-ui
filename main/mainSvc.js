@@ -892,6 +892,10 @@ const getUrlFromClipboard=(paramsObj)=>{
     return sendCmdToServer("getUrlFromClipboard", paramsObj);
 };
 
+const getImgUrlFromClipboard=(paramsObj)=>{
+    return sendCmdToServer("getImgUrlFromClipboard", paramsObj);
+};
+
 
 const openPicByName=(picName)=>{
     let url=getFileProtocalUrl(getImgsPath(picName));
@@ -1558,6 +1562,7 @@ const ipcHandlers={
     searchAllTags,
     saveFileFromClipboard,
     getUrlFromClipboard,
+    getImgUrlFromClipboard,
 };
 
 /**

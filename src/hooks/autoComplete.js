@@ -19,6 +19,13 @@ export const useAutoComplateFuncs=()=>{
             ).then();
             return;
         }
+        if(actionTypes.getImgUrlFromClipboard===subActionType){
+            respHandler(
+                api.getImgUrlFromClipboard,
+                resp=>insertTxtAndMoveCursor(cm, `![${resp.data.title}](${resp.data.url})`)
+            ).then();
+            return;
+        }
         if(actionTypes.clipboardImgToLocal===subActionType){
             respHandler(
                 api.saveFileFromClipboard.bind(this, {img:true, saveDir:currAssetsDir, saveToPicHost:false}),
@@ -85,8 +92,11 @@ export const useAutoComplateFuncs=()=>{
     });
 
 
-
-
+    /**
+     * 添加引用符号：
+     * 添加位置为节点的最后一个为空字符之后，若最后一个为空字符不是'|'，则自动生成一个用为分隔
+     * @type {(function({ref: *, tref: *}, *): void)|*}
+     */
     const doRefAction=useMemoizedFn(({ref, tref}, cm)=>{
         const typeName=(ref? "引用" : "文本引用");
         const cursor= cm.doc.getCursor();
@@ -107,8 +117,12 @@ export const useAutoComplateFuncs=()=>{
             return;
         }
 
-        const replTxt=`${useLeftSplitter?"|":""}${ref ? "ref" : "tref"}:${refName.trim()}${useRightSplitter?"|":""}`;
-        insertTxtAndMoveCursor(cm, replTxt);
+        let handledLine=lineTxt.trimEnd();
+        const replTxt=`${handledLine.endsWith("|")?"":"|"}${ref ? "ref" : "tref"}:${refName.trim()}`;
+        const insertPos={line:cursor.line, ch:handledLine.length};
+        const insertPos2={line:cursor.line, ch:lineTxt.length};
+        const newPos={line:cursor.line, ch:handledLine.length+replTxt.length};
+        insertTxtToAssignedPos(cm, replTxt, [insertPos,insertPos2] , newPos);
         return;
     });
 
@@ -150,6 +164,27 @@ const respHandler=async (getRespFunc, respHandleFunc)=>{
         api.showNotification("操作有误", "未知的操作结果","err");
     }
 };
+
+
+/**
+ * 向指定位置插入内容
+ * @param cm
+ * @param txt
+ * @param insertPos 插入点 {line,ch}   或   [{line1, ch1}, {line2, ch2}]
+ * @param afterPos 插入完成后光标位置
+ */
+const insertTxtToAssignedPos=(cm, txt, insertPos, afterPos)=>{
+    let insPos1=insertPos;
+    let insPos2=insertPos;
+    if(Array.isArray(insertPos)){
+        insPos1=insertPos[0];
+        insPos2=insertPos[1];
+    }
+
+    cm.doc.replaceRange(txt, insPos1, insPos2);
+    cm.doc.setCursor(afterPos);
+};
+
 
 /**
  * 向光标开始处插入内容并把光标后移

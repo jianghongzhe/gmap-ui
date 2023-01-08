@@ -460,6 +460,10 @@ class Api{
         return ipcRenderer.invoke('getUrlFromClipboard', {});
     };
 
+    getImgUrlFromClipboard=()=>{
+        return ipcRenderer.invoke('getImgUrlFromClipboard', {});
+    };
+
     /**
      * 复制剪切版中的图片到图片目录
      * @param {*} showName 
