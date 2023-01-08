@@ -28,7 +28,7 @@ const HintDlg=({pos, menus, bindRefFunc, onClick, onSelect})=>{
                                 "-"!==eachMenu ?
                                 (
                                     <li     className={`CodeMirror-hint ${eachMenu.selected ? "CodeMirror-hint-active" : ""}`}
-                                            onClick={onClick.bind(this, menuInd)}
+                                            onClick={onClick.bind(this, null)}
                                             onMouseOver={onSelect.bind(this, menuInd)}>
                                         {eachMenu.label}
                                     </li>

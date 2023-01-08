@@ -12,50 +12,50 @@ export const useAutoComplateFuncs=()=>{
      * @type {(function(*, *, *): void)|*}
      */
     const doClipboardAction=useMemoizedFn((subActionType, cm, currAssetsDir)=>{
-        if(actionTypes.getUrlFromClipboard===subActionType){
-            respHandler(
-                api.getUrlFromClipboard,
-                resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](${resp.data.url})`)
-            ).then();
-            return;
-        }
-        if(actionTypes.getImgUrlFromClipboard===subActionType){
-            respHandler(
-                api.getImgUrlFromClipboard,
-                resp=>insertTxtAndMoveCursor(cm, `![${resp.data.title}](${resp.data.url})`)
-            ).then();
-            return;
-        }
-        if(actionTypes.clipboardImgToLocal===subActionType){
-            respHandler(
-                api.saveFileFromClipboard.bind(this, {img:true, saveDir:currAssetsDir, saveToPicHost:false}),
-                resp=>insertTxtAndMoveCursor(cm, `![](assets/${resp.data.filename})`)
-            ).then();
-            return;
-        }
-        if(actionTypes.clipboardFileToLocal===subActionType){
-            respHandler(
-                api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:false}),
-                resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](assets/${resp.data.filename})`)
-            ).then();
-            return;
+        const actionHandlerMap={
+            [actionTypes.getUrlFromClipboard]: ()=>{
+                respHandler(
+                    api.getUrlFromClipboard,
+                    resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](${resp.data.url})`)
+                ).then();
+            },
+            [actionTypes.getImgUrlFromClipboard]: ()=>{
+                respHandler(
+                    api.getImgUrlFromClipboard,
+                    resp=>insertTxtAndMoveCursor(cm, `![${resp.data.title}](${resp.data.url})`)
+                ).then();
+            },
+            [actionTypes.clipboardImgToLocal]: ()=>{
+                respHandler(
+                    api.saveFileFromClipboard.bind(this, {img:true, saveDir:currAssetsDir, saveToPicHost:false}),
+                    resp=>insertTxtAndMoveCursor(cm, `![](assets/${resp.data.filename})`)
+                ).then();
+            },
+            [actionTypes.clipboardFileToLocal]: ()=>{
+                respHandler(
+                    api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:false}),
+                    resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](assets/${resp.data.filename})`)
+                ).then();
+            },
+            [actionTypes.clipboardImgToPicHost]: ()=>{
+                respHandler(
+                    api.saveFileFromClipboard.bind(this,{img:true, saveDir:currAssetsDir, saveToPicHost:true}),
+                    resp=>insertTxtAndMoveCursor(cm, `![](${resp.data.url})`)
+                ).then();
+            },
+            [actionTypes.clipboardFileToPicHost]: ()=>{
+                respHandler(
+                    api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:true}),
+                    resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](${resp.data.url})`)
+                ).then();
+            },
+        };
 
-        }
-        if(actionTypes.clipboardImgToPicHost===subActionType){
-            respHandler(
-                api.saveFileFromClipboard.bind(this,{img:true, saveDir:currAssetsDir, saveToPicHost:true}),
-                resp=>insertTxtAndMoveCursor(cm, `![](${resp.data.url})`)
-            ).then();
+        if(!actionHandlerMap[subActionType]){
+            api.showNotification("操作有误","该操作目前还不支持","err");
             return;
         }
-        if(actionTypes.clipboardFileToPicHost===subActionType){
-            respHandler(
-                api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:true}),
-                resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](${resp.data.url})`)
-            ).then();
-            return;
-        }
-        api.showNotification("操作有误","该操作目前还不支持","err");
+        actionHandlerMap[subActionType]();
     });
 
     const doLiteralAction=useMemoizedFn((subActionType, cm)=>{
@@ -75,17 +75,18 @@ export const useAutoComplateFuncs=()=>{
     const doDateTimeAction=useMemoizedFn(({date,time,dateOffset}, cm)=>{
         const now = new Date();
         if(time && !date){
-           insertTxtAndMoveCursor(cm, toTimeFmt(now));
+           insertTxtAndMoveCursor(cm, editorSvcEx.toTimeFmt(now));
            return;
         }
         if(date && time){
-           insertTxtAndMoveCursor(cm, toDateFmt(now)+" "+toTimeFmt(now));
+
+           insertTxtAndMoveCursor(cm, editorSvcEx.toDateFmt(now)+" "+editorSvcEx.toTimeFmt(now));
            return;
         }
         if(date && !time){
            dateOffset=(dateOffset??0);
            const assignedDate=new Date(new Date().getTime()+86400000*dateOffset);
-           insertTxtAndMoveCursor(cm, toDateFmt(assignedDate));
+           insertTxtAndMoveCursor(cm, editorSvcEx.toDateFmt(assignedDate));
            return;
         }
         api.showNotification("操作有误","该操作目前还不支持","err");
@@ -137,18 +138,7 @@ export const useAutoComplateFuncs=()=>{
     };
 };
 
-const toDateFmt=(date)=>{
-    const m=date.getMonth()+1;
-    const d=date.getDate();
-    const weekday=['日','一','二','三','四','五','六'][date.getDay()];
-    const resultDate=""+(new Date().getFullYear()-2000)+"."+(m<10?"0":"")+m+"."+(d<10?"0":"")+d+" "+weekday;
-    return resultDate;
-};
 
-const toTimeFmt=(date)=>{
-    const [h,m,s]=[date.getHours(), date.getMinutes(), date.getSeconds()];
-    return `${h<10?"0"+h:""+h}:${m<10?"0"+m:""+m}:${s<10?"0"+s:""+s}`;
-}
 
 
 
@@ -182,6 +172,7 @@ const insertTxtToAssignedPos=(cm, txt, insertPos, afterPos)=>{
     }
 
     cm.doc.replaceRange(txt, insPos1, insPos2);
+    cm.focus();
     cm.doc.setCursor(afterPos);
 };
 
@@ -207,5 +198,6 @@ const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null)=>{
         line=pos.line+cursorOffset[0];
         ch=pos.ch+cursorOffset[1];
     }
+    cm.focus();
     cm.doc.setCursor({line, ch});
 };

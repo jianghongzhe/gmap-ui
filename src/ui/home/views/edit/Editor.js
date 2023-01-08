@@ -110,7 +110,8 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
 
     /**
      * 自动完成菜单的处理函数
-     * @type {(function(*, *): void)|*}
+     * @param cm codemirror对象，如果没有传递，则使用引用中记录的
+     * @param event
      */
     const hintMenuOk=useMemoizedFn((cm, event)=>{
         cm=(cm??codeMirrorInstRef.current);
@@ -139,6 +140,9 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
             return;
         }
     });
+
+
+
 
     /**
      * 绑定键盘事件

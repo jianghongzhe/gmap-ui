@@ -255,7 +255,7 @@ const editTableMenus=[
  */
 const hintRefMenus=[
     {
-        label: '引用 ref:xx',
+        label: '引用　　　ref:xx',
         option: {
             type: actionTypes.refAction,
             data: {
@@ -265,7 +265,7 @@ const hintRefMenus=[
         }
     },
     {
-        label: '文本引用 tref:yy',
+        label: '文本引用　tref:yy',
         option: {
             type: actionTypes.refAction,
             data:{
@@ -282,7 +282,7 @@ const hintRefMenus=[
  */
 const hintContMenus=[
     {
-        label: '打开方式设置 # openers',
+        label: '打开方式　# openers',
         option: {
             type: actionTypes.literal,
             data: {
@@ -292,7 +292,7 @@ const hintContMenus=[
         }
     },
     {
-        label: '快捷方式设置 # shortcuts',
+        label: '快捷方式　# shortcuts',
         option: {
             type: actionTypes.literal,
             data: {
@@ -309,42 +309,73 @@ const hintContMenus=[
  */
 const fixedHintMenuList=[
     {
-        label: '剪切板 -> url',
+        label: '插入图片　![图片]()',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: "![图片]()",
+                cursorOffset: "![图片]()".length-1,
+            }
+        }
+    },
+    {
+        label: '插入链接　[链接]()',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: "[链接]()",
+                cursorOffset: "[链接]()".length-1,
+            }
+        }
+    },
+    {
+        label: '文件链接　[文件](file:///)',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: "[文件](file:///)",
+                cursorOffset: "[文件](file:///)".length-1,
+            }
+        }
+    },
+    "-",
+    {
+        label: '剪切板　　　->　url',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.getUrlFromClipboard,
         }
     },
     {
-        label: '剪切板 -> 图片引用',
+        label: '剪切板　　　->　图片引用',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.getImgUrlFromClipboard,
         }
     },
     {
-        label: '剪切板图片 -> 本地',
+        label: '剪切板图片　->　本地',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.clipboardImgToLocal,
         }
     },
     {
-        label: '剪切板图片 -> 图床',
+        label: '剪切板图片　->　图床',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.clipboardImgToPicHost,
         }
     },
     {
-        label: '剪切板文件 -> 本地',
+        label: '剪切板文件　->　本地',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.clipboardFileToLocal,
         }
     },
     {
-        label: '剪切板文件 -> 图床',
+        label: '剪切板文件　->　图床',
         option: {
             type: actionTypes.clipboardAction,
             data: actionTypes.clipboardFileToPicHost,
@@ -362,7 +393,7 @@ const fixedHintMenuList=[
         }
     },
     {
-        label: '当前日期和时间',
+        label: '当前日期时间',
         option: {
             type: actionTypes.dateTimeAction,
             data:{
@@ -405,7 +436,7 @@ const fixedHintMenuList=[
         }
     },
     {
-        label: '今天以后的日期 {d+}',
+        label: '之后的日期　{d+}',
         option: {
             type: actionTypes.literal,
             data: {
@@ -437,7 +468,7 @@ const fixedHintMenuList=[
         }
     },
     {
-        label: '今天以前的日期 {d-}',
+        label: '之前的日期　{d-}',
         option: {
             type: actionTypes.literal,
             data: {
