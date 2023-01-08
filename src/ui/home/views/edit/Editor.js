@@ -19,7 +19,6 @@ import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/jump-to-line';
 import 'codemirror/addon/display/rulers';
 import 'codemirror/addon/lint/lint';
-import 'codemirror/addon/hint/show-hint';
 
 import '../../../../service/gmap-lint';
 

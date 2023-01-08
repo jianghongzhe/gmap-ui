@@ -183,6 +183,11 @@ export const useHintMenu=({forceCloseSymbol})=>{
         return !(false===data) && !editorSvcEx.isCursorInNodePart(cm);
     });
 
+
+    /**
+     * 动态组装自动提示菜单项：
+     * @type {(function(*): void)|*}
+     */
     const showMenu=useMemoizedFn((cm)=>{
         let list=[];
         if(shouldShowRefMenu(cm)){

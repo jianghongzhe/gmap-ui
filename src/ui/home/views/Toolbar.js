@@ -1,5 +1,5 @@
 import React from 'react';
-import {Avatar, Button, Divider, Layout, Tooltip} from 'antd';
+import {Avatar, Button, Divider, Layout, Tooltip, Typography} from 'antd';
 import {
     CameraOutlined,
     CloudSyncOutlined,
@@ -28,6 +28,7 @@ import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 
 const { Header } = Layout;
+const { Title, Paragraph, Text, Link } = Typography;
 
 /**
  * 工具栏
@@ -96,8 +97,9 @@ const Toolbar=({
 
             {/* 快捷方式：随当前导图而变化 */}
             {
-                (currPane?.ds?.tree?.shortcuts && currPane.ds.tree.shortcuts.length>0) && <React.Fragment>
+                (currPane?.ds?.tree?.shortcuts?.length>0) && <React.Fragment>
                     <Divider type="vertical" className='divider'/>
+                    <Text style={{marginLeft:'14px',fontSize:'16px',lineHeight:'20px',}}>快捷入口：</Text>
                     {
                         currPane.ds.tree.shortcuts.map((shortItem, shortInd)=>(
                             <ShortcutItem key={`shortcutbtn-${shortInd}`} name={shortItem.name} url={shortItem.url} onClick={onOpenLink}/>

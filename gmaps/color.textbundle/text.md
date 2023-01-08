@@ -19,3 +19,4 @@ qqqqqq
 
 # shortcuts
 - [百度百度](https://baidu.com)
+- [文件](file:///notepad)

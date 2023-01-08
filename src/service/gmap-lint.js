@@ -26,109 +26,32 @@ import mindMapValidateSvc from './mindMapValidateSvc';
 
 
 
-    // CodeMirror.registerHelper("hint", "markdown",(cm, options)=>{
-    //     const cur = cm.getCursor();
-    //     console.log("位置",cm.cursorCoords(cur, "page"));
-    //
-    //     console.log("cursor", cur);
-    //
-    //
-    //
-    //     // console.log("qqq");
-    //
-    //     const hintList=[
-    //         {
-    //             lab1: '{p}',
-    //             lab2: '保存剪切板图片到本地',
-    //             val: '{p}',
-    //         },
-    //         {
-    //             lab1: '{p+}',
-    //             lab2: '保存剪切板图片到图床',
-    //             val: '{p+}',
-    //         },
-    //         {
-    //             lab1: '![]()',
-    //             lab2: '图片',
-    //             val: '![图片]()',
-    //         }
-    //
-    //     ];
-    //     const list= createHintList(hintList);
-    //
-    //
-    //     //let result=await new Promise((res,rej)=>({list: ['aaa','bbb'], from: CodeMirror.Pos(cur.line, start), to: CodeMirror.Pos(cur.line, end)}));
-    //     let result={list
-    // // :
-    //         //     [
-    //         //
-    //         //
-    //         //     {displayText:'![]() - 图片', text:'![图片]()', },
-    //         //     {displayText:'[]() - 超链接', text:'[链接]()', },
-    //         //     {displayText:'[](file:///) - 本地文件链接', text:'[](file:///)', },
-    //         //
-    //         //     {displayText:'{p} - 保存剪切板图片到本地', text:'{p}', },
-    //         //     {displayText:'{p+} - 保存剪切板图片到图床', text:'{p+}', },
-    //         //     {displayText:'{a} - 保存剪切板文件到本地', text:'{a}', },
-    //         //     {displayText:'{a+} - 保存剪切板文件到图床', text:'{a+}', },
-    //         //     {displayText:'{u} - 提取剪切板url链接', text:'{u}', },
-    //         //
-    //         //
-    //         //     {displayText:'{d} - 今天日期', text:'{d}', },
-    //         //     {displayText:'{d+1} - 明天日期', text:'{d+1}', },
-    //         //     {displayText:'{d+2} - 后天日期', text:'{d+2}', },
-    //         //     {displayText:'{d-1} - 昨天日期', text:'{d-1}', },
-    //         //     {displayText:'{d-2} - 前天日期', text:'{d-2}', },
-    //         //     {displayText:'{t} - 当前时间', text:'{t}', },
-    //         //     {displayText:'{dt} - 当前日期时间', text:'{dt}', },
-    //         //
-    //         //
-    //         //
-    //         //
-    //         //
-    //         //
-    //         //
-    //         // ]
-    //
-    //                 ,
-    //         from: cur/*CodeMirror.Pos(cur.line, start)*/, to: cur/*CodeMirror.Pos(cur.line, end)*/
-    //     };
-    //
-    //     // setTimeout(()=>{
-    //     //     console.log("ele", document.querySelector("ul[role=listbox]").outerHTML);
-    //     // },2000);
-    //
-    //
-    //     return result;
-    // });
-
+    /**
+     * 关于自动完成功能的说明：
+     * 由于codemirror的自动完成需要预先准备好label（显示用）和value（实际结果）值，不适用于本项目的情况，因此手动进行处理，但仍使用codemirror的css样式。
+     *
+     * codemirror的实现方式为如下代码示例。其中displayText和text需要预先准备好。
+     * <code>
+     *      CodeMirror.registerHelper("hint", "markdown",(cm, options)=>{
+     *         return {
+     *             list: [
+     *                 {
+     *                     displayText: "插入链接",
+     *                     text: "[某网](https://www.abc.def)",
+     *                 }
+     *             ],
+     *             from: {line:0, ch:0},
+     *             to: {line:0, ch:0},
+     *         };
+     *     });
+     * </code>
+     *
+     * 本项目不适用于上面实现方式的理由：
+     * 1、而本项目需要的方式为用户选择了指定菜单后再动态计算需要向编辑器插入的文本。比如如下场景：
+     * 把剪切板中的文件上传到图床并生成markdown链接，如：[xxx](http://yyy/a/b/c)。
+     * 该功能不可能在用户确认前就上传图床并生成markdown文本，只能等用户确认后再操作。
+     * 2、codemirror不适用于异步的情况，不支持Promise结果
+     *
+     *
+     */
 })();
-
-
-/**
- *
- * @param list [
- *  {
- *      lab1: '{u}',
- *      lab2: '',
- *      val: '提取剪切板url链接',
- *  }
- * ]
- */
-const createHintList=(list=[])=>{
-    const maxLabelLen= list.map(item=>item.lab1.trim()).reduce((accu, cur)=>Math.max(accu, `${cur}`.length),0);
-    return list.map(item=>({
-        displayText: `${item.lab1.padEnd(maxLabelLen, " ")} - ${item.lab2}`,
-        text: item.val,
-    }));
-};
-
-createHintList([
-    {
-        lab1: '{u}'
-    },
-    {
-        lab1: '[](file:///)'
-    }
-]);
-
