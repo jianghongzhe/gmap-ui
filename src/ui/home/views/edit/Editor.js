@@ -34,6 +34,7 @@ import HintDlg from "./HintDlg";
 import {useHintMenu} from "../../../../hooks/hintMenu";
 import {useAutoComplateFuncs} from "../../../../hooks/autoComplete";
 import {actionTypes} from "../../../../common/hintMenuConfig";
+import globalStyleConfig from "../../../../common/globalStyleConfig";
 
 const CodeMirror=React.memo(NotMemoedCodeMirror);
 
@@ -62,8 +63,6 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
         doLiteralAction,
         doDateTimeAction,
         doRefAction,
-        shouldShowRefMenu,
-        shouldShowContMenu,
     }=useAutoComplateFuncs();
 
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
@@ -248,13 +247,16 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
         let result={
             ...rulerStyle,
             'body .CodeMirror-lint-tooltip':{zIndex: 1000,},
-            'body .CodeMirror-hints':{zIndex: 1000,},
+            'body .CodeMirror-hints':{
+                zIndex: 1000,
+                maxHeight: `${globalStyleConfig.hintDlg.maxh}px`,
+            },
         };
         return result;
     },[rulerStyle]);
 
 
-
+    
     
     return <React.Fragment>
         <Global styles={globalStyle}/>

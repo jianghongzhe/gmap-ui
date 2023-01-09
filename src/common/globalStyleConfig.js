@@ -57,6 +57,10 @@ const config= {
         dynDdXDistAngleDegree: 13,
         nodePaddingTop: 10,
     },
+
+    hintDlg: {
+        maxh: 252,
+    },
 };
 
 export default config;

@@ -3,6 +3,7 @@ import {useMemoizedFn} from "ahooks";
 import {actionTypes} from "../common/hintMenuConfig";
 import editorSvcEx from "../service/editorSvcEx";
 import {message} from "_antd@4.24.6@antd";
+import globalStyleConfig from "../common/globalStyleConfig";
 
 
 export const useHintMenu=({forceCloseSymbol})=>{
@@ -486,22 +487,28 @@ const fixedHintMenuList=[
 
 
 
-
-
-
 /**
  * 计算自动完成菜单的位置:
- * 从codemirror中获取位置后还需要增加校准值
+ * 从codemirror中获取位置后还需要增加校准值，同时还要处理提示框下边缘超出窗口的情况
  * @param cm
  * @return {{top: *, left: *}}
  */
 const getHintMenuPos=(cm)=>{
+    // 光标为相对于codemirror编辑器的位置
     const cur = cm.getCursor();
-    const {left,top}=cm.cursorCoords(cur, "page");
-    return {
-        left: left+hintMenuAdjust.x,
-        top: top+hintMenuAdjust.y
-    };
+    let {left,top}=cm.cursorCoords(cur, "page");
+
+    // 增加校正值后变为相对于编辑器对话框的位置，返回结果也需要这种相对位置
+    left+=hintMenuAdjust.x;
+    top+=hintMenuAdjust.y;
+
+    // 如果提示框的下边缘超过窗口高度，则提示框应应显示在光标处的上面，默认是下面
+    // 相对于对话框的高度 + 100（编辑器对话框距窗口顶部的位置）+ 提示框高度 = 提示框下边相对于窗口的位置
+    if(top+100+globalStyleConfig.hintDlg.maxh>=document.body.clientHeight-3){
+        top-=globalStyleConfig.hintDlg.maxh+25;
+    }
+
+    return {left, top};
 };
 
 /**
