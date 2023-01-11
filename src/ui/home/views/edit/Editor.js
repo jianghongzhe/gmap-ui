@@ -43,7 +43,7 @@ const CodeMirror=React.memo(NotMemoedCodeMirror);
  * 编辑器
  * @param {*} props 
  */
-const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
+const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
 
     const {
         hintMenus,
@@ -236,7 +236,55 @@ const Editor=({openSymbol, onSetInst, action, value, onOnlySave, onOk, onShowHel
             setTimeout(focusFun, 0);
             return;
         }
+        if('edit'===action.type){
+            if(codeMirrorInstRef.current){
+                const cm=codeMirrorInstRef.current;
+                const pos={
+                    line:action.nd.lineInd,
+                    ch:cm.doc.getLine(action.nd.lineInd).length
+                };
+                cm.focus();
+                cm.setCursor(pos);
+                cm.scrollIntoView(pos);
+                return;
+            }
+        }
+        if('appendChild'===action.type){
+            console.log("action in editor", action);
+            return;
+        }
+        if('addSiblingBefore'===action.type){
+            if(codeMirrorInstRef.current){
+                const cm=codeMirrorInstRef.current;
+                const pos={
+                    line:action.nd.lineInd,
+                    ch:0,
+                };
+                let cont=`\t- 
+`;
+                cm.doc.replaceRange(cont, pos, pos);
+                cm.setCursor({...pos,ch:2});
+                cm.focus();
+
+                cm.scrollIntoView(pos);
+                return;
+            }
+
+            console.log("action in editor", action);
+            return;
+        }
+        if('addSiblingAfter'===action.type){
+            console.log("action in editor", action);
+            return;
+        }
+
+
+
+
+
+
     },[action, codeMirrorInstRef]);
+
 
 
 

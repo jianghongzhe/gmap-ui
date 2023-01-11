@@ -80,7 +80,7 @@ const MapsViewer=(props)=>{
     const [currLinkUrl, setCurrLinkUrl]=useState(null);
     const [paramReplItems, setParamReplItems]=useState([]);
 
-
+    const [editDlgAction, setEditDlgAction]=useState(null);
     
     const [findInFileDlgVisible,{setTrue:showFindInFileDlg, setFalse:hideFindInFileDlg}]=useBoolean(false);
 
@@ -460,6 +460,35 @@ const MapsViewer=(props)=>{
     },[setStrParamReplaceDlgVisible, selectFileListItem]);
 
 
+    const onNodeOp=useMemoizedFn((nd, action)=>{
+        onShowEditMapDlg();
+        setTimeout(()=>{
+            // console.log("onNodeOp nd", nd);
+            // console.log("onNodeOp action", action);
+            // console.log("type", typeof currPane.mapTxts);
+
+            /*
+            edit
+           appendChild
+           addSiblingBefore
+           addSiblingAfter
+             */
+
+            setEditDlgAction({
+               type: action,
+               nd,
+            });
+
+
+
+
+        },500);
+
+
+
+    });
+
+
     /***
      * 是否有已打开的对话框
      */
@@ -512,6 +541,7 @@ const MapsViewer=(props)=>{
                                 onOpenRef={openRef}
                                 onShowTimeline={onShowTimeline}
                                 onShowProgs={onShowProgs}
+                                onNodeOp={onNodeOp}
                             />
                         </>
 
@@ -562,6 +592,7 @@ const MapsViewer=(props)=>{
                 onCancel={closeAllDlg}
                 onChangeEditTmpTxt={onChangeEditTmpTxt}
                 onOpenHelpDlg={showHelpDlg}
+                action={editDlgAction}
             />
 
             <OpenGraphDlg

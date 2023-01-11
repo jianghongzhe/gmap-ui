@@ -31,6 +31,7 @@ const EditGraphDlg=(props)=>{
 
 
     const [openSymbol, setOpenSymbol]= useState(Symbol());
+    const [cursorPosSymbol, setCursorPosSymbol] = useState(null);
 
 
 
@@ -67,6 +68,15 @@ const EditGraphDlg=(props)=>{
             }, 500);
         }
     },[props.visible, setEditorAction]);
+
+
+
+    useEffect(()=>{
+        if(props.visible && props.action){
+            setEditorAction(props.action)
+        }
+    },[props.visible, props.action])
+
 
 
     return (
@@ -133,6 +143,7 @@ const EditGraphDlg=(props)=>{
                         onSetInst={setCodeMirrorInst}
                         onShowHelpDlg={props.onOpenHelpDlg}
                         onEditTable={onEditTable}
+                        cursorPosSymbol={cursorPosSymbol}
                     />
                 </div>
             </EnhDlg>

@@ -485,7 +485,7 @@ class MindmapSvc {
         let { ndLines, refs, openers, shortcuts} = this.loadParts(arrayOrTxt);
         const defaultRelaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
 
-        ndLines.forEach(str => {           
+        ndLines.forEach(({str,lineInd}) => {
             //=============数据行开始======================
             let lev = str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
             let txt = str.substring(lev + 1).trim();
@@ -675,6 +675,7 @@ class MindmapSvc {
 
             let nd = {
                 id: nodeIdPrefix+(++nodeIdCounter),
+                lineInd,
                 lev: lev,
                 str: txts,
                 left: false,
@@ -699,8 +700,6 @@ class MindmapSvc {
                 isRelaLineFrom: false,
                 isRelaLineTo: false,
             };
-
-            
 
 
             //还没有第一个节点，以第一个节点为根节点
@@ -855,8 +854,11 @@ class MindmapSvc {
         let ndLines = [];
         let currRefName = null;
         let alreadyHandleRefs = false;
+        let lineCounter=-1;
 
         alltxts.trim().replace(/\r/g, '').split("\n").forEach(line => {
+            ++lineCounter;
+
             if ("***" === line.trim() && !alreadyHandleRefs) {
                 alreadyHandleRefs = true;
             }
@@ -866,7 +868,7 @@ class MindmapSvc {
                 if ('' === line.trim()) {
                     return;
                 }
-                ndLines.push(line);//此处不要trim，因为节点有层级关系，前面有制表符
+                ndLines.push({str:line, lineInd:lineCounter,});//此处不要trim，因为节点有层级关系，前面有制表符
                 return;
             }
 
@@ -971,10 +973,10 @@ class MindmapSvc {
 
 
         // 文字引用直接替换到原文中
-        ndLines=ndLines.map(line=>{
-            let splitPos=line.indexOf("- ")+2;
-            let front=line.substring(0,splitPos);
-            let end="|"+escapeVLine(line.substring(splitPos).trim())+"|";
+        ndLines=ndLines.map(({str, lineInd})=>{
+            let splitPos=str.indexOf("- ")+2;
+            let front=str.substring(0,splitPos);
+            let end="|"+escapeVLine(str.substring(splitPos).trim())+"|";
 
             for(let key in trefs){
                 end=end.replace("|"+key+"|","|"+trefs[key]+"|");
@@ -985,7 +987,10 @@ class MindmapSvc {
             while(end.endsWith("|")){
                 end=end.substring(0,end.length-1);
             }
-            return front+unescapeVLineRestore(end.trim());
+            return {
+                str: front+unescapeVLineRestore(end.trim()),
+                lineInd
+            };
         });
 
 

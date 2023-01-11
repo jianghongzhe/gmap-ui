@@ -12,7 +12,7 @@ import api from "../../../service/api";
  * 导图的节点
  * @param {*} props 
  */
-const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
+const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNodeOp,})=>{
 
     //根主题的样式，根据是否有文本之外的内容显示不同样式
     //有额外内容：显示一个边框
@@ -71,17 +71,41 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink})=>{
 
 
         {/* 主题文本 markdown-body*/}
-        <span className='themename markdown-body-node' >
-            {
-                "string"===typeof(nd.str) ?
-                    <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
-                        :
-                    <>{nd.str.map((line,ind)=><React.Fragment key={'ndtxts-'+ind}>
-                        {0<ind && <br key={'ndbr-'+ind}/>}
-                        <span key={'ndtxt-'+ind} dangerouslySetInnerHTML={{__html:handleSingleLine(line)}}></span>
-                    </React.Fragment>)}</>
-            } 
-        </span>
+        <Tooltip color='cyan' mouseEnterDelay={0.4} title={
+            <div>
+                <div>节点操作</div>
+                <div style={{marginTop:'10px'}}>
+                    <Button type='dashed' ghost size='small' shape='round'
+                            style={{marginRight:"8px", marginBottom:'8px',}}
+                            onClick={onNodeOp.bind(this,nd,'edit')}>编辑节点</Button>
+                    <Button type='dashed' ghost size='small' shape='round'
+                            style={{marginRight:"8px", marginBottom:'8px',}}
+                            onClick={onNodeOp.bind(this,nd,'appendChild')}>添加子节点</Button>
+                    {
+                        nd.par && (<React.Fragment>
+                            <Button type='dashed' ghost size='small' shape='round'
+                                    style={{marginRight:"8px", marginBottom:'8px',}}
+                                    onClick={onNodeOp.bind(this,nd,'addSiblingBefore')}>添加兄弟节点（之前）</Button>
+                            <Button type='dashed' ghost size='small' shape='round'
+                                    style={{marginRight:"8px", marginBottom:'8px',}}
+                                    onClick={onNodeOp.bind(this,nd,'addSiblingAfter')}>添加兄弟节点（之后）</Button>
+                        </React.Fragment>)
+                    }
+                </div>
+            </div>
+        }>
+            <span className='themename markdown-body-node' >
+                {
+                    "string"===typeof(nd.str) ?
+                        <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
+                            :
+                        <>{nd.str.map((line,ind)=><React.Fragment key={'ndtxts-'+ind}>
+                            {0<ind && <br key={'ndbr-'+ind}/>}
+                            <span key={'ndtxt-'+ind} dangerouslySetInnerHTML={{__html:handleSingleLine(line)}}></span>
+                        </React.Fragment>)}</>
+                }
+            </span>
+        </Tooltip>
 
         {/* 进度 trailColor='#CCC' status="normal" format={percent => percent + '%'} */}
         {(nd && nd.prog) && (
