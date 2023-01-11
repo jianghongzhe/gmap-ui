@@ -26,6 +26,8 @@ import {useInitFindInPageDlg, useLoadAllDirs, useSetPathValidState, useSetWindow
 import { useCopyCurrMapLink, useCreateNewMapPromise, useSaveMapPromise, useSelectFileListItem } from '../../hooks/tabs';
 import HelpDlg from './views/edit/HelpDlg';
 import {useEditTags} from "../../hooks/tags";
+import {useNodeOp} from "../../hooks/nodeOp";
+import {useOpenLinkWithParam} from "../../hooks/openLinkWithParam";
 
 const { Content } = Layout;
 
@@ -76,12 +78,12 @@ const MapsViewer=(props)=>{
 
 
 
-    const [strParamReplaceDlgVisible, setStrParamReplaceDlgVisible]=useState(false);
-    const [currLinkUrl, setCurrLinkUrl]=useState(null);
-    const [paramReplItems, setParamReplItems]=useState([]);
+
+
 
     const [editDlgAction, setEditDlgAction]=useState(null);
-    
+    const {calcNewTxtAndCursor}= useNodeOp(currPane?.mapTxts);
+
     const [findInFileDlgVisible,{setTrue:showFindInFileDlg, setFalse:hideFindInFileDlg}]=useBoolean(false);
 
     const [relaChartDlgVisible, setRelaChartDlgVisible]=useState(false); 
@@ -114,6 +116,21 @@ const MapsViewer=(props)=>{
             progsObj: [],
     });
 
+    const openLinkWrapper= useMemoizedFn((url)=>{
+        api.openUrl(url, selectFileListItem);
+    });
+
+
+    // 链接插值参数
+    const {
+        dlgVisible: strParamReplaceDlgVisible,
+        currLinkUrl,
+        paramReplItems,
+        onClickLink: onBeforeOpenLink,
+        onDlgCancel: closeParamDlg,
+        onDlgOk: onStrParamReplaceDlgOk,
+    }= useOpenLinkWithParam(openLinkWrapper);
+
     
 
     useMount(()=>{
@@ -132,7 +149,7 @@ const MapsViewer=(props)=>{
     
     
 
-    const closeAllDlg =useCallback(() => {
+    const closeAllDlg =useMemoizedFn(() => {
         setNewMapDlgVisible(false);
         setSelMapDlgVisible(false);
         setEditDlgState((state)=>({...state, editMapDlgVisible:false}));
@@ -140,17 +157,8 @@ const MapsViewer=(props)=>{
         setTimelineDlgState((state)=>({...state, timelineDlgVisible:false}));
         setProgsDlgState((state)=>({...state, progsDlgVisible:false}));
         setRelaChartDlgVisible(false);
-        setStrParamReplaceDlgVisible(false);
-    },[
-        setNewMapDlgVisible,
-        setSelMapDlgVisible,
-        setEditDlgState,
-        setRefViewerDlgState,
-        setTimelineDlgState,
-        setProgsDlgState,
-        setRelaChartDlgVisible,
-        setStrParamReplaceDlgVisible,
-    ]);
+        closeParamDlg();
+    });
 
 
 
@@ -238,21 +246,7 @@ const MapsViewer=(props)=>{
 
 
     //------------修改导图----------------------------------------------------------------------
-    const onShowEditMapDlg =useMemoizedFn(() => {
-        (async()=>{
-            try {
-                api.closeFindInPageDlg();
-                setEditDlgState({
-                    editMapDlgVisible: true,
-                    editTmpTxt: currPane.mapTxts,
-                    currMapName: currPane.title
-                });
-                setTags(currPane.tags);
-                setTagVal("");
-            } catch (error) {
-            }
-        })();
-    });
+
 
     const onChangeEditTmpTxt =useCallback((editor, data, value) => {
         setEditDlgState((state)=>({...state, editTmpTxt: value}));
@@ -426,66 +420,45 @@ const MapsViewer=(props)=>{
     /**
      * 打开当前导图文件的目录
      */
-    const onShowCurrMapDir=useCallback(()=>{
+    const onShowCurrMapDir=useMemoizedFn(()=>{
         api.openCurrMapDir(activeKey);
-    },[activeKey]);
+    });
     
 
 
-    
+
+
 
     /**
-     * 导图上链接点击事件：当其中不包含占位符时直接执行链接，否则打开对话框当设置占位符
-     * @param {*} url 
-     * @returns 
+     * 节点编辑：
+     * 两个参数都不传递相当于默认的编辑功能
+     * @param nd 节点对象
+     * @param action 节点的操作 edit/appendChild/addSiblingBefore/addSiblingAfter
+     *
      */
-    const onBeforeOpenLink=useMemoizedFn((url)=>{
-        const replaceItems= strTmpl.parse(url);
-        if(null===replaceItems){
-            api.openUrl(url, selectFileListItem);
-            return;
-        }
-        setCurrLinkUrl(url);
-        setParamReplItems(replaceItems);
-        setStrParamReplaceDlgVisible(true);
+    const onNodeOp=useMemoizedFn((nd, action)=>{
+        const[newMapTxts, newCursor]= calcNewTxtAndCursor(nd, action);
+        api.closeFindInPageDlg();
+        setEditDlgState({
+            editMapDlgVisible: true,
+            editTmpTxt: newMapTxts,
+            currMapName: currPane.title
+        });
+        setTags(currPane.tags);
+        setTagVal("");
+
+        // 延迟光标定位
+        setTimeout(()=>{
+            setEditDlgAction({
+                type: 'putCursor',
+                pos: newCursor,
+            });
+        },500);
     });
 
-    /**
-     * 参数占位符替换后的回调
-     * @param {*} url 
-     */
-    const onStrParamReplaceDlgOk=useCallback((url)=>{
-        setStrParamReplaceDlgVisible(false);
-        api.openUrl(url, selectFileListItem);
-    },[setStrParamReplaceDlgVisible, selectFileListItem]);
 
-
-    const onNodeOp=useMemoizedFn((nd, action)=>{
-        onShowEditMapDlg();
-        setTimeout(()=>{
-            // console.log("onNodeOp nd", nd);
-            // console.log("onNodeOp action", action);
-            // console.log("type", typeof currPane.mapTxts);
-
-            /*
-            edit
-           appendChild
-           addSiblingBefore
-           addSiblingAfter
-             */
-
-            setEditDlgAction({
-               type: action,
-               nd,
-            });
-
-
-
-
-        },500);
-
-
-
+    const onShowEditMapDlg =useMemoizedFn(() => {
+        onNodeOp(null, null);
     });
 
 
@@ -499,7 +472,8 @@ const MapsViewer=(props)=>{
         refViewerDlgVisible ||
         timelineDlgVisible ||
         progsDlgVisible ||
-        relaChartDlgVisible
+        relaChartDlgVisible ||
+        strParamReplaceDlgVisible
     ),[
         newMapDlgVisible,
         editMapDlgVisible,
@@ -507,7 +481,8 @@ const MapsViewer=(props)=>{
         refViewerDlgVisible,
         timelineDlgVisible,
         progsDlgVisible,
-        relaChartDlgVisible
+        relaChartDlgVisible,
+        strParamReplaceDlgVisible
     ]);
     
     return (
@@ -569,7 +544,7 @@ const MapsViewer=(props)=>{
                 replItems={paramReplItems}
                 currLinkUrl={currLinkUrl}
                 onOk={onStrParamReplaceDlgOk}
-                onCancel={setStrParamReplaceDlgVisible.bind(this, false)}
+                onCancel={closeParamDlg}
             />
 
             <NewGraphDlg
@@ -629,6 +604,18 @@ const MapsViewer=(props)=>{
     
 }
 
+
+
+const getLastSubNdLineInd=(nd)=>{
+    if(!nd.childs || 0==nd.childs.length){
+        return nd.lineInd;
+    }
+    let tmp=nd.lineInd;
+    nd.childs.forEach(subNd=>{
+        tmp=Math.max(tmp, getLastSubNdLineInd(subNd));
+    });
+    return tmp;
+};
 
 
 export default React.memo(MapsViewer);

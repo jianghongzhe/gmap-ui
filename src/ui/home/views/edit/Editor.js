@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef,} from 'react';
 
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
 
@@ -236,75 +236,32 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
             setTimeout(focusFun, 0);
             return;
         }
-        if('edit'===action.type){
+
+        // 光标定位
+        // {
+        //      type: 'putCursor',
+        //      pos: {line,ch},
+        // }
+        if('putCursor'===action.type){
             if(codeMirrorInstRef.current){
                 const cm=codeMirrorInstRef.current;
-                const pos={
-                    line:action.nd.lineInd,
-                    ch:cm.doc.getLine(action.nd.lineInd).length
-                };
                 cm.focus();
-                cm.setCursor(pos);
-                cm.scrollIntoView(pos);
+                cm.setCursor(action.pos);
+                cm.scrollIntoView(action.pos);
                 return;
             }
-        }
-        if('appendChild'===action.type){
-            console.log("action in editor", action);
             return;
         }
-        if('addSiblingBefore'===action.type){
-            if(codeMirrorInstRef.current){
-                const cm=codeMirrorInstRef.current;
-                const pos={
-                    line:action.nd.lineInd,
-                    ch:0,
-                };
-                let cont=`\t- 
-`;
-                cm.doc.replaceRange(cont, pos, pos);
-                cm.setCursor({...pos,ch:2});
-                cm.focus();
-
-                cm.scrollIntoView(pos);
-                return;
-            }
-
-            console.log("action in editor", action);
-            return;
-        }
-        if('addSiblingAfter'===action.type){
-            console.log("action in editor", action);
-            return;
-        }
-
-
-
-
-
-
     },[action, codeMirrorInstRef]);
-
 
 
 
     /**
      * 标尺的样式和语法检查tooltip的样式
      */
-    const globalStyle=useMemo(()=>{
-        let result={
-            ...rulerStyle,
-            'body .CodeMirror-lint-tooltip':{zIndex: 1000,},
-            'body .CodeMirror-hints':{
-                zIndex: 1000,
-                maxHeight: `${globalStyleConfig.hintDlg.maxh}px`,
-            },
-        };
-        return result;
-    },[rulerStyle]);
+    const globalStyle=useMemo(()=>({...rulerStyle, ...fixedGlobalStyle,}),[rulerStyle]);
 
 
-    
     
     return <React.Fragment>
         <Global styles={globalStyle}/>
@@ -368,6 +325,14 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
     </React.Fragment>;
 };
 
+
+const fixedGlobalStyle= {
+    'body .CodeMirror-lint-tooltip': {zIndex: 1000,},
+    'body .CodeMirror-hints': {
+        zIndex: 1000,
+        maxHeight: `${globalStyleConfig.hintDlg.maxh}px`,
+    }
+};
 
 
 
