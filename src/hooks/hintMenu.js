@@ -190,6 +190,7 @@ export const useHintMenu=({forceCloseSymbol})=>{
      * @type {(function(*): void)|*}
      */
     const showMenu=useMemoizedFn((cm)=>{
+        // 菜单组装：动态菜单项 + 固定菜单项
         let list=[];
         if(shouldShowRefMenu(cm)){
             list=[...list, ...hintRefMenus];
@@ -204,7 +205,13 @@ export const useHintMenu=({forceCloseSymbol})=>{
             list=[...list, "-"];
         }
         list=[...list, ...fixedHintMenuList];
-        showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm))
+
+        // 先使光标位置可见，再打开菜单。打开菜单前增加延时以确保光标位置已滚动到可见处。
+        const cur = cm.getCursor();
+        cm.scrollIntoView(cur);
+        setTimeout(()=>{
+            showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm));
+        },50);
     });
 
     /**
