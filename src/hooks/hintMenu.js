@@ -214,19 +214,12 @@ export const useHintMenu=()=>{
      */
     const showMenu=useMemoizedFn((cm)=>{
         // 菜单组装：动态菜单项 + 固定菜单项
-        let list=[];
-        if(shouldShowRootMenu(cm)){
-            list=[...list, ...rootNdDlgMenus];
-        }
-        if(shouldShowRefMenu(cm)){
-            list=[...list, ...hintRefMenus];
-        }
-        if(shouldShowEditTableMenu(cm)){
-            list=[...list, ...editTableMenus];
-        }
-        if(shouldShowContMenu(cm)){
-            list=[...list, ...hintContMenus];
-        }
+        let list=[
+            ...(shouldShowRootMenu(cm) ? rootNdDlgMenus : []),
+            ...(shouldShowRefMenu(cm) ? hintRefMenus : []),
+            ...(shouldShowEditTableMenu(cm) ? editTableMenus : []),
+            ...(shouldShowContMenu(cm) ? hintContMenus : []),
+        ];
         if(0<list.length){
             list=[...list, "-"];
         }
