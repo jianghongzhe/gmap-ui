@@ -530,4 +530,5 @@ const getSizeStr=(size=0)=>{
     return parseInt(size/1000)+"K";
 };
 
-export default new Api();
+const inst=new Api();
+export default inst;

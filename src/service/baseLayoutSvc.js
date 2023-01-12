@@ -20,4 +20,5 @@ class BaseLayoutSvc{
     }
 }
 
-export default new BaseLayoutSvc();
+const inst=new BaseLayoutSvc();
+export default inst;

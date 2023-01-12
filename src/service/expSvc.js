@@ -102,6 +102,7 @@ class ExpSvc{
     return ndLine.replace(/[\\][|]/g,"___vline___").split("|")
             .map(item=>item.replace(/___vline___/g,"|").trim())
             .filter(item=>item.startsWith("ref:"));
-  };
+};
 
-export default new ExpSvc();
+const inst=new ExpSvc();
+export default inst;

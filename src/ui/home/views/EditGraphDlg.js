@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {Button, Input, List, Modal} from 'antd';
 import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
 import {tw} from 'gstyle-creater/src';
@@ -26,15 +26,9 @@ const EnhDlg=withEnh(Modal);
  */
 const EditGraphDlg=(props)=>{
     const codeMirrorInstRef=useRef();
-    const [editorAction, setEditorAction]= useState(null);
     const [colorPickerVisible, advColorPickerVisible, onAddColor, onClearColor, showColorPicker, showAdvColorPicker, handleColorPickerColorChange, hideColorPicker, hideAdvColorPicker]=useColorPicker();
     const [refNavDlgVisible,refNavDlgTitle,refNavDlgItems, showRefs, showTrefs, hideRefNavDlg]=useRefNavDlg(codeMirrorInstRef);
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
-
-
-    const [openSymbol, setOpenSymbol]= useState(Symbol());
-    const [cursorPosSymbol, setCursorPosSymbol] = useState(null);
-
 
 
 
@@ -67,20 +61,8 @@ const EditGraphDlg=(props)=>{
                type: editorEvents.show,
                payload: null,
             });
-
-
-
-            // setOpenSymbol(Symbol());
         }
-    },[props.visible, setEditorAction]);
-
-
-
-    useEffect(()=>{
-        if(props.visible && props.action){
-            setEditorAction(props.action)
-        }
-    },[props.visible, props.action])
+    },[props.visible]);
 
 
 
@@ -139,16 +121,13 @@ const EditGraphDlg=(props)=>{
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={props.onOpenHelpDlg} />
                     </div>
                     <Editor
-                        openSymbol={openSymbol}
                         value={props.editTmpTxt}
-                        action={editorAction}
                         onChange={props.onChangeEditTmpTxt}
                         onOnlySave={props.onOnlySave}
                         onOk={props.onOk}
                         onSetInst={setCodeMirrorInst}
                         onShowHelpDlg={props.onOpenHelpDlg}
                         onEditTable={onEditTable}
-                        cursorPosSymbol={cursorPosSymbol}
                     />
                 </div>
             </EnhDlg>

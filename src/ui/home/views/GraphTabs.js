@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect} from 'react';
-import {Tabs, Button, Card} from 'antd';
+import {Tabs, Button, } from 'antd';
 import { MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
 
 import NewMindmap from './NewMindmap';
 import MindNode from './MindNode';
-import keyDetector from 'key-detector/src';
+import keyDetector from 'key-detector';
 import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
-import NodeLinkIcon from "./NodeLinkIcon";
 
 
 /**

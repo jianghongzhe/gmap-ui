@@ -28,7 +28,7 @@ import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 
 const { Header } = Layout;
-const { Title, Paragraph, Text, Link } = Typography;
+const {  Text } = Typography;
 
 /**
  * 工具栏

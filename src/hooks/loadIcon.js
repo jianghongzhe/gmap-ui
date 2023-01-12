@@ -1,5 +1,5 @@
 import api from "../service/api";
-import {useEffect, useState, Avatar} from "react";
+import {useEffect, useState, } from "react";
 import {
     AppstoreOutlined,
     CheckSquareOutlined, CodeOutlined, CopyOutlined,

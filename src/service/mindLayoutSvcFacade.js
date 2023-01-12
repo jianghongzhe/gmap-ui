@@ -29,4 +29,5 @@ const getSvcInst=(ndsSet)=>{
 };
 
 
-export default new MindLayoutFacade();
+const inst=new MindLayoutFacade();
+export default inst;

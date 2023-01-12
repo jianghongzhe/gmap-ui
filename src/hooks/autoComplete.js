@@ -59,6 +59,10 @@ export const useAutoComplateFuncs=()=>{
     });
 
     const doLiteralAction=useMemoizedFn((subActionType, cm)=>{
+        if(subActionType.appendNodePart){
+            insertNodePart(cm, subActionType.txt);
+            return;
+        }
         insertTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
     });
 
@@ -102,12 +106,8 @@ export const useAutoComplateFuncs=()=>{
         const typeName=(ref? "引用" : "文本引用");
         const cursor= cm.doc.getCursor();
         const lineTxt=cm.doc.getLine(cursor.line);
-        const leftCont = lineTxt.substring(0, cursor.ch).trim();
-        const rightCont = lineTxt.substring(cursor.ch).trim();
-        const useLeftSplitter=(''!== leftCont && !leftCont.endsWith("|"));
-        const useRightSplitter=(''!== rightCont && !rightCont.startsWith("|"));
 
-        if(!editorSvcEx.isCursorInNodePart(cm) || null==lineTxt || ""==lineTxt.trim()){
+        if(!editorSvcEx.isCursorInNodePart(cm) || null===lineTxt || ""===lineTxt.trim()){
             api.showNotification("警告",`当前位置不允许生成${typeName}`,"warn");
             return;
         }
@@ -156,6 +156,8 @@ const respHandler=async (getRespFunc, respHandleFunc)=>{
 };
 
 
+
+
 /**
  * 向指定位置插入内容
  * @param cm
@@ -174,6 +176,18 @@ const insertTxtToAssignedPos=(cm, txt, insertPos, afterPos)=>{
     cm.doc.replaceRange(txt, insPos1, insPos2);
     cm.focus();
     cm.doc.setCursor(afterPos);
+};
+
+
+const insertNodePart=(cm, txt)=>{
+    const cursor= cm.doc.getCursor();
+    const lineTxt=cm.doc.getLine(cursor.line);
+    const handledLine=lineTxt.trimEnd();
+    const replTxt=`${handledLine.endsWith("|")?"":"|"}${txt}`;
+    const insertPos={line:cursor.line, ch:handledLine.length};
+    const insertPos2={line:cursor.line, ch:lineTxt.length};
+    const newPos={line:cursor.line, ch:handledLine.length+replTxt.length};
+    insertTxtToAssignedPos(cm, replTxt, [insertPos,insertPos2] , newPos);
 };
 
 

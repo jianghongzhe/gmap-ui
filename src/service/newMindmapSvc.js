@@ -110,4 +110,6 @@ class NewMindmapSvc {
     }
 }
 
-export default new NewMindmapSvc();
+const inst=new NewMindmapSvc();
+
+export default inst;

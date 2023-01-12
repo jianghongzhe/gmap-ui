@@ -321,15 +321,11 @@ class MindUpLayoutSvc{
 
 
 //常量值
-const nodePaddingTop=40;    //节点垂直方向的间距
+
 const containerMinW=800;    //导图容器最小宽
 const containerMinH=600;    //导图容器最小高
-const lineWid = 1;          //连接线宽度，与节点的下边框宽度一致
 const ndXDist = 40;         //父子节点之间水平距离
-const lineExpDist=16;       //父子节点水平距离中的留给折叠按钮的距离
-const fromXRatio = 0.3;     //起始弧线水平占比
-const fromYRatio = 0.3;     //终止弧线水平占比
 const graphPadding = 40;    //图表内容与容器边缘之间的距离
 
-
-export default new MindUpLayoutSvc();
+const inst=new MindUpLayoutSvc();
+export default inst;

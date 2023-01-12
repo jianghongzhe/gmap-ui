@@ -34,4 +34,5 @@ class GeneralSvc{
 const invalidChars=[' ','　','（','）','【','】','｛','｝'];
 const cnReg=/^.*[\u4E00-\u9FA5].*$/;
 
-export default new GeneralSvc();
+const inst=new GeneralSvc();
+export default inst;

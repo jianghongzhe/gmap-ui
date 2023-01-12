@@ -66,4 +66,5 @@ class StrTmpl{
     };
 }
 
-export default new StrTmpl();
+const inst=new StrTmpl();
+export default inst;

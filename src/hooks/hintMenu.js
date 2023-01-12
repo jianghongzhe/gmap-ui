@@ -1,12 +1,11 @@
-import {useReducer, useEffect, useMemo, useRef,} from "react";
+import {useReducer,  useMemo, useRef,} from "react";
 import {useMemoizedFn} from "ahooks";
 import {actionTypes} from "../common/hintMenuConfig";
 import editorSvcEx from "../service/editorSvcEx";
-import {message} from "_antd@4.24.6@antd";
 import globalStyleConfig from "../common/globalStyleConfig";
 
 
-export const useHintMenu=({forceCloseSymbol})=>{
+export const useHintMenu=()=>{
 
     const [{hintMenus,hintMenuPos}, dispatch]=useReducer(reducer, {
          /**
@@ -160,16 +159,40 @@ export const useHintMenu=({forceCloseSymbol})=>{
         });
     });
 
+
+    /**
+     * 是否显示添加引用菜单：
+     * 1、光标在节点部分
+     * 2、节点中有有效文本
+     * @type {(function(*): (boolean))|*}
+     */
     const shouldShowRefMenu=useMemoizedFn((cm)=>{
         const cursor= cm.doc.getCursor();
         const lineTxt=cm.doc.getLine(cursor.line);
 
-        if(!editorSvcEx.isCursorInNodePart(cm) || null==lineTxt || ""==lineTxt.trim()){
+        if(!editorSvcEx.isCursorInNodePart(cm) || null===lineTxt || ""===lineTxt.trim()){
             return false;
         }
 
         const refName=editorSvcEx.getFirstGeneralTxt(lineTxt);
         if(false===refName || ""===refName.trim()){
+            return false;
+        }
+        return true;
+    });
+
+    const shouldShowRootMenu=useMemoizedFn((cm)=>{
+        if(!shouldShowRefMenu(cm)){
+            return false;
+        }
+        const cursor= cm.doc.getCursor();
+        const lineTxt=cm.doc.getLine(cursor.line);
+        for(let i=0;i<cursor.line;++i){
+            if(''!==cm.doc.getLine(i).trim()){
+                return false;
+            }
+        }
+        if(!lineTxt.startsWith("- ")){
             return false;
         }
         return true;
@@ -192,6 +215,9 @@ export const useHintMenu=({forceCloseSymbol})=>{
     const showMenu=useMemoizedFn((cm)=>{
         // 菜单组装：动态菜单项 + 固定菜单项
         let list=[];
+        if(shouldShowRootMenu(cm)){
+            list=[...list, ...rootNdDlgMenus];
+        }
         if(shouldShowRefMenu(cm)){
             list=[...list, ...hintRefMenus];
         }
@@ -214,12 +240,7 @@ export const useHintMenu=({forceCloseSymbol})=>{
         },50);
     });
 
-    /**
-     * 如果强制关闭标志有更新，则关闭自动完成提示框
-     */
-    useEffect(()=>{
-        closeHintMenu();
-    },[forceCloseSymbol, closeHintMenu]);
+
 
     return {
         // 状态
@@ -261,6 +282,39 @@ const editTableMenus=[
     },
 ];
 
+const rootNdDlgMenus=[
+    {
+        label: '节点在右　right:',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: 'right:',
+                appendNodePart:true,
+            }
+        }
+    },
+    {
+        label: '上下结构　down:',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: 'down:',
+                appendNodePart:true,
+            }
+        }
+    },
+    {
+        label: '下上结构　up:',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: 'up:',
+                appendNodePart:true,
+            }
+        }
+    },
+];
+
 
 /**
  * 动态生成的自动提示菜单项 - 节点部分
@@ -284,6 +338,16 @@ const hintRefMenus=[
             data:{
                 ref:false,
                 tref:true,
+            }
+        }
+    },
+    {
+        label: '折叠节点　zip:',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: 'zip:',
+                appendNodePart:true,
             }
         }
     },

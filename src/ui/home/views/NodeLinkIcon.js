@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button, Avatar  } from 'antd';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 

@@ -143,4 +143,6 @@ class MindMapValidateSvc{
     
 }
 
-export default new MindMapValidateSvc();
+
+const inst=new MindMapValidateSvc();
+export default inst;

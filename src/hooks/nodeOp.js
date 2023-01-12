@@ -64,7 +64,7 @@ const insertLineAndJoin=(lines, lineInd, newLine)=>{
  * @returns {*}
  */
 const getLastSubNdLineInd=(nd)=>{
-    if(!nd.childs || 0==nd.childs.length){
+    if(!nd.childs || 0===nd.childs.length){
         return nd.lineInd;
     }
     let tmp=nd.lineInd;

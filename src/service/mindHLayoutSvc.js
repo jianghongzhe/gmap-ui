@@ -837,5 +837,5 @@ const graphPadding = 40;    //图表内容与容器边缘之间的距离
 
 
 
-
-export default new MindHLayoutSvc();
+const inst=new MindHLayoutSvc();
+export default inst;

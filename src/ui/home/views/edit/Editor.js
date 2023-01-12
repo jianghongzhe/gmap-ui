@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useRef,} from 'react';
 
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
 import useBus from 'use-bus';
-import keyDetector from 'key-detector/src';
+import keyDetector from 'key-detector';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.css';
@@ -46,8 +46,7 @@ const CodeMirror=React.memo(NotMemoedCodeMirror);
  * 编辑器
  * @param {*} props 
  */
-const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
-
+const Editor=({onSetInst, value, onOnlySave, onOk, onShowHelpDlg, onChange , onEditTable})=>{
     const {
         hintMenus,
         hintMenuPos,
@@ -59,7 +58,7 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
         moveHintMenuDown,
         moveHintMenuUp,
         moveHintMenuTo,
-    }= useHintMenu({forceCloseSymbol: openSymbol});
+    }= useHintMenu();
 
     const {
         doClipboardAction,
@@ -178,83 +177,37 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
                 }
             };
 
-            console.log("event", event)
-
+            // 按键事件分发：
+            // tab、enter、space: 如果自动提示框打开则触发确认操作；如果未打开且为tab则按自动补全功能处理
+            // up、down: 如果自动提示框打开则触发选中项上下移操作
             keyDetector.on(event, {
-                'tab': ()=>{
-                    console.log("tab.......")
-
-
-                },
-                'enter': ()=>{
-                    console.log("enter.......")
-
-
-                },
-                'space': ()=>{
-                    console.log("space.......")
-
-
+                'tab | enter | space': (e, which)=>{
+                    withHintMenuOpen(
+                        ()=>{
+                            clearEvent();
+                            hintMenuOk(instance, event);
+                        },
+                        ()=>{
+                            if('tab'===which){
+                                editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
+                            }
+                        },
+                    );
                 },
                 'up': ()=>{
-                    console.log("up.......")
+                    withHintMenuOpen(()=>{
+                        clearEvent();
+                        moveHintMenuUp();
+                    });
                 },
                 'down': ()=>{
-                    console.log("down.....")
-
+                    console.log("down do2wn.....")
+                    withHintMenuOpen(()=>{
+                        clearEvent();
+                        moveHintMenuDown();
+                    });
                 },
             });
-
-
-
-            // 按键事件分发：
-            // tab: 如果自动提示框打开则触发确认操作，否则按自动补全功能处理
-            // enter、space: 如果自动提示框打开则触发确认操作
-            // up、down: 如果自动提示框打开则触发选中项上下移操作
-            // keyDetector.on(event, {
-            //     'tab': ()=>{
-            //         console.log("tab.......")
-            //
-            //         withHintMenuOpen(
-            //             ()=>{
-            //                 clearEvent();
-            //                 hintMenuOk(instance, event);
-            //             },
-            //             ()=>{
-            //                 editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
-            //             },
-            //         );
-            //     },
-            //     'enter': ()=>{
-            //         console.log("enter.......")
-            //
-            //         withHintMenuOpen(()=>{
-            //             clearEvent();
-            //             hintMenuOk(instance, event);
-            //         });
-            //     },
-            //     'space': ()=>{
-            //         console.log("space.......")
-            //
-            //         withHintMenuOpen(()=>{
-            //             clearEvent();
-            //             hintMenuOk(instance, event);
-            //         });
-            //     },
-            //     'up': ()=>{
-            //         withHintMenuOpen(()=>{
-            //             clearEvent();
-            //             moveHintMenuUp();
-            //         });
-            //     },
-            //     'down': ()=>{
-            //         console.log("down do2wn.....")
-            //         withHintMenuOpen(()=>{
-            //             clearEvent();
-            //             moveHintMenuDown();
-            //         });
-            //     },
-            // });
         };
 
         codeMirrorInstRef.current.on("keydown", keyDownHandler);
@@ -331,28 +284,7 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
     useBus(editorEvents.show, (action)=> handleShowEvent(action), [handleShowEvent]);
 
 
-    /**
-     * 处理由父组件传递进来的事件：
-     * addColor：设置颜色
-     * refresh：刷新codemirror
-     */
-    useEffect(()=>{
-        if(!action){
-            return;
-        }
-        if('refresh'===action.type){
-            const focusFun=()=>{
-                if(codeMirrorInstRef.current){
-                    codeMirrorInstRef.current.focus();
-                    codeMirrorInstRef.current.refresh();
-                    return true;
-                }
-                return false;
-            }
-            setTimeout(focusFun, 0);
-            return;
-        }
-    },[action, codeMirrorInstRef]);
+
 
 
 

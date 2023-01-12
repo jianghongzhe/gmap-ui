@@ -570,4 +570,5 @@ class EchartParser{
     };
 }
 
-export default new EchartParser();
+const inst=new EchartParser();
+export default inst;

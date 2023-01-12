@@ -15,8 +15,7 @@ import {useBoolean, useMemoizedFn, useMount} from 'ahooks';
 
 import api from '../../service/api';
 import screenShot from '../../service/screenShot';
-import keyDetector from 'key-detector/src';
-import strTmpl from '../../common/strTmpl';
+import keyDetector from 'key-detector';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
 import {tabActiveKey, tabHasPane,  tabCurrPane, tabCurrInd} from '../../store/tabs';
@@ -83,7 +82,6 @@ const MapsViewer=(props)=>{
 
 
 
-    const [editDlgAction, setEditDlgAction]=useState(null);
     const {calcNewTxtAndCursor}= useNodeOp(currPane?.mapTxts);
 
     const [findInFileDlgVisible,{setTrue:showFindInFileDlg, setFalse:hideFindInFileDlg}]=useBoolean(false);
@@ -570,7 +568,6 @@ const MapsViewer=(props)=>{
                 onCancel={closeAllDlg}
                 onChangeEditTmpTxt={onChangeEditTmpTxt}
                 onOpenHelpDlg={showHelpDlg}
-                action={editDlgAction}
             />
 
             <OpenGraphDlg
@@ -609,16 +606,6 @@ const MapsViewer=(props)=>{
 
 
 
-const getLastSubNdLineInd=(nd)=>{
-    if(!nd.childs || 0==nd.childs.length){
-        return nd.lineInd;
-    }
-    let tmp=nd.lineInd;
-    nd.childs.forEach(subNd=>{
-        tmp=Math.max(tmp, getLastSubNdLineInd(subNd));
-    });
-    return tmp;
-};
 
 
 export default React.memo(MapsViewer);
