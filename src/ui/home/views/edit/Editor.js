@@ -1,6 +1,8 @@
 import React, {useEffect, useMemo, useRef,} from 'react';
 
 import { Controlled as NotMemoedCodeMirror } from 'react-codemirror2';
+import useBus from 'use-bus';
+import keyDetector from 'key-detector/src';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.css';
@@ -35,6 +37,7 @@ import {useHintMenu} from "../../../../hooks/hintMenu";
 import {useAutoComplateFuncs} from "../../../../hooks/autoComplete";
 import {actionTypes} from "../../../../common/hintMenuConfig";
 import globalStyleConfig from "../../../../common/globalStyleConfig";
+import {editorEvents} from "../../../../common/events";
 
 const CodeMirror=React.memo(NotMemoedCodeMirror);
 
@@ -143,7 +146,9 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
 
 
     /**
-     * 绑定键盘事件
+     * 绑定键盘事件处理：
+     * 没有使用codemirror自带的extraKeys，因为该方式会阻止按键本来的行为，即带有preventDefault。
+     * 而该处的按键事件处理需要根据情况自己决定是否保持按键默认的行为，或是自定义的行为（preventDefault）
      */
     useEffect(()=>{
         if(!codeMirrorInstRef.current){
@@ -158,47 +163,98 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
          * @returns 
          */
         const keyDownHandler=(instance, event)=>{
-            const noOtherCombKey=(!event.altKey && !event.shiftKey && !event.ctrlKey);
-            const isOnlyTab=("Tab"===event.code && noOtherCombKey);
-            const isOnlyEnter=("Enter"===event.code && noOtherCombKey);
-            const isOnlySpace=("Space"===event.code && noOtherCombKey);
-            const isOnlyUp=("ArrowUp"===event.code && noOtherCombKey);
-            const isOnlyDown=("ArrowDown"===event.code && noOtherCombKey);
+            const clearEvent=()=>{
+                try{
+                    event.stopPropagation();
+                    event.preventDefault();
+                }catch (ex){}
+            };
 
-            // 如果已打开了自动完成对话框，则优先按它处理
-            if(hintMenuOpen){
-                const func=()=>{
-                    try{
-                        event.stopPropagation();
-                        event.preventDefault();
-                    }catch (e){}
-                };
+            const withHintMenuOpen=(openFunc, notOpenFunc)=>{
+                if(hintMenuOpen) {
+                    openFunc?.();
+                }else{
+                    notOpenFunc?.();
+                }
+            };
 
-                // tab、回车、空格会触发菜单确定事件
-                if(isOnlyTab || isOnlyEnter || isOnlySpace){
-                    func();
-                    hintMenuOk(instance, event);
-                    return;
-                }
-                // 上下移动菜单选中项
-                if(isOnlyUp){
-                    func();
-                    moveHintMenuUp();
-                    return;
-                }
-                if(isOnlyDown){
-                    func();
-                    moveHintMenuDown();
-                    return;
-                }
-                return;
-            }
+            console.log("event", event)
 
-            // 否则如果是tab键，则按自动完成处理方式
-            if(isOnlyTab){
-                editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
-                return;
-            }
+            keyDetector.on(event, {
+                'tab': ()=>{
+                    console.log("tab.......")
+
+
+                },
+                'enter': ()=>{
+                    console.log("enter.......")
+
+
+                },
+                'space': ()=>{
+                    console.log("space.......")
+
+
+                },
+                'up': ()=>{
+                    console.log("up.......")
+                },
+                'down': ()=>{
+                    console.log("down.....")
+
+                },
+            });
+
+
+
+            // 按键事件分发：
+            // tab: 如果自动提示框打开则触发确认操作，否则按自动补全功能处理
+            // enter、space: 如果自动提示框打开则触发确认操作
+            // up、down: 如果自动提示框打开则触发选中项上下移操作
+            // keyDetector.on(event, {
+            //     'tab': ()=>{
+            //         console.log("tab.......")
+            //
+            //         withHintMenuOpen(
+            //             ()=>{
+            //                 clearEvent();
+            //                 hintMenuOk(instance, event);
+            //             },
+            //             ()=>{
+            //                 editorSvcEx.gotoDefinition(instance, event, api, currAssetsDir);
+            //             },
+            //         );
+            //     },
+            //     'enter': ()=>{
+            //         console.log("enter.......")
+            //
+            //         withHintMenuOpen(()=>{
+            //             clearEvent();
+            //             hintMenuOk(instance, event);
+            //         });
+            //     },
+            //     'space': ()=>{
+            //         console.log("space.......")
+            //
+            //         withHintMenuOpen(()=>{
+            //             clearEvent();
+            //             hintMenuOk(instance, event);
+            //         });
+            //     },
+            //     'up': ()=>{
+            //         withHintMenuOpen(()=>{
+            //             clearEvent();
+            //             moveHintMenuUp();
+            //         });
+            //     },
+            //     'down': ()=>{
+            //         console.log("down do2wn.....")
+            //         withHintMenuOpen(()=>{
+            //             clearEvent();
+            //             moveHintMenuDown();
+            //         });
+            //     },
+            // });
         };
 
         codeMirrorInstRef.current.on("keydown", keyDownHandler);
@@ -212,16 +268,76 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
 
 
     /**
+     * 处理光标定位事件
+     * @param {
+     *      type: 'putCursor',
+     *      payload: {line,ch},
+     * }
+     */
+    const handlePutCursorEvent=useMemoizedFn((action)=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        const cm=codeMirrorInstRef.current;
+        cm.focus();
+        cm.setCursor(action.payload);
+        cm.scrollIntoView(action.payload);
+    });
+    useBus(editorEvents.putCursor, (action)=> handlePutCursorEvent(action), [handlePutCursorEvent]);
+
+
+    /**
+     * 处理颜色选择或取消事件
+     * @param {
+     *     type: 'addColor',
+     *     payload: {
+     *         color,
+     *         delayFocus
+     *     }
+     * }
+     */
+    const handleAddColorEvent=useMemoizedFn((action)=>{
+        if(!codeMirrorInstRef.current){
+            return;
+        }
+        editorSvcEx.setColor(codeMirrorInstRef.current, action?.payload?.color, action?.payload?.delayFocus);
+    });
+    useBus(editorEvents.addColor, (action)=> handleAddColorEvent(action), [handleAddColorEvent]);
+
+
+    /**
+     * 处理编辑器显示事件：
+     * 1、codemirror.refresh
+     * 2、关闭自动提示框
+     * @param {
+     *     type: 'show',
+     *     payload: null,
+     * }
+     */
+    const handleShowEvent=useMemoizedFn((action)=>{
+        const func=()=>{
+            setTimeout(()=>{
+                if(!codeMirrorInstRef.current){
+                    return;
+                }
+                codeMirrorInstRef.current.focus();
+                codeMirrorInstRef.current.refresh();
+            },0);
+        }
+        func();
+        setTimeout(func, 500);
+        closeHintMenu();
+    });
+    useBus(editorEvents.show, (action)=> handleShowEvent(action), [handleShowEvent]);
+
+
+    /**
      * 处理由父组件传递进来的事件：
      * addColor：设置颜色
      * refresh：刷新codemirror
      */
     useEffect(()=>{
         if(!action){
-            return;
-        }
-        if('addColor'===action.type){
-            editorSvcEx.setColor(codeMirrorInstRef.current, action.color, action.delayFocus);
             return;
         }
         if('refresh'===action.type){
@@ -234,22 +350,6 @@ const Editor=({openSymbol,   onSetInst, action, value, onOnlySave, onOk, onShowH
                 return false;
             }
             setTimeout(focusFun, 0);
-            return;
-        }
-
-        // 光标定位
-        // {
-        //      type: 'putCursor',
-        //      pos: {line,ch},
-        // }
-        if('putCursor'===action.type){
-            if(codeMirrorInstRef.current){
-                const cm=codeMirrorInstRef.current;
-                cm.focus();
-                cm.setCursor(action.pos);
-                cm.scrollIntoView(action.pos);
-                return;
-            }
             return;
         }
     },[action, codeMirrorInstRef]);

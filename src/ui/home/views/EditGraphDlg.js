@@ -14,6 +14,8 @@ import {useTableEditDlg} from "../../../hooks/tableEditDlg";
 import {useRefNavDlg} from "../../../hooks/refNavDlg";
 import {useColorPicker} from "../../../hooks/colorPicker";
 import TagItem from "../../common/TagItem";
+import {dispatch} from "use-bus";
+import {editorEvents} from "../../../common/events";
 
 
 const EnhDlg=withEnh(Modal);
@@ -25,7 +27,7 @@ const EnhDlg=withEnh(Modal);
 const EditGraphDlg=(props)=>{
     const codeMirrorInstRef=useRef();
     const [editorAction, setEditorAction]= useState(null);
-    const [colorPickerVisible, advColorPickerVisible, onAddColor, onClearColor, showColorPicker, showAdvColorPicker, handleColorPickerColorChange, hideColorPicker, hideAdvColorPicker]=useColorPicker(setEditorAction);
+    const [colorPickerVisible, advColorPickerVisible, onAddColor, onClearColor, showColorPicker, showAdvColorPicker, handleColorPickerColorChange, hideColorPicker, hideAdvColorPicker]=useColorPicker();
     const [refNavDlgVisible,refNavDlgTitle,refNavDlgItems, showRefs, showTrefs, hideRefNavDlg]=useRefNavDlg(codeMirrorInstRef);
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
 
@@ -61,11 +63,14 @@ const EditGraphDlg=(props)=>{
      */
     useEffect(()=>{
         if(props.visible){
-            setEditorAction({type: 'refresh',});
-            setOpenSymbol(Symbol());
-            setTimeout(() => {
-                setEditorAction({type: 'refresh',});
-            }, 500);
+            dispatch({
+               type: editorEvents.show,
+               payload: null,
+            });
+
+
+
+            // setOpenSymbol(Symbol());
         }
     },[props.visible, setEditorAction]);
 

@@ -1,17 +1,26 @@
 import {useBoolean, useMemoizedFn} from "ahooks";
+import {dispatch} from 'use-bus';
+import {editorEvents} from "../common/events";
 
-
-export const useColorPicker=(setEditorAction)=>{
+export const useColorPicker=()=>{
     const [colorPickerVisible, {setTrue:showColorPicker, setFalse:hideColorPicker}]=useBoolean(false);
     const [advColorPickerVisible, {setTrue:showAdvColorPicker, setFalse:hideAdvColorPicker}]=useBoolean(false);
 
     const onAddColor =useMemoizedFn((color = null, delayFocus = false) => {
-        setEditorAction({
+        /*setEditorAction({
             type: 'addColor',
             color,
             delayFocus
+        });*/
+
+        dispatch({
+            type: editorEvents.addColor,
+            payload: {
+                color,
+                delayFocus
+            }
         });
-    },[setEditorAction]);
+    });
 
     const onClearColor =useMemoizedFn(() => {
         onAddColor(null);

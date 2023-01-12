@@ -28,6 +28,8 @@ import HelpDlg from './views/edit/HelpDlg';
 import {useEditTags} from "../../hooks/tags";
 import {useNodeOp} from "../../hooks/nodeOp";
 import {useOpenLinkWithParam} from "../../hooks/openLinkWithParam";
+import {dispatch} from 'use-bus';
+import {editorEvents} from "../../common/events";
 
 const { Content } = Layout;
 
@@ -448,10 +450,11 @@ const MapsViewer=(props)=>{
         setTagVal("");
 
         // 延迟光标定位
+        // 向编辑器组件发送事件，由于中间跨组件，所以不再一层一层传递
         setTimeout(()=>{
-            setEditDlgAction({
-                type: 'putCursor',
-                pos: newCursor,
+            dispatch({
+                type: editorEvents.putCursor,
+                payload: newCursor,
             });
         },500);
     });

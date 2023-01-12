@@ -36,6 +36,7 @@
     "react-scripts": "5.0.0",
     "recoil": "^0.7.6",
     "snapsvg": "^0.5.1",
+    "use-bus": "^2.5.2",
     "web-vitals": "^2.1.4",
     "webfontloader": "^1.6.28"
   },
