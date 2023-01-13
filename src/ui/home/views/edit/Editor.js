@@ -146,7 +146,7 @@ const Editor=({onSetInst, value, onOnlySave, onOk, onShowHelpDlg, onChange , onE
 
     /**
      * 绑定键盘事件处理：
-     * 没有使用codemirror自带的extraKeys，因为该方式会阻止按键本来的行为，即带有preventDefault。
+     * 没有使用codemirror自带的extraKeys，因为该方式会阻止按键本来的行为，即带有preventDefault效果。
      * 而该处的按键事件处理需要根据情况自己决定是否保持按键默认的行为，或是自定义的行为（preventDefault）
      */
     useEffect(()=>{
@@ -156,8 +156,7 @@ const Editor=({onSetInst, value, onOnlySave, onOk, onShowHelpDlg, onChange , onE
 
         /**
          * 键盘事件处理：
-         * tab：自动完成
-         * @param {*} instance 
+         * @param {*} instance
          * @param {*} event 
          * @returns 
          */

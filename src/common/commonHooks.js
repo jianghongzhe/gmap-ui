@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 const useChange=(initVal='')=>{
     const [txt, set]= useState(initVal);
     const change=useCallback((e)=>{
-        if('undefined'!==typeof(e) && 'undefined'!==typeof(e.target) && 'undefined'!==typeof(e.target.value)){
+        if('undefined'!==typeof(e?.target?.value)){
             set(e.target.value);
         }
     },[set]);

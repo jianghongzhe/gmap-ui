@@ -45,6 +45,7 @@ export const useNodeOp=(mapTxts)=>{
             ];
         }
 
+        // 没有有效的参数，则内容不变，光标为首行首列位置
         return [newLineTxt, cursorPos];
     });
 

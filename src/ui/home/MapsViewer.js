@@ -29,6 +29,7 @@ import {useNodeOp} from "../../hooks/nodeOp";
 import {useOpenLinkWithParam} from "../../hooks/openLinkWithParam";
 import {dispatch} from 'use-bus';
 import {editorEvents} from "../../common/events";
+import {useEditorDlg} from "../../hooks/editorDlg";
 
 const { Content } = Layout;
 
@@ -79,9 +80,6 @@ const MapsViewer=(props)=>{
 
 
 
-
-
-
     const {calcNewTxtAndCursor}= useNodeOp(currPane?.mapTxts);
 
     const [findInFileDlgVisible,{setTrue:showFindInFileDlg, setFalse:hideFindInFileDlg}]=useBoolean(false);
@@ -91,12 +89,15 @@ const MapsViewer=(props)=>{
     
     
 
-    const [{currMapName,editTmpTxt,editMapDlgVisible}, setEditDlgState]= useState({
-        currMapName: '',
-        editTmpTxt: '',
-        editMapDlgVisible: false,
-    });
 
+    const {
+        currMapName,
+        editTmpTxt,
+        editMapDlgVisible,
+        closeDlg: closeEditorDlg,
+        showDlg: showEditorDlg,
+        changeTxt: changeEditorTxt,
+    }= useEditorDlg();
     const [tags, tagVal, {setTags, removeTagByInd, addTag, setTagVal, changeTagVal}]= useEditTags();
 
     
@@ -140,22 +141,15 @@ const MapsViewer=(props)=>{
         loadFileList();
         setPathValidState();
     });
-
-    
-
-    
-
-
-    
     
 
     const closeAllDlg =useMemoizedFn(() => {
         setNewMapDlgVisible(false);
         setSelMapDlgVisible(false);
-        setEditDlgState((state)=>({...state, editMapDlgVisible:false}));
-        setRefViewerDlgState((state)=>({...state, refViewerDlgVisible:false}));
-        setTimelineDlgState((state)=>({...state, timelineDlgVisible:false}));
-        setProgsDlgState((state)=>({...state, progsDlgVisible:false}));
+        closeEditorDlg();
+        setRefViewerDlgState(state=>({...state, refViewerDlgVisible:false}));
+        setTimelineDlgState(state=>({...state, timelineDlgVisible:false}));
+        setProgsDlgState(state=>({...state, progsDlgVisible:false}));
         setRelaChartDlgVisible(false);
         closeParamDlg();
     });
@@ -248,21 +242,23 @@ const MapsViewer=(props)=>{
     //------------修改导图----------------------------------------------------------------------
 
 
-    const onChangeEditTmpTxt =useCallback((editor, data, value) => {
-        setEditDlgState((state)=>({...state, editTmpTxt: value}));
-    },[setEditDlgState]);
+    const onChangeEditTmpTxt =useMemoizedFn((editor, data, value) => {
+        changeEditorTxt(value);
+    });
 
-    const onEditMapDlgOK =useCallback(async (closeDlg = true) => {
+    const onEditMapDlgOK =useMemoizedFn(async (closeDlg = true) => {
         try {
             let txt = editTmpTxt;
             await saveMapPromise(txt, tags);
-            setEditDlgState(state=>({...state, editMapDlgVisible: !closeDlg}));
+            if(closeDlg){
+                closeEditorDlg();
+            }
             if (!closeDlg) {
                 message.success("图表内容已保存");
             }
         } catch (error) {
         }
-    },[ setEditDlgState, editTmpTxt, saveMapPromise, tags]);
+    });
 
 
 
@@ -439,11 +435,7 @@ const MapsViewer=(props)=>{
     const onNodeOp=useMemoizedFn((nd, action)=>{
         const[newMapTxts, newCursor]= calcNewTxtAndCursor(nd, action);
         api.closeFindInPageDlg();
-        setEditDlgState({
-            editMapDlgVisible: true,
-            editTmpTxt: newMapTxts,
-            currMapName: currPane.title
-        });
+        showEditorDlg(currPane.title, newMapTxts);
         setTags(currPane.tags);
         setTagVal("");
 
@@ -491,7 +483,7 @@ const MapsViewer=(props)=>{
             <Layout>
                 {
                     hasPane ?
-                        <>
+                        <React.Fragment>
                             <Toolbar
                                 onShowNewMapDlg={onShowNewMapDlg}
                                 onShowSelMapDlg={showSelMapDlg}
@@ -519,7 +511,7 @@ const MapsViewer=(props)=>{
                                 onShowProgs={onShowProgs}
                                 onNodeOp={onNodeOp}
                             />
-                        </>
+                        </React.Fragment>
 
                         :
 
