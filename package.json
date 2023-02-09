@@ -1,6 +1,6 @@
 {
   "name": "gmap",
-  "version": "4.17.0-20230113.release",
+  "version": "4.18.0-20230209.release",
   "showname": "GMap - 思维导图",
   "private": true,
   "homepage": "./",
@@ -13,7 +13,7 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "ahooks": "^3.7.4",
-    "antd": "^4.24.6",
+    "antd": "^4.24.7",
     "codemirror": "^5.65.11",
     "echarts": "^5.4.1",
     "flowchart.js": "^1.17.1",
@@ -22,11 +22,11 @@
     "highlight.js": "^11.7.0",
     "imports-loader": "^4.0.1",
     "js-sequence-diagram": "^2.0.1",
-    "json5": "^2.2.2",
+    "json5": "^2.2.3",
     "katex": "^0.16.4",
     "key-detector": "^1.1.0",
     "lodash": "^4.17.21",
-    "marked": "^4.2.5",
+    "marked": "^4.2.12",
     "mermaid": "^9.3.0",
     "raphael": "^2.3.0",
     "react": "^17.0.2",
@@ -69,7 +69,7 @@
   "devDependencies": {
     "@emotion/babel-plugin": "^11.10.5",
     "customize-cra": "^1.0.0",
-    "electron": "^21.3.3",
+    "electron": "^22.2.0",
     "react-app-rewired": "^2.2.1"
   }
 }
