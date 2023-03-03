@@ -1,0 +1,22 @@
+[
+    {
+        "os": "Windows 10 Pro x64",
+        "macs": [
+            "c4:3d:7e:dd:8f:37",
+            "c0:15:5d:8c:9c:ac"
+        ],
+        "settings": {
+            "theme": "default"
+        }
+    },
+    {
+        "os": "Windows 10 Pro x64",
+        "macs": [
+            "d4:3d:7e:dd:8f:37",
+            "00:15:5d:8c:9c:ac"
+        ],
+        "settings": {
+            "theme": "twilight"
+        }
+    }
+]
