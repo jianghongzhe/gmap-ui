@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net, ipcMain,Notification   } = require('electron');
 const fs = require('fs');
+const os = require('os');
 const Url = require('url');
 const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
@@ -19,6 +20,7 @@ const autoUpdaterDir=path.join(__dirname, '../../../', 'app_update');
 const autoUpdaterPath=path.join(__dirname, '../../../', 'app_update', 'app_update.exe');
 const htmlTmplDir=path.join(__dirname, '../', 'externals', 'tmpl_html'); 
 const mapsPath=path.join(__dirname, '../', 'gmaps');
+const settingFilePath=path.join(__dirname, '../', 'gmaps','setting.json');
 const imgsPath=path.join(__dirname, '../', 'gmaps','imgs');
 const attsPath=path.join(__dirname, '../', 'gmaps','atts');
 const workPath=path.join(__dirname, '../', 'work');
@@ -1297,6 +1299,90 @@ const openDevTool=()=>{
 
 
 /**
+ * 获得本机相关信息，用于识别不同机器，以使不同机器有不同设置
+ * @return {{os: string, macs: Set<unknown>}}
+ */
+const getOsAndMacs=()=>{
+    let nets=os.networkInterfaces();
+    let macs=new Set();
+    for(let key in nets){
+        nets[key].map(item=>item.mac)
+            .filter(mac=>''!==mac.replace(/(00)|([:])/g,''))
+            .forEach(mac=>macs.add(mac));
+    }
+    macs=[...macs];
+    return {
+        os: os.version()+" "+os.arch(),
+        macs
+    };
+};
+
+
+
+const baseFillSettingItems=(item)=>{
+    if('undefined'===typeof(item.settings)){
+        item.settings={};
+    }
+    if('undefined'===typeof(item.settings.theme)){
+        item.settings.theme='default';
+    }
+};
+
+/**
+ * 获得新的系统设置对象，其中值都为默认值
+ * @return {{theme: string}}
+ */
+const getDefaultSettings=()=>{
+    const item=getOsAndMacs();
+    baseFillSettingItems(item);
+    return [item];
+};
+
+const isMatchSettingItem=(osAndMacs, settingItem)=>(settingItem.os===osAndMacs.os && settingItem.macs.some(item=>osAndMacs.macs.includes(item)));
+
+/**
+ * 把给定的系统设置对象转换为新的格式，即补充新出现的设置项等
+ * 判断本机的依据：操作系统名称相同且mac地址之间有交集
+ * 如果为本机，则把mac地址取并集
+ * 补充没有的设置项
+ * @param oldJson
+ */
+const fillNewSettingItems=(oldJson)=>{
+    const osAndMacs=getOsAndMacs();
+    let foundCurrMarchine=false;
+    oldJson.forEach(each=>{
+        const isCurrMachine=isMatchSettingItem(osAndMacs, each);
+        if(isCurrMachine){
+            foundCurrMarchine=true;
+            each.macs=[...new Set([...each.macs, ...osAndMacs.macs])];
+        }
+        baseFillSettingItems(each);
+    });
+    if(!foundCurrMarchine){
+        oldJson.push(getDefaultSettings()[0]);
+    }
+};
+
+const getSettingValue=(itemName)=>{
+    const osAndMacs=getOsAndMacs();
+    const oldSettings=JSON.parse(fs.readFileSync(settingFilePath,'utf-8'));
+    const val = oldSettings.filter(each=>isMatchSettingItem(osAndMacs, each))[0].settings[itemName];
+    return val;
+};
+
+const saveSettingValue=(itemName, itemValue)=>{
+    const osAndMacs=getOsAndMacs();
+    const oldSettings=JSON.parse(fs.readFileSync(settingFilePath,'utf-8'));
+    const oldJsonStr=JSON.stringify(oldSettings, null, 4);
+    oldSettings.filter(each=>isMatchSettingItem(osAndMacs, each))[0].settings[itemName]=itemValue;
+    const newJsonStr = JSON.stringify(oldSettings, null, 4);
+    if(oldJsonStr!==newJsonStr){
+        fs.writeFileSync(settingFilePath, newJsonStr, 'utf-8');
+    }
+};
+
+
+/**
  * 初始化工作：
  * 1、持有主窗口对象
  * 2、创建初始目录：导图目录、工作目录、缓存目录等
@@ -1311,7 +1397,19 @@ const init=(_mainWindow)=>{
                 fs.mkdirSync(eachWorkdir,{recursive:true});
             }
         });
-        common.log(`app started, pid is: ${process.pid}`, true);
+
+        // 配置文件初始化：如果不存在，则创建并设置默认值；如果存在，则把新设置项加入（版本升级造成出现新设置项等）后重新保存
+        if(!fs.existsSync(settingFilePath)){
+            fs.writeFileSync(settingFilePath, JSON.stringify(getDefaultSettings(), null, 4), 'utf-8');
+        }else{
+            const oldSettings=JSON.parse(fs.readFileSync(settingFilePath,'utf-8'));
+            const oldJsonStr=JSON.stringify(oldSettings, null, 4);
+            fillNewSettingItems(oldSettings);
+            const newJsonStr = JSON.stringify(oldSettings, null, 4);
+            if(oldJsonStr!==newJsonStr){
+                fs.writeFileSync(settingFilePath, newJsonStr, 'utf-8');
+            }
+        }
 
         const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
         if(assistProcess && assistProcess.stdout){
@@ -1563,6 +1661,8 @@ const ipcHandlers={
     saveFileFromClipboard,
     getUrlFromClipboard,
     getImgUrlFromClipboard,
+    getSettingValue,
+    saveSettingValue,
 };
 
 /**

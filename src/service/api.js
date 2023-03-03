@@ -515,6 +515,24 @@ class Api{
     calcAttUrlSync=(graphFileFullpath,picRelaPath)=>{
         return ipcRenderer.sendSync('calcAttUrlSync', graphFileFullpath, picRelaPath);
     }
+
+
+
+    getSettingValue=(itemName)=>{
+        return ipcRenderer.invoke('getSettingValue', itemName);
+    }
+
+    saveSettingValue=(itemName, itemVal)=>{
+        return ipcRenderer.invoke('saveSettingValue', itemName, itemVal);
+    }
+
+    getTheme=()=>{
+        return this.getSettingValue("theme");
+    };
+
+    saveTheme=(theme)=>{
+        this.saveSettingValue("theme", theme);
+    };
 }
 
 

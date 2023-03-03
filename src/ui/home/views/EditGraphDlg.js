@@ -16,7 +16,8 @@ import {useColorPicker} from "../../../hooks/colorPicker";
 import TagItem from "../../common/TagItem";
 import {dispatch} from "use-bus";
 import {editorEvents} from "../../../common/events";
-import {useMemoizedFn} from "ahooks";
+import {useMemoizedFn, useMount} from "ahooks";
+import api from "../../../service/api";
 
 
 const EnhDlg=withEnh(Modal);
@@ -32,6 +33,21 @@ const EditGraphDlg=(props)=>{
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
 
     const [theme, setTheme]= useState('default');
+
+    useMount(()=>{
+        setTimeout(()=>{
+            (async ()=>{
+                let currSavedTheme=await api.getTheme();
+                setTheme(currSavedTheme);
+                console.log("curr theme loaded", currSavedTheme);
+            })();
+        },500);
+    });
+
+    const setAndSaveTheme=useMemoizedFn((val)=>{
+        setTheme(val);
+        api.saveTheme(val);
+    });
 
     const setCodeMirrorInst=useCallback((inst)=>{
         codeMirrorInstRef.current=inst;
@@ -75,7 +91,7 @@ const EditGraphDlg=(props)=>{
                                 style={{ marginLeft:'30px',marginRight:'0px', width:'200px'}}
                                 value={theme}
                                 options={themeOpts}
-                                onChange={setTheme}
+                                onChange={setAndSaveTheme}
                         />
                         <span style={{marginLeft:'40px'}}>
                             {
