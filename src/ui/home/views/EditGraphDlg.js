@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useRef} from 'react';
-import {Button, Input, List, Modal} from 'antd';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Button, Input, List, Modal, Select} from 'antd';
 import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
 import {tw} from 'gstyle-creater/src';
 
@@ -16,6 +16,7 @@ import {useColorPicker} from "../../../hooks/colorPicker";
 import TagItem from "../../common/TagItem";
 import {dispatch} from "use-bus";
 import {editorEvents} from "../../../common/events";
+import {useMemoizedFn} from "ahooks";
 
 
 const EnhDlg=withEnh(Modal);
@@ -30,7 +31,7 @@ const EditGraphDlg=(props)=>{
     const [refNavDlgVisible,refNavDlgTitle,refNavDlgItems, showRefs, showTrefs, hideRefNavDlg]=useRefNavDlg(codeMirrorInstRef);
     const [tableEditData, tableEditDlgVisible, onEditTable, onSetTableMarkdown, hideTableEditDlg]=useTableEditDlg(codeMirrorInstRef);
 
-
+    const [theme, setTheme]= useState('default');
 
     const setCodeMirrorInst=useCallback((inst)=>{
         codeMirrorInstRef.current=inst;
@@ -65,12 +66,17 @@ const EditGraphDlg=(props)=>{
     },[props.visible]);
 
 
-
     return (
         <>
             <EnhDlg
                     title={<div>
                         <span>{"编辑图表 - " + props.currMapName}</span>
+                        <Select size='small'
+                                style={{ marginLeft:'30px',marginRight:'0px', width:'200px'}}
+                                value={theme}
+                                options={themeOpts}
+                                onChange={setTheme}
+                        />
                         <span style={{marginLeft:'40px'}}>
                             {
                                 props.tags.map((tag,ind)=>
@@ -121,6 +127,7 @@ const EditGraphDlg=(props)=>{
                         <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={props.onOpenHelpDlg} />
                     </div>
                     <Editor
+                        theme={theme}
                         value={props.editTmpTxt}
                         onChange={props.onChangeEditTmpTxt}
                         onOnlySave={props.onOnlySave}
@@ -167,6 +174,92 @@ const EditGraphDlg=(props)=>{
         </>
     );
 }
+
+
+/**
+ * 主题下拉框选项
+ * @type {{label: *, value: *}[]}
+ */
+const themeOpts=(()=>{
+    const opts= [
+        "3024-day",
+        "colorforth",
+        "juejin",
+        "neat",
+        "solarized",
+        "3024-night",
+        "darcula",
+        "lesser-dark",
+        "neo",
+        "ssms",
+        "abbott",
+        "dracula",
+        "liquibyte",
+        "night",
+        "the-matrix",
+        "abcdef",
+        "duotone-dark",
+        "lucario",
+        "nord",
+        "tomorrow-night-bright",
+        "ambiance-mobile",
+        "duotone-light",
+        "material-darker",
+        "oceanic-next",
+        "tomorrow-night-eighties",
+        "ambiance",
+        "eclipse",
+        "material-ocean",
+        "panda-syntax",
+        "ttcn",
+        "ayu-dark",
+        "elegant",
+        "material-palenight",
+        "paraiso-dark",
+        "twilight",
+        "ayu-mirage",
+        "erlang-dark",
+        "material",
+        "paraiso-light",
+        "vibrant-ink",
+        "base16-dark",
+        "gruvbox-dark",
+        "mbo",
+        "pastel-on-dark",
+        "xq-dark",
+        "base16-light",
+        "hopscotch",
+        "mdn-like",
+        "railscasts",
+        "xq-light",
+        "bespin",
+        "icecoder",
+        "midnight",
+        "rubyblue",
+        "yeti",
+        "blackboard",
+        "idea",
+        "monokai",
+        "seti",
+        "yonce",
+        "cobalt",
+        "isotope",
+        "moxer",
+        "shadowfox",
+        "zenburn",
+    ].sort((s1,s2)=>s1.localeCompare(s2)).map(name=>({
+        value: name,
+        label: name,
+    }));
+    opts.unshift({
+        value: 'default',
+        label: '默认主题',
+    })
+    return opts;
+})();
+
+
+
 
 
 
