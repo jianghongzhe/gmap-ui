@@ -12,10 +12,13 @@ export const useNodeOp=(mapTxts)=>{
         let newLineTxt=mapTxts??'';
         let cursorPos={line:0, ch: 0};
 
+
+        // console.log("节点占用的行：", nd.lineInd+" "+nd.lineInd2);
+
         // 编辑节点，光标位置定在节点所有行的行尾
         if('edit'===action){
-            const ch=getLines()[nd.lineInd].length;
-            cursorPos={line:nd.lineInd, ch};
+            const ch=getLines()[nd.lineInd2].length;
+            cursorPos={line:nd.lineInd2, ch};
             return [newLineTxt, cursorPos];
         }
         // 添加子节点，层级为当前节点下一层，行号为节点及所有子节点中最后一行的下一行
@@ -66,9 +69,9 @@ const insertLineAndJoin=(lines, lineInd, newLine)=>{
  */
 const getLastSubNdLineInd=(nd)=>{
     if(!nd.childs || 0===nd.childs.length){
-        return nd.lineInd;
+        return nd.lineInd2;
     }
-    let tmp=nd.lineInd;
+    let tmp=nd.lineInd2;
     nd.childs.forEach(subNd=>{
         tmp=Math.max(tmp, getLastSubNdLineInd(subNd));
     });

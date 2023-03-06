@@ -485,7 +485,7 @@ class MindmapSvc {
         let { ndLines, refs, openers, shortcuts} = this.loadParts(arrayOrTxt);
         const defaultRelaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
 
-        ndLines.forEach(({str,lineInd}) => {
+        ndLines.forEach(({str,lineInd,lineInd2}) => {
             //=============数据行开始======================
             let lev = str.indexOf("-");//减号之前有几个字符即为缩进几层，层数从0开始计
             let txt = str.substring(lev + 1).trim();
@@ -676,6 +676,7 @@ class MindmapSvc {
             let nd = {
                 id: nodeIdPrefix+(++nodeIdCounter),
                 lineInd,
+                lineInd2,
                 lev: lev,
                 str: txts,
                 left: false,
@@ -993,6 +994,28 @@ class MindmapSvc {
             };
         });
 
+        // 把拆分为多行的节点合并到一起
+        // 合并前
+        // 1    - a
+        // 2      ax
+        // 3      ay
+        // 合并后
+        // 1-3  - a|ax|ay
+        const tmp=[];
+        ndLines.forEach(({str, lineInd})=>{
+            if(0===tmp.length || str.trim().startsWith("- ")){
+                tmp.push({
+                    str,
+                    lineInd,
+                    lineInd2: lineInd,
+                });
+                return;
+            }
+            let target=tmp[tmp.length-1];
+            target.str=target.str+"|"+str;
+            target.lineInd2=lineInd;
+        });
+        ndLines=tmp;
 
         return { ndLines, refs, graphs, openers, shortcuts};
     }

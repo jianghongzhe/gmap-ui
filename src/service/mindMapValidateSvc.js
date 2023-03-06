@@ -28,6 +28,7 @@ class MindMapValidateSvc{
             return "请输入图表的文本内容";
         }
         const result=this.validateForLintTooltip(txt);
+        console.log("rs", result);
         if(true===result){
             return true;
         }
@@ -40,7 +41,7 @@ class MindMapValidateSvc{
      * @param {*} txt 
      * @returns 
      * {line, pos1, pos2, msg} 语法有误 
-     * false - 语法无误
+     * true - 语法无误
      */
     validateForLintTooltip=(txt="")=>{
         //内容为空则忽略验证
@@ -55,20 +56,36 @@ class MindMapValidateSvc{
             lines=lines.splice(0, splitLine.lineInd);
         }
 
-        //每行开头必须是0或多个tab符和一个减号和一个空格，且空格后还有内容
+        // 每行开头必须是0或多个tab符和一个减号和一个空格，且空格后还有内容
+        // 节点支持以多行表示，即后面的不以一个减号和一个空格开头，且层级不做限制
         const reg=/^\t*- .*$/;
+        let currNdLine=null;
         for(let {line,lineInd} of lines){
             if(''===line.trim()){
                 continue;
             }
+
+            // 不符合 '- xxx' 的格式
             if(!reg.test(line)){
-                return {
-                    line: lineInd,
-                    pos1: 0,
-                    pos2: line.length,
-                    msg:  "格式有误，应为零或多个tab，紧接一个减号和一个空格，后面为正文内容：\r\n[tab][tab]- blabla",
-                };
+                // 还没有当前节点，则判定为格式有误
+                if(null===currNdLine){
+                    return {
+                        line: lineInd,
+                        pos1: 0,
+                        pos2: line.length,
+                        msg:  "格式有误，应为零或多个tab，紧接一个减号和一个空格，后面为正文内容：\r\n[tab][tab]- blabla",
+                    };
+                }
+
+                // 有当前节点，则认为与当前节点是同一节点的多行表示
+                // - aaa
+                //   xx
+                //   yyy
+                continue;
             }
+
+            // 符合 '- xxx' 的格式
+            currNdLine={line,lineInd};
             let txtPart=line.substring(line.indexOf("- ")+"- ".length);
             if(""===txtPart.trim()){
                 return {
@@ -83,7 +100,7 @@ class MindMapValidateSvc{
         //不能多个顶级主题，且顶级主题只能在第一个位置
         let meetFirstNd=false;
         for(let {line,lineInd} of lines){
-            if(''===line.trim()){
+            if(''===line.trim() || !line.trim().startsWith("- ")){
                 continue;
             }
             //第一个出现的主题：如果不是根主题，则不通过，否则置状态
@@ -115,7 +132,7 @@ class MindMapValidateSvc{
         let lastLev=-1;
         let hasLast=false;
         for(let {line,lineInd} of lines){
-            if(''===line.trim()){
+            if(''===line.trim() || !line.trim().startsWith("- ")){
                 continue;
             }
             //第一个节点

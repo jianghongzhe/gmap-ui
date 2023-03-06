@@ -1323,8 +1323,8 @@ const baseFillSettingItems=(item)=>{
     if('undefined'===typeof(item.settings)){
         item.settings={};
     }
-    if('undefined'===typeof(item.settings.theme)){
-        item.settings.theme='default';
+    if('undefined'===typeof(item.settings.editor_theme)){
+        item.settings.editor_theme='default';
     }
 };
 

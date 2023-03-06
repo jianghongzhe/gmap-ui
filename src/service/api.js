@@ -526,14 +526,18 @@ class Api{
         return ipcRenderer.invoke('saveSettingValue', itemName, itemVal);
     }
 
-    getTheme=()=>{
-        return this.getSettingValue("theme");
+    getEditorTheme=()=>{
+        return this.getSettingValue(settingConst.editor_theme);
     };
 
-    saveTheme=(theme)=>{
-        this.saveSettingValue("theme", theme);
+    saveEditorTheme=(theme)=>{
+        this.saveSettingValue(settingConst.editor_theme, theme);
     };
 }
+
+const settingConst={
+    editor_theme: "editor_theme",
+};
 
 
 

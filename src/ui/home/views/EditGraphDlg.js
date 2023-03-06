@@ -37,7 +37,7 @@ const EditGraphDlg=(props)=>{
     useMount(()=>{
         setTimeout(()=>{
             (async ()=>{
-                let currSavedTheme=await api.getTheme();
+                let currSavedTheme=await api.getEditorTheme();
                 setTheme(currSavedTheme);
                 console.log("curr theme loaded", currSavedTheme);
             })();
@@ -46,7 +46,7 @@ const EditGraphDlg=(props)=>{
 
     const setAndSaveTheme=useMemoizedFn((val)=>{
         setTheme(val);
-        api.saveTheme(val);
+        api.saveEditorTheme(val);
     });
 
     const setCodeMirrorInst=useCallback((inst)=>{
