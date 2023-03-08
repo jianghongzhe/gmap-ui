@@ -1303,12 +1303,15 @@ const openDevTool=()=>{
  * @return {{os: string, macs: Set<unknown>}}
  */
 const getOsAndMacs=()=>{
+    const isZeroMac=(mac)=>(''===mac.replace(/(00)|([:])/g,''));
     let nets=os.networkInterfaces();
     let macs=new Set();
     for(let key in nets){
-        nets[key].map(item=>item.mac)
-            .filter(mac=>''!==mac.replace(/(00)|([:])/g,''))
-            .forEach(mac=>macs.add(mac));
+        nets[key].filter(item=>true!==item.internal)
+            .filter(item=>!isZeroMac(item.mac))
+            .filter(item=>'ipv4'===item.family.toLowerCase())
+            .map(item=>item.mac)
+            .forEach(mac=>macs.add(mac));	;
     }
     macs=[...macs];
     return {
@@ -1343,7 +1346,7 @@ const isMatchSettingItem=(osAndMacs, settingItem)=>(settingItem.os===osAndMacs.o
 /**
  * 把给定的系统设置对象转换为新的格式，即补充新出现的设置项等
  * 判断本机的依据：操作系统名称相同且mac地址之间有交集
- * 如果为本机，则把mac地址取并集
+ * 如果为本机，则以当前获取到的mac地址为准
  * 补充没有的设置项
  * @param oldJson
  */
@@ -1354,7 +1357,7 @@ const fillNewSettingItems=(oldJson)=>{
         const isCurrMachine=isMatchSettingItem(osAndMacs, each);
         if(isCurrMachine){
             foundCurrMarchine=true;
-            each.macs=[...new Set([...each.macs, ...osAndMacs.macs])];
+            each.macs=[...osAndMacs.macs]; // [...new Set([...each.macs, ...osAndMacs.macs])];
         }
         baseFillSettingItems(each);
     });
