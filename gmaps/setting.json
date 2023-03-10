@@ -2,8 +2,7 @@
     {
         "os": "Windows 10 Pro x64",
         "macs": [
-            "d4:3d:7e:dd:8f:37",
-            "00:15:5d:ca:e3:b6"
+            "d4:3d:7e:dd:8f:37"
         ],
         "settings": {
             "editor_theme": "default"
