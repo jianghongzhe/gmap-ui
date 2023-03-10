@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {  useEffect, useRef, useState } from 'react';
 import {  Modal,Button,BackTop,Tooltip } from 'antd';
 import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
@@ -22,7 +22,7 @@ import screenShot from '../../../service/screenShot';
 //import lod from 'lodash';
 // import snap from 'snapsvg';
 import webfontloader from 'webfontloader';
-import { useEventListener } from 'ahooks';
+import {useEventListener, useMemoizedFn} from 'ahooks';
 import { useMemo } from 'react';
 import { tabActiveKey } from '../../../store/tabs';
 import { useRecoilValue } from 'recoil';
@@ -253,16 +253,16 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     
 
     
-    const onExpHtml=useCallback(()=>{
+    const onExpHtml=useMemoizedFn(()=>{
         //expSvc.expHtml(refname, marked(txt));
         api.expHtml(activeKey, refname, txt);
-    },[activeKey, refname, txt]);
+    });
 
     
-    const onExpMarkdown=useCallback(()=>{
+    const onExpMarkdown=useMemoizedFn(()=>{
         api.expMarkdown(activeKey,refname, txt);
         //expSvc.expMarkdown(txt);
-    },[activeKey, refname, txt]);
+    });
     
 
     
@@ -271,7 +271,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
      * 导出图片或pdf
      * @param {*} expImg  true-导出图片  false-导出pdf
      */
-    const onExpImage=useCallback((type='img')=>{
+    const onExpImage=useMemoizedFn((type='img')=>{
         (async()=>{
             const typeNames={
                 shot: '滚动截屏',
@@ -311,7 +311,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
 
             }
         })();
-    },[wrapperId, bodyId, backtopId]);
+    });
 
 
 

@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, { useEffect, useMemo} from 'react';
 import {Alert, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
 import {useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
+import {useMemoizedFn} from "_ahooks@3.7.4@ahooks";
 
 
 /**
@@ -40,12 +41,12 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
     },[ds, setAllStyles]);
 
 
-    const getExpBtnStyle=useCallback((nd)=>(
+    const getExpBtnStyle=useMemoizedFn((nd)=>(
         (nd && expBtnStyles && expBtnStyles[nd.id]) ? expBtnStyles[nd.id] : {}   
-    ),[expBtnStyles]);
+    ));
 
 
-    const getNdStyle=useCallback((nd)=>{
+    const getNdStyle=useMemoizedFn((nd)=>{
         let borderStyle=getNdBorderStyle(nd, ds.tree);
         const hasNdStyle=(nd && ndStyles && ndStyles[nd.id]);
         let positionStyle=(hasNdStyle ? ndStyles[nd.id]: {});
@@ -60,18 +61,18 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
             };
         }
         return result;
-    },[ndStyles, ds]);
+    });
 
 
-    const getLineStyle=useCallback((nd,type)=>{
+    const getLineStyle=useMemoizedFn((nd,type)=>{
         return (nd && lineStyles && lineStyles[nd.id] && lineStyles[nd.id][type]) ? 
             lineStyles[nd.id][type] 
                 : 
             {};
-    },[lineStyles]);
+    });
 
 
-    const getRelaLineWrapperStyle=useCallback((fromId, toId)=>{
+    const getRelaLineWrapperStyle=useMemoizedFn((fromId, toId)=>{
         if(!relaLineStyles[`${fromId}_${toId}`] || !relaLineStyles[`${fromId}_${toId}`].svgStyle){
             return {
                 left:"-9999px",
@@ -79,9 +80,9 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
             };
         }
         return relaLineStyles[`${fromId}_${toId}`].svgStyle;
-    },[relaLineStyles]);
+    });
 
-    const getRelaLinePos=useCallback((fromId, toId)=>{
+    const getRelaLinePos=useMemoizedFn((fromId, toId)=>{
         if(!relaLineStyles[`${fromId}_${toId}`] || !relaLineStyles[`${fromId}_${toId}`].linePos){
             return {
                 x1: 0,
@@ -91,7 +92,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
             };
         }
         return relaLineStyles[`${fromId}_${toId}`].linePos;
-    },[relaLineStyles]);
+    });
 
 
     //如果提供了节点渲染器或扩展按钮渲染器，则使用，否则使用默认的

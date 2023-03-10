@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Button,Tooltip, Progress  } from 'antd';
 import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import {marked} from 'marked';
@@ -179,19 +179,19 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
  * 4、否则，生成一个链接
  */
 const LinkComplexItem=({link, linkInd, onOpenLink})=>{
-    const isFileExtProtocol=useCallback((addr)=>{
+    const isFileExtProtocol=useMemoizedFn((addr)=>{
         return (addr.startsWith("fileext://") || addr.startsWith("filex://"));
-    },[]);
+    });
 
-    const isDirExtProtocol=useCallback((addr)=>{
+    const isDirExtProtocol=useMemoizedFn((addr)=>{
         return (addr.startsWith("dirext://") || addr.startsWith("dirx://"));
-    },[]);
+    });
 
-    const isUrlxProtocol=useCallback((addr)=>{
+    const isUrlxProtocol=useMemoizedFn((addr)=>{
         return addr.startsWith("urlx://");
-    },[]);
+    });
 
-    const splitUrlxProtocol=useCallback((addr, name)=>{
+    const splitUrlxProtocol=useMemoizedFn((addr, name)=>{
         let len=0;
         if(addr.startsWith("urlx://")){
             len=(addr.startsWith("urlx:///") ? "urlx:///".length : "urlx://".length);
@@ -211,12 +211,12 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
                 tooltip:  (name ? name+"  "+cpUrl:cpUrl),
             },
         ];
-    },[]);
+    });
 
     /**
      * 把fileext协议的url分解为三个具体的协议：file、openas、dir
      */
-    const splitFileExtProtocol=useCallback((addr, name)=>{
+    const splitFileExtProtocol=useMemoizedFn((addr, name)=>{
 
         let len=0;
         if(addr.startsWith("fileext://")){
@@ -250,12 +250,12 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
                 tooltip: "复制  "+cpUrl,
             },
         ];
-    },[]);
+    });
 
     /**
      * 把fileext协议的url分解为三个具体的协议：file、openas、dir
      */
-    const splitDirExtProtocol=useCallback((addr, name)=>{
+    const splitDirExtProtocol=useMemoizedFn((addr, name)=>{
         let len=0;
         if(addr.startsWith("dirext://")){
             len=(addr.startsWith("dirext:///") ? "dirext:///".length : "dirext://".length);
@@ -283,7 +283,7 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
                 tooltip: "复制  "+cpUrl,
             },
         ];
-    },[]);
+    });
 
 
     if(isFileExtProtocol(link.addr)){

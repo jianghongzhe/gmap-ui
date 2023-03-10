@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import {Empty, Input, Modal, Space, Typography} from 'antd';
 import {SearchOutlined} from '@ant-design/icons';
 import api from '../../../service/api';
@@ -66,10 +66,10 @@ const FindInFileDlg=({visible, onCancel})=>{
      * 打开导图
      * @param {*} fullTitle 标题的全路径 a/b/c
      */
-    const openMap=useCallback((fullTitle)=>{
+    const openMap=useMemoizedFn((fullTitle)=>{
         api.openUrl(`gmap://${fullTitle}`, selectFileListItem);
         onCancel();
-    },[onCancel, selectFileListItem]);
+    });
 
     /**
      * 向添加或移除标签，根据表达式中是否存在判断

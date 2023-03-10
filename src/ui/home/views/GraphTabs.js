@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect} from 'react';
+import React, { useEffect} from 'react';
 import {Tabs, Button, } from 'antd';
 import { MinusCircleOutlined,FileMarkdownOutlined,FileOutlined} from '@ant-design/icons';
 
@@ -8,6 +8,7 @@ import keyDetector from 'key-detector';
 import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
+import {useMemoizedFn} from "ahooks";
 
 
 /**
@@ -78,11 +79,11 @@ const GraphTabs=(props)=>{
      * @param {*} targetKey 
      * @param {*} action 
      */
-    const onEditTab =useCallback((targetKey, action) => {
+    const onEditTab =useMemoizedFn((targetKey, action) => {
         if ("remove" === action) {
             removeTab(targetKey);
         }
-    },[removeTab]);
+    });
 
 
 

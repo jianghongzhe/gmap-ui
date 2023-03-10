@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Layout, message } from 'antd';
 
 import Welcome from './views/Welcome';
@@ -221,13 +221,13 @@ const MapsViewer=(props)=>{
 
 
     //------------新建图表操作----------------------------------------------------------------------
-    const onShowNewMapDlg =useCallback(() => {
+    const onShowNewMapDlg =useMemoizedFn(() => {
         api.closeFindInPageDlg();
         setNewMapDlgVisible(true);
-    },[setNewMapDlgVisible]);
+    });
 
 
-    const onNewMapDlgOK =useCallback(({dir,name}) => {
+    const onNewMapDlgOK =useMemoizedFn(({dir,name}) => {
         (async()=>{
             try {
                 await createNewMapPromise({dir,name});
@@ -236,7 +236,7 @@ const MapsViewer=(props)=>{
             } catch (error) {
             }
         })();
-    },[ setNewMapDlgVisible, createNewMapPromise, reloadFileList]);
+    });
 
 
     //------------修改导图----------------------------------------------------------------------
@@ -263,51 +263,51 @@ const MapsViewer=(props)=>{
 
 
     //------------选择文件功能----------------------------------------------------------------------
-    const onSelectMapItem =useCallback(async (item) => {
+    const onSelectMapItem =useMemoizedFn(async (item) => {
         try{
             selectFileListItem(item);
             setSelMapDlgVisible(false);
         }catch(e){
         }
-    },[selectFileListItem, setSelMapDlgVisible]);
+    });
 
 
-    const showSelMapDlg =useCallback(() => {
+    const showSelMapDlg =useMemoizedFn(() => {
         setSelMapDlgVisible(true);
-    },[setSelMapDlgVisible]);
+    });
 
 
 
     //------------导图的操作----------------------------------------------------------------------
 
-    const onShowTimeline =useCallback((timelineObj) => {
+    const onShowTimeline =useMemoizedFn((timelineObj) => {
         setTimelineDlgState({
             timelineDlgVisible: true,
             timelineObj: timelineObj,
         });
-    },[setTimelineDlgState]);
+    });
 
-    const onShowProgs =useCallback((progs) => {
+    const onShowProgs =useMemoizedFn((progs) => {
         setProgsDlgState({
             progsObj: progs,
             progsDlgVisible: true,
         });
-    },[setProgsDlgState]);
+    });
 
     
 
     
 
-    const openRef =useCallback((refObj) => {
+    const openRef =useMemoizedFn((refObj) => {
         setRefViewerDlgState({
             currRefObj: refObj,
             refViewerDlgVisible: true,
         });
-    },[setRefViewerDlgState]);
+    });
 
 
 
-    const onExpHtml=useCallback(()=>{
+    const onExpHtml=useMemoizedFn(()=>{
         (async ()=>{
             const exists=await api.existsFullpath(activeKey);
             if(!exists){
@@ -319,10 +319,10 @@ const MapsViewer=(props)=>{
             console.log(activeKey);
             api.expHtml(activeKey,null,handledContent);
         })();
-    },[activeKey]);
+    });
 
     
-    const onExpMarkdown=useCallback(()=>{
+    const onExpMarkdown=useMemoizedFn(()=>{
         (async ()=>{
             const exists=await api.existsFullpath(activeKey);
             if(!exists){
@@ -334,14 +334,14 @@ const MapsViewer=(props)=>{
             console.log(activeKey);
             api.expMarkdown(activeKey,null,handledContent);
         })();
-    },[activeKey/*, panes*/]);
+    });
 
 
     /**
      * 导出图片或pdf  
      * @param {*} expImg  true-导出图片  false-导出pdf
      */
-    const onExpImage=useCallback((type='img')=>{
+    const onExpImage=useMemoizedFn((type='img')=>{
         (async()=>{
             if(null===currTabInd){
                 return;
@@ -410,7 +410,7 @@ const MapsViewer=(props)=>{
                 [maxW, maxH]            // 有效部分最大的宽和高
             );
         })();
-    },[currTabInd]);
+    });
 
 
     /**

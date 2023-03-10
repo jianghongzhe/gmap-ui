@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, { useEffect, useMemo} from 'react';
 import {Button, Input, Modal, Table} from 'antd';
 import {
     AlignCenterOutlined,
@@ -17,6 +17,7 @@ import {
 import {withEnh} from '../../../common/specialDlg';
 import {useEditTableData} from '../../../../hooks/tableEdit';
 import {useBindAndGetRefs} from '../../../../common/commonHooks';
+import {useMemoizedFn} from "ahooks";
 
 
 const EnhDlg=withEnh(Modal);
@@ -52,18 +53,18 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
     /**
      * 根据引用的key使对应元素获得焦点
      */
-    const focusIpt=useCallback((key)=>{
+    const focusIpt=useMemoizedFn((key)=>{
         const ele=getIptRef(key);
         if(ele){
             ele.focus();
         }
-    },[getIptRef]);
+    });
 
 
     /**
      * 处理tab键导航
      */
-    const onKeyDown=useCallback((lineInd,colInd,e)=>{
+    const onKeyDown=useMemoizedFn((lineInd,colInd,e)=>{
         if(!e.altKey && !e.shiftKey && !e.ctrlKey && "Tab"===e.key){
             e.preventDefault();
             e.stopPropagation();
@@ -92,7 +93,7 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
             focusIpt(`head-0`);
             return;
         }
-    },[lines,colNames, focusIpt]);
+    });
 
     /**
      * 派生数据之表格的列：由原始的一维字符串数组转换为一维对象数组：
@@ -244,11 +245,11 @@ const TableEditDlg=({visible, data, onCancel, onOk})=>{
     },[visible, data, setData]);  
 
 
-    const onCommit=useCallback(()=>{
+    const onCommit=useMemoizedFn(()=>{
         const tableMd=createTableMd(data.needExtraBlankLine);
         onCancel();
         onOk(tableMd);
-    },[data, createTableMd, onCancel, onOk]);
+    });
 
 
     return (

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState} from 'react';
 import {Button, Input, List, Modal, Select} from 'antd';
 import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
 import {tw} from 'gstyle-creater/src';
@@ -49,24 +49,24 @@ const EditGraphDlg=(props)=>{
         api.saveEditorTheme(val);
     });
 
-    const setCodeMirrorInst=useCallback((inst)=>{
+    const setCodeMirrorInst=useMemoizedFn((inst)=>{
         codeMirrorInstRef.current=inst;
-    },[]);
+    });
 
 
-    const hideAllDlg =useCallback(() => {
+    const hideAllDlg =useMemoizedFn(() => {
         hideColorPicker();
         hideAdvColorPicker();
         hideRefNavDlg();
-    },[hideColorPicker, hideAdvColorPicker,   hideRefNavDlg]);
+    });
 
 
-    const gotoRefDefinition=useCallback((ref)=>{
+    const gotoRefDefinition=useMemoizedFn((ref)=>{
         hideAllDlg();
         setTimeout(() => {
             editorSvcEx.gotoLine(codeMirrorInstRef.current, ref.headLineInd, ref.contentLineInd);    
         }, 400);
-    },[hideAllDlg]);
+    });
 
 
     /**

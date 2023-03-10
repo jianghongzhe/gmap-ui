@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import React, {  useMemo } from 'react';
 import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 import { useBindAndGetRef } from '../../../common/commonHooks';
 import TagItem from "../../common/TagItem";
+import {useMemoizedFn} from "ahooks";
 
 /**
  * 路径选择
@@ -10,13 +11,13 @@ import TagItem from "../../common/TagItem";
 const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloadCurrDir, onSelectMapItem: onselectFileItem})=>{
     const [, bindListRef, getScrollTarget]=useBindAndGetRef();
 
-    const onSelectMapItem=useCallback((item)=>{
+    const onSelectMapItem=useMemoizedFn((item)=>{
         if (!item.isfile) {
             onloadDir(item.fullpath);
             return;
         }
         onselectFileItem(item);
-    },[onloadDir, onselectFileItem]);
+    });
 
     
     //列表样式，如果指定的forceMaxH，则保持高度和最大高度一致

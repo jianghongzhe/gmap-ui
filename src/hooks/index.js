@@ -3,7 +3,7 @@ import {allDirs, installPathValid} from '../store/common';
 import {currFileListDir, filelist, fileListDirLevels} from '../store/filelist';
 import api from '../service/api';
 import generalSvc from '../service/generalSvc';
-import {useCallback} from 'react';
+import {useMemoizedFn} from "ahooks";
 
 
 /**
@@ -12,7 +12,7 @@ import {useCallback} from 'react';
  */
 export const useSetPathValidState=()=>{
     const set=useSetRecoilState(installPathValid);
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         (async ()=>{
             const installPath=await api.getBasePath();
             const pathValid=(generalSvc.isPathValid(installPath) ? true : false);
@@ -23,7 +23,7 @@ export const useSetPathValidState=()=>{
                 }, 500);
             }
         })();
-    },[set]);
+    });
 };
 
 
@@ -32,14 +32,14 @@ export const useSetPathValidState=()=>{
  * @returns 
  */
 export const useSetWindowTitle=()=>{
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         (async ()=>{
             let titleTxt=await api.loadAppNameAndVersionTxt();
             let {react,antd}=await api.loadDepsVersion();
             const vers=await api.getInnerModuleVersions();
             document.querySelector("head > title").innerHTML = `${titleTxt}　( powered by electron ${vers.electron}, node ${vers.node}, chrome ${vers.chrome}, v8 ${vers.v8}, react ${react}, antd ${antd} )`;
         })();
-    },[]);
+    });
 };
 
 
@@ -48,9 +48,9 @@ export const useSetWindowTitle=()=>{
  * @returns 
  */
 export const useInitFindInPageDlg=()=>{
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         api.initFindInPageDlg();
-    },[]);
+    });
 };
 
 
@@ -60,12 +60,12 @@ export const useInitFindInPageDlg=()=>{
  */
 export const useGetAndLoadAllDirs=()=>{
     const [dirs, set]=useRecoilState(allDirs);
-    const loadFunc= useCallback(()=>{
+    const loadFunc= useMemoizedFn(()=>{
         (async ()=>{
             const allDirs=await api.listAllDirs();
             set(allDirs);
         })();        
-    },[set]);
+    });
     return [dirs, loadFunc];
 };
 
@@ -76,12 +76,12 @@ export const useGetAndLoadAllDirs=()=>{
  */
 export const useLoadAllDirs=()=>{
     const set=useSetRecoilState(allDirs);
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         (async ()=>{
             const allDirs=await api.listAllDirs();
             set(allDirs);
         })();        
-    },[set]);
+    });
 };
 
 
@@ -94,23 +94,23 @@ export const useLoadFileList=()=>{
     const setFileListDirLevels= useSetRecoilState(fileListDirLevels);
     const currDir=useRecoilValue(currFileListDir);
 
-    const load= useCallback((dir=null)=>{
+    const load= useMemoizedFn((dir=null)=>{
         (async()=>{
             const filelist=await (dir ? api.list(dir) : api.list());
             const dirs=await (dir ? api.getPathItems(dir) : api.getPathItems());
             setFileList(filelist);
             setFileListDirLevels(dirs);
         })();        
-    },[setFileList, setFileListDirLevels]);
+    });
 
-    const reload=useCallback(()=>{
+    const reload=useMemoizedFn(()=>{
         (async()=>{
             const filelist=await (currDir ? api.list(currDir) : api.list());
             const dirs=await (currDir ? api.getPathItems(currDir) : api.getPathItems());
             setFileList(filelist);
             setFileListDirLevels(dirs);
         })();        
-    },[currDir, setFileList, setFileListDirLevels]);
+    });
 
     return [load, reload];
 };
@@ -121,23 +121,23 @@ export const useGetAndLoadFileList=()=>{
     const [dirLevs, setFileListDirLevels]= useRecoilState(fileListDirLevels);
     const currDir=useRecoilValue(currFileListDir);
 
-    const load= useCallback((dir=null)=>{
+    const load= useMemoizedFn((dir=null)=>{
         (async()=>{
             const filelist=await (dir ? api.list(dir) : api.list());
             const dirs=await (dir ? api.getPathItems(dir) : api.getPathItems());
             setFileList(filelist);
             setFileListDirLevels(dirs);
         })();        
-    },[setFileList, setFileListDirLevels]);
+    });
 
-    const reload=useCallback(()=>{
+    const reload=useMemoizedFn(()=>{
         (async()=>{
             const filelist=await (currDir ? api.list(currDir) : api.list());
             const dirs=await (currDir ? api.getPathItems(currDir) : api.getPathItems());
             setFileList(filelist);
             setFileListDirLevels(dirs);
         })();        
-    },[currDir, setFileList, setFileListDirLevels]);
+    });
 
     return [files, dirLevs, load, reload];
 };

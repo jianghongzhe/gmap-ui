@@ -1,38 +1,39 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
+import {useMemoizedFn} from "ahooks";
 
 const useEditTableData=()=>{
     const [data, set]=useState({aligns:[], colNames:[], lines:[]});
 
     // --------------------如下为工具方法-----------------------------------
-    const setItemForNewArray=useCallback((array, ind, val)=>{
+    const setItemForNewArray=useMemoizedFn((array, ind, val)=>{
         const tmp=[...array];
         tmp[ind]=val;
         return tmp;
-    },[]);
+    });
 
-    const delItemForNewArray=useCallback((array, ind)=>{
+    const delItemForNewArray=useMemoizedFn((array, ind)=>{
         const tmp=[...array];
         tmp.splice(ind,1);
         return tmp;
-    },[]);
+    });
 
-    const addItemForNewArray=useCallback((array, ind, val)=>{
+    const addItemForNewArray=useMemoizedFn((array, ind, val)=>{
         const tmp=[...array];
         tmp.splice(ind, 0, val);
         return tmp;
-    },[]);
+    });
 
-    const swapItemForNewArray=useCallback((array, ind1, ind2)=>{
+    const swapItemForNewArray=useMemoizedFn((array, ind1, ind2)=>{
         const tmp=[...array];
         let t=tmp[ind1];
         tmp[ind1]=tmp[ind2];
         tmp[ind2]=t;
         return tmp;
-    },[]);
+    });
 
-    const handleVLine=useCallback((txt)=>{
+    const handleVLine=useMemoizedFn((txt)=>{
         return txt.replace(/[\\][|]/g, "|").replace(/[|]/g, "\\|");
-    },[]);
+    });
 
 
 
@@ -43,9 +44,9 @@ const useEditTableData=()=>{
      * @param aligns
      * @param lines
      */
-    const setData=useCallback((colNames, aligns, lines)=>{
+    const setData=useMemoizedFn((colNames, aligns, lines)=>{
         set({colNames, aligns, lines});
-    },[set]);
+    });
 
 
     /**
@@ -53,14 +54,14 @@ const useEditTableData=()=>{
      * @param ind 列索引
      * @param e 事件对象
      */
-    const changeCol=useCallback((ind, e)=>{
+    const changeCol=useMemoizedFn((ind, e)=>{
         set(oldState=>{
             return {
                 ...oldState,
                 colNames: setItemForNewArray(oldState.colNames, ind, e.target.value),
             };
         });
-    },[set, setItemForNewArray]);
+    });
 
 
     /**
@@ -68,14 +69,14 @@ const useEditTableData=()=>{
      * @param ind 列索引
      * @param align 对齐方式：left、right、center
      */
-    const changeAlign=useCallback((ind, align)=>{
+    const changeAlign=useMemoizedFn((ind, align)=>{
         set(oldState=>{
             return {
                 ...oldState,
                 aligns: setItemForNewArray(oldState.aligns, ind, align)
             };
         });
-    },[set, setItemForNewArray]);
+    });
 
 
     /**
@@ -84,35 +85,35 @@ const useEditTableData=()=>{
      * @param col 列索引
      * @param e 事件对象
      */
-    const changeCell=useCallback((line, col, e)=>{
+    const changeCell=useMemoizedFn((line, col, e)=>{
         set(oldState=>{
             return {
                 ...oldState,
                 lines: oldState.lines.map((items, ind)=>(ind!==line ? items : setItemForNewArray(items, col, e.target.value))),
             }
         });
-    },[set, setItemForNewArray]);
+    });
 
 
     /**
      * 添加行
      * @param ind 行索引
      */
-    const addLine=useCallback((ind)=>{
+    const addLine=useMemoizedFn((ind)=>{
         set(oldState=>{
             return {
                 ...oldState,
                 lines: addItemForNewArray(oldState.lines, ind, oldState.colNames.map(cn=>"-")),
             };
         });
-    },[set, addItemForNewArray]);
+    });
 
 
     /**
      * 添加列，对齐方式默认为左对齐
      * @param ind 列索引
      */
-    const addCol=useCallback((ind)=>{
+    const addCol=useMemoizedFn((ind)=>{
         set(oldState=>{
             return {
                 colNames: addItemForNewArray(oldState.colNames, ind, `列头`), 
@@ -120,14 +121,14 @@ const useEditTableData=()=>{
                 lines: oldState.lines.map(line=>addItemForNewArray(line, ind, '-')),
             };
         });
-    },[set, addItemForNewArray]);
+    });
 
 
     /**
      * 删除列
      * @param ind 列索引
      */
-    const delCol=useCallback((ind)=>{
+    const delCol=useMemoizedFn((ind)=>{
         set(oldState=>{
             return {
                 colNames: delItemForNewArray(oldState.colNames, ind), 
@@ -135,21 +136,21 @@ const useEditTableData=()=>{
                 lines: oldState.lines.map(line=>delItemForNewArray(line, ind)),
             };
         });
-    },[set, delItemForNewArray]);
+    });
 
 
     /**
      * 删除行
      * @param ind 行索引
      */
-    const delRow=useCallback((ind)=>{
+    const delRow=useMemoizedFn((ind)=>{
         set(oldState=>{
             return {
                 ...oldState,
                 lines: delItemForNewArray(oldState.lines, ind)
             };
         });
-    },[set, delItemForNewArray]);
+    });
 
 
     /**
@@ -157,14 +158,14 @@ const useEditTableData=()=>{
      * @param ind1 行索引1
      * @param ind2 行索引2
      */
-    const swapLine=useCallback((ind1,ind2)=>{
+    const swapLine=useMemoizedFn((ind1,ind2)=>{
         set(oldState=>{
             return {
                 ...oldState,
                 lines: swapItemForNewArray(oldState.lines, ind1, ind2)
             };
         });
-    },[set,swapItemForNewArray]);
+    });
 
 
     /**
@@ -172,7 +173,7 @@ const useEditTableData=()=>{
      * @param ind1 列索引1
      * @param ind2 列索引2
      */
-    const swapCol=useCallback((ind1,ind2)=>{
+    const swapCol=useMemoizedFn((ind1,ind2)=>{
         set(oldState=>{
             return {
                 colNames: swapItemForNewArray(oldState.colNames, ind1, ind2), 
@@ -180,13 +181,13 @@ const useEditTableData=()=>{
                 lines: oldState.lines.map(line=>swapItemForNewArray(line, ind1, ind2)),
             };
         });
-    }, [set,swapItemForNewArray]);
+    });
 
 
     /**
      * 生成markdown文本
      */
-    const createTableMd=useCallback((needExtraBlankLine)=>{
+    const createTableMd=useMemoizedFn((needExtraBlankLine)=>{
         let lineSep=`
 `;
         let tableMd=""+
@@ -198,7 +199,7 @@ const useEditTableData=()=>{
             tableMd=lineSep+tableMd+lineSep;
         }
         return tableMd;
-    },[data, handleVLine]);
+    });
 
 
     return [

@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {Modal, Input,Button,TreeSelect } from 'antd';
 import {ReloadOutlined } from '@ant-design/icons';
 import {useGetAndLoadAllDirs} from '../../../hooks';
+import {useMemoizedFn} from "ahooks";
 
 /**
  * 新建图表对话框
@@ -34,11 +35,11 @@ const NewGraphDlg=(props)=>{
      * @param {*} fun 
      * @param {*} e 
      */
-    const onChange=useCallback((fun,e)=>{
+    const onChange=useMemoizedFn((fun,e)=>{
         let val=(e && e.target ? e.target.value : e);
         val=('undefined'===typeof(val) ? '' : val);
         fun(val);
-    },[]);
+    });
 
     /**
      * 确定事件

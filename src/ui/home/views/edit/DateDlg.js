@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { Modal, Button, Divider, Calendar  } from 'antd';
 import { DoubleLeftOutlined,LeftOutlined,RightOutlined,DoubleRightOutlined } from '@ant-design/icons';
 import moment  from 'moment';
 import {withEnh} from '../../../common/specialDlg';
+import {useMemoizedFn} from "ahooks";
 
 
 const EnhDlg=withEnh(Modal);
@@ -22,7 +23,7 @@ const DateDlg=(props)=>{
     },[props.visible]);
 
     //设置特殊日期
-    const onSelCommonDays=useCallback((offset)=>{
+    const onSelCommonDays=useMemoizedFn((offset)=>{
         let time=moment();
         if(offset>0){
             time=time.add(offset, 'days');
@@ -31,16 +32,16 @@ const DateDlg=(props)=>{
             time=time.subtract(0-offset, 'days');
         }
         setDate(time);
-    },[setDate]);
+    });
 
     //确定按钮事件
-    const onOk=useCallback(()=>{
+    const onOk=useMemoizedFn(()=>{
         props.onOk(date.format("YYYY-MM-DD"));
-    },[props, date]);
+    });
 
 
 
-    const headerRender=useCallback(({ value, type, onChange, onTypeChange }) => {
+    const headerRender=useMemoizedFn(({ value, type, onChange, onTypeChange }) => {
         const changeYear=(delta)=>{
             const y=parseInt(date.format("YYYY"),10)+delta;
             const result = value.clone().year(y);
@@ -71,7 +72,7 @@ const DateDlg=(props)=>{
             <Button size='small' type='text' title="下月" icon={<RightOutlined className='icon'/>} onClick={changeMonth.bind(this,1)}></Button>
             <Button size='small' type='text' title="后一年" icon={<DoubleRightOutlined className='icon'/>} onClick={changeYear.bind(this,1)}></Button>
         </div>
-    },[date]);
+    });
 
     return (
         <EnhDlg  title="选择日期"

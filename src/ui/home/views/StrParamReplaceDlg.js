@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Input, Modal} from 'antd';
 import {withEnh} from '../../common/specialDlg';
 import strTmpl from '../../../common/strTmpl';
 import { useBindAndGetRefs } from '../../../common/commonHooks';
+import {useMemoizedFn} from "ahooks";
 
 const EnhDlg=withEnh(Modal);
 
@@ -25,9 +26,9 @@ const StrParamReplaceDlg=(props)=>{
     const [items, setItems]=useState([]);
     const [,bindIptByKey, getIptByKey]= useBindAndGetRefs();
     
-    const setFocusByKey=useCallback((key, delay=0)=>{
+    const setFocusByKey=useMemoizedFn((key, delay=0)=>{
         setFocus(getIptByKey.bind(this, key), delay);
-    },[getIptByKey]);
+    });
 
     /**
      * props中给出的初始值转化为state值
@@ -59,11 +60,11 @@ const StrParamReplaceDlg=(props)=>{
      * @param {*} ind 
      * @param {*} e 
      */
-    const onChange=useCallback((ind, e)=>{
+    const onChange=useMemoizedFn((ind, e)=>{
         const newItems=[...items];
         newItems[ind].value=e.target.value;
         setItems(newItems);
-    },[items, setItems]);
+    });
 
     
 

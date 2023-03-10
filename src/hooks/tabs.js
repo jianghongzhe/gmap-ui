@@ -1,5 +1,4 @@
 import { message } from "antd";
-import { useCallback } from "react";
 import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
 import api from "../service/api";
 import {tabActiveKey as tabActiveKeyState, tabPanes as tabPanesState, tabCurrPane, tabCurrInd, tabCurrTitle, tabActiveKey} from '../store/tabs';
@@ -7,12 +6,13 @@ import mindmapSvc from '../service/mindmapSvc';
 import newMindmapSvc from '../service/newMindmapSvc';
 import mindMapValidateSvc from "../service/mindMapValidateSvc";
 import globalStyleConfig from "../common/globalStyleConfig";
+import {useMemoizedFn} from "ahooks";
 
 export const useSelectFileListItem=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
 
-    return useCallback((item)=>{
+    return useMemoizedFn((item)=>{
         console.log("item item", item);
 
         if (!item || !item.isfile) {
@@ -56,7 +56,7 @@ export const useSelectFileListItem=()=>{
             ]);
             setTabActiveKey(mdFullpath);
         })();
-    },[tabPanes, setTabActiveKey, setTabPanes]);
+    });
 };
 
 const useCurrPaneState=()=>{
@@ -64,14 +64,14 @@ const useCurrPaneState=()=>{
     const currInd=useRecoilValue(tabCurrInd);
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
 
-    const set= useCallback((newCurrPane)=>{
+    const set= useMemoizedFn((newCurrPane)=>{
         if(null===currPane || null===currInd){
             return;
         }
         const newPanes=[...tabPanes];
         newPanes[currInd]=newCurrPane;
         setTabPanes(newPanes);
-    },[currPane, currInd, tabPanes, setTabPanes]);
+    });
 
     return [currPane, set];
 };
@@ -80,7 +80,7 @@ const useCurrPaneState=()=>{
 export const useToggleExpand=()=>{
     const[currPane, setCurrPane]= useCurrPaneState();
 
-    return useCallback((nd)=>{
+    return useMemoizedFn((nd)=>{
         setCurrPane({
             ...currPane,
             ds: {
@@ -91,13 +91,13 @@ export const useToggleExpand=()=>{
                 }
             }
         });
-    },[currPane, setCurrPane]);
+    });
 };
 
 export const useExpandAll=()=>{
     const[currPane, setCurrPane]= useCurrPaneState();
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         let expands={...currPane.ds.expands};
         newMindmapSvc.expandAll(currPane.ds).forEach(ndId=>{
             expands[ndId]=true;
@@ -109,13 +109,13 @@ export const useExpandAll=()=>{
                 expands
             }
         });
-    },[currPane, setCurrPane]);
+    });
 };
 
 export const useRestoreDefaultExpandState=()=>{
     const[currPane, setCurrPane]= useCurrPaneState();
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         setCurrPane({
             ...currPane,
             ds: {
@@ -126,15 +126,15 @@ export const useRestoreDefaultExpandState=()=>{
                 }
             }
         });
-    },[currPane, setCurrPane]);
+    });
 };
 
 
 export const useSetAssignedTabKey=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
-    return useCallback((key)=>{
+    return useMemoizedFn((key)=>{
         setTabActiveKey(key);
-    }, [setTabActiveKey]);
+    });
 };
 
 
@@ -143,7 +143,7 @@ export const useTogglePreTab=()=>{
     const currInd=useRecoilValue(tabCurrInd);
     const tabPanes= useRecoilValue(tabPanesState);
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if(null===currInd){
             return;
         }
@@ -155,7 +155,7 @@ export const useTogglePreTab=()=>{
             return;
         }
         setTabActiveKey(tabPanes[tabPanes.length-1].key);
-    },[currInd, tabPanes, setTabActiveKey]);
+    });
 };
 
 
@@ -164,7 +164,7 @@ export const useToggleNextTab=()=>{
     const currInd=useRecoilValue(tabCurrInd);
     const tabPanes= useRecoilValue(tabPanesState);
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if(null===currInd){
             return;
         }
@@ -176,14 +176,14 @@ export const useToggleNextTab=()=>{
             return;
         }
         setTabActiveKey(tabPanes[0].key);
-    },[currInd, tabPanes, setTabActiveKey]);
+    });
 };
 
 
 const useGetTabIndByKey=()=>{
     const tabPanes= useRecoilValue(tabPanesState);
 
-    return useCallback((targetKey)=>{
+    return useMemoizedFn((targetKey)=>{
         let ind=null;
         tabPanes.forEach((pane, i) => {
             if (pane.key === targetKey) {
@@ -191,7 +191,7 @@ const useGetTabIndByKey=()=>{
             }
         });
         return ind;
-    },[tabPanes]);
+    });
 };
 
 export const useRemoveTab=()=>{
@@ -199,7 +199,7 @@ export const useRemoveTab=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
     const getTabIndByKey= useGetTabIndByKey();
 
-    return useCallback((targetKey)=>{
+    return useMemoizedFn((targetKey)=>{
         // 空判断
         if (0 === tabPanes.length) {
             return;
@@ -223,7 +223,7 @@ export const useRemoveTab=()=>{
         }
         //要删除的不是当前活动的选项卡，则不影响activeKey（即不需要改变）
         setTabPanes(panes);
-    },[activeKey, tabPanes, setActiveKey, setTabPanes, getTabIndByKey]);
+    });
 };
 
 
@@ -231,41 +231,41 @@ export const useRemoveOtherTabs=()=>{
     const currPane= useRecoilValue(tabCurrPane);
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
     
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         // 没有选项卡或只有一个，则不删除
         if (0 === tabPanes.length || 1 === tabPanes.length) {
             return;
         }
         setTabPanes([currPane]);
-    },[currPane, tabPanes, setTabPanes]);
+    });
 };
 
 export const useRemoveRightTabs=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
     const currInd=useRecoilValue(tabCurrInd);
     
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if(null==currInd){
             return;
         }
         if(currInd<tabPanes.length-1){
             setTabPanes([...tabPanes].splice(0, currInd+1));
         }
-    },[tabPanes, currInd, setTabPanes]);
+    });
 };
 
 export const useRemoveLeftTabs=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
     const currInd=useRecoilValue(tabCurrInd);
     
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if(null==currInd){
             return;
         }
         if(currInd>0){
             setTabPanes([...tabPanes].splice(currInd));
         }
-    },[tabPanes, currInd, setTabPanes]);
+    });
 };
 
 
@@ -273,10 +273,10 @@ export const useRemoveAllTabs=()=>{
     const setActiveKey= useSetRecoilState(tabActiveKeyState);
     const setTabPanes= useSetRecoilState(tabPanesState);
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         setTabPanes([]);
         setActiveKey(null);
-    },[setActiveKey, setTabPanes]);
+    });
 };
 
 
@@ -285,7 +285,7 @@ export const useMovePreTab=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
     const currInd=useRecoilValue(tabCurrInd);
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if (null==currInd || 0 === tabPanes.length || 1 === tabPanes.length) {
             return;
         }
@@ -295,14 +295,14 @@ export const useMovePreTab=()=>{
         newPanes[currInd]=newPanes[targetInd];
         newPanes[targetInd]=t;
         setTabPanes(newPanes);
-    },[currInd, tabPanes, setTabPanes]);
+    });
 };
 
 export const useMoveNextTab=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
     const currInd=useRecoilValue(tabCurrInd);
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if (null==currInd || 0 === tabPanes.length || 1 === tabPanes.length) {
             return;
         }
@@ -312,18 +312,18 @@ export const useMoveNextTab=()=>{
         newPanes[currInd]=newPanes[targetInd];
         newPanes[targetInd]=t;
         setTabPanes(newPanes);
-    },[currInd, tabPanes, setTabPanes]);
+    });
 };
 
 
 export const useCopyCurrMapLink=()=>{
     const currMapTitle= useRecoilValue(tabCurrTitle);
 
-    return useCallback(()=>{
+    return useMemoizedFn(()=>{
         if(!currMapTitle){return;}
         let cmd=`cp://[跳转到导图 - ${currMapTitle}](gmap://${currMapTitle})`;
         api.openUrl(cmd);
-    },[currMapTitle]);
+    });
 };
 
 
@@ -331,7 +331,7 @@ export const useCreateNewMapPromise=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
     const setTabPanes= useSetRecoilState(tabPanesState);
 
-    return useCallback(({dir,name})=>{
+    return useMemoizedFn(({dir,name})=>{
         return new Promise((res, rej)=>{
             //验证名称为空和文件是否存在
             if (!name || '' === name) {
@@ -384,7 +384,7 @@ export const useCreateNewMapPromise=()=>{
                 res();
             })();
         });
-    },[setTabActiveKey, setTabPanes]);
+    });
 }
 
 
@@ -394,7 +394,7 @@ export const useSaveMapPromise=()=>{
     const [currPane, setCurrPane]= useCurrPaneState();
     const activeKey= useRecoilValue(tabActiveKey);
 
-    return useCallback((txt, tags)=>{
+    return useMemoizedFn((txt, tags)=>{
         return new Promise((res, rej)=>{
             if(!activeKey || !currPane){
                 rej();
@@ -428,7 +428,7 @@ export const useSaveMapPromise=()=>{
                 res();
             })();
         });
-    },[currPane, setCurrPane, activeKey]);
+    });
 };
 
 
