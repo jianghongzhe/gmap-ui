@@ -5,7 +5,8 @@
             "d4:3d:7e:dd:8f:37"
         ],
         "settings": {
-            "editor_theme": "default"
+            "editor_theme": "default",
+            "theme": "default"
         }
     }
 ]

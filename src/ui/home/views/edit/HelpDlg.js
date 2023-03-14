@@ -11,6 +11,7 @@ import imgUrlScatter from '../../../../assets/graph_scatter.png';
 import imgUrlRela from '../../../../assets/graph_rela.png';
 import imgUrlEchart from '../../../../assets/graph_echart.png';
 import globalStyleConfig from '../../../../common/globalStyleConfig';
+import styles from './HelpDlg.module.scss';
 
 const EnhDlg=withEnh(Modal);
 
@@ -431,6 +432,9 @@ const HelpDlg=(props)=>{
                                     }
                                     </tbody>
                                 </table>
+                                {/*<div className={styles.test} style={{'--col-qq-ss':'red'}}>*/}
+                                {/*    <div >haha样式ha</div>*/}
+                                {/*</div>*/}
                             </div>
                         )
                     }

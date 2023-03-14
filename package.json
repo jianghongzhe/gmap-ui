@@ -70,6 +70,7 @@
     "@emotion/babel-plugin": "^11.10.5",
     "customize-cra": "^1.0.0",
     "electron": "^22.2.0",
-    "react-app-rewired": "^2.2.1"
+    "react-app-rewired": "^2.2.1",
+    "sass": "^1.59.2"
   }
 }
