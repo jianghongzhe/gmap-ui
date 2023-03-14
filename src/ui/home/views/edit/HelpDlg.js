@@ -29,15 +29,15 @@ const HelpDlg=(props)=>{
                 zIndex={globalStyleConfig.helpDlgZIndex}
                 onCancel={props.onCancel}>
             
-            <Tabs tabPosition='left' css={tabsStyle}
+            <Tabs tabPosition='left' className={styles.tabContainer}
                 items={[
                     {
                         label:'节点部分',
                         key:"1",
-                        className:'tabitem',
+                        className: styles.tabitem,
                         children: (
-                            <div className='wrapper'>
-                                <table css={helpTableStyle}>
+                            <div className={styles.wrapper}>
+                                <table className={styles.helpTable}>
                                     <tbody>
                                     <tr>
                                         <th>类型</th>
@@ -71,10 +71,10 @@ const HelpDlg=(props)=>{
                     {
                         label:'引用部分',
                         key:"2",
-                        className:'tabitem',
+                        className: styles.tabitem,
                         children: (
-                            <div className='wrapper'>
-                                <table css={helpTableStyle}>
+                            <div className={styles.wrapper}>
+                                <table className={styles.helpTable}>
                                     <tbody>
                                     <tr>
                                         <th>类型</th>
@@ -97,20 +97,22 @@ const HelpDlg=(props)=>{
                                     }
                                     </tbody>
                                 </table>
-                                <div css={{marginTop:'10px',}}>
-                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
-                                </div>
-                                <div>
-                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex```）</Button>
-                                </div>
-                                <div>
-                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid```）</Button>
-                                </div>
-                                <div>
-                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow```）</Button>
-                                </div>
-                                <div>
-                                    <Button type='link' css={{paddingLeft:0,}} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence```）</Button>
+                                <div className={styles.linkItemContainer}>
+                                    <div>
+                                        <Button type='link' className={styles.btn} onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
+                                    </div>
+                                    <div>
+                                        <Button type='link' className={styles.btn} onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex```）</Button>
+                                    </div>
+                                    <div>
+                                        <Button type='link' className={styles.btn} onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid```）</Button>
+                                    </div>
+                                    <div>
+                                        <Button type='link' className={styles.btn} onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow```）</Button>
+                                    </div>
+                                    <div>
+                                        <Button type='link' className={styles.btn} onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence```）</Button>
+                                    </div>
                                 </div>
                             </div>
                         )
@@ -118,10 +120,10 @@ const HelpDlg=(props)=>{
                     {
                         label: 'markdown扩展',
                         key: "3",
-                        className: 'tabitem',
+                        className: styles.tabitem,
                         children: (
-                            <div className='wrapper'>
-                                <table css={helpTableStyle}>
+                            <div className={styles.wrapper}>
+                                <table className={styles.helpTable}>
                                     <tbody>
                                     <tr>
                                         <th>名称</th>
@@ -150,10 +152,10 @@ const HelpDlg=(props)=>{
                     {
                         label: '自动补全',
                         key: "4",
-                        className: 'tabitem',
+                        className: styles.tabitem,
                         children: (
-                            <div className='wrapper'>
-                                <table css={helpTableStyle}>
+                            <div className={styles.wrapper}>
+                                <table className={styles.helpTable}>
                                     <tbody>
                                     <tr>
                                         <th>名称</th>
@@ -182,10 +184,10 @@ const HelpDlg=(props)=>{
                     {
                         label: 'Echart图',
                         key: "5",
-                        className: 'tabitem',
+                        className: styles.tabitem,
                         children: (
-                            <div className='wrapper'>
-                                <table css={helpTableStyle}>
+                            <div className={styles.wrapper}>
+                                <table className={styles.helpTable}>
                                     <tbody>
                                     <tr>
                                         <th style={{width:'100px'}}>图表名称</th>
@@ -197,7 +199,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem' style={{width:'200px'}}>
+                                                    <div className={styles.chartItem} >
                                                         ```echart<br/>
                                                         pie<br/>
                                                         title 饼图<br/>
@@ -212,7 +214,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlPie} style={{width:'320px'}} alt="饼图"/>
+                                            <img src={imgUrlPie} alt="饼图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -220,7 +222,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         bar<br/>
                                                         title 柱状图<br/>
@@ -238,7 +240,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlBar} style={{width:'320px'}} alt="柱状图"/>
+                                            <img src={imgUrlBar} alt="柱状图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -246,7 +248,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         line<br/>
                                                         title 折线图<br/>
@@ -264,7 +266,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlLine} style={{width:'320px'}} alt="折线图"/>
+                                            <img src={imgUrlLine} alt="折线图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -272,7 +274,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         stack<br/>
                                                         title 堆积图<br/>
@@ -290,7 +292,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlStack} style={{width:'320px'}} alt="堆积图"/>
+                                            <img src={imgUrlStack} alt="堆积图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -298,7 +300,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         bar-line<br/>
                                                         title 柱线混合图<br/>
@@ -318,7 +320,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlMix} style={{width:'320px'}} alt="柱线混合图"/>
+                                            <img src={imgUrlMix} alt="柱线混合图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -326,7 +328,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         scatter<br/>
                                                         title 散点图<br/>
@@ -342,7 +344,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlScatter} style={{width:'320px'}} alt="散点图"/>
+                                            <img src={imgUrlScatter} alt="散点图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -350,7 +352,7 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         graph<br/>
                                                         title 关系图<br/>
@@ -367,7 +369,7 @@ const HelpDlg=(props)=>{
                                             </div>
                                         </td>
                                         <td style={{textAlign:'center'}}>
-                                            <img src={imgUrlRela} style={{width:'320px'}} alt="关系图"/>
+                                            <img src={imgUrlRela} alt="关系图"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -375,12 +377,12 @@ const HelpDlg=(props)=>{
                                         <td>
                                             <div>
                                                 <div>
-                                                    <div className='chartItem'>
+                                                    <div className={styles.chartItem}>
                                                         ```echart<br/>
                                                         {'{'}<br/>
-                                                        <div css={{marginLeft:'20px'}}>w: '50%',</div>
-                                                        <div css={{marginLeft:'20px'}}>h: '200px',</div>
-                                                        <div css={{marginLeft:'20px'}}>{'//'} echart官方配置项</div>
+                                                        <div className={styles.spaceTab}>w: '50%',</div>
+                                                        <div className={styles.spaceTab}>h: '200px',</div>
+                                                        <div className={styles.spaceTab}>{'//'} echart官方配置项</div>
                                                         {'}'}<br/>
                                                         ```
                                                     </div>
@@ -399,15 +401,15 @@ const HelpDlg=(props)=>{
                     {
                         label: '快捷键',
                         key: "6",
-                        className: 'tabitem',
+                        className: styles.tabitem,
                         children: (
-                            <div className='wrapper'>
-                                <table css={helpTableStyle}>
+                            <div className={styles.wrapper}>
+                                <table className={styles.helpTable}>
                                     <tbody>
                                     {
                                         shortcuts.map((item,ind)=><React.Fragment key={ind}>
                                             <tr key={ind}>
-                                                <th colSpan='2' css={{fontWeight:'bold',}}>{item.title}</th>
+                                                <th colSpan='2' className={styles.colSpan}>{item.title}</th>
                                             </tr>
                                             <tr>
                                                 <th>按键</th>
@@ -626,61 +628,61 @@ const shortcuts=[
                   
 
 
-const tabsStyle={
-    '& .tabitem div.wrapper': {
-        height:    '600px',
-        minHeight: '100px',
-        maxHeight: 'calc(100vh - 320px)',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-    },
-    '& .tabitem div.wrapper .chartTitle': {
-        fontSize:'20px',
-        fontWeight:'bold',
-    },
-    '& .tabitem div.wrapper .chartItem': {
-        color:'grey'
-    },
-};
+// const tabsStyle={
+//     '& .tabitem div.wrapper': {
+//         height:    '600px',
+//         minHeight: '100px',
+//         maxHeight: 'calc(100vh - 320px)',
+//         overflowY: 'auto',
+//         overflowX: 'hidden',
+//     },
+//     '& .tabitem div.wrapper .chartTitle': {
+//         fontSize:'20px',
+//         fontWeight:'bold',
+//     },
+//     '& .tabitem div.wrapper .chartItem': {
+//         color:'grey'
+//     },
+// };
 
 
 
 
-const helpTableStyle = {
-    width: '100%',
-    borderCollapse: 'collapse',
-    border: '1px solid lightgrey',
-    '& td,& th': {
-        border: '1px solid lightgrey',
-        padding: '5px 10px',
-    },
-    '& th': {
-        textAlign: 'center',
-    },
-    '& td:nth-child(1)': {
-        width: 120,
-        textAlign:'left',
-    },
-    '& td:nth-child(2) > div': {
-        display: 'table',
-        width: '100%',
-        // backgroundColor:'lightblue',
-    },
-    '& td:nth-child(2) > div > div': {
-        display: 'table-row',
-    },
-    '& td:nth-child(2) > div > div > div': {
-        display: 'table-cell',
-    },
-    '& td:nth-child(2) > div > div > div:nth-child(1)': {
-        width:250,
-        // backgroundColor:'red',
-        // textAlign:'center',
-    },
-    '& td:nth-child(2) > div > div > div:nth-child(2)': {
-        textAlign: 'left',
-        color:'#BBB',
-    },
-};
+// const helpTableStyle = {
+//     width: '100%',
+//     borderCollapse: 'collapse',
+//     border: '1px solid lightgrey',
+//     '& td,& th': {
+//         border: '1px solid lightgrey',
+//         padding: '5px 10px',
+//     },
+//     '& th': {
+//         textAlign: 'center',
+//     },
+//     '& td:nth-child(1)': {
+//         width: 120,
+//         textAlign:'left',
+//     },
+//     '& td:nth-child(2) > div': {
+//         display: 'table',
+//         width: '100%',
+//         // backgroundColor:'lightblue',
+//     },
+//     '& td:nth-child(2) > div > div': {
+//         display: 'table-row',
+//     },
+//     '& td:nth-child(2) > div > div > div': {
+//         display: 'table-cell',
+//     },
+//     '& td:nth-child(2) > div > div > div:nth-child(1)': {
+//         width:250,
+//         // backgroundColor:'red',
+//         // textAlign:'center',
+//     },
+//     '& td:nth-child(2) > div > div > div:nth-child(2)': {
+//         textAlign: 'left',
+//         color:'#BBB',
+//     },
+// };
 
 export default React.memo(HelpDlg);

@@ -1,6 +1,80 @@
-.test{
-    div{
-        color: var(--col-qq-ss);
-    }
+.tabContainer{
+    .tabitem {
+        div.wrapper {
+            height:     600px;
+            min-height: 100px;
+            max-height: calc(100vh - 20px);
+            overflow-y: auto;
+            overflow-x: hidden;
 
+            div.linkItemContainer{
+                margin-top: 10px;
+
+                .btn{
+                    padding-left: 0;
+                }
+            }
+
+            .helpTable{
+                width: 100%;
+                border-collapse: collapse;
+                border: 1px solid lightgrey;
+                td, th {
+                    border: 1px solid lightgrey;
+                    padding: 5px 10px;
+                }
+                th {
+                    textAlign: center;
+                }
+                th.colSpan{
+                    font-weight: bold;
+                }
+
+
+                td:nth-child(1) {
+                    width: 120px;
+                    textAlign: left;
+                }
+                td:nth-child(2) > div {
+                    display: table;
+                    width: 100%;
+                    // backgroundColor:'lightblue',
+                    > div {
+                        display: table-row;
+
+                        > div {
+                            display: table-cell;
+                        }
+
+                        > div:nth-child(1) {
+                            width: 250px;
+                            // backgroundColor:'red',
+                            // textAlign:'center',
+                        }
+
+                        > div:nth-child(2) {
+                            textAlign: left;
+                            color: #BBB;
+                        }
+
+                        > div.chartItem {
+                            width: 200px;
+                            color: grey;
+
+                            .spaceTab{
+                                margin-left: 20px;
+                            }
+                        }
+                    }
+                }
+                td > img{
+                    width: 320px;
+                }
+            }
+
+
+
+        }
+    }
 }
+
