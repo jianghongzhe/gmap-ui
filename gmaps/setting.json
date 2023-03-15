@@ -6,7 +6,8 @@
         ],
         "settings": {
             "editor_theme": "default",
-            "theme": "default"
+            "theme": "default",
+            "url_opener": "C:\\Program Files (x86)\\Google\\Chrome Dev\\Application\\chrome.exe"
         }
     }
 ]

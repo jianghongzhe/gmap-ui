@@ -863,6 +863,22 @@ const openUrl=(url)=>{
             return resp;
         });
     }
+
+    // 打开网址：如果未指定打开方式，则使用系统默认的，否则使用指定打开方式打开，借助openby协议
+    if(url.startsWith("http://") || url.startsWith("https://")){
+        const urlOpener=getSettingValue("url_opener");
+        if('default'===urlOpener){
+            shell.openExternal(url);
+            return;
+        }
+        return sendCmdToServer("openby", {url: `openby://${url}@@${urlOpener}`,}).then(resp=>{
+            if(resp && false===resp.succ){
+                showNotification("操作有误", resp.msg, 'err');
+            }
+            return resp;
+        });
+    }
+
     // 其他情况，直接用shell执行
     shell.openExternal(url);
 }
@@ -1325,8 +1341,9 @@ const getOsAndMacs=()=>{
  * 填充系统设置项：
  * {
  *      settings: {
- *          theme: 'default',
  *          editor_theme: 'default',
+ *          theme: 'default',
+ *          url_opener: 'default',
  *      }
  * }
  * @param item
@@ -1340,6 +1357,9 @@ const baseFillSettingItems=(item)=>{
     }
     if('undefined'===typeof(item.settings.theme)){
         item.settings.theme='default';
+    }
+    if('undefined'===typeof(item.settings.url_opener)){
+        item.settings.url_opener='default';
     }
 };
 
