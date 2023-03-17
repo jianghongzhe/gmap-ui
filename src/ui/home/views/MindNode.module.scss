@@ -1,0 +1,20 @@
+.themeBtnWrapper{
+  :global{
+    .themebtn {
+      width: 16px !important;
+      height: 16px !important;
+      vertical-align: bottom;
+      padding: 0 !important;
+      line-height: 16px;
+      margin-bottom: 2px;
+      margin-left: 3px;
+
+      .themebtnicon{
+        font-size: 16px;
+        line-height: 16px;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  }
+}

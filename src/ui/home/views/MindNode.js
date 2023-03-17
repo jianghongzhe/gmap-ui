@@ -7,6 +7,7 @@ import './markdown-node.css';
 import {useMemoizedFn, useRafState} from "ahooks";
 import strTmpl from "../../../common/strTmpl";
 import api from "../../../service/api";
+import styles from './MindNode.module.scss';
 
 /**
  * 导图的节点
@@ -144,7 +145,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
             (nd && nd.refs && 0<nd.refs.length) && (
                 nd.refs.map((refItem,refInd)=>(                
                     <Tooltip key={refInd} color='cyan' placement="top" title={'查看引用 - '+refItem.showname} mouseEnterDelay={0.4}>
-                        <span css={themeBtnWrapperStyle}>
+                        <span className={styles.themeBtnWrapper}>
                             <Button 
                                 type="link" 
                                 size='small' 
@@ -371,7 +372,7 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
                 }
             </div>
         } >
-            <span css={themeBtnWrapperStyle}>
+            <span className={styles.themeBtnWrapper}>
                 <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
             </span>
         </Tooltip>
@@ -414,7 +415,7 @@ const GroupLinkItem=({links, openLinkFunc})=>{
         return null;
     }
     return <Tooltip  color='cyan' placement="top" title={title}>
-        <span css={themeBtnWrapperStyle} >
+        <span className={styles.themeBtnWrapper}>
             <NodeLinkIcon lindAddr="group_links" onClick={openMultiLinks}/>
         </span>
     </Tooltip>
@@ -443,24 +444,24 @@ const handleSingleLine=(str)=>{
 }
 
 
-const themeBtnWrapperStyle={
-    '& .themebtn':{
-        width:16,
-        height:16,
-        verticalAlign:'bottom',
-        padding:0,
-        lineHeight:'16px',
-        marginBottom:2,
-        marginLeft:3,
-    },
-
-    '& .themebtn .themebtnicon':{
-        fontSize:16,
-        lineHeight:'16px',
-        margin:0,
-        padding:0,
-    }
-};
+// const themeBtnWrapperStyle={
+//     '& .themebtn':{
+//         width:16,
+//         height:16,
+//         verticalAlign:'bottom',
+//         padding:0,
+//         lineHeight:'16px',
+//         marginBottom:2,
+//         marginLeft:3,
+//     },
+//
+//     '& .themebtn .themebtnicon':{
+//         fontSize:16,
+//         lineHeight:'16px',
+//         margin:0,
+//         padding:0,
+//     }
+// };
 
 
 const themeIconStyle={

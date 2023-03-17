@@ -2,7 +2,6 @@ import React, {  useState } from 'react';
 import {  Modal } from 'antd';
 import { PhotoshopPicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
-import generalSvc from '../../../../service/generalSvc';
 import styles from './ColorPickerDlg.module.scss';
 
 const EnhDlg=withEnh(Modal);
