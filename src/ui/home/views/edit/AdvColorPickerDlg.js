@@ -3,9 +3,10 @@ import {  Modal } from 'antd';
 import { PhotoshopPicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
 import generalSvc from '../../../../service/generalSvc';
+import styles from './ColorPickerDlg.module.scss';
 
 const EnhDlg=withEnh(Modal);
-const arrowStyle= generalSvc.getDlgTopArrowStyle({left:18 ,top:-6, len:6 ,color:'rgb(240,240,240)'});
+// const arrowStyle= generalSvc.getDlgTopArrowStyle({left:18 ,top:-6, len:6 ,color:'rgb(240,240,240)'});
 
 /**
  * 高级颜色选择对话框
@@ -16,12 +17,18 @@ const AdvColorPickerDlg=({visible, onOk, onCancel})=>{
 
     return <EnhDlg noTitle noFooter closable={false}
             size={{w: `${dlgW}px`}}
-            css={{left, top}}
+            className={styles.leftTop}
+            style={{'--left': left, '--top': top,}}
             visible={visible}
             onCancel={onCancel}
             bodyStyle={{padding:0,}}>
-        <div id='globalArrow' css={arrowStyle}></div>
-        <PhotoshopPicker css={{height:310}} header='高级颜色选择' color={color.hex} onChange={setColor} onAccept ={onOk.bind(this, color)} onCancel={onCancel}/>
+        <div id='globalArrow' className={styles.arrow} style={{
+            '--left': '18px',
+            '--top': '-6px',
+            '--len': '6px',
+            '--color': 'rgb(240,240,240)',
+        }}></div>
+        <PhotoshopPicker className={styles.psPicker} header='高级颜色选择' color={color.hex} onChange={setColor} onAccept ={onOk.bind(this, color)} onCancel={onCancel}/>
     </EnhDlg>;
 };
 

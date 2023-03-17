@@ -3,10 +3,11 @@ import { Modal } from 'antd';
 import { CirclePicker } from 'react-color';
 import {withEnh} from '../../../common/specialDlg';
 import generalSvc from '../../../../service/generalSvc';
+import styles from './ColorPickerDlg.module.scss';
 
 const EnhDlg=withEnh(Modal);
 
-const arrowStyle= generalSvc.getDlgTopArrowStyle({left:18 ,top:-6, len:6 ,color:'white'});
+// const arrowStyle= generalSvc.getDlgTopArrowStyle({left:18 ,top:-6, len:6 ,color:'white'});
 
 
 /**
@@ -17,10 +18,16 @@ const ColorPickerDlg=({visible, onCancel, onOk})=>{
     return <React.Fragment>
         <EnhDlg noTitle noFooter closable={false} 
                 size={{w: `${dlgW}px`}}
-                css={{left, top}}
+                className={styles.leftTop}
+                style={{'--left': left, '--top': top,}}
                 visible={visible}
                 onCancel={onCancel}>
-            <div css={arrowStyle}></div>
+            <div className={styles.arrow} style={{
+                '--left':'18px',
+                '--top':'-6px',
+                '--len':'6px' ,
+                '--color':'white',
+            }}></div>
             <CirclePicker id='colorPickerxxx'
                 width ='504px'
                 colors={colors}
@@ -34,7 +41,7 @@ const offsetX=242;// 258;
 const top='208px';//'204px';
 
 //left = offsetX - (100vw - 200px - dlgW) / 2
-const left=`calc(${parseInt(offsetX+100+dlgW/2)}px - 50vw);`
+const left=`calc(${parseInt(offsetX+100+dlgW/2)}px - 50vw)`;
 
 
 const colors=[
