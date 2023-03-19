@@ -2,7 +2,7 @@
     :global{
         .tabitem {
             div.wrapper {
-                height:     600px;
+                height:     700px;
                 min-height: 100px;
                 max-height: calc(100vh - 20px);
                 overflow-y: auto;
@@ -15,6 +15,19 @@
                         padding-left: 0;
                     }
                 }
+
+                .helpTable.nodes td:nth-child(2) > div > div > div:nth-child(1) {
+                    width: 320px;
+                }
+
+                .helpTable.refs td:nth-child(2) > div > div > div:nth-child(1) {
+                    width: 200px;
+                }
+                .helpTable.autocomplete td:nth-child(2) > div > div > div:nth-child(1) {
+                    width: 160px;
+                }
+
+
 
                 .helpTable{
                     width: 100%;
@@ -37,9 +50,16 @@
                         textAlign: left;
                     }
                     td:nth-child(2) > div {
+                        + div {
+                            margin-top: 4px;
+                        }
+
                         display: table;
                         width: 100%;
                         // backgroundColor:'lightblue',
+
+
+
                         > div {
                             display: table-row;
 

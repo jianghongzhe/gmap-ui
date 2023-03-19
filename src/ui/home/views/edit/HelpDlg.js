@@ -24,7 +24,7 @@ const HelpDlg=(props)=>{
         <EnhDlg noFooter
                 title="帮助"
                 closable={true}
-                size={{w: 960}}
+                size={{w: 1100}}
                 visible={props.visible}
                 zIndex={globalStyleConfig.helpDlgZIndex}
                 onCancel={props.onCancel}>
@@ -37,7 +37,7 @@ const HelpDlg=(props)=>{
                         className: "tabitem",
                         children: (
                             <div className="wrapper">
-                                <table className="helpTable">
+                                <table className="helpTable nodes">
                                     <tbody>
                                     <tr>
                                         <th>类型</th>
@@ -53,7 +53,19 @@ const HelpDlg=(props)=>{
                                                             <div key={''+ind+"_"+subInd}>
                                                                 <div>
                                                                     <div>{subitem[0]}</div>
-                                                                    <div dangerouslySetInnerHTML={{__html:subitem[1]}}></div>
+                                                                    <div>
+                                                                        {
+                                                                            Array.isArray(subitem[1]) ?
+                                                                                (
+                                                                                    subitem[1].map((line,lineInd)=>(
+                                                                                        <div key={lineInd} dangerouslySetInnerHTML={{__html:line}}></div>
+                                                                                    ))
+                                                                                )
+                                                                                :
+                                                                                (<div dangerouslySetInnerHTML={{__html:subitem[1]}}></div>)
+                                                                        }
+                                                                    </div>
+
                                                                 </div>
                                                             </div>
                                                         ))
@@ -74,7 +86,7 @@ const HelpDlg=(props)=>{
                         className: "tabitem",
                         children: (
                             <div className="wrapper">
-                                <table className="helpTable">
+                                <table className="helpTable refs">
                                     <tbody>
                                     <tr>
                                         <th>类型</th>
@@ -155,7 +167,7 @@ const HelpDlg=(props)=>{
                         className: "tabitem",
                         children: (
                             <div className="wrapper">
-                                <table className="helpTable">
+                                <table className="helpTable autocomplete">
                                     <tbody>
                                     <tr>
                                         <th>名称</th>
@@ -447,7 +459,7 @@ const HelpDlg=(props)=>{
 
 const nodes=[
     ['项目符号',[
-        ['- aaa',"// '-' 前用[tab]表示层级关系"],
+        ['- aaa',"// '-' 前用 <span style=\"color:black;\">[tab]</span> 表示层级关系"],
     ]],
     ['文本',[
         ['aaabbb','// 单行文本'],
@@ -461,8 +473,16 @@ const nodes=[
         ['[打开](file:///d:\\a\\b.txt)','// 执行文件或打开目录'],
         ['[打开](file:///%java_home%\\bin)','// 从环境变量匹配路径并执行'],
         ['[打开](file:///control)','// 从path环境变量或注册表app path匹配路径并执行'],
-        ['[打开方式](openas://d:\\xx.txt)','// 选择打开方式'],
-        ['[打开](openby://d:\\a.txt@@nt)','// 用指定打开方式打开文件'],
+        ['[打开方式](openas://d:\\xx.txt)','// 选择文件的打开方式'],
+        ['[打开方式](openas://https://baidu.com)','// 选择网址的打开方式'],
+        ['[打开](openby://d:\\a.txt@@notepad)','// 用指定打开方式打开文件'],
+        ['[打开](openby://https://baidu.com@@chrome)','// 用指定打开方式打开网址'],
+        ['[打开](openby://txt://-a -b -c@@aa.exe)',[
+            '// 使指定程序按指定命令行参数执行；',
+            '// 其中txt://表示后面内容为纯文本，不验证路径有效性；',
+            '// txt://只是标识，本身并不传入命令行参数',
+            '// 最终的命令为：aa.exe -a -b -c',
+        ]],
         ['[打开](diropenby://d:\\a\\b@@code)','// 用指定打开方式打开目录'],
         ['[打开](openin://d:\\a.exe@@f:\\x\\y)','// 以指定目录为当前目录打开指定文件'],
         ['[选择](dir://d:\\a\\b.txt)','// 打开目录并选择指定文件或目录'],
@@ -560,7 +580,7 @@ const refs=[
     ['打开方式头部','# openers',''],
     ['打开方式正文','- [txt]: notepad','// txt对应节点openby协议中@@后的部分'],
     ['快捷方式头部','# shortcuts',''],
-    ['快捷方式正文','- [百度](https://baidu.com)','// txt对应节点openby协议中@@后的部分'],
+    ['快捷方式正文','- [百度](https://baidu.com)','// 配置的快捷方式会出现在工具栏上'],
 ];
 
 
