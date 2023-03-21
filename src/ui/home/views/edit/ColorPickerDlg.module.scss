@@ -12,8 +12,8 @@
 }
 
 .leftTop{
-  left: var(--left);
-  top: var(--top);
+  left: var(--left) !important;
+  top: var(--top) !important;
 }
 
 .psPicker{

@@ -3,7 +3,7 @@ import {Alert, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
 import {useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
-import {useMemoizedFn} from "_ahooks@3.7.4@ahooks";
+import {useMemoizedFn} from "ahooks";
 
 
 /**

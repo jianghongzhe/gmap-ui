@@ -9,5 +9,16 @@
             "theme": "default",
             "url_opener": "C:\\Program Files (x86)\\Google\\Chrome Dev\\Application\\chrome.exe"
         }
+    },
+    {
+        "os": "Windows 10 Home China x64",
+        "macs": [
+            "20:16:b9:eb:12:20"
+        ],
+        "settings": {
+            "editor_theme": "default",
+            "theme": "default",
+            "url_opener": "default"
+        }
     }
 ]
