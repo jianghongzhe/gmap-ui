@@ -312,30 +312,68 @@ class MindmapSvc {
             return [true,false,null];
         },
 
+        // openers中设置的值替换链接中的部分
         handleOpener: (item, openers)=>{
-            const matchResult=item.match(/^\[([^[\]]*)\]\(((dir)?openby[:][/][/].+[@][@](.+))\)$/);
-            if(!matchResult){
-                return [false,false,null];
-            }
-            const linkName=matchResult[1].trim()
-            const oldLink=matchResult[2].trim()
-            const openerName=matchResult[4].trim();
+            const singlePartHandler=(matchResult)=>{
+                const linkName=matchResult[1].trim()
+                const protocol=matchResult[2].trim()
+                const path=matchResult[3].trim();
 
-            // 从引用中的打开方式字典中未找到打开方式，则说明使用系统自带的打开方式，链接不做处理
-            if(!openers[openerName]){
                 return [true,true,{
                     name: linkName,
-                    addr: oldLink,
+                    addr: openers[path] ? protocol+openers[path]: protocol+path,
                 }];
-            }
-            
-            // 已找到打开方式，使用替换后的链接地址
-            const replacedUrl=oldLink.replace(`@@${openerName}`, `@@${openers[openerName]}`).trim();
-            let link={
-                name: linkName,
-                addr: replacedUrl,
             };
-            return [true,true,link];
+
+            const doublePartHandler=(matchResult)=>{
+                const linkName=matchResult[1].trim()
+                const protocol=matchResult[2].trim()
+                const frontPart=matchResult[3].trim();
+                const endPart=matchResult[4].trim();
+
+                return [true,true,{
+                    name: linkName,
+                    addr: protocol+(openers[frontPart] ? openers[frontPart] : frontPart)+"@@"+(openers[endPart] ? openers[endPart] : endPart),
+                }];
+            };
+
+            // file协议：[xxx](file:///yy)
+            let matchResult= item.match(/^\[([^[\]]*)\]\((file[:][/][/][/]?)(.+)\)$/);
+            if(matchResult){
+                return singlePartHandler(matchResult);
+            }
+
+            // openas协议：：[xxx](openas:///yy)
+            matchResult= item.match(/^\[([^[\]]*)\]\((openas[:][/][/][/]?)(.+)\)$/);
+            if(matchResult){
+                return singlePartHandler(matchResult);
+            }
+
+            // cmdopen
+            matchResult= item.match(/^\[([^[\]]*)\]\((cmdopen[:][/][/][/]?)(.+)\)$/);
+            if(matchResult){
+                return singlePartHandler(matchResult);
+            }
+
+            // openby
+            matchResult=item.match(/^\[([^[\]]*)\]\((openby[:][/][/][/]?)(.+)[@][@](.+)\)$/);
+            if(matchResult){
+                return doublePartHandler(matchResult);
+            }
+
+            // diropenby
+            matchResult=item.match(/^\[([^[\]]*)\]\((diropenby[:][/][/][/]?)(.+)[@][@](.+)\)$/);
+            if(matchResult){
+                return doublePartHandler(matchResult);
+            }
+
+            //openin
+            matchResult=item.match(/^\[([^[\]]*)\]\((openin[:][/][/][/]?)(.+)[@][@](.+)\)$/);
+            if(matchResult){
+                return doublePartHandler(matchResult);
+            }
+
+            return [false,false,null];
         },
 
         
