@@ -5,7 +5,10 @@ import {
     CheckSquareOutlined, CodeOutlined, CopyOutlined,
     DeploymentUnitOutlined,
     FileUnknownOutlined, FolderOutlined, LinkOutlined, TeamOutlined
-} from "_@ant-design_icons@4.8.0@@ant-design/icons";
+} from "@ant-design/icons";
+
+import cmdopen_url from '../assets/node_icon_cmdopen.png';
+import browser_url from '../assets/node_icon_browser.png';
 
 export const useLoadIcon=({lindAddr})=>{
     /**
@@ -42,7 +45,19 @@ export const useLoadIcon=({lindAddr})=>{
         if(canceled){
             return;
         }
-        if(["file://", "http://", "https://", "dir://", "openas://","openby://","diropenby://","openin://", "gmap://", "cppath://"].some(pref=>lindAddr.startsWith(pref))){
+        if([
+            "file://",
+            "http://",
+            "https://",
+            "dir://",
+            "openas://",
+            "openby://",
+            "diropenby://",
+            "openin://",
+            "gmap://",
+            "cppath://",
+            "cmdopen://"
+        ].some(pref=>lindAddr.startsWith(pref))){
             (async ()=>{
                 try{
                     if(canceled){
@@ -135,6 +150,12 @@ const getAssignedIcon=(addr)=>{
             compType: CopyOutlined,
         };
     }
+    if("cmdopen"===addr){
+        return {
+            type: 'image',
+            url: cmdopen_url,
+        };
+    }
 
     // 直接使用本地图片文件
     return {
@@ -150,6 +171,14 @@ const getAssignedIcon=(addr)=>{
  * @return
  */
 const getDefIcon=(addr)=>{
+    // 如果为网址，则使用浏览器图片
+    if(addr.startsWith("http://") || addr.startsWith("https://")){
+        return {
+            type: 'image',
+            url: browser_url,
+        };
+    }
+
     // 需要验证的类型，默认为灰色，验证后为蓝色或正常色
     // 打开方式：默认为灰色，如果路径有效则为蓝色
     if(addr.startsWith("openas://")){
