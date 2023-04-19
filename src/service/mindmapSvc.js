@@ -918,6 +918,8 @@ class MindmapSvc {
                     (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
                     (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length) ||
                     (trimLine.startsWith("# graph:") && trimLine.length > "# graph:".length)
+
+                // TODO 命令类型
             ){
                 currRefName = trimLine.substring("# ".length);
                 return;
@@ -974,7 +976,14 @@ class MindmapSvc {
                 //是新引用
                 trefs[currRefName] = trimLine;
                 return;
-            }else if(currRefName.startsWith("graph:")){
+            }
+
+
+            // TODO 命令的处理
+
+            // TODO deprecate graph
+
+            else if(currRefName.startsWith("graph:")){
                 if(""===trimLine){
                     return;
                 }

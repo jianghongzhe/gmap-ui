@@ -22,15 +22,6 @@ const useBindInputRef=()=>{
     return [ref, bindInputRef];
 };
 
-const useBindRef=()=>{
-    const ref=useRef(null);
-    const bindRef=useMemoizedFn(e=>{
-        if(ref){
-            ref.current=e;
-        }
-    });
-    return [ref, bindRef];
-};
 
 
 const useBindAndGetRef=()=>{
@@ -77,7 +68,6 @@ const useBindAndGetRefs=()=>{
 export {
     useChange,
     useBindInputRef,
-    useBindRef,
     useBindAndGetRef,
     useBindAndGetRefs,
 };
