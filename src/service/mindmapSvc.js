@@ -313,27 +313,43 @@ class MindmapSvc {
         },
 
         // openers中设置的值替换链接中的部分
-        handleOpener: (item, openers)=>{
-            const singlePartHandler=(matchResult)=>{
+        handleOpener: (item, openers, cmds)=>{
+            const singlePartHandler=(matchResult, shouldUseCmds=false)=>{
                 const linkName=matchResult[1].trim()
                 const protocol=matchResult[2].trim()
                 const path=matchResult[3].trim();
 
-                return [true,true,{
+                if(!shouldUseCmds) {
+                    return [true, true, {
+                        name: linkName,
+                        addr: openers[path] ? protocol + openers[path] : protocol + path,
+                    }];
+                }
+                return [true, true, {
                     name: linkName,
-                    addr: openers[path] ? protocol+openers[path]: protocol+path,
+                    addr: protocol +
+                        (openers[path] ? openers[path] : (cmds[path] ? cmds[path] : path)),
                 }];
             };
 
-            const doublePartHandler=(matchResult)=>{
+            const doublePartHandler=(matchResult, shouldUseCmds=false)=>{
                 const linkName=matchResult[1].trim()
                 const protocol=matchResult[2].trim()
                 const frontPart=matchResult[3].trim();
                 const endPart=matchResult[4].trim();
 
-                return [true,true,{
+                if(!shouldUseCmds) {
+                    return [true, true, {
+                        name: linkName,
+                        addr: protocol + (openers[frontPart] ? openers[frontPart] : frontPart) + "@@" + (openers[endPart] ? openers[endPart] : endPart),
+                    }];
+                }
+                return [true, true, {
                     name: linkName,
-                    addr: protocol+(openers[frontPart] ? openers[frontPart] : frontPart)+"@@"+(openers[endPart] ? openers[endPart] : endPart),
+                    addr: protocol +
+                        (openers[frontPart] ? openers[frontPart] : frontPart) +
+                        "@@" +
+                        (openers[endPart] ? openers[endPart] : (cmds[endPart] ? cmds[endPart] : endPart)),
                 }];
             };
 
@@ -355,16 +371,28 @@ class MindmapSvc {
                 return singlePartHandler(matchResult);
             }
 
+            // cmd
+            matchResult= item.match(/^\[([^[\]]*)\]\((cmd[:][/][/][/]?)(.+)\)$/);
+            if(matchResult){
+                return singlePartHandler(matchResult, true);
+            }
+
+            // cmdp
+            matchResult= item.match(/^\[([^[\]]*)\]\((cmdp[:][/][/][/]?)(.+)\)$/);
+            if(matchResult){
+                return singlePartHandler(matchResult, true);
+            }
+
             // openby
             matchResult=item.match(/^\[([^[\]]*)\]\((openby[:][/][/][/]?)(.+)[@][@](.+)\)$/);
             if(matchResult){
-                return doublePartHandler(matchResult);
+                return doublePartHandler(matchResult, true);
             }
 
             // diropenby
             matchResult=item.match(/^\[([^[\]]*)\]\((diropenby[:][/][/][/]?)(.+)[@][@](.+)\)$/);
             if(matchResult){
-                return doublePartHandler(matchResult);
+                return doublePartHandler(matchResult, true);
             }
 
             //openin
@@ -520,7 +548,7 @@ class MindmapSvc {
         let down=false;
         let up=false;
 
-        let { ndLines, refs, openers, shortcuts} = this.loadParts(arrayOrTxt);
+        let { ndLines, refs, openers, shortcuts, cmds} = this.loadParts(arrayOrTxt);
         const defaultRelaLineColor='gray';// 关联线颜色默认为灰，与连线颜色不同，连线默认为lightgrey
 
         ndLines.forEach(({str,lineInd,lineInd2}) => {
@@ -627,7 +655,7 @@ class MindmapSvc {
                     }
 
                     //是打开为
-                    [handled,hasVal,val]=this.linePartHandlers.handleOpener(item, openers);
+                    [handled,hasVal,val]=this.linePartHandlers.handleOpener(item, openers, cmds);
                     if(handled){
                         if(hasVal){
                             links.push(val);
@@ -889,6 +917,7 @@ class MindmapSvc {
         let shortcuts=[];
         let refs = {};
         let trefs = {};
+        let cmds={};
         let graphs = {};
         let ndLines = [];
         let currRefName = null;
@@ -917,9 +946,8 @@ class MindmapSvc {
             if (    
                     (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
                     (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length) ||
-                    (trimLine.startsWith("# graph:") && trimLine.length > "# graph:".length)
-
-                // TODO 命令类型
+                    (trimLine.startsWith("# graph:") && trimLine.length > "# graph:".length) ||
+                    (trimLine.startsWith("# cmd:") && trimLine.length > "# cmd:".length)
             ){
                 currRefName = trimLine.substring("# ".length);
                 return;
@@ -976,47 +1004,42 @@ class MindmapSvc {
                 //是新引用
                 trefs[currRefName] = trimLine;
                 return;
-            }
-
-
-            // TODO 命令的处理
-
-            // TODO deprecate graph
-
-            else if(currRefName.startsWith("graph:")){
-                if(""===trimLine){
-                    return;
-                }
-                if(!trimLine.startsWith("- ")){
-                    return;
-                }
-                let items=trimLine.substring("- ".length)
-                    .replaceAll("，",",")
-                    .replaceAll("、",",")
-                    .replaceAll("|",",")
-                    .replaceAll("｜",",")                    
-                    .replaceAll("/",",")
-                    .replaceAll("／",",")
-                    .replaceAll("\\",",")
-                    .replaceAll("＼",",")
-                    .split(",")
-                    .filter(each=>null!==each && ""!==each.trim())
-                    .map(each=>each.trim())
-                    .filter((each,ind)=>ind<3);
-                if(items.length<3){
-                    return;
-                }
-
+            } else if(currRefName.startsWith("cmd:")){
+                const cmdAlias=currRefName.substring("cmd:".length).trim();
                 //是已记录过的引用
-                if ("undefined" !== typeof (graphs[currRefName])) {
-                    graphs[currRefName].push(items);
+                if ("undefined" !== typeof (cmds[cmdAlias])) {
+                    cmds[cmdAlias].push(trimLine);
                     return;
                 }
                 //是新引用
-                graphs[currRefName] = [items];
+                cmds[cmdAlias] = [trimLine];
                 return;
             }
         });
+
+
+
+        // 命令处理，只保留三引号之间的部分作为命令主体
+        for(let key in cmds){
+            let startSymbolFound=false;
+            let endSymbolFound=false;
+            const preservedCmdLines=[];
+            cmds[key].forEach(line=>{
+                if(line.startsWith("```") && line.length>"```".length){
+                    startSymbolFound=true;
+                    return;
+                }
+                if("```"===line && true===startSymbolFound){
+                    endSymbolFound=true;
+                    return;
+                }
+                if(startSymbolFound && !endSymbolFound && ''!==line){
+                    preservedCmdLines.push(line);
+                }
+            });
+            cmds[key]=preservedCmdLines.join(" \\");
+        }
+
 
 
 
@@ -1064,7 +1087,7 @@ class MindmapSvc {
         });
         ndLines=tmp;
 
-        return { ndLines, refs, graphs, openers, shortcuts};
+        return { ndLines, refs, graphs, openers, shortcuts, cmds};
     }
 
     setLeaf = (nd) => {

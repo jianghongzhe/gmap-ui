@@ -262,6 +262,14 @@ const shortcutsSample=`# shortcuts
 ${shortcutsSampleLine2}`;
 
 
+const threeQuot="```";
+const cmdSampleLine1="# cmd:";
+const cmdSample=`${cmdSampleLine1}
+${threeQuot}sh
+
+${threeQuot}`;
+
+
 /**
  * 动态生成的自动提示菜单项 - 表格编辑
  * @type {[{label: string, option: {type: string}}]}
@@ -368,6 +376,16 @@ const hintContMenus=[
             data: {
                 txt: shortcutsSample,
                 cursorOffset: [1, shortcutsSampleLine2.length],
+            }
+        }
+    },
+    {
+        label: '命令　　　# cmd:',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: cmdSample,
+                cursorOffset: [0, cmdSampleLine1.length],
             }
         }
     },

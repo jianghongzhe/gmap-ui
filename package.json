@@ -46,7 +46,7 @@
     "test": "react-app-rewired test",
     "__eject": "react-scripts eject",
     "electron_nonono": "set DEV_SERVER_URL=http://localhost:3000 && set DEV_TOOL_EXTENSION_URL= && electron --inspect=5858 .",
-    "electron": "set DEV_SERVER_URL=http://localhost:3000 && electron --inspect=5858 ."
+    "electron": "set DEV_SERVER_URL=http://localhost:5334 && electron --inspect=5858 ."
   },
   "eslintConfig": {
     "extends": [
