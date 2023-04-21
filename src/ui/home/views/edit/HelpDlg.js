@@ -99,8 +99,12 @@ const HelpDlg=(props)=>{
                                                 <td>
                                                     <div>
                                                         <div>
-                                                            <div>{item[1]}</div>
-                                                            <div>{item[2]}</div>
+                                                            <div>
+                                                                <MultiLineTxt txt={item[1]} retainEmptyLine={true}/>
+                                                            </div>
+                                                            <div>
+                                                                <MultiLineTxt txt={item[2]} retainEmptyLine={true}/>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -457,6 +461,24 @@ const HelpDlg=(props)=>{
     
 }
 
+
+/**
+ *
+ * @param txt 字符串或字符串数组
+ * @param retainEmptyLine 是否保留空行
+ * @constructor
+ */
+const MultiLineTxt=({txt, retainEmptyLine})=>{
+    if(Array.isArray(txt)){
+        return txt.map((line, lineInd)=>(
+                    <div key={`line-${lineInd}`}>{line}{retainEmptyLine && ''===line.trim()?'　':''}</div>
+        ));
+    }
+
+    return txt;
+};
+
+
 const nodes=[
     ['项目符号',[
         ['- aaa',"// '-' 前用 <span style=\"color:black;\">[tab]</span> 表示层级关系"],
@@ -570,18 +592,69 @@ const autoCompletes=[
 
 
 const refs=[
-    ['开始标志','***','// 第一次出现表示引用开始'],
-    ['文字引用','# tref:xxx','// 节点内容可分多行写'],
-    ['文字正文','Markdown语法','// 多行会连接为一行，除非指定 | 符号'],
-    ['引用头部','# ref:xxx','// 对应节点中的设置'],
-    ['引用正文','Markdown语法','// 支持github markdown及latex'],
-    //['关系图引用','# graph:xxx','// 对应节点中的设置'],
-    //['关系图正文','- 名称1,名称2,关系1','// 每行一个关系，可写多行'],
-    ['打开方式头部','# openers',''],
-    ['打开方式正文','- [txt]: notepad','// txt对应节点openby协议中@@后的部分'],
-    ['快捷方式头部','# shortcuts',''],
-    ['快捷方式正文','- [百度](https://baidu.com)','// 配置的快捷方式会出现在工具栏上'],
+    ['开始标志','***','// 第一次出现表示引用部分开始'],
+    [
+        '文字引用',
+        [
+            '# tref:xxx',
+            'Markdown语法',
+        ],
+        [
+            '// 节点内容可分多行写',
+            '// 多行会连接为一行，除非指定 | 符号'
+        ],
+    ],
+    [
+        '引用',
+        [
+            '# ref:xxx',
+            '### hello',
+            '- blabla'
+        ],
+        [
+            '// 对应节点中的设置',
+            '// 支持github markdown及latex'
+        ],
+    ],
+    [
+        '打开方式',
+        [
+            '# openers',
+            '- [txt]: notepad'
+        ],
+        [
+            '',
+            '// txt对应节点openby协议中@@后的部分'
+        ]
+    ],
+    [
+        '快捷方式',
+        [
+            '# shortcuts',
+            '- [百度](https://baidu.com)'
+        ],
+        [
+            '',
+            '// 配置的快捷方式会出现在工具栏上'
+        ],
+    ],
+    [
+        '命令别名',
+        [
+            '# cmd:xxx',
+            '```sh',
+            'ping 127.0.0.1',
+            '```'
+        ],
+        [
+            '// 别名可用于节点中的cmd、cmdp协议及openby、diropenby协议@@后的部分',
+            '',
+            '// 脚本的具体内容',
+            ''
+        ]
+    ],
 ];
+
 
 
 const shortcuts=[
