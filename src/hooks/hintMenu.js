@@ -397,32 +397,42 @@ const hintContMenus=[
  */
 const fixedHintMenuList=[
     {
-        label: '插入图片　![图片]()',
+        label: '插入图片　![]()',
         option: {
             type: actionTypes.literal,
             data: {
-                txt: "![图片]()",
-                cursorOffset: "![图片]()".length-1,
+                txt: "![]()",
+                cursorOffset: "![]()".length-1,
             }
         }
     },
     {
-        label: '插入链接　[链接]()',
+        label: '插入链接　[]()',
         option: {
             type: actionTypes.literal,
             data: {
-                txt: "[链接]()",
-                cursorOffset: "[链接]()".length-1,
+                txt: "[]()",
+                cursorOffset: "[]()".length-1,
             }
         }
     },
     {
-        label: '文件链接　[文件](file:///)',
+        label: '文件链接　[](file:///)',
         option: {
             type: actionTypes.literal,
             data: {
-                txt: "[文件](file:///)",
+                txt: "[](file:///)",
                 cursorOffset: "[文件](file:///)".length-1,
+            }
+        }
+    },
+    {
+        label: '命令链接　[](cmd://)',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: "[](cmd://)",
+                cursorOffset: "[](cmd://)".length-1,
             }
         }
     },
