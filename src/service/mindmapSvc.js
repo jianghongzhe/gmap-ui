@@ -398,7 +398,7 @@ class MindmapSvc {
             //openin
             matchResult=item.match(/^\[([^[\]]*)\]\((openin[:][/][/][/]?)(.+)[@][@](.+)\)$/);
             if(matchResult){
-                return doublePartHandler(matchResult);
+                return doublePartHandler(matchResult, false);
             }
 
             return [false,false,null];
@@ -1086,6 +1086,14 @@ class MindmapSvc {
             target.lineInd2=lineInd;
         });
         ndLines=tmp;
+
+        // 快捷方式别名替换，需要在openers与cmds处理完后执行
+        shortcuts.forEach(item=>{
+             let [handled, hasVal, val]=this.linePartHandlers.handleOpener(`[${item.name}](${item.url})`, openers, cmds);
+             if(true===handled && true===hasVal){
+                item.url=val.addr;
+             }
+        });
 
         return { ndLines, refs, graphs, openers, shortcuts, cmds};
     }

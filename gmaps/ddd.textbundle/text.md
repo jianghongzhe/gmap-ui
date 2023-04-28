@@ -9,7 +9,7 @@
 ***
 
 # shortcuts
-- [sss](cmdp://aa)
+- [sss](cmd://aa)
 
 # openers
 - [txt]: notepad
