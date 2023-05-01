@@ -269,6 +269,10 @@ ${threeQuot}sh
 
 ${threeQuot}`;
 
+const aliasSampleLine2="[xxx]: yyy";
+const aliasSample=`# alias
+${aliasSampleLine2}`;
+
 
 /**
  * 动态生成的自动提示菜单项 - 表格编辑
@@ -389,6 +393,19 @@ const hintContMenus=[
             }
         }
     },
+    {
+        label: '命令　　　# alias',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: aliasSample,
+                cursorOffset: [1, aliasSampleLine2.length],
+            }
+        }
+    },
+
+
+
 ];
 
 /**
