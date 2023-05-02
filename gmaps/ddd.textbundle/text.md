@@ -10,6 +10,10 @@ bbb
 
 # shortcuts
 - [百度](xxx)
+- 复合
+	- [](file:///notepad)
+	- [qqr](xxx)
+	
 
 # alias
 [xxx]: https://baidu.com

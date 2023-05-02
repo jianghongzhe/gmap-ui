@@ -931,6 +931,7 @@ class MindmapSvc {
         let ndLines = [];
         let currRefName = null;
         let currAliasName=null;
+        let currShortcutItem=null;
         let alreadyHandleRefs = false;
         let lineCounter=-1;
 
@@ -979,12 +980,30 @@ class MindmapSvc {
             //已有当前标识符
             if("shortcuts"===currRefName){
                 // - [链接名称](链接地址)
-                const matchResult=trimLine.match(/^[-] \[(.+)\]\((.+)\)$/);
+                let matchResult=line.match(/^[-] \[(.+)\]\((.+)\)[ 　\t]*$/);
                 if(matchResult && matchResult[1] && matchResult[2]){
                     const name=matchResult[1].trim();
                     const url=matchResult[2].trim();
                     shortcuts.push({name,url});
+                    return;
                 }
+
+                // [tab]- [链接名称](链接地址)
+                matchResult=line.match(/^\t[-] \[(.*)\]\((.+)\)[ 　\t]*$/);
+                if(matchResult && matchResult[2] && currShortcutItem){
+                    currShortcutItem.url.push(matchResult[2].trim());
+                    return;
+                }
+
+                // - 名称
+                matchResult=line.match(/^[-] (.+)[ 　\t]*$/);
+                if(matchResult && matchResult[1]){
+                    currShortcutItem={name:matchResult[1].trim(), url:[]}
+                    shortcuts.push(currShortcutItem);
+                    return;
+                }
+
+
             }
             else if("alias"===currRefName){
                 const isCommentLine=(line)=>{
@@ -1091,15 +1110,44 @@ class MindmapSvc {
         });
         ndLines=tmp;
 
+
+
         // 快捷方式别名替换，需要在alias加载完后执行
+        // 如果链接是字符串，则直接替换别名
+        // 如果链接是数组，且数组只有一个元素，则替换后改为字符串类型
+        // 如果链接是数组，且数组有多个元素，则把每个元素替换别名，并保持数组类型
+        let tmpShorts=[];
         shortcuts.forEach(item=>{
-             let [handled, hasVal, val]=this.linePartHandlers.handleOpener(`[${item.name}](${item.url})`, alias);
-             if(true===handled && true===hasVal){
-                item.url=val.addr;
+             if('string'===typeof(item.url)){
+                item.url=this.replaceLinkAlias(item.url, alias);
+                tmpShorts.push(item);
+                return;
              }
+
+             if(Array.isArray(item.url) && 1===item.url.length){
+                 item.url=this.replaceLinkAlias(item.url[0], alias);
+                 tmpShorts.push(item);
+                 return;
+             }
+
+            if(Array.isArray(item.url) && 1<item.url.length){
+                item.url=item.url.map(eachUrl=>this.replaceLinkAlias(eachUrl, alias));
+                tmpShorts.push(item);
+                return;
+            }
         });
+        shortcuts=tmpShorts;
+        console.log("shortcuts", shortcuts);
 
         return { ndLines, refs, graphs, shortcuts, alias};
+    }
+
+    replaceLinkAlias=(url, alias)=>{
+        let [handled, hasVal, val]=this.linePartHandlers.handleOpener(`[link_name](${url})`, alias);
+        if(true===handled && true===hasVal){
+            return val.addr;
+        }
+        return url;
     }
 
     setLeaf = (nd) => {

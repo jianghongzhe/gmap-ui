@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {Avatar, Button, Divider, Layout, Tooltip, Typography} from 'antd';
 import {
     CameraOutlined,
@@ -26,6 +26,7 @@ import {useRecoilValue} from 'recoil';
 import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
+import {useMemoizedFn} from "ahooks";
 
 const { Header } = Layout;
 const {  Text } = Typography;
@@ -111,8 +112,25 @@ const Toolbar=({
     );
 }
 
+
+
 const ShortcutItem=({name, url, onClick})=>{
-    const [localIcon] = useLoadIcon({lindAddr: url});
+    const [localIcon] = useLoadIcon({lindAddr: Array.isArray(url) ? "group_links" : url});
+
+    const onClickAggr=useMemoizedFn((url)=>{
+        if(Array.isArray(url)){
+            url.forEach(eachUrl=>onClick(eachUrl));
+            return;
+        }
+        onClick(url);
+    });
+
+    const urlTxt=useMemo(()=>{
+        if(Array.isArray(url)){
+            return url.join(" + ");
+        }
+        return url;
+    },[url]);
 
     if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
         return null;
@@ -129,8 +147,8 @@ const ShortcutItem=({name, url, onClick})=>{
     if('icon'===localIcon.type){
         const IconComp=localIcon.compType;
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${url}`}>
-                <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClick.bind(this, url)}/>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${urlTxt}`}>
+                <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}/>
             </Tooltip>
         );
     }
@@ -144,8 +162,8 @@ const ShortcutItem=({name, url, onClick})=>{
      */
     if('image'===localIcon.type){
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${url}`}>
-                <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url)}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${urlTxt}`}>
+                <Button shape='circle' className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}>
                     <Avatar src={localIcon.url} size='small'/>
                 </Button>
             </Tooltip>

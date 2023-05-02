@@ -253,21 +253,13 @@ export const useHintMenu=()=>{
 };
 
 
-const openersSampleLine2="- [txt]: notepad";
-const openersSample=`# openers
-${openersSampleLine2}`;
+
+
 
 const shortcutsSampleLine2="- [百度](https://baidu.com)";
 const shortcutsSample=`# shortcuts
 ${shortcutsSampleLine2}`;
 
-
-const threeQuot="```";
-const cmdSampleLine1="# cmd:";
-const cmdSample=`${cmdSampleLine1}
-${threeQuot}sh
-
-${threeQuot}`;
 
 const aliasSampleLine2="[xxx]: yyy";
 const aliasSample=`# alias
@@ -364,16 +356,6 @@ const hintRefMenus=[
  */
 const hintContMenus=[
     {
-        label: '打开方式　# openers',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: openersSample,
-                cursorOffset: [1, openersSampleLine2.length],
-            }
-        }
-    },
-    {
         label: '快捷方式　# shortcuts',
         option: {
             type: actionTypes.literal,
@@ -384,17 +366,7 @@ const hintContMenus=[
         }
     },
     {
-        label: '命令　　　# cmd:',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: cmdSample,
-                cursorOffset: [0, cmdSampleLine1.length],
-            }
-        }
-    },
-    {
-        label: '命令　　　# alias',
+        label: '别名　　　# alias',
         option: {
             type: actionTypes.literal,
             data: {
@@ -403,9 +375,6 @@ const hintContMenus=[
             }
         }
     },
-
-
-
 ];
 
 /**
