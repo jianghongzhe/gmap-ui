@@ -1,6 +1,10 @@
 import mindMapValidateSvc from './mindMapValidateSvc';
 import api from './api';
 import globalStyleConfig from '../common/globalStyleConfig';
+import partLoaders from './partLoaders';
+import {ndLineLoader} from './partLoaders';
+import linePartHandlers from './linePartHandlers';
+
 
 
 
@@ -218,327 +222,7 @@ class MindmapSvc {
 
 
 
-    
-    /**
-     * 获得节点行中的特殊部分的处理器
-     * @returns [
-     *      (item, ...)=>[boolean, boolean, value]
-     *      //参数：该行文本、其他依赖的对象等 
-     *      //返回：[0]是否已处理、[1]是否有有效的结果值、[2]结果值内容
-     * ]
-     * 
-     */
-    linePartHandlers={
-        handleId: (item)=>{
-            if(!item.startsWith("id:") || item.length<="id:".length){
-                return [false,false,null]
-            }
-            return [true,true,item.substring("id:".length).trim()];
-        },
 
-        handleToId:(item)=>{
-            if(!item.startsWith("toid:") || item.length<="toid:".length){
-                return [false,false,null]
-            }
-            let result={};
-            item.split(",").filter(each=>null!=each && ""!==each.trim()).map(each=>each.trim()).forEach((each,ind)=>{
-                if(each.startsWith("toid:") && each.length>"toid:".length){
-                    result={...result, id:each.substring("toid:".length).trim()};
-                    return;
-                }
-                if(each.startsWith("c:") && each.length>"c:".length){
-                    result={...result, color:each.substring("c:".length).trim() };
-                    return;
-                }
-            });
-            return [true,true,result];
-        },
-
-        handleForceRight: (item)=>{
-            if ('right:' !== item) {
-                return [false,false,null];
-            }
-
-            return [true,true,true];
-        },
-
-        handleDownLayout: (item)=>{
-            if ('down:' !== item) {
-                return [false,false,null];
-            }
-
-            return [true,true,true];
-        },
-
-        handleUpLayout: (item)=>{
-            if ('up:' !== item) {
-                return [false,false,null];
-            }
-
-            return [true,true,true];
-        },
-
-
-
-        /**
-         * 节点默认是折叠状态
-         * @param {*} item 
-         * @returns 
-         */
-        handleZip: (item)=>{
-            if ('zip:' !== item) {
-                return [false,false,null];
-            }
-
-            return [true,true,false];
-        },
-
-
-        handleRef: (item, refs)=>{
-            let refPrefixLen = 'ref:'.length;
-            if (!item.startsWith("ref:") || item.length <= refPrefixLen) {
-                return [false,false,null];
-            }
-
-            if ('undefined' !== typeof (refs[item])) {
-                let ref = {
-                    name: item,
-                    showname: item.substring(refPrefixLen).trim(),
-                    txt: refs[item],
-                    parsedTxt: null,
-                };
-                return [true,true,ref];
-            }
-            return [true,false,null];
-        },
-
-        // openers中设置的值替换链接中的部分
-        handleOpener: (item, alias)=>{
-            const singlePartHandler=(matchResult)=>{
-                const linkName=matchResult[1].trim()
-                const protocol=matchResult[2].trim()
-                const path=matchResult[3].trim();
-
-                return [true, true, {
-                    name: linkName,
-                    addr: protocol + (alias[path] ? alias[path] : path),
-                }];
-            };
-
-            const doublePartHandler=(matchResult)=>{
-                const linkName=matchResult[1].trim()
-                const protocol=matchResult[2].trim()
-                const frontPart=matchResult[3].trim();
-                const endPart=matchResult[4].trim();
-
-                return [true, true, {
-                    name: linkName,
-                    addr: protocol +
-                        (alias[frontPart] ? alias[frontPart] : frontPart) +
-                        "@@" +
-                        (alias[endPart] ? alias[endPart] : endPart),
-                }];
-            };
-
-            // 链接地址本身就是别名的处理，如果发生别名替换则直接返回，否则继续向下匹配
-            let matchResult= item.match(/^\[([^[\]]*)\]\((.+)\)$/);
-            if(matchResult){
-                const linkName=matchResult[1].trim()
-                const path=matchResult[2].trim();
-
-                if(alias[path]){
-                    return [true, true, {
-                        name: linkName,
-                        addr: alias[path],
-                    }];
-                }
-            }
-
-            // http(s)协议：[xxx](http(s):///yy)
-            matchResult= item.match(/^\[([^[\]]*)\]\((https?[:][/][/])(.+)\)$/);
-            if(matchResult){
-                return singlePartHandler(matchResult);
-            }
-
-            // file协议：[xxx](file:///yy)
-            matchResult= item.match(/^\[([^[\]]*)\]\((file[:][/][/][/]?)(.+)\)$/);
-            if(matchResult){
-                return singlePartHandler(matchResult);
-            }
-
-            // openas协议：：[xxx](openas:///yy)
-            matchResult= item.match(/^\[([^[\]]*)\]\((openas[:][/][/][/]?)(.+)\)$/);
-            if(matchResult){
-                return singlePartHandler(matchResult);
-            }
-
-            // cmdopen
-            matchResult= item.match(/^\[([^[\]]*)\]\((cmdopen[:][/][/][/]?)(.+)\)$/);
-            if(matchResult){
-                return singlePartHandler(matchResult);
-            }
-
-            // cmd
-            matchResult= item.match(/^\[([^[\]]*)\]\((cmd[:][/][/][/]?)(.+)\)$/);
-            console.log("item", item);
-            console.log("match", matchResult);
-            if(matchResult){
-                return singlePartHandler(matchResult);
-            }
-
-            // cmdp
-            matchResult= item.match(/^\[([^[\]]*)\]\((cmdp[:][/][/][/]?)(.+)\)$/);
-            if(matchResult){
-                return singlePartHandler(matchResult);
-            }
-
-            // openby
-            matchResult=item.match(/^\[([^[\]]*)\]\((openby[:][/][/][/]?)(.+)[@][@](.+)\)$/);
-            if(matchResult){
-                return doublePartHandler(matchResult);
-            }
-
-            // diropenby
-            matchResult=item.match(/^\[([^[\]]*)\]\((diropenby[:][/][/][/]?)(.+)[@][@](.+)\)$/);
-            if(matchResult){
-                return doublePartHandler(matchResult);
-            }
-
-            //openin
-            matchResult=item.match(/^\[([^[\]]*)\]\((openin[:][/][/][/]?)(.+)[@][@](.+)\)$/);
-            if(matchResult){
-                return doublePartHandler(matchResult);
-            }
-
-            return [false,false,null];
-        },
-
-        
-
-        handleLineColor:(item)=>{
-            if (!item.startsWith("c:")) {
-                return [false,false,null];
-            }
-
-            if(item.length > 20){
-                return [true,false,null];
-            }
-            let lineColor = item.substring("c:".length).trim();//如果出现多次，则以最后一次为准
-            return [true,true,lineColor];
-        },
-        
-        handleMemo:(item)=>{
-            if (!item.startsWith("m:")) {
-                return [false,false,null];
-            }
-            let memo=item.substring("m:".length).trim();//备注可以出现多个，最终加入数组中
-            if(null==memo || ''===memo.trim()){
-                return [true,false,null];
-            }
-            return [true,true,memo];
-        },
-
-        handleCommonLink:(item, isUrlPattern)=>{
-            let urlPattern = isUrlPattern(item);
-            if (false === urlPattern) {
-                return [false,false,null];
-            }
-
-            let link={
-                name: null,
-                addr: urlPattern
-            };
-            return [true,true,link];
-        },
-
-        handleMarkdownLink:(item, hasUrlPrefix)=>{
-            //是markdown链接 [文字](地址)
-            if (!(/^\[.*?\]\(.+?\)$/.test(item))) {
-                return [false,false,null];
-            }
-
-            let txt = item.substring(1, item.lastIndexOf("]")).trim();
-            let url = item.substring(item.indexOf("(") + 1, item.length - 1).trim();
-            if(null===txt || ''===txt || ""===txt.trim()){
-                if(url.startsWith("cmd://")){
-                    txt='执行命令';
-                }else if(url.startsWith("cp://")){
-                    txt='复制';
-                }else if(url.startsWith("dir://")){
-                    txt='打开目录并选择';
-                }else if(url.startsWith("openas://")){
-                    txt='打开方式';
-                }else{
-                    txt='打开';
-                }
-            }
-
-            if (hasUrlPrefix(url)) {
-                url=url+"";
-            }else if(url.startsWith("./")){
-                url=api.calcAttUrlSync("",url);
-            }/*else{
-                url = "http://" + url;
-            }*/
-
-            let link={
-                name: txt,
-                addr: url
-            };
-            return [true,true,link];
-        },
-
-        
-
-        handleProg:(item, progs)=>{
-            let progMatchItems=/^p[:]([-]?)([0-9]{1,3})$/.exec(item);
-            if(!(item.startsWith("p:") && progMatchItems)){
-                return [false,false,null];
-            }
-
-            let isErr=(progMatchItems[1]?true:false);
-            let num=parseInt(progMatchItems[2]);
-            num=(num>100?100:num);
-            let msg=(isErr?"完成到 "+num+"% 时出现错误":(100===num?"已完成":"已完成 "+num+"%"));
-
-            let prog={
-                num: num,
-                txt: null,//稍后加入
-                st: isErr?'exception':(100===num?'success':'normal'),
-                allProgs: progs,
-                msg: msg,
-                err : isErr,
-                done: !isErr && 100===num,
-                doing: !isErr && 100>num,
-            };
-            return [true,true,prog];
-        },
-
-        handleDate:(item, timeline, parseDateInfo)=>{
-            //匹配规则：[0]整串  [1]日期部分  [2],purple  [3]purple
-            let dateMatchItems = /^d[:]([0-9]{2}[-/.][0-9]{1,2}[-/.][0-9]{1,2})(,(.{0,25}))?$/.exec(item);
-            if (!(item.startsWith("d:") && dateMatchItems && dateMatchItems[1])) {
-                return [false,false,null];
-            }
-
-            let dateItem = {
-                fullDate: '', //2020-05-23 五
-                msg: '', //昨天、前天、大前天，过期x天，今天、明天、后天、大后天，还差x天
-                abbrDate: '', //是当年： 5/23   不是当年 22/3/20,
-                timeline: timeline, //时间线对象
-                color: null,
-                txt: null,//稍后加入
-                expired:false,
-                near:false,
-                future:false,
-            };
-            dateItem=parseDateInfo(dateItem,dateMatchItems[1],dateMatchItems[3]);
-            return [true,true,dateItem];
-        },
-    };
-
-
-    
 
     /**
      * 根据指定文本，加载节点信息（树型结构）
@@ -594,7 +278,7 @@ class MindmapSvc {
                     if (null == item || "" === item) { return; }
 
                     //forceRight
-                    let [handled,hasVal,val]=this.linePartHandlers.handleForceRight(item);
+                    let [handled,hasVal,val]=linePartHandlers.handleForceRight(item);
                     if(handled){
                         if(hasVal){
                             forceRight = val;
@@ -603,7 +287,7 @@ class MindmapSvc {
                     }
 
                     // down layout
-                    [handled,hasVal,val]=this.linePartHandlers.handleDownLayout(item);
+                    [handled,hasVal,val]=linePartHandlers.handleDownLayout(item);
                     if(handled){
                         if(hasVal){
                             down=val;
@@ -611,7 +295,7 @@ class MindmapSvc {
                         return;
                     }
                     // up layout
-                    [handled,hasVal,val]=this.linePartHandlers.handleUpLayout(item);
+                    [handled,hasVal,val]=linePartHandlers.handleUpLayout(item);
                     if(handled){
                         if(hasVal){
                             up=val;
@@ -624,7 +308,7 @@ class MindmapSvc {
 
 
                     // id
-                    [handled,hasVal,val]=this.linePartHandlers.handleId(item);
+                    [handled,hasVal,val]=linePartHandlers.handleId(item);
                     if(handled){
                         if(hasVal){
                             logicId=val;
@@ -633,7 +317,7 @@ class MindmapSvc {
                     }
 
                     // toid
-                    [handled,hasVal,val]=this.linePartHandlers.handleToId(item);
+                    [handled,hasVal,val]=linePartHandlers.handleToId(item);
                     if(handled){
                         if(hasVal){
                             logicToIds.push(val.id);
@@ -643,7 +327,7 @@ class MindmapSvc {
                     }
 
                     //节点默认是折叠状态
-                    [handled,hasVal,val]=this.linePartHandlers.handleZip(item);
+                    [handled,hasVal,val]=linePartHandlers.handleZip(item);
                     if(handled){
                         if(hasVal){
                             expand = val;
@@ -652,7 +336,7 @@ class MindmapSvc {
                     }
 
                     //是引用
-                    [handled,hasVal,val]=this.linePartHandlers.handleRef(item, refs);
+                    [handled,hasVal,val]=linePartHandlers.handleRef(item, refs);
                     if(handled){
                         if(hasVal){
                             if(!refNames.includes(val.name)){
@@ -664,7 +348,7 @@ class MindmapSvc {
                     }
 
                     //是打开为
-                    [handled,hasVal,val]=this.linePartHandlers.handleOpener(item, alias);
+                    [handled,hasVal,val]=linePartHandlers.handleOpener(item, alias);
                     if(handled){
                         if(hasVal){
                             links.push(val);
@@ -673,7 +357,7 @@ class MindmapSvc {
                     }
 
                     //是颜色标记  c:red  c:#fcfcfc 
-                    [handled,hasVal,val]=this.linePartHandlers.handleLineColor(item);
+                    [handled,hasVal,val]=linePartHandlers.handleLineColor(item);
                     if(handled){
                         if(hasVal){
                             lineColor=val;
@@ -682,7 +366,7 @@ class MindmapSvc {
                     }
 
                     //是备注标记  m:说明
-                    [handled,hasVal,val]=this.linePartHandlers.handleMemo(item);
+                    [handled,hasVal,val]=linePartHandlers.handleMemo(item);
                     if(handled){
                         if(hasVal){
                             memo.push(val);
@@ -691,7 +375,7 @@ class MindmapSvc {
                     }
 
                     //是普通链接  http://www.xxx.com
-                    [handled,hasVal,val]=this.linePartHandlers.handleCommonLink(item, this.isUrlPattern);
+                    [handled,hasVal,val]=linePartHandlers.handleCommonLink(item, this.isUrlPattern);
                     if(handled){
                         if(hasVal){
                             links.push(val);
@@ -700,7 +384,7 @@ class MindmapSvc {
                     }
 
                     //进度   p:10   p:-20   
-                    [handled,hasVal,val]=this.linePartHandlers.handleProg(item, progs);
+                    [handled,hasVal,val]=linePartHandlers.handleProg(item, progs);
                     if(handled){
                         if(hasVal){
                             if(!prog){
@@ -715,7 +399,7 @@ class MindmapSvc {
                     }
 
                     //日期类型 d:20.1.8、d:20.1.8,purple
-                    [handled,hasVal,val]=this.linePartHandlers.handleDate(item,timeline,this.parseDateInfo);
+                    [handled,hasVal,val]=linePartHandlers.handleDate(item,timeline,this.parseDateInfo);
                     if(handled){
                         if(hasVal){
                             dateItem=val;
@@ -725,7 +409,7 @@ class MindmapSvc {
                     }
 
                     //是markdown链接 [文字](地址)
-                    [handled,hasVal,val]=this.linePartHandlers.handleMarkdownLink(item,this.hasUrlPrefix);
+                    [handled,hasVal,val]=linePartHandlers.handleMarkdownLink(item,this.hasUrlPrefix);
                     if(handled){
                         if(hasVal){
                             links.push(val);
@@ -922,233 +606,55 @@ class MindmapSvc {
      * 把内容拆分为节点、引用、别名、快捷方式等部分
      */
     loadParts = (alltxts) => {
-        let alias={};
-        let shortcuts=[];
-        let refs = {};
-        let trefs = {};
-
-        let graphs = {};
-        let ndLines = [];
-        let currRefName = null;
-        let currAliasName=null;
-        let currShortcutItem=null;
-        let alreadyHandleRefs = false;
+        let alreadyArriveRefs = false;
         let lineCounter=-1;
+        let currLoader=null;
+        const result={};
+        const tmpVals={};
+
+        ndLineLoader.preHandle(result, tmpVals);
+        partLoaders.forEach(loader=>loader.preHandle(result, tmpVals));
 
         alltxts.trim().replace(/\r/g, '').split("\n").forEach(line => {
             ++lineCounter;
+            const trimLine = line.trim();
 
-            if ("***" === line.trim() && !alreadyHandleRefs) {
-                alreadyHandleRefs = true;
-            }
-
-            //还没到引用部分
-            if (!alreadyHandleRefs) {
-                if ('' === line.trim()) {
-                    return;
-                }
-                //此处不要trim，因为节点有层级关系，前面制表符要保留
-                ndLines.push({str:line, lineInd:lineCounter,});
+            if ("***" === line.trim() && !alreadyArriveRefs) {
+                alreadyArriveRefs = true;
                 return;
             }
 
-            //已经到引用部分
-            //是引用标识符
-            let trimLine = line.trim();
-            if (    
-                    (trimLine.startsWith("# ref:") && trimLine.length > "# ref:".length) ||
-                    (trimLine.startsWith("# tref:") && trimLine.length > "# tref:".length)
-            ){
-                currRefName = trimLine.substring("# ".length);
-                return;
-            }
-            if("# shortcuts"===trimLine){
-                currRefName="shortcuts";
-                return;
-            }
-            if("# alias"===trimLine){
-                currRefName="alias";
+            // 还没到引用部分，使用节点处理器加载内容
+            if (!alreadyArriveRefs) {
+                ndLineLoader.handleLine(line, trimLine, result, tmpVals, lineCounter);
                 return;
             }
 
-
-            //还没有当前标识符
-            if (null == currRefName) {
-                return;
+            // 已经到引用部分，判断是否是指定类型的头部标识，如果是，则使用该类型的处理器加载内容
+            for (const loader of partLoaders) {
+                if(loader.isPartTitle(line, trimLine, tmpVals)){
+                    currLoader=loader;
+                    return;
+                }
             }
-
-            //已有当前标识符
-            if("shortcuts"===currRefName){
-                // - [链接名称](链接地址)
-                let matchResult=line.match(/^[-] \[(.+)\]\((.+)\)[ 　\t]*$/);
-                if(matchResult && matchResult[1] && matchResult[2]){
-                    const name=matchResult[1].trim();
-                    const url=matchResult[2].trim();
-                    shortcuts.push({name,url});
-                    return;
-                }
-
-                // [tab]- [链接名称](链接地址)
-                matchResult=line.match(/^\t[-] \[(.*)\]\((.+)\)[ 　\t]*$/);
-                if(matchResult && matchResult[2] && currShortcutItem){
-                    currShortcutItem.url.push(matchResult[2].trim());
-                    return;
-                }
-
-                // - 名称
-                matchResult=line.match(/^[-] (.+)[ 　\t]*$/);
-                if(matchResult && matchResult[1]){
-                    currShortcutItem={name:matchResult[1].trim(), url:[]}
-                    shortcuts.push(currShortcutItem);
-                    return;
-                }
-
-
-            }
-            else if("alias"===currRefName){
-                const isCommentLine=(line)=>{
-                    return (
-                        '#'===line || line.startsWith("# ") ||
-                        'rem'===line || line.startsWith("rem ") ||
-                        '::'===line || line.startsWith("::")
-                    );
-                };
-
-                // [xxx]:
-                let matchResult= trimLine.match(/^\[([^[\]]*)\][:]$/);
-                if(matchResult){
-                    currAliasName=matchResult[1].trim();
-                    return;
-                }
-                // [xxx]: yyy
-                matchResult= trimLine.match(/^\[([^[\]]*)\][:] (.+)$/);
-                if(matchResult){
-                    currAliasName=matchResult[1].trim();
-                    const line=matchResult[2].trim();
-                    if(!isCommentLine(line)){
-                        alias[currAliasName]=matchResult[2].trim();
-                    }
-                    return;
-                }
-                if(''!==trimLine && null!==currAliasName && !isCommentLine(trimLine)){
-                    if("undefined"!== typeof(alias[currAliasName])){
-                        alias[currAliasName]+=" \\"+trimLine;
-                        return;
-                    }
-                    alias[currAliasName]=trimLine;
-                    return;
-                }
-                return;
-            }
-            else if(currRefName.startsWith("ref:")){
-                //是已记录过的引用
-                if ("undefined" !== typeof (refs[currRefName])) {
-                    refs[currRefName] += '\n' + line;
-                    return;
-                }
-                //是新引用
-                refs[currRefName] = line;
-                return;
-            }else if(currRefName.startsWith("tref:")){
-                if(""===trimLine){
-                    return;
-                }
-
-                //是已记录过的引用
-                if ("undefined" !== typeof (trefs[currRefName])) {
-                    trefs[currRefName] += trimLine;
-                    return;
-                }
-                //是新引用
-                trefs[currRefName] = trimLine;
+            if(currLoader){
+                currLoader.handleLine(line, trimLine, result, tmpVals, lineCounter);
                 return;
             }
         });
 
+        ndLineLoader.postHandle(result);
+        partLoaders.forEach(loader=>loader.postHandle(result));
 
-        // 文字引用直接替换到原文中
-        ndLines=ndLines.map(({str, lineInd})=>{
-            let splitPos=str.indexOf("- ")+2;
-            let front=str.substring(0,splitPos);
-            let end="|"+escapeVLine(str.substring(splitPos).trim())+"|";
-
-            for(let key in trefs){
-                end=end.replace("|"+key+"|","|"+trefs[key]+"|");
-            }
-            while(end.startsWith("|")){
-                end=end.substring(1);
-            }
-            while(end.endsWith("|")){
-                end=end.substring(0,end.length-1);
-            }
-            return {
-                str: front+unescapeVLineRestore(end.trim()),
-                lineInd
-            };
-        });
-
-        // 把拆分为多行的节点合并到一起
-        // 合并前
-        // 1    - a
-        // 2      ax
-        // 3      ay
-        // 合并后
-        // 1-3  - a|ax|ay
-        const tmp=[];
-        ndLines.forEach(({str, lineInd})=>{
-            if(0===tmp.length || str.trim().startsWith("- ")){
-                tmp.push({
-                    str,
-                    lineInd,
-                    lineInd2: lineInd,
-                });
-                return;
-            }
-            let target=tmp[tmp.length-1];
-            target.str=target.str+"|"+str;
-            target.lineInd2=lineInd;
-        });
-        ndLines=tmp;
-
-
-
-        // 快捷方式别名替换，需要在alias加载完后执行
-        // 如果链接是字符串，则直接替换别名
-        // 如果链接是数组，且数组只有一个元素，则替换后改为字符串类型
-        // 如果链接是数组，且数组有多个元素，则把每个元素替换别名，并保持数组类型
-        let tmpShorts=[];
-        shortcuts.forEach(item=>{
-             if('string'===typeof(item.url)){
-                item.url=this.replaceLinkAlias(item.url, alias);
-                tmpShorts.push(item);
-                return;
-             }
-
-             if(Array.isArray(item.url) && 1===item.url.length){
-                 item.url=this.replaceLinkAlias(item.url[0], alias);
-                 tmpShorts.push(item);
-                 return;
-             }
-
-            if(Array.isArray(item.url) && 1<item.url.length){
-                item.url=item.url.map(eachUrl=>this.replaceLinkAlias(eachUrl, alias));
-                tmpShorts.push(item);
-                return;
-            }
-        });
-        shortcuts=tmpShorts;
-        console.log("shortcuts", shortcuts);
-
-        return { ndLines, refs, graphs, shortcuts, alias};
+        return {
+            ndLines:    result.ndLines,
+            refs:       result.refs,
+            shortcuts:  result.shortcuts,
+            alias:      result.alias
+        };
     }
 
-    replaceLinkAlias=(url, alias)=>{
-        let [handled, hasVal, val]=this.linePartHandlers.handleOpener(`[link_name](${url})`, alias);
-        if(true===handled && true===hasVal){
-            return val.addr;
-        }
-        return url;
-    }
+
 
     setLeaf = (nd) => {
         nd.leaf = (0 === nd.childs.length);
@@ -1176,6 +682,11 @@ class MindmapSvc {
         return false;
     }
 }
+
+
+
+
+
 
 
 //竖线转义相差工具方法
