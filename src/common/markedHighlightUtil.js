@@ -102,6 +102,16 @@ class MarkedHighlightUtil {
          * @returns 
          */
         renderer.text=function(txt){
+            // 文字颜色
+            const colorItems=txt.match(/[$][\\]textcolor[{].+?[}][{].+?[}][$]/g);
+            if(colorItems && colorItems.length){
+                colorItems.forEach(item=>{
+                    const [_nouse, color, str]=item.match(/^[$][\\]textcolor[{](.+?)[}][{](.+?)[}][$]$/);
+                    txt=txt.replace(item, `<span style="color:${color}">${str}</span>`);
+                });
+            }
+
+            // 行内latex公式
             const latexItems=txt.match(/[$][^$\r\n\t]+?[$]/g);
             if(latexItems && latexItems.length){
                 for(let i=0; i<latexItems.length; ++i){
@@ -111,6 +121,7 @@ class MarkedHighlightUtil {
                 }
             }
 
+            // 高亮与上下标
             const newTxt=txt.replace(/(==)([^=\r\n\t]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>")
                 .replace(/(\^)([^^\r\n\t]{1,20})(\^)/g, "<sup>$2</sup>")
                 .replace(/(--)([^\-\r\n\t]{1,20})(--)/g, "<sub>$2</sub>");

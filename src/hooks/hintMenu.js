@@ -422,6 +422,18 @@ const fixedHintMenuList=[
             }
         }
     },
+    {
+        label: '文字颜色　',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                wrap: true,
+                txt: ["$\\textcolor{}{", "}$"],
+                cursorOffset: "$\\textcolor{".length,
+            }
+        }
+    },
+
     "-",
     {
         label: '剪切板　　　->　url',

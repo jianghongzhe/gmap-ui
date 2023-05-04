@@ -63,6 +63,10 @@ export const useAutoComplateFuncs=()=>{
             insertNodePart(cm, subActionType.txt);
             return;
         }
+        if(subActionType.wrap){
+            wrapTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
+            return;
+        }
         insertTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
     });
 
@@ -192,15 +196,54 @@ const insertNodePart=(cm, txt)=>{
 
 
 /**
- * 向光标开始处插入内容并把光标后移
+ * 用指定文字包裹选中的内容
+ * @param cm
+ * @param txts ['前面的部分', '后面的部分']
+ * @param cursorOffset 光标位置
+ *      非负数为从替换的起始位置向后偏移；
+ *      负数为从替换后的结束位置向前偏移
+ */
+const wrapTxtAndMoveCursor=(cm, txts, cursorOffset=null)=>{
+    let pos=cm.doc.getCursor();// { ch: 3  line: 0}
+    let pos2=pos;
+    const selections=cm.doc.listSelections();
+    if(0<selections.length){
+        pos=selections[0].anchor;
+        pos2=selections[0].head;
+    }
+
+    const originTxt=(cm.doc.getRange(pos, pos2))??'';
+    const replTxt=`${txts[0]}${originTxt}${txts[1]}`;
+    cm.doc.replaceRange(replTxt, pos, pos2);
+
+    let line=pos.line;
+    let ch=pos.ch+replTxt.length;
+
+    if('number'===typeof(cursorOffset)){
+        if(cursorOffset>=0){
+            ch=pos.ch+cursorOffset;
+        }else{
+            ch=pos.ch+replTxt.length+cursorOffset;
+        }
+    }else{
+        console.log("不支持数字以外的类型");
+    }
+    cm.focus();
+    cm.doc.setCursor({line, ch});
+};
+
+
+/**
+ * 向光标处插入内容并把光标后移
  * @param cm
  * @param txt
  * @param cursorOffset 可选
  * 情况1：number   在当前行中的列的偏移量
  * 情况2：[number, number]  行的偏移量和列的偏移量
+ * @param wrap
  * */
-const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null)=>{
-    const pos=cm.doc.getCursor();// { ch: 3  line: 0}
+const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null, wrap=false)=>{
+    let pos=cm.doc.getCursor();// { ch: 3  line: 0}
     cm.doc.replaceRange(txt, pos, pos);
 
     let line=pos.line;

@@ -1158,7 +1158,30 @@ const editorSvcExInstWrapper=(function(){
     };
 
     const setColor=(cm, color, delayFocus = false)=>{
-        let {line} = cm.getCursor();
+        let {line, ch} = cm.getCursor();
+
+        // 如果已经到引用部分，则直接把颜色值插入文本中
+        let refPartLineInd=getRefPartSplitLineInd(cm);
+        if(refPartLineInd>=0 && line>=refPartLineInd){
+            if(!color){
+                return;
+            }
+
+            cm.doc.replaceRange(color, {line, ch}, {line, ch});
+            cm.doc.setCursor({line, ch:ch+color.length});
+
+            const fun=()=>{
+                cm.doc.setCursor({line, ch:ch+color.length});
+                cm.focus();
+            };
+            fun();
+            if(delayFocus){
+                setTimeout(fun, 500);
+            }
+            return;
+        }
+
+        // 否则把颜色标识插入节点行中，同时要分析文本行的格式
         let lineTxt = cm.getLine(line);
         const originLen=lineTxt.length;
 

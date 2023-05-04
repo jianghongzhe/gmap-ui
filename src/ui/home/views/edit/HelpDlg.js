@@ -576,9 +576,11 @@ const nodes=[
                           
 const markdownExts=[
     ['行内Latex','$a_{1}^{2}+b_{1}=c$',''],
+    ['文字颜色','$\\textcolor{red}{文字}$','// 可从自动完成菜单生成'],
     ['文字高亮','==高亮==',''],
     ['上标','a^2^=9',''],
     ['下标','H--2--O',''],
+
 ];
 
 const autoCompletes=[
