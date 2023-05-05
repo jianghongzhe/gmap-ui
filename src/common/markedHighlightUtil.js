@@ -263,7 +263,7 @@ class MarkedHighlightUtil {
                         }
                     });
                 }
-                console.log("style", style);
+
 
                 let newHref=href;
                 let newHrefEx=href;
@@ -280,6 +280,96 @@ class MarkedHighlightUtil {
                 return out;
             }
         }
+
+        renderer.table=(header, body)=>{
+            if (body) body = `<tbody>${body}</tbody>`;
+            let html= `<table><thead>${header}</thead>${body}</table>`;
+
+            // 解析表格中各单元格的值
+            const lines=[];
+            (html.match(/[<]tr[^>]*?[>](.|\n)+?[<]\/tr[>]/gm)??[]).forEach(row=>{
+                const line=[];
+                (row.match(/[<]t[hd][^>]*?[>]((.|\n)*?)[<]\/t[hd][>]/gm)??[]).forEach(cell=>{
+                    const val= cell.match(/^[<]t[hd][^>]*?[>]((.|\n)*?)[<]\/t[hd][>]$/m)[1].trim();
+                    line.push(val);
+                });
+                if(0<line.length){
+                    lines.push(line);
+                }
+            });
+
+            // 从第一个单元格中提取元数据，同时记录去掉元数据后的单元格值
+            const chartTypes=[];
+            let firstCellVal=lines?.[0]?.[0]??'';
+            (firstCellVal.match(/[#][^#]+/g)??[]).map(meta=>{
+                firstCellVal=firstCellVal.replace(meta, '');
+                return meta.substring(1).trim();
+            }).forEach(meta=>{
+                if('bar'===meta && !chartTypes.some(eachType=>'bar'===eachType.type)){
+                    chartTypes.push({
+                        type:'bar',
+                        opts:[],
+                    });
+                    return;
+                }
+                if(meta.startsWith("bar{") && !chartTypes.some(eachType=>'bar'===eachType.type)){
+                    chartTypes.push({
+                        type: 'bar',
+                        opts: meta.substring("bar{".length, meta.indexOf("}")).trim().split(",").filter(v=>""!==v.trim()),
+                    });
+                    return;
+                }
+                if('line'===meta && !chartTypes.some(eachType=>'line'===eachType.type)){
+                    chartTypes.push({
+                        type:'line',
+                        opts:[],
+                    });
+                    return;
+                }
+                if(meta.startsWith("line{") && !chartTypes.some(eachType=>'line'===eachType.type)){
+                    chartTypes.push({
+                        type: 'line',
+                        opts: meta.substring("line{".length, meta.indexOf("}")).trim().split(",").filter(v=>""!==v.trim()),
+                    });
+                    return;
+                }
+            });
+
+            // 替换表格html中第一个单元格的值为不带元数据的值
+            const end=html.indexOf("</th>");
+            const start= html.lastIndexOf(">",end)+1;
+            html= html.substring(0,start)+firstCellVal+html.substring(end);
+
+            // 根据图表元数据和解析得到的单元格数据计算出图表的html文本
+            let extraContent='';
+            chartTypes.forEach(({type,opts})=>{
+                // 柱状图和拆线图配置信息一致，一块处理
+                if('bar'===type || 'line'===type){
+                    const isBar=('bar'===type);
+
+                    // x轴的配置：  ,2015,2016,2017
+                    const xAxis= lines[0].map((val,ind)=>(0===ind ? '' : val.trim())).join(',');
+
+                    // 数据行的配置：
+                    // 苹果,25,30,40
+                    // 桔子,20,40,70
+                    let dataLines=lines.filter((val,ind)=>ind>0).map(vals=> vals.map(v=>v.trim()).join(","));
+
+                    const tmpId=`echart-${this.getNewId()}`;
+                    extraContent+= `<div>
+                        <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>
+${isBar ? 'bar' : 'line'}
+${opts.join("\n")}
+${xAxis}
+${dataLines.join("\n")}
+                        </div>
+                        <div id='${tmpId}'></div>
+                    </div>`;
+                }
+            });
+            return `${extraContent}${html}`;
+        }
+
 
 
         //初始化markdown解析功能：使用上面的高亮函数和渲染器
