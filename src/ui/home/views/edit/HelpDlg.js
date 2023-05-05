@@ -611,11 +611,26 @@ const refs=[
         [
             '# ref:xxx',
             '### hello',
-            '- blabla'
+            '- blabla',
+            '',
+            '![图#left](aa.jpg)',
+            '![图#float-right](aa.jpg)',
+            '![图#inline](aa.jpg)',
+            '![图#70%](aa.jpg)',
+            '![图#300px*200px](aa.jpg)',
+            '![图#200px#center](aa.jpg)',
         ],
         [
-            '// 对应节点中的设置',
-            '// 支持github markdown及latex'
+            '// 与节点中对应的名称一致',
+            '// 支持github markdown及latex',
+            '',
+            '// 图片元数据说明：以 # 开头的即为元数据',
+            '// 左中右对齐：left、center、right',
+            '// 浮动左右对齐：float-left、float-right',
+            '// 行内样式（即：inline-block），可图文混排，不设置则默认为 block',
+            '// 图片宽度设置，单位可为 px 或 %',
+            '// 同时指定宽度和高度',
+            '// 可同时指定多个元数据',
         ],
     ],
     [

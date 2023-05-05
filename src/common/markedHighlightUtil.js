@@ -197,6 +197,74 @@ class MarkedHighlightUtil {
                   return text;
                 }
 
+                console.log("img title is", title);
+                console.log("img txt is", text);
+                console.log("img txt is blank", ''=== text);
+
+
+
+                // 对图片文本中的元数据进行处理
+                // ![图片#640px*480px#center](xxx.jpg)
+                let style="";
+                let wrapperStyle="";
+                let handledTxt=text;
+                let display="block";
+                let wrap=false;
+
+                const metas=text.match(/[#][^#]+/g);
+                if(metas){
+                    metas.map(meta=>{
+                        handledTxt=handledTxt.replace(meta, "");
+                        return meta.substring(1).trim();
+                    }).forEach(meta=>{
+                        // 20px、50%
+                        if(/^[0-9]+(px|[%])$/.test(meta)){
+                            style+=`width:${meta};`;
+                            return;
+                        }
+                        // 20px*50px、30%*20px
+                        if(/^[0-9]+(px|[%])[*][0-9]+(px|[%])$/.test(meta)){
+                            const [w,h]=meta.split("*");
+                            style+=`width:${w};height:${h};`;
+                            return;
+                        }
+                        if('inline'===meta){
+                            display="inline-block";
+                            return;
+                        }
+                        if('float-left'===meta){
+                            style+="float:left;";
+                            display="block";
+                            return;
+                        }
+                        if('float-right'===meta){
+                            style+="float:right;";
+                            display="block";
+                            return;
+                        }
+                        // 左中右对齐，需要一个包裹元素，对齐样式设置在包裹元素上
+                        if('left'===meta){
+                            wrapperStyle+="text-align:left;";
+                            display="inline-block";
+                            wrap=true;
+                            return;
+                        }
+                        if('right'===meta){
+                            wrapperStyle+="text-align:right;";
+                            display="inline-block";
+                            wrap=true;
+                            return;
+                        }
+                        if('center'===meta){
+                            wrapperStyle+="text-align:center;";
+                            display="inline-block";
+                            wrap=true;
+                            return;
+                        }
+                    });
+                }
+                console.log("style", style);
+
                 let newHref=href;
                 let newHrefEx=href;
 
@@ -205,7 +273,10 @@ class MarkedHighlightUtil {
                     newHrefEx=tmp[0];
                     newHref=tmp[1];
                 }
-                const out = `<img class="${mdImgCls}" style="display:block;" src="${newHref}" srcex="${newHrefEx}" alt="${text}" title="${text}"/>`;
+                let out = `<img class="${mdImgCls}" style="display:${display};${style}" src="${newHref}" srcex="${newHrefEx}" alt="${handledTxt}" title="${handledTxt}"/>`;
+                if(wrap){
+                   out=`<div style="${wrapperStyle}">${out}</div>`;
+                }
                 return out;
             }
         }
