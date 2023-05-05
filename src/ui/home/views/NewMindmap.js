@@ -109,10 +109,10 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
             return ndExpBtnRenderer;
         }
         return (nd)=>(nd ? (nd.expand? "-":"+") : "");
-    },[ndExpBtnRenderer])  
-    
+    },[ndExpBtnRenderer])
 
 
+    console.log("数据。。。。。", ds);
 
     
     // 非正常状态时的渲染

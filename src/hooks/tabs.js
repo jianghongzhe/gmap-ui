@@ -37,9 +37,9 @@ export const useSelectFileListItem=()=>{
     
             //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
             let rootNd=mindmapSvc.parseRootNode(origintxts, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
-            console.log("rootnd",rootNd);
+            // console.log("rootnd",rootNd);
             let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
-            console.log("节点数量", ndsSet.list.length);
+            //console.log("节点数量", ndsSet.list.length);
 
 
 

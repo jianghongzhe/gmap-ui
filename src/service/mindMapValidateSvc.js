@@ -28,11 +28,10 @@ class MindMapValidateSvc{
             return "请输入图表的文本内容";
         }
         const result=this.validateForLintTooltip(txt);
-        console.log("rs", result);
         if(true===result){
             return true;
         }
-        return "内容中含有语法错误，不能保存";
+        return "内容中含有语法错误，无法正常加载";
     }
 
 
