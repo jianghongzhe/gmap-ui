@@ -158,17 +158,17 @@ class ShortcutLoader extends PartLoader{
         let tmpShorts=[];
         result.shortcuts.forEach(item=>{
             if('string'===typeof(item.url)){
-                item.url=this.replaceLinkAlias(item.url, result.alias);
+                item.url=replaceLinkAlias(item.url, result.alias);
                 tmpShorts.push(item);
                 return;
             }
             if(Array.isArray(item.url) && 1===item.url.length){
-                item.url=this.replaceLinkAlias(item.url[0], result.alias);
+                item.url=replaceLinkAlias(item.url[0], result.alias);
                 tmpShorts.push(item);
                 return;
             }
             if(Array.isArray(item.url) && 1<item.url.length){
-                item.url=item.url.map(eachUrl=>this.replaceLinkAlias(eachUrl, result.alias));
+                item.url=item.url.map(eachUrl=>replaceLinkAlias(eachUrl, result.alias));
                 tmpShorts.push(item);
                 return;
             }
@@ -177,13 +177,7 @@ class ShortcutLoader extends PartLoader{
     }
 
 
-    replaceLinkAlias=(url, alias)=>{
-        let [handled, hasVal, val]=linePartHandlers.handleOpener(`[link_name](${url})`, alias);
-        if(true===handled && true===hasVal){
-            return val.addr;
-        }
-        return url;
-    }
+
 }
 
 
@@ -285,6 +279,23 @@ class RefLoader extends PartLoader{
         //是新引用
         result.refs[tmp.currRefName] = line;
     }
+
+    /**
+     * 引用中出现的链接和图片进行别名替换
+     * @param result
+     */
+    postHandle=(result)=>{
+        for (const refName in result.refs) {
+            let content=result.refs[refName];
+            ((content.match(/\[[^\]]*\][(]([^)]+)[)]/g))??[]).forEach(item=>{
+                const originUrl=item.match(/^\[[^\]]*\][(]([^)]+)[)]$/)[1];
+                const replacedUrl= replaceLinkAlias(originUrl, result.alias);
+                const replacedItem= item.replace(`(${originUrl})`, `(${replacedUrl})`);
+                content=content.replace(item, replacedItem);
+            });
+            result.refs[refName]=content;
+        }
+    }
 }
 
 
@@ -338,6 +349,15 @@ class NdLineLoader extends PartLoader{
 
 
 
+const replaceLinkAlias=(url, alias)=>{
+    let [handled, hasVal, val]=linePartHandlers.handleOpener(`[link_name](${url})`, alias);
+    if(true===handled && true===hasVal){
+        return val.addr;
+    }
+    return url;
+}
+
+
 //竖线转义相差工具方法
 const vlineEscapeTxt='___vline___';
 const escapeVLineReg=/[\\][|]/g;
@@ -350,6 +370,7 @@ const unescapeVLineRestore=(str)=>str.replace(unescapeVLineReg,'\\|');
 
 /**
  * 引用各部分的加载器
+ * 其中别名要第一个加载，因为其它部分会用到
  * @type {(AliasLoader|ShortcutLoader|TRefLoader|RefLoader)[]}
  */
 const partLoaders=[
