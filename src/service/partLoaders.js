@@ -281,7 +281,8 @@ class RefLoader extends PartLoader{
     }
 
     /**
-     * 引用中出现的链接和图片进行别名替换
+     * 1、引用中出现的链接和图片进行别名替换；
+     * 2、对表格首行头一列中的图表元数据进行解析，插入图表相关代码
      * @param result
      */
     postHandle=(result)=>{
@@ -295,6 +296,38 @@ class RefLoader extends PartLoader{
             });
             result.refs[refName]=content;
         }
+
+
+
+
+        // 普通表格行匹配规则
+        const regCommonLine=/^[|](.*?[|])+$/;
+        // 表格行中的对齐行匹配规则
+        const regAlignLine=/^[|]([ :\-]+?[|])+$/;
+
+
+        for (const refName in result.refs) {
+            const lines=result.refs[refName].replace(/\r/g,'').split("\n");
+            for (let lineInd = 0; lineInd < lines.length; lineInd++) {
+                const line=lines[lineInd];
+                const trimLine=line.trim();
+
+
+                // TODO
+                //
+                if(regCommonLine.test(trimLine) && lines[lineInd+1] && regAlignLine.test(lines[lineInd+1].trim())){
+
+                }
+
+
+            }
+
+
+
+
+
+        }
+
     }
 }
 
