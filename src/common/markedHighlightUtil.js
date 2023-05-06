@@ -300,36 +300,36 @@ class MarkedHighlightUtil {
 
             // 从第一个单元格中提取元数据，同时记录去掉元数据后的单元格值
             const chartTypes=[];
+            const existChartType=(assignedType)=>chartTypes.some(eachType=>assignedType===eachType.type);
+
             let firstCellVal=lines?.[0]?.[0]??'';
             (firstCellVal.match(/[#][^#]+/g)??[]).map(meta=>{
                 firstCellVal=firstCellVal.replace(meta, '');
                 return meta.substring(1).trim();
             }).forEach(meta=>{
-                if('bar'===meta && !chartTypes.some(eachType=>'bar'===eachType.type)){
+                if(('bar'===meta || meta.startsWith("bar{")) && !existChartType('bar')){
+                    let opts=[];
+                    if(meta.startsWith("bar{")){
+                        opts=meta.substring("bar{".length, meta.indexOf("}")).trim()
+                            .split(",")
+                            .filter(v=>""!==v.trim());
+                    }
                     chartTypes.push({
                         type:'bar',
-                        opts:[],
+                        opts,
                     });
                     return;
                 }
-                if(meta.startsWith("bar{") && !chartTypes.some(eachType=>'bar'===eachType.type)){
-                    chartTypes.push({
-                        type: 'bar',
-                        opts: meta.substring("bar{".length, meta.indexOf("}")).trim().split(",").filter(v=>""!==v.trim()),
-                    });
-                    return;
-                }
-                if('line'===meta && !chartTypes.some(eachType=>'line'===eachType.type)){
+                if(('line'===meta || meta.startsWith("line{")) && !existChartType('line')){
+                    let opts=[];
+                    if(meta.startsWith("line{")){
+                        opts=meta.substring("line{".length, meta.indexOf("}")).trim()
+                            .split(",")
+                            .filter(v=>""!==v.trim());
+                    }
                     chartTypes.push({
                         type:'line',
-                        opts:[],
-                    });
-                    return;
-                }
-                if(meta.startsWith("line{") && !chartTypes.some(eachType=>'line'===eachType.type)){
-                    chartTypes.push({
-                        type: 'line',
-                        opts: meta.substring("line{".length, meta.indexOf("}")).trim().split(",").filter(v=>""!==v.trim()),
+                        opts,
                     });
                     return;
                 }
