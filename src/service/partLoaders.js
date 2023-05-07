@@ -331,21 +331,22 @@ class NdLineLoader extends PartLoader{
      * @param result
      */
     postHandle=(result)=>{
-        const tmp=[];
-        result.ndLines.forEach(({str, lineInd})=>{
-            if(0===tmp.length || str.trim().startsWith("- ")){
-                tmp.push({
+        result.ndLines=result.ndLines.reduce((accu, {str, lineInd}, ind)=>{
+            if(0===ind || str.trim().startsWith("- ")){
+                accu.push({
                     str,
                     lineInd,
                     lineInd2: lineInd,
                 });
-                return;
+                return accu;
             }
-            let target=tmp[tmp.length-1];
-            target.str+="|"+str;
-            target.lineInd2=lineInd;
-        });
-        result.ndLines=tmp;
+            let lastNode=accu[accu.length-1];
+            if(lastNode){
+                lastNode.str+="|"+str;
+                lastNode.lineInd2=lineInd;
+            }
+            return accu;
+        }, []);
     }
 }
 
