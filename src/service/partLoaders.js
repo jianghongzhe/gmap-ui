@@ -227,7 +227,7 @@ class TRefLoader extends PartLoader{
      */
     postHandle=(result)=>{
         // 文字引用直接替换到原文中
-        result.ndLines=result.ndLines.map(({str, lineInd})=>{
+        result.ndLines=result.ndLines.map(({str, lineInd, lineInd2})=>{
             let splitPos=str.indexOf("- ")+2;
             let front=str.substring(0,splitPos);
             let end="|"+escapeVLine(str.substring(splitPos).trim())+"|";
@@ -243,7 +243,8 @@ class TRefLoader extends PartLoader{
             }
             return {
                 str: front+unescapeVLineRestore(end.trim()),
-                lineInd
+                lineInd,
+                lineInd2,
             };
         });
     }
@@ -341,7 +342,7 @@ class NdLineLoader extends PartLoader{
                 return;
             }
             let target=tmp[tmp.length-1];
-            target.str=target.str+"|"+str;
+            target.str+="|"+str;
             target.lineInd2=lineInd;
         });
         result.ndLines=tmp;
