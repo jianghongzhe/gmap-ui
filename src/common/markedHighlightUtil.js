@@ -292,6 +292,7 @@ class MarkedHighlightUtil {
             });
 
             // 从第一个单元格中提取元数据，同时记录去掉元数据后的单元格值
+            // TODO 当为柱线混合图时，数据行第一列也会有元数据，都需要提取
             const chartTypes=[];
             const existChartType=(assignedType)=>chartTypes.some(eachType=>assignedType===eachType.type);
 
@@ -352,9 +353,13 @@ class MarkedHighlightUtil {
                     });
                     return;
                 }
+
+                // TODO 柱线混合图
             });
             firstCellVal=firstCellVal.trim();
 
+
+            // TODO 柱线混合图所有数据行第一列中也会有元数据，替换时一起处理
             // 替换表格html中第一个单元格的值为不带元数据的值
             const end=html.indexOf("</th>");
             const start= html.lastIndexOf(">",end)+1;
