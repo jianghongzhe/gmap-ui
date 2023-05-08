@@ -333,7 +333,21 @@ class MarkedHighlightUtil {
                     });
                     return;
                 }
+                if(('pie'===meta || meta.startsWith("pie{")) && !existChartType('pie')){
+                    let opts=[];
+                    if(meta.startsWith("pie{")){
+                        opts=meta.substring("pie{".length, meta.indexOf("}")).trim()
+                            .split(",")
+                            .filter(v=>""!==v.trim());
+                    }
+                    chartTypes.push({
+                        type:'pie',
+                        opts,
+                    });
+                    return;
+                }
             });
+            firstCellVal=firstCellVal.trim();
 
             // 替换表格html中第一个单元格的值为不带元数据的值
             const end=html.indexOf("</th>");
@@ -345,6 +359,11 @@ class MarkedHighlightUtil {
             chartTypes.forEach(({type,opts})=>{
                 // 柱状图和拆线图配置信息一致，一块处理
                 if('bar'===type || 'line'===type){
+                    // 需要有标题行和至少一个数据行
+                    if(lines.length<2){
+                        return;
+                    }
+
                     const isBar=('bar'===type);
 
                     // x轴的配置：  ,2015,2016,2017
@@ -353,7 +372,7 @@ class MarkedHighlightUtil {
                     // 数据行的配置：
                     // 苹果,25,30,40
                     // 桔子,20,40,70
-                    let dataLines=lines.filter((val,ind)=>ind>0).map(vals=> vals.map(v=>v.trim()).join(","));
+                    const dataLines=lines.filter((val,ind)=>ind>0).map(vals=> vals.map(v=>v.trim()).join(","));
 
                     const tmpId=`echart-${this.getNewId()}`;
                     extraContent+= `<div>
@@ -365,6 +384,37 @@ ${dataLines.join("\n")}
                         </div>
                         <div id='${tmpId}'></div>
                     </div>`;
+                    return;
+                }
+                if('pie'===type){
+                    // 需要有标题行和唯一一个数据行
+                    if(2!==lines.length){
+                        return;
+                    }
+                    const dataLines=[];
+                    const cols=Math.min(lines[0].length, lines[1].length);
+                    for (let i = 0; i < cols; ++i) {
+                        const value=lines[1][i].trim();
+                        let label=(0===i ? firstCellVal : lines[0][i].trim());
+                        if(!label.startsWith("\"")){
+                            label="\""+label;
+                        }
+                        if(!label.endsWith("\"")){
+                            label+="\"";
+                        }
+                        dataLines.push(`${label}:${value}`);
+                    }
+
+                    const tmpId=`echart-${this.getNewId()}`;
+                    extraContent+= `<div>
+                        <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>
+pie
+${opts.join("\n")}
+${dataLines.join("\n")}
+                        </div>
+                        <div id='${tmpId}'></div>
+                    </div>`;
+                    return;
                 }
             });
             return `${extraContent}${html}`;
