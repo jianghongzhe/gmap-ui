@@ -84,8 +84,7 @@ class MarkedHighlightUtil {
             return hljs.highlight(code, {language:validLanguage}).value;
         };
 
-        console.log("marked xxx", marked);
-        console.log("marked.Renderer", marked.Renderer);
+
 
         //渲染器实现，对原代码做如下修改：
         //1、解决marked生成的html中没有hljs样式的问题
@@ -196,12 +195,6 @@ class MarkedHighlightUtil {
                 if (href === null) {
                   return text;
                 }
-
-                console.log("img title is", title);
-                console.log("img txt is", text);
-                console.log("img txt is blank", ''=== text);
-
-
 
                 // 对图片文本中的元数据进行处理
                 // ![图片#640px*480px#center](xxx.jpg)
@@ -333,6 +326,19 @@ class MarkedHighlightUtil {
                     });
                     return;
                 }
+                if(('stack'===meta || meta.startsWith("stack{")) && !existChartType('stack')){
+                    let opts=[];
+                    if(meta.startsWith("stack{")){
+                        opts=meta.substring("stack{".length, meta.indexOf("}")).trim()
+                            .split(",")
+                            .filter(v=>""!==v.trim());
+                    }
+                    chartTypes.push({
+                        type:'stack',
+                        opts,
+                    });
+                    return;
+                }
                 if(('pie'===meta || meta.startsWith("pie{")) && !existChartType('pie')){
                     let opts=[];
                     if(meta.startsWith("pie{")){
@@ -358,7 +364,7 @@ class MarkedHighlightUtil {
             let extraContent='';
             chartTypes.forEach(({type,opts})=>{
                 // 柱状图和拆线图配置信息一致，一块处理
-                if('bar'===type || 'line'===type){
+                if('bar'===type || 'line'===type || 'stack'===type){
                     // 需要有标题行和至少一个数据行
                     if(lines.length<2){
                         return;
@@ -377,7 +383,7 @@ class MarkedHighlightUtil {
                     const tmpId=`echart-${this.getNewId()}`;
                     extraContent+= `<div>
                         <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>
-${isBar ? 'bar' : 'line'}
+${type}
 ${opts.join("\n")}
 ${xAxis}
 ${dataLines.join("\n")}

@@ -566,6 +566,7 @@ class EchartParser{
             opt.yAxis[0].name=yName;
             opt.yAxis[0].nameTextStyle={fontSize :15};
         }
+        // console.log("optopt", opt);
         return {w, h, opt};
     };
 }
