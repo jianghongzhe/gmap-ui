@@ -12,22 +12,9 @@
 
 
 
+![](assets/271b2ee628994969b8c81760c21e2981.jpg)
 
-
-|列头1#bar-line{w 50%}#line{w 30%}|2015|2016|
-|-|-:|-:|
-|数据1#stack:aa|20|30|
-|参考值#line|20|60|
-|数据3#stack:aa|40|30|
-|数据4#bar|40|30|
-
-
-|苹果#pie{w 40%}|桔子|梨|
-|-|-|-|
-|30|40|80|
-
-
-
+![图片](file:///C:/Users/Administrator/Desktop/test/bbb.jpg)
 
 ![aa#left#500px](imglink)
 

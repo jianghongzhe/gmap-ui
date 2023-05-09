@@ -278,6 +278,7 @@ class Api{
             })();
             return;
         }
+
         return ipcRenderer.invoke('openUrl', url);
     }
 

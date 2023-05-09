@@ -325,6 +325,18 @@ const getDefFormatImgExt=()=>{
     return userPngImg?".png":".jpg";
 }
 
+/**
+ * 是否是图片扩展名
+ */
+const isImgExt=(path)=> [
+    '.jpg',
+    '.gif',
+    '.png',
+    '.bmp',
+    '.svg',
+].some(eachExt=>path.trim().toLowerCase().endsWith(eachExt));
+
+
 const getTmpImgSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+getDefFormatImgExt()));
 
 const getTmpAttSavePath=()=>(path.join(workPath,"tmp_"+new Date().getTime()+".dat"));
@@ -735,7 +747,8 @@ const screenShotCombine=(opt)=>{
 
 
 /**
- * 打开指定url，如果是本地file://协议的资源，则使用fileRunner执行，否则使用默认的方式执行
+ * 打开指定url
+ * 对于 http://、https:// 协议及 file:/// 协议的图片文件，如果设置中指定了对应的打开方式，则使用之，否则再使用系统默认打开方式打开
  * @param {*} url 
  */
 const openUrl=(url)=>{
@@ -764,7 +777,20 @@ const openUrl=(url)=>{
         });
     }
     // 执行文件或打开目录
+    // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
     if(url.startsWith("file://")){
+        if(isImgExt(url)){
+            const imgOpener=getSettingValue("img_opener");
+            if('default'!==imgOpener){
+                const beginInd= (url.startsWith("file:///") ? "file:///".length : "file://".length);
+                return sendCmdToServer("openby", {url: `openby://${url.substring(beginInd)}@@${imgOpener}`,}).then(resp=>{
+                    if(resp && false===resp.succ){
+                        showNotification("操作有误", resp.msg, 'err');
+                    }
+                    return resp;
+                });
+            }
+        }
         return sendCmdToServer("file", {url}).then(resp=>{
             if(resp && false===resp.succ){
                 showNotification("操作有误", resp.msg, 'err');
@@ -1360,6 +1386,9 @@ const baseFillSettingItems=(item)=>{
     }
     if('undefined'===typeof(item.settings.url_opener)){
         item.settings.url_opener='default';
+    }
+    if('undefined'===typeof(item.settings.img_opener)){
+        item.settings.img_opener='default';
     }
 };
 
