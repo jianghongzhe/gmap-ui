@@ -1,22 +1,23 @@
-- aaasss|ref:aaasss
-  aaa
-  bbb
-	- sss
+- aaasss|[](cmdp://haha)
+	- aaa
+	- bbb
+		- sss
 
 ***
 
 # alias
 [imglink]: https://gitee.com/static/images/logo-black.svg
 
+[haha]:
+```
+dir
+ping 127.0.0.1
+```
+
+```bat
+echo "qqqq"
+```
+
+
+
 # ref:aaasss
-
-
-
-![](assets/271b2ee628994969b8c81760c21e2981.jpg)
-
-![图片](file:///C:/Users/Administrator/Desktop/test/bbb.jpg)
-
-![aa#left#500px](imglink)
-
-
-[click](imglink)

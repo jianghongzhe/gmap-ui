@@ -75,17 +75,51 @@ class AliasLoader extends PartLoader{
             tmp.currAliasName=matchResult[1].trim();
             const firstLine=matchResult[2].trim();
             if(!this.isCommentLine(firstLine)){
-                result.alias[tmp.currAliasName]=firstLine;
+                result.alias[tmp.currAliasName]=[firstLine];
             }
             return;
         }
         if(''!==trimLine && !this.isCommentLine(trimLine) && tmp.currAliasName){
             if("undefined"!== typeof(result.alias[tmp.currAliasName])){
-                result.alias[tmp.currAliasName]+=" \\"+trimLine;
+                result.alias[tmp.currAliasName].push(trimLine);
                 return;
             }
-            result.alias[tmp.currAliasName]=trimLine;
+            result.alias[tmp.currAliasName]=[trimLine];
             return;
+        }
+    }
+
+
+    /**
+     * 把数组转换为字符串；
+     * 如果出现 ``` 包裹的内容，则只取其中的内容作为有效内容，其它内容忽略
+     * @param result
+     */
+    postHandle=(result)=>{
+        for (const key in result.alias) {
+            let hasStartSymbol=false;
+            let hasEndSymbol=false;
+            let cutBeginLine=0;
+            let cutEndLine=result.alias[key].length;
+
+            result.alias[key].forEach((line,lineInd)=>{
+                if(hasStartSymbol && hasEndSymbol){
+                    return;
+                }
+                // 开始截取位置为 ```bat 行的下一行
+                if(!hasStartSymbol && /^```[^`]*$/.test(line.trim())){
+                    cutBeginLine=lineInd+1;
+                    hasStartSymbol=true;
+                    return;
+                }
+                // 结束截取位置为开始位置之后的 ``` 行
+                if(hasStartSymbol && /^```$/.test(line.trim())){
+                    cutEndLine=lineInd;
+                    hasEndSymbol=true;
+                    return;
+                }
+            });
+            result.alias[key]=result.alias[key].splice(cutBeginLine, cutEndLine-cutBeginLine).join(" \\");
         }
     }
 
