@@ -5,10 +5,10 @@
 
 ***
 # shortcuts
-- [百度#confirm](https://baidu.com)
+- [百度#confirm](https://baidu.c{{o}}m)
 - 组合
-	- [ss](file:///notepad)
-	- [bb#confirm](file:///emeditor)
+	- [ss](file:///notep{{a}}d)
+	- [bb](file:///emed{{i}}tor)
 
 
 # ref:aaasss

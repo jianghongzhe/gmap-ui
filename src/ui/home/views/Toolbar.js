@@ -28,6 +28,7 @@ import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 import {useMemoizedFn} from "ahooks";
 import loadMetadata from "../../../common/metadataLoader";
+import strTmpl from '../../../common/strTmpl';
 
 
 const { Header } = Layout;
@@ -63,7 +64,19 @@ const Toolbar=({
     const restoreDefaultExpandState= useRestoreDefaultExpandState();
     const currPane= useRecoilValue(tabCurrPane);
 
-
+    /**
+     * 有效的快捷方式：
+     * 是单个链接，则直接保留
+     * 是一组链接，去掉其中带有插值表达式的项，如果还有其余的项，则把这些项保留
+     * @type {unknown}
+     */
+    const validShortCuts=useMemo(()=>{
+        // TODO
+        if(currPane?.ds?.tree?.shortcuts?.length>0){
+            return [];
+        }
+        return [];
+    },[currPane]);
 
 
     return (
@@ -100,6 +113,7 @@ const Toolbar=({
             <ToolbarItem title='帮助' icon={<QuestionOutlined />} onClick={onOpenHelpDlg}/>
 
             {/* 快捷方式：随当前导图而变化 */}
+            {/* TODO */}
             {
                 (currPane?.ds?.tree?.shortcuts?.length>0) && <React.Fragment>
                     <Divider type="vertical" className='divider'/>
@@ -118,32 +132,39 @@ const Toolbar=({
 
 
 const ShortcutItem=({name, url, subNames, onClick})=>{
-    const [localIcon] = useLoadIcon({lindAddr: Array.isArray(url) ? "group_links" : url});
+
+
+    // TODO 有效性判断移到上面组件中完成。。。。
 
     /**
      * urlTxt: 显示的url地址，如果只有一个地址，则直接显示，否则用 + 连接起来显示
      * handledName: 显示的链接名称，如果是单个链接，则显示去掉元数据后的值，否则直接显示
      * needConfirm: 是否需要确认后再执行；如果是单个链接，则名称中包含指定元数据则需要，如果是多个链接，则任何一个名称中包含指定元数据则需要
      */
-    const [urlTxt, handledName, needConfirm]=useMemo(()=>{
-        let handledName=name;
-        let handledUrl=url;
-        let needConfirm=false;
-
+    const [factUrl, urlToShow, nameToShow, needConfirm, valid]=useMemo(()=>{
         if(Array.isArray(url)){
-            handledUrl= url.join(" + ");
-            if(subNames.some(subName=>loadMetadata(subName)[1].includes("confirm"))){
-                needConfirm=true;
-            }
+            // [ {eachName,eachUrl} ]  排除掉带有插值表达式的项
+            const list=subNames.map((subName,ind)=>({eachName:subName, eachUrl:url[ind]}))
+                .filter(({eachName,eachUrl},ind)=> !strTmpl.containsParam(eachUrl));
+            const valid=(list.length>0);
+            const needConfirm=(list.some(({eachName})=>loadMetadata(eachName)[1].includes("confirm")));
+            const nameToShow=name.trim();
+            let factUrl=list.map(({eachUrl})=>eachUrl);
+            const urlToShow=factUrl.join(" + ");
+            factUrl=(1===factUrl.length ? factUrl[0] : factUrl);
+            return [factUrl, urlToShow, nameToShow, needConfirm, valid];
         }else{
-            let metas=null;
-            [handledName, metas]=loadMetadata(name);
-            if(metas.includes("confirm")){
-                needConfirm=true;
-            }
+            const valid=!strTmpl.containsParam(url);
+            let [nameToShow, metas]=loadMetadata(name);
+            const needConfirm=metas.includes("confirm");
+            const urlToShow=url;
+            const factUrl=url;
+            return [factUrl, urlToShow, nameToShow, needConfirm, valid];
         }
-        return [handledUrl, handledName, needConfirm];
     },[name, url, subNames]);
+
+
+    const [localIcon] = useLoadIcon({lindAddr: Array.isArray(factUrl) ? "group_links" : factUrl});
 
 
     /**
@@ -151,13 +172,13 @@ const ShortcutItem=({name, url, subNames, onClick})=>{
      *
      * @type {(function(*): void)|*}
      */
-    const onClickAggr=useMemoizedFn((url)=>{
+    const onClickAggr=useMemoizedFn(()=>{
         const func=()=>{
-            if(Array.isArray(url)){
-                url.forEach(eachUrl=>onClick(eachUrl));
+            if(Array.isArray(factUrl)){
+                factUrl.forEach(eachUrl=>onClick(eachUrl));
                 return;
             }
-            onClick(url);
+            onClick(factUrl);
         };
         if(needConfirm){
             confirm({
@@ -173,7 +194,8 @@ const ShortcutItem=({name, url, subNames, onClick})=>{
 
 
 
-    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
+    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type) || !valid){
+        console.log("无效。。。。。", valid)
         return null;
     }
 
@@ -188,7 +210,7 @@ const ShortcutItem=({name, url, subNames, onClick})=>{
     if('icon'===localIcon.type){
         const IconComp=localIcon.compType;
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${handledName}  ${urlTxt}`}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${nameToShow}  ${urlToShow}`}>
                 <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}/>
             </Tooltip>
         );
@@ -203,7 +225,7 @@ const ShortcutItem=({name, url, subNames, onClick})=>{
      */
     if('image'===localIcon.type){
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${handledName}  ${urlTxt}`}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${nameToShow}  ${urlToShow}`}>
                 <Button shape='circle' className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}>
                     <Avatar src={localIcon.url} size='small'/>
                 </Button>
