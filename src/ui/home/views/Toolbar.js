@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Avatar, Button, Divider, Layout, Tooltip, Typography} from 'antd';
+import {Avatar, Button, Divider, Layout, Tooltip, Typography, Modal} from 'antd';
 import {
     CameraOutlined,
     CloudSyncOutlined,
@@ -27,9 +27,12 @@ import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 import {useMemoizedFn} from "ahooks";
+import loadMetadata from "../../../common/metadataLoader";
+
 
 const { Header } = Layout;
 const {  Text } = Typography;
+const { confirm } = Modal;
 
 /**
  * 工具栏
@@ -103,7 +106,7 @@ const Toolbar=({
                     <Text style={{marginLeft:'14px',fontSize:'16px',lineHeight:'20px',}}>快捷入口：</Text>
                     {
                         currPane.ds.tree.shortcuts.map((shortItem, shortInd)=>(
-                            <ShortcutItem key={`shortcutbtn-${shortInd}`} name={shortItem.name} url={shortItem.url} onClick={onOpenLink}/>
+                            <ShortcutItem key={`shortcutbtn-${shortInd}`} name={shortItem.name} url={shortItem.url} subNames={shortItem.subNames} onClick={onOpenLink}/>
                         ))
                     }
                 </React.Fragment>
@@ -114,23 +117,61 @@ const Toolbar=({
 
 
 
-const ShortcutItem=({name, url, onClick})=>{
+const ShortcutItem=({name, url, subNames, onClick})=>{
     const [localIcon] = useLoadIcon({lindAddr: Array.isArray(url) ? "group_links" : url});
 
-    const onClickAggr=useMemoizedFn((url)=>{
+    /**
+     * urlTxt: 显示的url地址，如果只有一个地址，则直接显示，否则用 + 连接起来显示
+     * handledName: 显示的链接名称，如果是单个链接，则显示去掉元数据后的值，否则直接显示
+     * needConfirm: 是否需要确认后再执行；如果是单个链接，则名称中包含指定元数据则需要，如果是多个链接，则任何一个名称中包含指定元数据则需要
+     */
+    const [urlTxt, handledName, needConfirm]=useMemo(()=>{
+        let handledName=name;
+        let handledUrl=url;
+        let needConfirm=false;
+
         if(Array.isArray(url)){
-            url.forEach(eachUrl=>onClick(eachUrl));
+            handledUrl= url.join(" + ");
+            if(subNames.some(subName=>loadMetadata(subName)[1].includes("confirm"))){
+                needConfirm=true;
+            }
+        }else{
+            let metas=null;
+            [handledName, metas]=loadMetadata(name);
+            if(metas.includes("confirm")){
+                needConfirm=true;
+            }
+        }
+        return [handledUrl, handledName, needConfirm];
+    },[name, url, subNames]);
+
+
+    /**
+     * 点击事件聚合处理，相当于每个链接执行一次，总体执行前先判断是否需要确认
+     *
+     * @type {(function(*): void)|*}
+     */
+    const onClickAggr=useMemoizedFn((url)=>{
+        const func=()=>{
+            if(Array.isArray(url)){
+                url.forEach(eachUrl=>onClick(eachUrl));
+                return;
+            }
+            onClick(url);
+        };
+        if(needConfirm){
+            confirm({
+                title: '确定要打开如下链接吗？',
+                content: Array.isArray(url) ? <div>{url.map(eachUrl=><div>{eachUrl}</div>)}</div> : url,
+                onOk: () => func(),
+                maskClosable: true,
+            });
             return;
         }
-        onClick(url);
+        func();
     });
 
-    const urlTxt=useMemo(()=>{
-        if(Array.isArray(url)){
-            return url.join(" + ");
-        }
-        return url;
-    },[url]);
+
 
     if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
         return null;
@@ -147,7 +188,7 @@ const ShortcutItem=({name, url, onClick})=>{
     if('icon'===localIcon.type){
         const IconComp=localIcon.compType;
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${urlTxt}`}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${handledName}  ${urlTxt}`}>
                 <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}/>
             </Tooltip>
         );
@@ -162,7 +203,7 @@ const ShortcutItem=({name, url, onClick})=>{
      */
     if('image'===localIcon.type){
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${name}  ${urlTxt}`}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${handledName}  ${urlTxt}`}>
                 <Button shape='circle' className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}>
                     <Avatar src={localIcon.url} size='small'/>
                 </Button>

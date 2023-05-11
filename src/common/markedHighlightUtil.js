@@ -3,6 +3,7 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import tableEnh from './tableEnh';
+import loadMetaData from './metadataLoader';
 
 /**
  * marked结合hljs实现语法高亮与点击事件处理等功能
@@ -199,65 +200,58 @@ class MarkedHighlightUtil {
 
                 // 对图片文本中的元数据进行处理
                 // ![图片#640px*480px#center](xxx.jpg)
+                const [handledTxt, metas]=loadMetaData(text);
                 let style="";
                 let wrapperStyle="";
-                let handledTxt=text;
                 let display="block";
                 let wrap=false;
 
-                const metas=text.match(/[#][^#]+/g);
-                if(metas){
-                    metas.map(meta=>{
-                        handledTxt=handledTxt.replace(meta, "");
-                        return meta.substring(1).trim();
-                    }).forEach(meta=>{
-                        // 20px、50%
-                        if(/^[0-9]+(px|[%])$/.test(meta)){
-                            style+=`width:${meta};`;
-                            return;
-                        }
-                        // 20px*50px、30%*20px
-                        if(/^[0-9]+(px|[%])[*][0-9]+(px|[%])$/.test(meta)){
-                            const [w,h]=meta.split("*");
-                            style+=`width:${w};height:${h};`;
-                            return;
-                        }
-                        if('inline'===meta){
-                            display="inline-block";
-                            return;
-                        }
-                        if('float-left'===meta){
-                            style+="float:left;";
-                            display="block";
-                            return;
-                        }
-                        if('float-right'===meta){
-                            style+="float:right;";
-                            display="block";
-                            return;
-                        }
-                        // 左中右对齐，需要一个包裹元素，对齐样式设置在包裹元素上
-                        if('left'===meta){
-                            wrapperStyle+="text-align:left;";
-                            display="inline-block";
-                            wrap=true;
-                            return;
-                        }
-                        if('right'===meta){
-                            wrapperStyle+="text-align:right;";
-                            display="inline-block";
-                            wrap=true;
-                            return;
-                        }
-                        if('center'===meta){
-                            wrapperStyle+="text-align:center;";
-                            display="inline-block";
-                            wrap=true;
-                            return;
-                        }
-                    });
-                }
-
+                metas.forEach(meta=>{
+                    // 20px、50%
+                    if(/^[0-9]+(px|[%])$/.test(meta)){
+                        style+=`width:${meta};`;
+                        return;
+                    }
+                    // 20px*50px、30%*20px
+                    if(/^[0-9]+(px|[%])[*][0-9]+(px|[%])$/.test(meta)){
+                        const [w,h]=meta.split("*");
+                        style+=`width:${w};height:${h};`;
+                        return;
+                    }
+                    if('inline'===meta){
+                        display="inline-block";
+                        return;
+                    }
+                    if('float-left'===meta){
+                        style+="float:left;";
+                        display="block";
+                        return;
+                    }
+                    if('float-right'===meta){
+                        style+="float:right;";
+                        display="block";
+                        return;
+                    }
+                    // 左中右对齐，需要一个包裹元素，对齐样式设置在包裹元素上
+                    if('left'===meta){
+                        wrapperStyle+="text-align:left;";
+                        display="inline-block";
+                        wrap=true;
+                        return;
+                    }
+                    if('right'===meta){
+                        wrapperStyle+="text-align:right;";
+                        display="inline-block";
+                        wrap=true;
+                        return;
+                    }
+                    if('center'===meta){
+                        wrapperStyle+="text-align:center;";
+                        display="inline-block";
+                        wrap=true;
+                        return;
+                    }
+                });
 
                 let newHref=href;
                 let newHrefEx=href;
@@ -280,202 +274,6 @@ class MarkedHighlightUtil {
             let html= `<table><thead>${header}</thead>${body}</table>`;
             const idCreater=()=>`echart-${this.getNewId()}`;
             return tableEnh(html, idCreater);
-
-
-
-//             const metas=[];
-//             const barLineSeriesConfig=[];
-//             const lines=[];
-//             const tableEle=new DOMParser().parseFromString(html, "text/html").querySelector("table");
-//             let hasBarLineChart=false;
-//             tableEle.querySelectorAll("tr").forEach((tr,rowInd)=>{
-//                 const line=[];
-//                 tr.querySelectorAll("th,td").forEach((td,colInd)=>{
-//                     const originVal=td.innerHTML.trim();
-//                     let val=originVal;
-//
-//                     // 首行第一列为图表元数据，如果其中有柱线混合图则记录一个标识
-//                     if(0===colInd && 0===rowInd){
-//                         (val.match(/[#][^#]+/g)??[]).forEach(meta=>{
-//                             val=val.replace(meta, "");
-//                             metas.push(meta.trim());
-//                             if(meta.includes("#bar-line")) {
-//                                 hasBarLineChart = true;
-//                             }
-//                         });
-//                     }
-//                     // 如果图表元数据中包含柱线混合图，则第二行到最后一行的第一列中都包含系列相关的配置
-//                     if(0===colInd && 0<rowInd && hasBarLineChart){
-//                         (val.match(/[#][^#]+/g)??[]).filter((ele,ind)=>ind<1).forEach(meta=>{
-//                             val=val.replace(meta, "");
-//                             barLineSeriesConfig.push(meta.substring(1).trim());
-//                         });
-//                     }
-//                     // 如果去掉元数据后的单元格值与之前不同，则修改
-//                     if(val!==originVal){
-//                         td.innerHTML=val;
-//                     }
-//                     line.push(val);
-//                 });
-//                 lines.push(line);
-//             });
-//
-//
-//
-//             // 从第一个单元格中提取元数据，同时记录去掉元数据后的单元格值
-//             // TODO 当为柱线混合图时，数据行第一列也会有元数据，都需要提取
-//             const chartTypes=metas.map(meta=>meta.substring(1).trim()).reduce((currChartTypes, meta)=>{
-//                 let opts=[];
-//                 let type=meta;
-//                 const ind1= meta.indexOf("{");
-//                 if(0<ind1){
-//                     const ind2= meta.indexOf("}", ind1);
-//                     opts=meta.substring(ind1+1, ind2).trim()
-//                         .split(",")
-//                         .filter(v=>""!==v.trim());
-//                     type=meta.substring(0, ind1);
-//                 }
-//                 if(!currChartTypes.some(eachType=>type===eachType.type)){
-//                     currChartTypes.push({
-//                         type,
-//                         opts,
-//                         serialConfig: 'bar-line'===type ? barLineSeriesConfig : null,
-//                     });
-//                 }
-//                 return currChartTypes;
-//             },[]);
-//
-//             console.log("chartTypes.....", chartTypes);
-//
-//
-//
-//
-//             // 根据图表元数据和解析得到的单元格数据计算出图表的html文本
-//             let extraContent='';
-//             chartTypes.forEach(({type,opts,serialConfig})=>{
-//                 // 柱状图和拆线图配置信息一致，一块处理
-//                 if('bar'===type || 'line'===type || 'stack'===type){
-//                     // 需要有标题行和至少一个数据行
-//                     if(lines.length<2){
-//                         return;
-//                     }
-//
-//
-//
-//                     // x轴的配置：  ,2015,2016,2017
-//                     const xAxis= lines[0].map((val,ind)=>(0===ind ? '' : val.trim())).join(',');
-//
-//                     // 数据行的配置：
-//                     // 苹果,25,30,40
-//                     // 桔子,20,40,70
-//                     const dataLines=lines.filter((val,ind)=>ind>0).map(vals=> vals.map(v=>v.trim()).join(","));
-//
-//                     const tmpId=`echart-${this.getNewId()}`;
-//                     extraContent+= `<div>
-//                         <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>
-// ${type}
-// ${opts.join("\n")}
-// ${xAxis}
-// ${dataLines.join("\n")}
-//                         </div>
-//                         <div id='${tmpId}'></div>
-//                     </div>`;
-//                     return;
-//                 }
-//                 if('pie'===type){
-//                     // 需要有标题行和唯一一个数据行
-//                     if(2!==lines.length){
-//                         return;
-//                     }
-//                     const dataLines=[];
-//                     const cols=Math.min(lines[0].length, lines[1].length);
-//                     for (let i = 0; i < cols; ++i) {
-//                         const value=lines[1][i].trim();
-//                         let label=lines[0][i].trim();
-//                         if(!label.startsWith("\"")){
-//                             label="\""+label;
-//                         }
-//                         if(!label.endsWith("\"")){
-//                             label+="\"";
-//                         }
-//                         dataLines.push(`${label}:${value}`);
-//                     }
-//
-//                     const tmpId=`echart-${this.getNewId()}`;
-//                     extraContent+= `<div>
-//                         <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>
-// pie
-// ${opts.join("\n")}
-// ${dataLines.join("\n")}
-//                         </div>
-//                         <div id='${tmpId}'></div>
-//                     </div>`;
-//                     return;
-//                 }
-//                 if('bar-line'===type){
-//                     // 柱线图每个数据行都要指定分类
-//                     if(serialConfig.length!==lines.length-1){
-//                         return;
-//                     }
-//
-//                     // x轴的配置：  ,2015,2016,2017
-//                     const xAxis= lines[0].map((val,ind)=>(0===ind ? '' : val.trim())).join(',');
-//
-//                     // stack 食品
-//                     // - bar,三餐,500,400,300
-//                     // - bar,食品,500,400,300
-//                     // bar,娱乐,600,400,600
-//                     // line,参考值,500,200,300
-//                     const dataLines=[];
-//                     const cates=[];
-//                     lines.filter((val,ind)=>ind>0).forEach((val,ind)=>{
-//                         if('bar'===serialConfig[ind] || 'line'===serialConfig[ind]){
-//                             cates.push({
-//                                 type: '',
-//                                 txt:  [serialConfig[ind], ...val].join(",")
-//                             });
-//                             return;
-//                         }
-//                         if(serialConfig[ind].startsWith("stack:")){
-//                             const groupName=serialConfig[ind].substring("stack:".length).trim();
-//                             const existItem= cates.find(cate=>groupName===cate.type);
-//                             if(existItem){
-//                                 existItem.txt.push(['- bar', ...val].join(","));
-//                                 return;
-//                             }
-//                             cates.push({
-//                                 type:groupName,
-//                                 txt:[
-//                                     `stack ${groupName}`,
-//                                     ['- bar', ...val].join(","),
-//                                 ],
-//                             });
-//                         }
-//                     });
-//                     cates.forEach(cate=>{
-//                         if(''===cate.type){
-//                             dataLines.push(cate.txt);
-//                             return ;
-//                         }
-//                         cate.txt.forEach(eachLine=>dataLines.push(eachLine));
-//                     });
-//
-//
-//                     const tmpId=`echart-${this.getNewId()}`;
-//                     extraContent+= `<div>
-//                         <div class="echart-graph" style='display:none;' targetid='${tmpId}' handled='false'>
-// bar-line
-// ${opts.join("\n")}
-// ${xAxis}
-// ${dataLines.join("\n")}
-//
-//                         </div>
-//                         <div id='${tmpId}'></div>
-//                     </div>`;
-//                     return;
-//                 }
-//             });
-//             return `${extraContent}${tableEle.outerHTML}`;
         }
 
 

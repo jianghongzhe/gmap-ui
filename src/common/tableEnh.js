@@ -1,3 +1,5 @@
+import loadMetaData, {parseMetadata} from './metadataLoader';
+
 /**
  * 对表格html串增强：
  * 通过提取表格中的元数据信息，生成对应的echart图html串并插入原html串中
@@ -18,7 +20,7 @@ const innerEnhancer=(html, idCreater)=>{
     // 提取表格中的元数据
     // 提取表格中的数据（去掉元数据后的值）
     // 去掉表格对象中的元数据
-    const metas=[];
+    let metas=[];
     const barLineSeriesConfig=[];
     const lines=[];
     const tableEle=new DOMParser().parseFromString(html, "text/html").querySelector("table");
@@ -31,20 +33,16 @@ const innerEnhancer=(html, idCreater)=>{
 
             // 首行第一列为图表元数据，如果其中有柱线混合图则记录一个标识
             if(0===colInd && 0===rowInd){
-                (val.match(/[#][^#]+/g)??[]).forEach(meta=>{
-                    val=val.replace(meta, "");
-                    metas.push(meta.substring(1).trim());
-                    if(meta.includes("#bar-line")) {
-                        hasBarLineChart = true;
-                    }
-                });
+                [val, metas]=loadMetaData(val);
+                hasBarLineChart=metas.some(meta=>"bar-line"===meta || meta.startsWith("bar-line{"));
             }
-            // 如果图表元数据中包含柱线混合图，则第二行到最后一行的第一列中都包含系列相关的配置
+            // 如果图表元数据中包含柱线混合图，则第二行到最后一行的第一列中都包含系列相关的配置元数据，且每个格只取第一个元数据
             if(0===colInd && 0<rowInd && hasBarLineChart){
-                (val.match(/[#][^#]+/g)??[]).filter((ele,ind)=>ind<1).forEach(meta=>{
-                    val=val.replace(meta, "");
-                    barLineSeriesConfig.push(meta.substring(1).trim());
-                });
+                let tmp=null;
+                [val, tmp]=loadMetaData(val);
+                if(0<tmp.length){
+                    barLineSeriesConfig.push(tmp[0]);
+                }
             }
             // 如果去掉元数据后的单元格值与之前不同，则修改
             if(val!==originVal){
@@ -59,16 +57,7 @@ const innerEnhancer=(html, idCreater)=>{
 
     // 解析元数据 {type, opts, serialConfig}
     const chartTypes=metas.reduce((currChartTypes, meta)=>{
-        let opts=[];
-        let type=meta;
-        const ind1= meta.indexOf("{");
-        if(0<ind1){
-            const ind2= meta.indexOf("}", ind1);
-            opts=meta.substring(ind1+1, ind2).trim()
-                .split(",")
-                .filter(v=>""!==v.trim());
-            type=meta.substring(0, ind1);
-        }
+        const {type, opts}=parseMetadata(meta);
         if(!currChartTypes.some(eachType=>type===eachType.type)){
             currChartTypes.push({
                 type,

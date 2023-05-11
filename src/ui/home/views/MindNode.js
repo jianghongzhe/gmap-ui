@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Button,Tooltip, Progress  } from 'antd';
+import { Button,Tooltip, Progress,Modal  } from 'antd';
 import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import {marked} from 'marked';
 import NodeLinkIcon from './NodeLinkIcon';
@@ -8,6 +8,10 @@ import {useMemoizedFn, useRafState} from "ahooks";
 import strTmpl from "../../../common/strTmpl";
 import api from "../../../service/api";
 import styles from './MindNode.module.scss';
+import loadMetadata from "../../../common/metadataLoader";
+
+
+const { confirm } = Modal;
 
 /**
  * 导图的节点
@@ -286,6 +290,13 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
         ];
     });
 
+    const [handledLinkName, needConfirmBeforeClick]= useMemo(()=>{
+        // link.name
+        const [handledLinkName, metas]=loadMetadata(link.name);
+        console.log("需要确认?",link.addr+" "+ metas.includes("confirm"));
+        return [handledLinkName, metas.includes("confirm")];
+    },[link]);
+
 
     if(isFileExtProtocol(link.addr)){
         return <React.Fragment key={'link-'+linkInd}>
@@ -314,17 +325,29 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
             }
         </React.Fragment>
     }
-    return <LinkItem key={'link-'+linkInd} tooltip={link.name ? link.name+"  "+link.addr:link.addr} addr={link.addr} openLinkFunc={onOpenLink.bind(this,link.addr)}/>;
+    return <LinkItem key={'link-'+linkInd} needConfirm={needConfirmBeforeClick} tooltip={handledLinkName ? handledLinkName+"  "+link.addr:link.addr} addr={link.addr} openLinkFunc={onOpenLink.bind(this,link.addr)}/>;
 };
 
 
 
-const LinkItem=({tooltip, addr, openLinkFunc})=> {
+const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
     /**
      * 右键菜单相关的数据项
      */
     const [ctxMenuItems, setCtxMenuItems] = useRafState([]);
 
+    const delegateClick= useMemoizedFn((arg)=>{
+        if(needConfirm){
+            confirm({
+                title: '确定要打开该链接吗？',
+                content: addr,
+                onOk:()=> openLinkFunc(arg),
+                maskClosable: true,
+            });
+            return;
+        }
+        openLinkFunc(arg);
+    });
 
 
     const onOpenChange=useMemoizedFn((open)=>{
@@ -373,7 +396,7 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
             </div>
         } >
             <span className={styles.themeBtnWrapper}>
-                <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
+                <NodeLinkIcon lindAddr={addr} onClick={delegateClick}/>
             </span>
         </Tooltip>
     );
@@ -390,26 +413,50 @@ const LinkItem=({tooltip, addr, openLinkFunc})=> {
  */
 const GroupLinkItem=({links, openLinkFunc})=>{
     /**
-     * 排除掉带有占位符的项，增加trimedAddr项，表示原始链接
+     * validLinks: 排除掉带有占位符的项，增加trimedAddr项，表示原始链接
+     * title: 有名称且不是[打开]就显示名字，否则显示链接地址，多个之间以 + 连接
+     * needConfirm: validLinks中有任何一个名称中带有 confirm 元数据，则需要确认后才能打开
      */
-    const validLinks=useMemo(
-        ()=> links.filter(lk=>!strTmpl.containsParam(lk.addr)).map(lk=>({...lk, trimedAddr: lk.addr.substring("grp://".length)})),
+    const [validLinks, title, needConfirm]=useMemo(
+        ()=> {
+            let needConfirm=false;
+            const validLinks=links.filter(lk=>!strTmpl.containsParam(lk.addr))
+                .map(lk=>{
+                    const [newName, metas]=loadMetadata(lk.name);
+                    if(metas.includes("confirm")){
+                        needConfirm=true;
+                    }
+                    return {
+                        ...lk,
+                        name: newName,
+                        trimedAddr: lk.addr.substring("grp://".length)
+                    };
+                });
+            const title=validLinks.map(lk=>(lk.name && '打开'!==lk.name ? lk.name : lk.trimedAddr)).join(" + ");
+            return [validLinks, title, needConfirm];
+        },
         [links]
     );
 
-    /**
-     * tooptip：有名称且不是[打开]就显示名字，否则显示链接地址
-     */
-    const title=useMemo(
-        ()=> validLinks.map(lk=>(lk.name && '打开'!==lk.name ? lk.name : lk.trimedAddr)).join(" + "),
-        [validLinks]
-    );
+
 
     /**
      * 点击事件，相当于每个链接分别点一次
      * @type {function(): *}
      */
-    const openMultiLinks=useMemoizedFn(()=>validLinks.forEach(lk=> openLinkFunc(lk.trimedAddr)));
+    const openMultiLinks=useMemoizedFn(()=>{
+        const func=()=>validLinks.forEach(lk=> openLinkFunc(lk.trimedAddr));
+        if(needConfirm) {
+            confirm({
+                title: '确定要打开如下链接吗？',
+                content: <div>{validLinks.map(lk=><div>{lk.trimedAddr}</div>)}</div>,
+                onOk: () => func(),
+                maskClosable: true,
+            });
+            return;
+        }
+        func();
+    });
 
     if(null===validLinks || 0===validLinks.length){
         return null;

@@ -160,7 +160,7 @@ class ShortcutLoader extends PartLoader{
         if(matchResult && matchResult[1] && matchResult[2]){
             const name=matchResult[1].trim();
             const url=matchResult[2].trim();
-            result.shortcuts.push({name,url});
+            result.shortcuts.push({name,url,subNames:null});
             return;
         }
 
@@ -168,13 +168,14 @@ class ShortcutLoader extends PartLoader{
         matchResult=line.match(/^\t[-] \[(.*)\]\((.+)\)[ 　\t]*$/);
         if(matchResult && matchResult[2] && tmp.currShortcutItem){
             tmp.currShortcutItem.url.push(matchResult[2].trim());
+            tmp.currShortcutItem.subNames.push(matchResult[1].trim());
             return;
         }
 
         // - 名称
         matchResult=line.match(/^[-] (.+)[ 　\t]*$/);
         if(matchResult && matchResult[1]){
-            tmp.currShortcutItem={name:matchResult[1].trim(), url:[]}
+            tmp.currShortcutItem={name:matchResult[1].trim(), url:[], subNames:[]}
             result.shortcuts.push(tmp.currShortcutItem);
             return;
         }
