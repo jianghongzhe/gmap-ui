@@ -184,111 +184,111 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
  * 4、否则，生成一个链接
  */
 const LinkComplexItem=({link, linkInd, onOpenLink})=>{
-    const isFileExtProtocol=useMemoizedFn((addr)=>{
-        return (addr.startsWith("fileext://") || addr.startsWith("filex://"));
-    });
-
-    const isDirExtProtocol=useMemoizedFn((addr)=>{
-        return (addr.startsWith("dirext://") || addr.startsWith("dirx://"));
-    });
-
-    const isUrlxProtocol=useMemoizedFn((addr)=>{
-        return addr.startsWith("urlx://");
-    });
-
-    const splitUrlxProtocol=useMemoizedFn((addr, name)=>{
-        let len=0;
-        if(addr.startsWith("urlx://")){
-            len=(addr.startsWith("urlx:///") ? "urlx:///".length : "urlx://".length);
-        }else{
-            return [];
-        }
-        const originUrl=addr.substring(len);
-        const cpUrl=`cp://${originUrl}`;
-
-        return [
-            {
-                addr: originUrl,
-                tooltip:  (name ? name+"  "+originUrl:originUrl),
-            },
-            {
-                addr: cpUrl,
-                tooltip:  (name ? name+"  "+cpUrl:cpUrl),
-            },
-        ];
-    });
-
-    /**
-     * 把fileext协议的url分解为三个具体的协议：file、openas、dir
-     */
-    const splitFileExtProtocol=useMemoizedFn((addr, name)=>{
-
-        let len=0;
-        if(addr.startsWith("fileext://")){
-            len=(addr.startsWith("fileext:///") ? "fileext:///".length : "fileext://".length);
-        }else if(addr.startsWith("filex://")){
-            len=(addr.startsWith("filex:///") ? "filex:///".length : "filex://".length);
-        }else{
-            return [];
-        }
-        
-        const after=addr.substring(len);
-        const fileUrl="file:///"+after;
-        const openasUrl="openas://"+after;
-        const dirUrl="dir://"+after;
-        const cpUrl="cppath://"+after;
-        return [
-            {
-                addr: fileUrl,
-                tooltip:  (name ? name+"  "+fileUrl:fileUrl),
-            },
-            {
-                addr: openasUrl,
-                tooltip: "打开方式  "+openasUrl,
-            },
-            {
-                addr: dirUrl,
-                tooltip: "打开目录并选择  "+dirUrl,
-            },
-            {
-                addr: cpUrl,
-                tooltip: "复制  "+cpUrl,
-            },
-        ];
-    });
-
-    /**
-     * 把fileext协议的url分解为三个具体的协议：file、openas、dir
-     */
-    const splitDirExtProtocol=useMemoizedFn((addr, name)=>{
-        let len=0;
-        if(addr.startsWith("dirext://")){
-            len=(addr.startsWith("dirext:///") ? "dirext:///".length : "dirext://".length);
-        }else if(addr.startsWith("dirx://")){
-            len=(addr.startsWith("dirx:///") ? "dirx:///".length : "dirx://".length);
-        }else{
-            return [];
-        }
-        
-        const after=addr.substring(len);
-        const fileUrl="file:///"+after;
-        const dirUrl="dir://"+after;
-        const cpUrl="cppath://"+after;
-        return [
-            {
-                addr: fileUrl,
-                tooltip:  (name ? name+"  "+fileUrl:fileUrl),
-            },
-            {       
-                addr: dirUrl,
-                tooltip: "打开目录并选择  "+dirUrl,
-            },
-            {
-                addr: cpUrl,
-                tooltip: "复制  "+cpUrl,
-            },
-        ];
-    });
+    // const isFileExtProtocol=useMemoizedFn((addr)=>{
+    //     return (addr.startsWith("fileext://") || addr.startsWith("filex://"));
+    // });
+    //
+    // const isDirExtProtocol=useMemoizedFn((addr)=>{
+    //     return (addr.startsWith("dirext://") || addr.startsWith("dirx://"));
+    // });
+    //
+    // const isUrlxProtocol=useMemoizedFn((addr)=>{
+    //     return addr.startsWith("urlx://");
+    // });
+    //
+    // const splitUrlxProtocol=useMemoizedFn((addr, name)=>{
+    //     let len=0;
+    //     if(addr.startsWith("urlx://")){
+    //         len=(addr.startsWith("urlx:///") ? "urlx:///".length : "urlx://".length);
+    //     }else{
+    //         return [];
+    //     }
+    //     const originUrl=addr.substring(len);
+    //     const cpUrl=`cp://${originUrl}`;
+    //
+    //     return [
+    //         {
+    //             addr: originUrl,
+    //             tooltip:  (name ? name+"  "+originUrl:originUrl),
+    //         },
+    //         {
+    //             addr: cpUrl,
+    //             tooltip:  (name ? name+"  "+cpUrl:cpUrl),
+    //         },
+    //     ];
+    // });
+    //
+    // /**
+    //  * 把fileext协议的url分解为三个具体的协议：file、openas、dir
+    //  */
+    // const splitFileExtProtocol=useMemoizedFn((addr, name)=>{
+    //
+    //     let len=0;
+    //     if(addr.startsWith("fileext://")){
+    //         len=(addr.startsWith("fileext:///") ? "fileext:///".length : "fileext://".length);
+    //     }else if(addr.startsWith("filex://")){
+    //         len=(addr.startsWith("filex:///") ? "filex:///".length : "filex://".length);
+    //     }else{
+    //         return [];
+    //     }
+    //
+    //     const after=addr.substring(len);
+    //     const fileUrl="file:///"+after;
+    //     const openasUrl="openas://"+after;
+    //     const dirUrl="dir://"+after;
+    //     const cpUrl="cppath://"+after;
+    //     return [
+    //         {
+    //             addr: fileUrl,
+    //             tooltip:  (name ? name+"  "+fileUrl:fileUrl),
+    //         },
+    //         {
+    //             addr: openasUrl,
+    //             tooltip: "打开方式  "+openasUrl,
+    //         },
+    //         {
+    //             addr: dirUrl,
+    //             tooltip: "打开目录并选择  "+dirUrl,
+    //         },
+    //         {
+    //             addr: cpUrl,
+    //             tooltip: "复制  "+cpUrl,
+    //         },
+    //     ];
+    // });
+    //
+    // /**
+    //  * 把fileext协议的url分解为三个具体的协议：file、openas、dir
+    //  */
+    // const splitDirExtProtocol=useMemoizedFn((addr, name)=>{
+    //     let len=0;
+    //     if(addr.startsWith("dirext://")){
+    //         len=(addr.startsWith("dirext:///") ? "dirext:///".length : "dirext://".length);
+    //     }else if(addr.startsWith("dirx://")){
+    //         len=(addr.startsWith("dirx:///") ? "dirx:///".length : "dirx://".length);
+    //     }else{
+    //         return [];
+    //     }
+    //
+    //     const after=addr.substring(len);
+    //     const fileUrl="file:///"+after;
+    //     const dirUrl="dir://"+after;
+    //     const cpUrl="cppath://"+after;
+    //     return [
+    //         {
+    //             addr: fileUrl,
+    //             tooltip:  (name ? name+"  "+fileUrl:fileUrl),
+    //         },
+    //         {
+    //             addr: dirUrl,
+    //             tooltip: "打开目录并选择  "+dirUrl,
+    //         },
+    //         {
+    //             addr: cpUrl,
+    //             tooltip: "复制  "+cpUrl,
+    //         },
+    //     ];
+    // });
 
     const [handledLinkName, needConfirmBeforeClick]= useMemo(()=>{
         // link.name
@@ -298,33 +298,33 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
     },[link]);
 
 
-    if(isFileExtProtocol(link.addr)){
-        return <React.Fragment key={'link-'+linkInd}>
-            {
-                splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                    <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
-                ))
-            }
-        </React.Fragment>
-    }
-    if(isDirExtProtocol(link.addr)){
-        return <React.Fragment key={'link-'+linkInd}>
-            {
-                splitDirExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-                    <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
-                ))
-            }
-        </React.Fragment>
-    }
-    if(isUrlxProtocol(link.addr)){
-        return <React.Fragment key={'link-'+linkInd}>
-            {
-                splitUrlxProtocol(link.addr, link.name).map((subitem, subind)=>(
-                    <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
-                ))
-            }
-        </React.Fragment>
-    }
+    // if(isFileExtProtocol(link.addr)){
+    //     return <React.Fragment key={'link-'+linkInd}>
+    //         {
+    //             splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
+    //                 <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
+    //             ))
+    //         }
+    //     </React.Fragment>
+    // }
+    // if(isDirExtProtocol(link.addr)){
+    //     return <React.Fragment key={'link-'+linkInd}>
+    //         {
+    //             splitDirExtProtocol(link.addr, link.name).map((subitem, subind)=>(
+    //                 <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
+    //             ))
+    //         }
+    //     </React.Fragment>
+    // }
+    // if(isUrlxProtocol(link.addr)){
+    //     return <React.Fragment key={'link-'+linkInd}>
+    //         {
+    //             splitUrlxProtocol(link.addr, link.name).map((subitem, subind)=>(
+    //                 <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
+    //             ))
+    //         }
+    //     </React.Fragment>
+    // }
     return <LinkItem key={'link-'+linkInd} needConfirm={needConfirmBeforeClick} tooltip={handledLinkName ? handledLinkName+"  "+link.addr:link.addr} addr={link.addr} openLinkFunc={onOpenLink.bind(this,link.addr)}/>;
 };
 

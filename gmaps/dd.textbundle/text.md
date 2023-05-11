@@ -1,14 +1,14 @@
-- aaasss|ref:aaasss|[baiduddd#confirm](https://baidu.com)
+- aaasss|ref:aaasss|[baiduddd#confirm](https://baidu{{.}}com)
 	- aaa|[ss#confirm](grp://file:///notepad)|[bb](grp://file:///emeditor)
 	- bbb
 		- sss
 
 ***
 # shortcuts
-- [百度](https://baidu.com)
+- [百度#confirm](https://baidu.com)
 - 组合
 	- [ss](file:///notepad)
-	- [bb](file:///emeditor)
+	- [bb#confirm](file:///emeditor)
 
 
 # ref:aaasss
