@@ -1,5 +1,5 @@
 import React,{useState} from "react";
-import {useMemoizedFn} from "ahooks";
+import {useBoolean, useMemoizedFn} from "ahooks";
 import {Modal} from "antd";
 import strTmpl from "../common/strTmpl";
 
@@ -11,10 +11,12 @@ const {confirm} = Modal;
  * @param openUrlFunc (url)=>{}
  */
 export const useOpenLinkWithParam=(openUrlFunc)=>{
-    const [dlgVisible, setDlgVisible]=useState(false);
+    const [dlgVisible, {setTrue: showDlg, setFalse:onDlgCancel}]=useBoolean(false);
     const [currLinkUrl, setCurrLinkUrl]=useState(null);
     const [paramReplItems, setParamReplItems]=useState([]);
     const [shouldConfirm, setShouldConfirm]= useState(false);
+
+
 
     /**
      * 打开指定链接，打开前根据情况选择是否显示确认框
@@ -34,7 +36,10 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
             confirm({
                 title: '确定要打开如下链接吗？',
                 content: Array.isArray(addr) ? <div>{addr.map(eachUrl=><div>{eachUrl}</div>)}</div> : addr,
-                onOk: openLink,
+                onOk: ()=>{
+                    onDlgCancel();
+                    openLink();
+                },
                 maskClosable: true,
             });
             return;
@@ -65,7 +70,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
             setCurrLinkUrl(addr);
             setShouldConfirm(!!needConfirm);
             setParamReplItems(replaceItems);
-            setDlgVisible(true);
+            showDlg();
         };
 
         /**
@@ -104,17 +109,20 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
         openOneLink(url, needConfirm);
     });
 
-    const onDlgCancel=useMemoizedFn(()=>{
-        setDlgVisible(false);
-    });
+
 
     /**
-     * 参数占位符替换后的回调
+     * 参数占位符替换后的回调：
+     * 如果需要确认，则对话框不关闭，直到确认框完成时再关闭
      * @param {*} url
      */
     const onDlgOk=useMemoizedFn((url)=>{
+        if(shouldConfirm){
+            confirmOrNot(url, true);
+            return;
+        }
         onDlgCancel();
-        confirmOrNot(url, shouldConfirm);
+        confirmOrNot(url, false);
     });
 
 

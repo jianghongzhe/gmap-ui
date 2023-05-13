@@ -1,8 +1,8 @@
 - aaasss|ref:aaasss|[baiduddd#confirm](https://baidu{{.}}com)
 	- aaa|[ss#confirm](grp://file:///notepad)|[](grp://file:///emeditor)
 	- bbb
-		- sss|[qqq#confirm](file:///notepad)
-
+		- 百度搜索|[#confirm](cmd://ping {{ip:127.0.0.1}})
+		
 ***
 # shortcuts
 - [百度#confirm](https://baidu.c{{o}}m)
