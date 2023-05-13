@@ -8,10 +8,10 @@ import {useMemoizedFn, useRafState} from "ahooks";
 import strTmpl from "../../../common/strTmpl";
 import api from "../../../service/api";
 import styles from './MindNode.module.scss';
-import loadMetadata from "../../../common/metadataLoader";
+import {filterGroupLinks, filterSingleLink} from "../../../service/linkFilter";
 
 
-const { confirm } = Modal;
+
 
 /**
  * 导图的节点
@@ -178,154 +178,18 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
 
 /**
  * 渲染链接：
- * 1、如果是fileext或filex协议，则拆分为file、openas、dir、cp几个链接
- * 2、如果是dirext或dirx协议，则拆分为file、dir、cp几个链接
- * 3、如果是urlx协议，则拆分为普通链接、cp几个链接
- * 4、否则，生成一个链接
  */
 const LinkComplexItem=({link, linkInd, onOpenLink})=>{
-    // const isFileExtProtocol=useMemoizedFn((addr)=>{
-    //     return (addr.startsWith("fileext://") || addr.startsWith("filex://"));
-    // });
-    //
-    // const isDirExtProtocol=useMemoizedFn((addr)=>{
-    //     return (addr.startsWith("dirext://") || addr.startsWith("dirx://"));
-    // });
-    //
-    // const isUrlxProtocol=useMemoizedFn((addr)=>{
-    //     return addr.startsWith("urlx://");
-    // });
-    //
-    // const splitUrlxProtocol=useMemoizedFn((addr, name)=>{
-    //     let len=0;
-    //     if(addr.startsWith("urlx://")){
-    //         len=(addr.startsWith("urlx:///") ? "urlx:///".length : "urlx://".length);
-    //     }else{
-    //         return [];
-    //     }
-    //     const originUrl=addr.substring(len);
-    //     const cpUrl=`cp://${originUrl}`;
-    //
-    //     return [
-    //         {
-    //             addr: originUrl,
-    //             tooltip:  (name ? name+"  "+originUrl:originUrl),
-    //         },
-    //         {
-    //             addr: cpUrl,
-    //             tooltip:  (name ? name+"  "+cpUrl:cpUrl),
-    //         },
-    //     ];
-    // });
-    //
-    // /**
-    //  * 把fileext协议的url分解为三个具体的协议：file、openas、dir
-    //  */
-    // const splitFileExtProtocol=useMemoizedFn((addr, name)=>{
-    //
-    //     let len=0;
-    //     if(addr.startsWith("fileext://")){
-    //         len=(addr.startsWith("fileext:///") ? "fileext:///".length : "fileext://".length);
-    //     }else if(addr.startsWith("filex://")){
-    //         len=(addr.startsWith("filex:///") ? "filex:///".length : "filex://".length);
-    //     }else{
-    //         return [];
-    //     }
-    //
-    //     const after=addr.substring(len);
-    //     const fileUrl="file:///"+after;
-    //     const openasUrl="openas://"+after;
-    //     const dirUrl="dir://"+after;
-    //     const cpUrl="cppath://"+after;
-    //     return [
-    //         {
-    //             addr: fileUrl,
-    //             tooltip:  (name ? name+"  "+fileUrl:fileUrl),
-    //         },
-    //         {
-    //             addr: openasUrl,
-    //             tooltip: "打开方式  "+openasUrl,
-    //         },
-    //         {
-    //             addr: dirUrl,
-    //             tooltip: "打开目录并选择  "+dirUrl,
-    //         },
-    //         {
-    //             addr: cpUrl,
-    //             tooltip: "复制  "+cpUrl,
-    //         },
-    //     ];
-    // });
-    //
-    // /**
-    //  * 把fileext协议的url分解为三个具体的协议：file、openas、dir
-    //  */
-    // const splitDirExtProtocol=useMemoizedFn((addr, name)=>{
-    //     let len=0;
-    //     if(addr.startsWith("dirext://")){
-    //         len=(addr.startsWith("dirext:///") ? "dirext:///".length : "dirext://".length);
-    //     }else if(addr.startsWith("dirx://")){
-    //         len=(addr.startsWith("dirx:///") ? "dirx:///".length : "dirx://".length);
-    //     }else{
-    //         return [];
-    //     }
-    //
-    //     const after=addr.substring(len);
-    //     const fileUrl="file:///"+after;
-    //     const dirUrl="dir://"+after;
-    //     const cpUrl="cppath://"+after;
-    //     return [
-    //         {
-    //             addr: fileUrl,
-    //             tooltip:  (name ? name+"  "+fileUrl:fileUrl),
-    //         },
-    //         {
-    //             addr: dirUrl,
-    //             tooltip: "打开目录并选择  "+dirUrl,
-    //         },
-    //         {
-    //             addr: cpUrl,
-    //             tooltip: "复制  "+cpUrl,
-    //         },
-    //     ];
-    // });
+    const {
+        tooltip,
+        url: factUrl,
+        shouldConfirm,
+    }=useMemo(()=>filterSingleLink(link.name, link.addr), [link]);
 
-    const [handledLinkName, needConfirmBeforeClick]= useMemo(()=>{
-        // link.name
-        const [handledLinkName, metas]=loadMetadata(link.name);
-        console.log("需要确认?",link.addr+" "+ metas.includes("confirm"));
-        return [handledLinkName, metas.includes("confirm")];
-    },[link]);
-
-
-    // if(isFileExtProtocol(link.addr)){
-    //     return <React.Fragment key={'link-'+linkInd}>
-    //         {
-    //             splitFileExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-    //                 <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
-    //             ))
-    //         }
-    //     </React.Fragment>
-    // }
-    // if(isDirExtProtocol(link.addr)){
-    //     return <React.Fragment key={'link-'+linkInd}>
-    //         {
-    //             splitDirExtProtocol(link.addr, link.name).map((subitem, subind)=>(
-    //                 <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
-    //             ))
-    //         }
-    //     </React.Fragment>
-    // }
-    // if(isUrlxProtocol(link.addr)){
-    //     return <React.Fragment key={'link-'+linkInd}>
-    //         {
-    //             splitUrlxProtocol(link.addr, link.name).map((subitem, subind)=>(
-    //                 <LinkItem key={'sublink-'+linkInd+'_'+subind} tooltip={subitem.tooltip} addr={subitem.addr} openLinkFunc={onOpenLink.bind(this,subitem.addr)}/>
-    //             ))
-    //         }
-    //     </React.Fragment>
-    // }
-    return <LinkItem key={'link-'+linkInd} needConfirm={needConfirmBeforeClick} tooltip={handledLinkName ? handledLinkName+"  "+link.addr:link.addr} addr={link.addr} openLinkFunc={onOpenLink.bind(this,link.addr)}/>;
+    return <LinkItem key={'link-'+linkInd}
+                     tooltip={tooltip}
+                     addr={factUrl}
+                     openLinkFunc={onOpenLink.bind(this, factUrl, shouldConfirm)}/>;
 };
 
 
@@ -335,20 +199,6 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
      * 右键菜单相关的数据项
      */
     const [ctxMenuItems, setCtxMenuItems] = useRafState([]);
-
-    const delegateClick= useMemoizedFn((arg)=>{
-        if(needConfirm){
-            confirm({
-                title: '确定要打开该链接吗？',
-                content: addr,
-                onOk:()=> openLinkFunc(arg),
-                maskClosable: true,
-            });
-            return;
-        }
-        openLinkFunc(arg);
-    });
-
 
     const onOpenChange=useMemoizedFn((open)=>{
         // 当tooltip关闭时、或地址中包含插值参数时，不设置右键菜单项
@@ -396,7 +246,7 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
             </div>
         } >
             <span className={styles.themeBtnWrapper}>
-                <NodeLinkIcon lindAddr={addr} onClick={delegateClick}/>
+                <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
             </span>
         </Tooltip>
     );
@@ -412,58 +262,18 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
  * @returns {JSX.Element|null}
  */
 const GroupLinkItem=({links, openLinkFunc})=>{
-    /**
-     * validLinks: 排除掉带有占位符的项，增加trimedAddr项，表示原始链接
-     * title: 有名称且不是[打开]就显示名字，否则显示链接地址，多个之间以 + 连接
-     * needConfirm: validLinks中有任何一个名称中带有 confirm 元数据，则需要确认后才能打开
-     */
-    const [validLinks, title, needConfirm]=useMemo(
-        ()=> {
-            let needConfirm=false;
-            const validLinks=links.filter(lk=>!strTmpl.containsParam(lk.addr))
-                .map(lk=>{
-                    const [newName, metas]=loadMetadata(lk.name);
-                    if(metas.includes("confirm")){
-                        needConfirm=true;
-                    }
-                    return {
-                        ...lk,
-                        name: newName,
-                        trimedAddr: lk.addr.substring("grp://".length)
-                    };
-                });
-            const title=validLinks.map(lk=>(lk.name && '打开'!==lk.name ? lk.name : lk.trimedAddr)).join(" + ");
-            return [validLinks, title, needConfirm];
-        },
-        [links]
-    );
 
+    const val= useMemo(()=>filterGroupLinks(links),[links])
 
-
-    /**
-     * 点击事件，相当于每个链接分别点一次
-     * @type {function(): *}
-     */
-    const openMultiLinks=useMemoizedFn(()=>{
-        const func=()=>validLinks.forEach(lk=> openLinkFunc(lk.trimedAddr));
-        if(needConfirm) {
-            confirm({
-                title: '确定要打开如下链接吗？',
-                content: <div>{validLinks.map(lk=><div>{lk.trimedAddr}</div>)}</div>,
-                onOk: () => func(),
-                maskClosable: true,
-            });
-            return;
-        }
-        func();
-    });
-
-    if(null===validLinks || 0===validLinks.length){
+    if(null===val){
         return null;
     }
-    return <Tooltip  color='cyan' placement="top" title={title}>
+    if(!Array.isArray(val.url)){
+        return <LinkItem tooltip={val.tooltip} addr={val.url} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm)}/>;
+    }
+    return <Tooltip  color='cyan' placement="top" title={val.tooltip}>
         <span className={styles.themeBtnWrapper}>
-            <NodeLinkIcon lindAddr="group_links" onClick={openMultiLinks}/>
+            <NodeLinkIcon lindAddr="group_links" onClick={openLinkFunc.bind(this, val.url, val.shouldConfirm)}/>
         </span>
     </Tooltip>
 };

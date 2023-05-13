@@ -26,14 +26,12 @@ import {useRecoilValue} from 'recoil';
 import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
-import {useMemoizedFn} from "ahooks";
-import loadMetadata from "../../../common/metadataLoader";
-import strTmpl from '../../../common/strTmpl';
+import {filterShortCuts} from "../../../service/linkFilter";
 
 
 const { Header } = Layout;
 const {  Text } = Typography;
-const { confirm } = Modal;
+
 
 /**
  * 工具栏
@@ -70,13 +68,7 @@ const Toolbar=({
      * 是一组链接，去掉其中带有插值表达式的项，如果还有其余的项，则把这些项保留
      * @type {unknown}
      */
-    const validShortCuts=useMemo(()=>{
-        // TODO
-        if(currPane?.ds?.tree?.shortcuts?.length>0){
-            return [];
-        }
-        return [];
-    },[currPane]);
+    const validShortCuts=useMemo(()=>filterShortCuts(currPane?.ds?.tree?.shortcuts),[currPane]);
 
 
     return (
@@ -113,14 +105,13 @@ const Toolbar=({
             <ToolbarItem title='帮助' icon={<QuestionOutlined />} onClick={onOpenHelpDlg}/>
 
             {/* 快捷方式：随当前导图而变化 */}
-            {/* TODO */}
             {
-                (currPane?.ds?.tree?.shortcuts?.length>0) && <React.Fragment>
+                (validShortCuts.length>0) && <React.Fragment>
                     <Divider type="vertical" className='divider'/>
                     <Text style={{marginLeft:'14px',fontSize:'16px',lineHeight:'20px',}}>快捷入口：</Text>
                     {
-                        currPane.ds.tree.shortcuts.map((shortItem, shortInd)=>(
-                            <ShortcutItem key={`shortcutbtn-${shortInd}`} name={shortItem.name} url={shortItem.url} subNames={shortItem.subNames} onClick={onOpenLink}/>
+                        validShortCuts.map((shortItem, shortInd)=>(
+                            <ShortcutItem key={`shortcutbtn-${shortInd}`} tooltip={shortItem.tooltip} url={shortItem.url} shouldConfirm={shortItem.shouldConfirm} onClick={onOpenLink}/>
                         ))
                     }
                 </React.Fragment>
@@ -131,71 +122,12 @@ const Toolbar=({
 
 
 
-const ShortcutItem=({name, url, subNames, onClick})=>{
+const ShortcutItem=({tooltip, url, shouldConfirm, onClick})=>{
+
+    const [localIcon] = useLoadIcon({lindAddr: Array.isArray(url) ? "group_links" : url});
 
 
-    // TODO 有效性判断移到上面组件中完成。。。。
-
-    /**
-     * urlTxt: 显示的url地址，如果只有一个地址，则直接显示，否则用 + 连接起来显示
-     * handledName: 显示的链接名称，如果是单个链接，则显示去掉元数据后的值，否则直接显示
-     * needConfirm: 是否需要确认后再执行；如果是单个链接，则名称中包含指定元数据则需要，如果是多个链接，则任何一个名称中包含指定元数据则需要
-     */
-    const [factUrl, urlToShow, nameToShow, needConfirm, valid]=useMemo(()=>{
-        if(Array.isArray(url)){
-            // [ {eachName,eachUrl} ]  排除掉带有插值表达式的项
-            const list=subNames.map((subName,ind)=>({eachName:subName, eachUrl:url[ind]}))
-                .filter(({eachName,eachUrl},ind)=> !strTmpl.containsParam(eachUrl));
-            const valid=(list.length>0);
-            const needConfirm=(list.some(({eachName})=>loadMetadata(eachName)[1].includes("confirm")));
-            const nameToShow=name.trim();
-            let factUrl=list.map(({eachUrl})=>eachUrl);
-            const urlToShow=factUrl.join(" + ");
-            factUrl=(1===factUrl.length ? factUrl[0] : factUrl);
-            return [factUrl, urlToShow, nameToShow, needConfirm, valid];
-        }else{
-            const valid=!strTmpl.containsParam(url);
-            let [nameToShow, metas]=loadMetadata(name);
-            const needConfirm=metas.includes("confirm");
-            const urlToShow=url;
-            const factUrl=url;
-            return [factUrl, urlToShow, nameToShow, needConfirm, valid];
-        }
-    },[name, url, subNames]);
-
-
-    const [localIcon] = useLoadIcon({lindAddr: Array.isArray(factUrl) ? "group_links" : factUrl});
-
-
-    /**
-     * 点击事件聚合处理，相当于每个链接执行一次，总体执行前先判断是否需要确认
-     *
-     * @type {(function(*): void)|*}
-     */
-    const onClickAggr=useMemoizedFn(()=>{
-        const func=()=>{
-            if(Array.isArray(factUrl)){
-                factUrl.forEach(eachUrl=>onClick(eachUrl));
-                return;
-            }
-            onClick(factUrl);
-        };
-        if(needConfirm){
-            confirm({
-                title: '确定要打开如下链接吗？',
-                content: Array.isArray(url) ? <div>{url.map(eachUrl=><div>{eachUrl}</div>)}</div> : url,
-                onOk: () => func(),
-                maskClosable: true,
-            });
-            return;
-        }
-        func();
-    });
-
-
-
-    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type) || !valid){
-        console.log("无效。。。。。", valid)
+    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
         return null;
     }
 
@@ -210,8 +142,8 @@ const ShortcutItem=({name, url, subNames, onClick})=>{
     if('icon'===localIcon.type){
         const IconComp=localIcon.compType;
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${nameToShow}  ${urlToShow}`}>
-                <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}/>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
+                <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm)}/>
             </Tooltip>
         );
     }
@@ -225,8 +157,8 @@ const ShortcutItem=({name, url, subNames, onClick})=>{
      */
     if('image'===localIcon.type){
         return (
-            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={`${nameToShow}  ${urlToShow}`}>
-                <Button shape='circle' className='toolbtn'  size='large' onClick={onClickAggr.bind(this, url)}>
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
+                <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm)}>
                     <Avatar src={localIcon.url} size='small'/>
                 </Button>
             </Tooltip>

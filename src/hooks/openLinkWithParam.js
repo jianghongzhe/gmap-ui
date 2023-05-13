@@ -1,8 +1,8 @@
-import {useState} from "react";
+import React,{useState} from "react";
 import {useMemoizedFn} from "ahooks";
 import {Modal} from "antd";
 import strTmpl from "../common/strTmpl";
-import React from "_@types_react@17.0.53@@types/react";
+
 
 const {confirm} = Modal;
 
@@ -21,7 +21,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * @param addr
      * @param needConfirm
      */
-    const confirmOrNot=(addr, needConfirm=false)=>{
+    const confirmOrNot=useMemoizedFn((addr, needConfirm=false)=>{
         const openLink=()=>{
             if(Array.isArray(addr)){
                 addr.forEach(eachAddr=>openUrlFunc(eachAddr));
@@ -34,13 +34,13 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
             confirm({
                 title: '确定要打开如下链接吗？',
                 content: Array.isArray(addr) ? <div>{addr.map(eachUrl=><div>{eachUrl}</div>)}</div> : addr,
-                onOk: () => openLink,
+                onOk: openLink,
                 maskClosable: true,
             });
             return;
         }
         openLink();
-    };
+    });
 
     /**
      * 导图上链接点击事件：当其中不包含占位符时直接执行链接，否则打开对话框并设置占位符
