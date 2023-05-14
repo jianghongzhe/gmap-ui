@@ -21,6 +21,7 @@ const FindInFileDlg=({visible, onCancel})=>{
     const selectFileListItem= useSelectFileListItem();
     const [exp, {change: onExpChange, set: setExp}]= useChange('');
     const [searchResults, setSearchResults]= useRafState([]);
+    const [expTags, setExpTags]= useRafState([]);
     const [expRef, bindExpRef]= useBindInputRef();
     const [allTags, setAllTags]=useRafState([]);
 
@@ -37,7 +38,6 @@ const FindInFileDlg=({visible, onCancel})=>{
                 const result=await api.searchAllTags()
                 if(result && true===result.succ){
                     setAllTags(result.data);
-                    console.log("all tags: ", result.data);
                 }
             })();
         }
@@ -51,15 +51,17 @@ const FindInFileDlg=({visible, onCancel})=>{
         }
         if(null==exp || ""===exp.trim()){
             setSearchResults([]);
+            setExpTags([]);
             return;
         }
         (async () => {
             const result=await api.searchInFile(exp);
             if(result && true===result.succ){
-                setSearchResults(result.data);
+                setSearchResults(result?.data?.items??[]);
+                setExpTags(result?.data?.extra?.preciseTags??[]);
             }
         })();
-    },[exp, setSearchResults, visible],{wait: 500,});
+    },[exp, setSearchResults, setExpTags, visible],{wait: 500,});
 
     
     /**
@@ -77,23 +79,51 @@ const FindInFileDlg=({visible, onCancel})=>{
      */
     const appendOrRemoveTag= useMemoizedFn((tag)=>{
         setExp(oldExp=>{
-            var resultExp=` ${oldExp} `
-            const tagExp=` tag:${tag} `;
-
-            if(resultExp.includes(tagExp)){
-                while(resultExp.includes(tagExp)){
-                    resultExp=resultExp.replace(tagExp, " ");
-                }
-                resultExp= resultExp.trim();
-                return (null===resultExp || ''===resultExp ? "" : resultExp+" ");
+            // 当前查询表达式包含指定标签，则从中剔除标签部分
+            // 标签部分根据引号个数组装成不同表达式：tag:abc、tag:"abc"、tag:"abc
+            const matchedItems=isTagInExp(tag)
+            if(null!==matchedItems){
+                let tmp=oldExp.trim();
+                matchedItems.forEach(matchedItem=>{
+                    let repl=null;
+                    if(1===matchedItem.quotCnt){
+                        repl=`tag:"${matchedItem.tag}`;
+                    }else if(2===matchedItem.quotCnt){
+                        repl=`tag:"${matchedItem.tag}"`;
+                    }else{
+                        repl=`tag:${matchedItem.tag}`;
+                    }
+                    tmp=tmp.replace(repl, '').trim();
+                });
+                return (''===tmp ? '' : tmp+" ");
             }
-            resultExp= `${resultExp.trim()} ${tagExp.trim()}`.trim()
-            return (null===resultExp || ''===resultExp ? "" : resultExp+" ");
+
+            // 不包含，则把标签表达式附加到当前查询条件最后
+            const tagWrapper=(tag.includes(" ") || tag.includes("　") ? '"' : '');
+            return `${oldExp.trim()} tag:${tagWrapper}${tag}${tagWrapper}`.trim();
         });
         focusRef(expRef, false);
     });
 
-    const isTagInExp= useMemoizedFn((tag)=> (` ${exp} `).includes(` tag:${tag} `));
+    /**
+     * 判断查找关键词中是否包含指定标签
+     * @return
+     * 不包含 - null
+     * 包含 - [
+     *  {
+     *      tag: 'abc',
+     *      quotCnt: 0/1/2
+     *  }
+     * ]
+     */
+    const isTagInExp= useMemoizedFn((tag)=>{
+        const matchedItems=expTags.filter(expTag=>tag===expTag.tag)
+            .sort((e1,e2)=>e2.quotCnt-e1.quotCnt);
+        if(0===matchedItems.length){
+            return null;
+        }
+        return matchedItems;
+    });
 
 
     return <Modal 
@@ -107,7 +137,7 @@ const FindInFileDlg=({visible, onCancel})=>{
                 <div ref={refcondPart}>
                     {/* <label>标题和内容：</label> */}
                     <Input className='ipt' prefix={<SearchOutlined />} 
-                        placeholder="搜索关键词：  t:标题 、 c:正文 、 f:全文 、 tag:标签 、 全文 、 !不匹配 、 并列条件1 并列条件2"
+                        placeholder='搜索关键词：  title:标题 、 txt:正文 、 full:全文 、 tag:标签精确、 tag*:标签模糊、 全文 、 !不匹配 、 "带 空 格"、 并列条件1 并列条件2'
                         size="large"  allowClear={true} value={exp} onChange={onExpChange} ref={bindExpRef} onPressEnter={setExp.bind(this,'')}/>
                     {
                         (searchResults && searchResults.length>0) &&
@@ -119,7 +149,7 @@ const FindInFileDlg=({visible, onCancel})=>{
                         allTags.map((tag,ind)=>
                             <TagItem key={`tag-${ind}`}
                                      tag={tag}
-                                     colored={isTagInExp(tag)}
+                                     colored={null!==isTagInExp(tag)}
                                      onClick={appendOrRemoveTag.bind(this,tag)}
                             />
                         )
@@ -146,7 +176,7 @@ const FindInFileDlg=({visible, onCancel})=>{
                                     searchItem.tags.map((tag,ind)=>
                                         <TagItem key={`tag-${ind}`}
                                                  tag={tag}
-                                                 colored={isTagInExp(tag)}
+                                                 colored={null!==isTagInExp(tag)}
                                                  onClick={appendOrRemoveTag.bind(this,tag)}
                                         />
                                     )
