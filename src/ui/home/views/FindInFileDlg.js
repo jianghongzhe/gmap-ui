@@ -22,6 +22,7 @@ const FindInFileDlg=({visible, onCancel})=>{
     const [exp, {change: onExpChange, set: setExp}]= useChange('');
     const [searchResults, setSearchResults]= useRafState([]);
     const [expTags, setExpTags]= useRafState([]);
+    const [hasUnclosedQuot, setHasUnclosedQuot]= useRafState(false);
     const [expRef, bindExpRef]= useBindInputRef();
     const [allTags, setAllTags]=useRafState([]);
 
@@ -59,6 +60,7 @@ const FindInFileDlg=({visible, onCancel})=>{
             if(result && true===result.succ){
                 setSearchResults(result?.data?.items??[]);
                 setExpTags(result?.data?.extra?.preciseTags??[]);
+                setHasUnclosedQuot(true===result?.data?.extra?.hasUnclosedQuot);
             }
         })();
     },[exp, setSearchResults, setExpTags, visible],{wait: 500,});
@@ -99,8 +101,10 @@ const FindInFileDlg=({visible, onCancel})=>{
             }
 
             // 不包含，则把标签表达式附加到当前查询条件最后
+            // 标签中如果有空格，则需要双引号包裹
+            // 原表达式如果有未关闭的双绰号，则要先补一个再加入后面的表达式
             const tagWrapper=(tag.includes(" ") || tag.includes("　") ? '"' : '');
-            return `${oldExp.trim()} tag:${tagWrapper}${tag}${tagWrapper}`.trim();
+            return `${oldExp.trim()}${hasUnclosedQuot ? '"' : ''} tag:${tagWrapper}${tag}${tagWrapper}`.trim();
         });
         focusRef(expRef, false);
     });
