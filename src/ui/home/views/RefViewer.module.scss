@@ -1,0 +1,35 @@
+
+
+.markdown_body{
+  margin: 0 auto;
+  width: 98%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.backtop {
+  right: 140px !important;
+  bottom: 120px !important;
+
+  &:hover {
+    :global {
+      .ant-back-top-content {
+        background-color: rgba(24,144,255, 1.0);
+      }
+    }
+  }
+
+  :global {
+    .ant-back-top-content {
+      background-color: rgba(24,144,255, .80);
+    }
+  }
+}
+
+.toolbar_first{
+  margin-left: 20px;
+}
+
+.toolbar_not_first{
+  margin-left: 8px;
+}

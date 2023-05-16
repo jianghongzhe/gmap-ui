@@ -107,7 +107,7 @@ class MarkedHighlightUtil {
             const colorItems=txt.match(/[$][\\]textcolor[{].+?[}][{].+?[}][$]/g);
             if(colorItems && colorItems.length){
                 colorItems.forEach(item=>{
-                    const [_nouse, color, str]=item.match(/^[$][\\]textcolor[{](.+?)[}][{](.+?)[}][$]$/);
+                    const [, color, str]=item.match(/^[$][\\]textcolor[{](.+?)[}][{](.+?)[}][$]$/);
                     txt=txt.replace(item, `<span style="color:${color}">${str}</span>`);
                 });
             }

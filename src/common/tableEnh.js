@@ -6,7 +6,7 @@ import loadMetaData, {parseMetadata} from './metadataLoader';
  * @param html
  * @return {string}
  */
-export default (html, idCreater)=>{
+const tableEnh= (html, idCreater)=>{
     try {
         return innerEnhancer(html, idCreater);
     }catch (e){
@@ -283,3 +283,5 @@ const parsers= {
     pie: pieParser,
     'bar-line' : barLineMixParser,
 };
+
+export default tableEnh;

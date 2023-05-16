@@ -24,7 +24,8 @@ const EnhDlg=withEnh(Modal);
 
 /**
  * 日期选择对话框
- * @param {
+ * @param
+ * {
  *  visible: true,                      //
  *  data: {
  *      hasInitData: false,             // 是否有初始数据，如果光标所在行为空行则为false，否则为true

@@ -7,7 +7,7 @@
  *      ['元数据1', '元数据2', ...]
  * ]
  */
-export default (txt)=>{
+const loader= (txt)=>{
     txt=(txt??'').trim();
     let metas=(txt.match(/[#][^#]*/g)??[]).map(item=>{
         txt=txt.replace(item, '').trim();
@@ -39,6 +39,8 @@ const parseMetadata=(meta)=>{
         opts: [],
     };
 };
+
+export default loader;
 
 export {
     parseMetadata

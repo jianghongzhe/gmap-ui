@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Button,Tooltip, Progress,Modal  } from 'antd';
+import { Button,Tooltip, Progress  } from 'antd';
 import { FormOutlined,ReadOutlined,ClockCircleOutlined,CloseOutlined,CheckOutlined } from '@ant-design/icons';
 import {marked} from 'marked';
 import NodeLinkIcon from './NodeLinkIcon';

@@ -104,7 +104,6 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
                     return;
                 }
             }
-            return;
         }
         openOneLink(url, needConfirm);
     });

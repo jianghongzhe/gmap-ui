@@ -1,0 +1,22 @@
+.toolbar{
+
+  background-color:    #f0f2f5 !important;
+  padding-left:        0 !important;
+
+  :global{
+    .toolbtn       {
+      margin-left:     10px;
+    }
+    .toolbtnFirst {
+      margin-left:     15px;
+    }
+    .divider {
+      background-color:#CCC;
+      height: 50%;
+      width:2px;
+      padding: 0;
+      margin-left:10px;
+      margin-right:0;
+    }
+  }
+}

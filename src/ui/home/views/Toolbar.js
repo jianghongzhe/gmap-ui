@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Avatar, Button, Divider, Layout, Tooltip, Typography, Modal} from 'antd';
+import {Avatar, Button, Divider, Layout, Tooltip, Typography} from 'antd';
 import {
     CameraOutlined,
     CloudSyncOutlined,
@@ -27,6 +27,7 @@ import {useExpandAll, useRestoreDefaultExpandState} from '../../../hooks/tabs';
 import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 import {filterShortCuts} from "../../../service/linkFilter";
+import styles from './Toolbar.module.scss';
 
 
 const { Header } = Layout;
@@ -72,7 +73,7 @@ const Toolbar=({
 
 
     return (
-        <Header css={headerStyle}>
+        <Header className={styles.toolbar}>
             <ToolbarItem title='新建' icon={<PlusOutlined />} className='toolbtnFirst' onClick={onShowNewMapDlg}/>
             <ToolbarItem title='打开' icon={<FolderOpenOutlined />} onClick={onShowSelMapDlg}/>           
 
@@ -176,25 +177,5 @@ const ToolbarItem=({title, icon, disabled=false, className='toolbtn',type='defau
 
 
 
-
-//#f0f2f5
-const headerStyle = {
-    backgroundColor:    '#f0f2f5',
-    paddingLeft:        0,
-    '& .toolbtn':       {
-        marginLeft:     10
-    },
-    '& .toolbtnFirst':       {
-        marginLeft:     15
-    },
-    '& .divider':{
-        backgroundColor:'#CCC',
-        height:'50%',
-        width:2, 
-        padding:0,
-        marginLeft:10,
-        marginRight:0
-    }
-};
 
 export default React.memo(Toolbar);

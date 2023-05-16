@@ -1,0 +1,27 @@
+
+.full_width{
+  width: 100%;
+}
+
+.container{
+  width: 100%;
+
+  :global{
+    td{
+      padding-top: 10px;
+    }
+    td.label {
+      width: 80px;
+    }
+    td.extra{
+      width: 50px;
+
+      .refreshBtn{
+        margin-left: 15px;
+      }
+    }
+  }
+}
+
+
+

@@ -1,5 +1,4 @@
 import mindMapValidateSvc from './mindMapValidateSvc';
-import api from './api';
 import globalStyleConfig from '../common/globalStyleConfig';
 import partLoaders from './partLoaders';
 import {ndLineLoader} from './partLoaders';

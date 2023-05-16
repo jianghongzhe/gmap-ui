@@ -27,6 +27,8 @@ import { useMemo } from 'react';
 import { tabActiveKey } from '../../../store/tabs';
 import { useRecoilValue } from 'recoil';
 import { useBindAndGetRef } from '../../../common/commonHooks';
+import styles from './RefViewer.module.scss';
+import classnames from "classnames";
 // import seqDiagram from '../../../common/sequence-diagram';
 //import seqDiagram from 'js-sequence-diagram';
 
@@ -341,20 +343,11 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                 visible={visible}
                 maskClosable={true}               
                 onCancel={onCancel}>
-            <div id={bodyId} className='markdown-body' css={{
-                margin:'0px auto',
-                width:'98%',
-                overflowX:'hidden',
-                overflowY:'hidden',}}
-                dangerouslySetInnerHTML={{__html:refCont}}>
+            <div id={bodyId}
+                 className={classnames('markdown-body', styles.markdown_body)}
+                 dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
-            {/* <div id='demo111' css={{width:'500px',height:'500px'}}></div> */}
-            
-            <BackTop id={backtopId} target={getScrollTarget} css={{
-                right:140,
-                bottom:120,
-                ...backtopColorStyle
-            }}/>
+            <BackTop id={backtopId} target={getScrollTarget} className={styles.backtop}/>
         </EnhDlg>
     </React.Fragment>);
     
@@ -372,7 +365,12 @@ const copyTxt=(txt)=>{
 
 const ToolbarItem=({title, icon, onClick, isFirst=false})=>(
     <Tooltip color='cyan' placement="top" title={title}>
-        <Button shape='circle' icon={icon} css={{marginLeft:isFirst?'20px':'8px'}} type='default' size='default' onClick={onClick}/>
+        <Button shape='circle'
+                icon={icon}
+                className={isFirst ? styles.toolbar_first: styles.toolbar_not_first}
+                type='default'
+                size='default'
+                onClick={onClick}/>
     </Tooltip>
 );
 
@@ -415,17 +413,5 @@ const useCreatedId=(prefix=null)=>{
     return useState(()=>(prefix ? ""+prefix : "wild")+new Date().getTime())[0];
 };
 
-
-
-//24  144 255    #1890ff
-//16  136 233    #1088e9
-const backtopColorStyle={
-    '& .ant-back-top-content':{
-        backgroundColor:'rgba(24,144,255, .80)',
-    },
-    '&:hover .ant-back-top-content':{
-        backgroundColor:'rgba(24,144,255, 1.0)', 
-    },
-}
 
 export default React.memo(RefViewer);

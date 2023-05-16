@@ -1,0 +1,40 @@
+
+.rootContainer{
+  margin-top: 50px;
+  padding: 10px;
+  background-color: white;
+}
+
+
+.logoWrapper{
+  text-align: center;
+  margin-bottom: 50px;
+
+  :global{
+    .appname{
+      font-size: 18px;
+    }
+    .ver {
+      display: inline-block;
+      margin-left: 30px;
+    }
+    .btns {
+      margin-top: 50px;
+    }
+    .btns .rbtn {
+      margin-left: 10px;
+    }
+    .btns .r2btn {
+      margin-left:20px;
+    }
+    .newBtn_container{
+      margin-top: 20px;
+      .newBtn_subContainer{
+        width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+    }
+  }
+}

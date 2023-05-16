@@ -1,0 +1,22 @@
+.list{
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: var(--max-list-h);
+
+  :global{
+    .listitem:hover {
+      background-color: #EEE;
+      border-radius: 10px;
+    }
+    .listitem {
+      cursor: pointer;
+      transition: all 0.3s 0s;
+      transition-timing-function: ease;
+    }
+  }
+}
+
+.list_force_maxh{
+  height: var(--max-list-h);
+  min-height: var(--max-list-h);
+}

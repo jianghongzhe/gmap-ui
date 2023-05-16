@@ -1,9 +1,11 @@
-import React, {  useMemo } from 'react';
+import React from 'react';
 import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
 import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
 import { useBindAndGetRef } from '../../../common/commonHooks';
 import TagItem from "../../common/TagItem";
 import {useMemoizedFn} from "ahooks";
+import classnames from 'classnames';
+import styles from './PathSelect.module.scss';
 
 /**
  * 路径选择
@@ -18,30 +20,6 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
         }
         onselectFileItem(item);
     });
-
-    
-    //列表样式，如果指定的forceMaxH，则保持高度和最大高度一致
-    const listWrapperStyle=useMemo(()=>{
-        let style={
-            'maxHeight':maxH,
-            'overflowY':'auto',
-            'overflowX':'hidden',
-
-            '& .listitem:hover':{
-                backgroundColor:'#EEE',
-                borderRadius:10,
-            },
-            '& .listitem':{
-                cursor:'pointer',
-                transition: 'all 0.3s 0s',
-                transitionTimingFunction: 'ease',
-            }
-        };
-        if(forceMaxH){
-            style={'height':maxH,'minHeight':maxH, ...style};
-        }
-        return style;
-    },[maxH, forceMaxH]);
 
 
     return (
@@ -65,7 +43,7 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
             <Divider css={{marginTop:'10px',marginBottom:'0px'}}/>
             
             {/* id={listWrapperId} */}
-            <div css={listWrapperStyle}  ref={bindListRef}>                   
+            <div  className={classnames({[styles.list]:true, [styles.list_force_maxh]:forceMaxH})} style={{'--max-list-h': maxH,}}  ref={bindListRef}>
                 <List
                     itemLayout="horizontal"
                     dataSource={filelist}

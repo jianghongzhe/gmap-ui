@@ -5,6 +5,7 @@ import { PlusOutlined,FolderOutlined,CodeOutlined,ControlOutlined,ReloadOutlined
 import logourl from '../../../assets/logo.jpg';
 import api from '../../../service/api';
 import ConnectedPathSelect from './ConnectedPathSelect';
+import styles from './Welcome.module.scss';
 
 /**
  * 首页
@@ -22,19 +23,15 @@ const Welcome=(props)=>{
     return (
         <Row>
             <Col span={16} offset={4}>
-                <Row css={{
-                    marginTop:50,
-                    padding:10,
-                    backgroundColor:'white'
-                }}>
+                <Row className={styles.rootContainer}>
                     <Col span={14} >
                         <ConnectedPathSelect 
-                            maxH='calc(100vh - 160px)' 
+                            maxH='calc(100vh - 160px)'
                             backtopLoc={['calc(44vw + 80px)',120]}
                             onSelectMapItem={props.onSelectMapItem}/>
                     </Col>
                     <Col span={10}>                   
-                        <div css={logoWrapperStyle}>
+                        <div className={styles.logoWrapper}>
                             <p><Avatar size={256} src={logourl}/></p>
                             <p className='appname'>{appInfo.showname}<span className='ver'>V{appInfo.version}</span></p>
                             <div className='btns'>
@@ -46,13 +43,11 @@ const Welcome=(props)=>{
                                     <ButtonItem title='版本发布说明' className='rbtn' icon={<HistoryOutlined />} onClick={api.openReleaseNote}/>
                                     <ButtonItem title='检查更新' className='rbtn' icon={<CloudSyncOutlined />} onClick={props.onOpenUpdateApp}/>
                                 </div>
-                                <div css={{marginTop:'20px'}}>
-                                    <div css={{width:'280px',marginLeft:'auto',marginRight:'auto',}}>
+                                <div className='newBtn_container'>
+                                    <div className='newBtn_subContainer'>
                                         <Button type="primary" block  icon={<PlusOutlined />} size='large' onClick={props.onAddMap}>新建</Button>
                                     </div>
-                                </div> 
-                                
-                                
+                                </div>
                             </div>                               
                         </div>
                     </Col>
@@ -70,30 +65,6 @@ const ButtonItem=({title, className, icon, onClick})=>(
     </Tooltip>
 );
 
-
-
-
-const logoWrapperStyle={
-    'textAlign':'center',
-    'marginBottom':50,
-
-    '& .appname':{
-        'fontSize':18
-    },
-    '& .ver':{
-        'display':'inline-block',
-        'marginLeft':30
-    },
-    '& .btns':{
-        marginTop:50,
-    },
-    '& .btns .rbtn':{
-        'marginLeft':10
-    },
-    '& .btns .r2btn':{
-        'marginLeft':20
-    }
-};
 
 
 

@@ -3,6 +3,8 @@ import {Modal, Input,Button,TreeSelect } from 'antd';
 import {ReloadOutlined } from '@ant-design/icons';
 import {useGetAndLoadAllDirs} from '../../../hooks';
 import {useMemoizedFn} from "ahooks";
+import styles from './NewGraphDlg.module.scss';
+
 
 /**
  * 新建图表对话框
@@ -63,15 +65,15 @@ const NewGraphDlg=(props)=>{
                 onCancel={props.onCancel}
                 width={700}>
             
-            <table css={{width:'100%'}}>
+            <table className={styles.container}>
                 <tbody>
                     <tr>
-                        <td css={{paddingTop:'10px',width:'80px'}}>图表目录：</td>
-                        <td css={{paddingTop:'10px',}}>
+                        <td className='label'>图表目录：</td>
+                        <td >
                             <TreeSelect
-                                style={{ width: '100%' }}
+                                className={styles.full_width}
                                 value={dir}
-                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
                                 treeData={allDirs}
                                 placeholder="请选择图表目录"
                                 treeDefaultExpandAll
@@ -79,8 +81,8 @@ const NewGraphDlg=(props)=>{
                                 onChange={onChange.bind(this,setDir)}
                             />
                         </td>
-                        <td css={{paddingTop:'10px',width:'50px'}}>
-                            <Button css={{marginLeft:'15px'}} 
+                        <td className='extra'>
+                            <Button className='refreshBtn'
                                 title='刷新目录列表' 
                                 size='small' 
                                 type="default" 
@@ -90,10 +92,10 @@ const NewGraphDlg=(props)=>{
                         </td>
                     </tr>
                     <tr>
-                        <td css={{paddingTop:'10px',}}>图表名称：</td>
-                        <td css={{paddingTop:'10px',}}>
+                        <td>图表名称：</td>
+                        <td>
                             <Input
-                                css={{width:'100%'}}
+                                className={styles.full_width}
                                 placeholder="请输入图表名称"
                                 ref={nameEle}
                                 value={name} 
