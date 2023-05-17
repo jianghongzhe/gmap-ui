@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState} from 'react';
 import {Button, Input, List, Modal, Select} from 'antd';
-import {QuestionCircleOutlined, TableOutlined} from '@ant-design/icons';
-import {tw} from 'gstyle-creater/src';
+import {FormOutlined, QuestionCircleOutlined, ReadOutlined, TableOutlined} from '@ant-design/icons';
 
 import {withEnh} from '../../common/specialDlg';
 
@@ -18,6 +17,7 @@ import {dispatch} from "use-bus";
 import {editorEvents} from "../../../common/events";
 import {useMemoizedFn, useMount} from "ahooks";
 import api from "../../../service/api";
+import styles from './EditGraphDlg.module.scss';
 
 
 const EnhDlg=withEnh(Modal);
@@ -85,15 +85,15 @@ const EditGraphDlg=(props)=>{
     return (
         <>
             <EnhDlg
-                    title={<div>
+                    title={<div className={styles.title}>
                         <span>{"编辑图表 - " + props.currMapName}</span>
                         <Select size='small'
-                                style={{ marginLeft:'30px',marginRight:'0px', width:'200px'}}
+                                className='theme_selector'
                                 value={theme}
                                 options={themeOpts}
                                 onChange={setAndSaveTheme}
                         />
-                        <span style={{marginLeft:'40px'}}>
+                        <span className='tag_container'>
                             {
                                 props.tags.map((tag,ind)=>
                                     <TagItem key={`taglist-item${ind}`}
@@ -104,7 +104,7 @@ const EditGraphDlg=(props)=>{
                                 )
                             }
                         </span>
-                        <Input style={{width:'100px'}}
+                        <Input className='tag_input'
                                size="small"
                                placeholder='+ 标签'
                                value={props.tagVal}
@@ -122,25 +122,28 @@ const EditGraphDlg=(props)=>{
                     ]}
                     onCancel={props.onCancel}>              
                 <div>
-                    <div css={toolbarStyle}>
+                    <div className={styles.toolbar}>
                         {/* 颜色选择器 */}
                         {
                             commonColors.map((eachcolor, colorInd) => (
-                                <div key={colorInd} title={eachcolor} css={getEditDlgColorBoxStyle(eachcolor)} onClick={onAddColor.bind(this, eachcolor)}></div>
+                                <div key={colorInd}
+                                     title={eachcolor}
+                                     className={styles.assignedColorStyle}
+                                     style={{'--bg_color':eachcolor,}}
+                                     onClick={onAddColor.bind(this, eachcolor)}></div>
                             ))
                         }
-                        <div css={selColorStyle} title='选择颜色' onClick={showColorPicker}></div>
-                        <div css={selColorStyleAdv} title='选择颜色（高级）' onClick={showAdvColorPicker}></div>
-                        <div css={clearColorStyle} title='清除颜色' onClick={onClearColor}></div>
+                        <div className={styles.selColorStyle} title='选择颜色' onClick={showColorPicker}></div>
+                        <div className={styles.selColorStyleAdv} title='选择颜色（高级）' onClick={showAdvColorPicker}></div>
+                        <div className={styles.clearColorStyle} title='清除颜色' onClick={onClearColor}></div>
 
                         {/* 插入日期、图片、附件、帮助 */}
-                        {/* <CalendarOutlined title='插入日期（ Ctrl + T ）' css={insertImgStyle} onClick={showDateDlg} />
-                        <PictureOutlined title='插入图片（ Ctrl + P ）' css={insertImgStyle} onClick={showInsertPicDlg} />
-                        <FileOutlined title='插入附件（ Ctrl + I ）' css={insertImgStyle} onClick={showInsertAttDlg} /> */}
-                        <div css={txtBtnStyle} title='查看引用' onClick={showRefs}>ref</div>
-                        <div css={txtBtnStyle} title='查看文本引用' onClick={showTrefs}>tref</div>
-                        <TableOutlined title="编辑表格（ Ctrl + T ）" css={tableStyle} onClick={onEditTable}/>
-                        <QuestionCircleOutlined title='帮助（ Ctrl + H ）' css={helpStyle} onClick={props.onOpenHelpDlg} />
+                        {/*<div className={styles.txtBtnStyle} title='查看引用' onClick={showRefs}>ref</div>*/}
+                        {/*<div className={styles.txtBtnStyle} title='查看文本引用' onClick={showTrefs}>tref</div>*/}
+                        <ReadOutlined className={styles.refStyle} title='跳转到引用' onClick={showRefs}/>
+                        <FormOutlined className={styles.refStyle} title='跳转到文本引用' onClick={showTrefs}/>
+                        <TableOutlined title="编辑表格（ Ctrl + T ）" className={styles.tableStyle} onClick={onEditTable}/>
+                        <QuestionCircleOutlined title='帮助（ Ctrl + H ）' className={styles.helpStyle} onClick={props.onOpenHelpDlg} />
                     </div>
                     <Editor
                         theme={theme}
@@ -161,14 +164,14 @@ const EditGraphDlg=(props)=>{
                 onCancel={hideAllDlg}
                 width={800}
                 footer={null}>
-                <div css={{overflowX:'hidden', overflowY:'auto', maxHeight:'calc(100vh - 320px)'}}>
+                <div className={styles.refNavDlgBody}>
                     <List
                         header={null}
                         footer={null}
                         bordered={false}
                         dataSource={refNavDlgItems}
                         renderItem={item => (
-                            <List.Item css={{cursor:'pointer','&:hover':{color:'#1890ff',}}} onClick={gotoRefDefinition.bind(this, item)}>{item.name}</List.Item>
+                            <List.Item className='item' onClick={gotoRefDefinition.bind(this, item)}>{item.name}</List.Item>
                         )}
                     />
                 </div>
@@ -275,77 +278,10 @@ const themeOpts=(()=>{
 })();
 
 
-
-
-
-
-
-
-
 const commonColors=[
     '#cf1322', '#389e0d', '#0050b3', '#fa8c16', 
     '#13c2c2', '#ad6800', '#1890ff', '#722ed1', '#c41d7f'
 ];
-
-const toolbarStyle=tw('mb-6');
-
-
-const baseHoverStyle = tw(
-    "cursor-pointer transition-all duration-0.2s delay:0.1s",
-    {'&:hover': "rounded-6 opacity-0.6"},
-);
-
-const txtBtnStyle=tw(
-    `
-        w-30 h-18 text-14 leading-18 text-center align-top inline-block ml-10 rounded-7 cursor-pointer
-        transition-all duration-0.5s delay:2.5s
-        border-1 border-solid border-grey
-    `,
-    {'&:hover': 'text-#1890ff rounded-7 opacity-0.8 border-1 border-solid border-#1890ff'},
-);
-
-const tableStyle = {
-    ...baseHoverStyle,
-    ...tw(
-        'text-19 ml-10 text-#1890ff',
-        {'&:hover': 'opacity-0.6 rotate-180'},
-    ),
-}
-
-const helpStyle = {
-    ...baseHoverStyle,
-    ...tw(
-        'text-19 ml-10 text-#1890ff',
-        {'&:hover': 'opacity-0.6 rotate-45'},
-    ),
-}
-
-const colorBoxhoverStyle = {
-    ...baseHoverStyle,
-    ...tw("w-16 h-16 inline-block mr-10"),
-}
-
-const selColorStyle = {
-    ...colorBoxhoverStyle,
-    ...tw("bg-[linear-gradient(135deg,orange 20%,green 100%)]"),
-
-};
-
-const selColorStyleAdv = {
-    ...colorBoxhoverStyle,
-    ...tw('bg-[linear-gradient(135deg,orange 20%,pink 40%,green 100%)]'),
-};
-
-const clearColorStyle = {
-    ...colorBoxhoverStyle,
-    ...tw('bg-white border-1 border-solid border-gray'),
-};
-
-const getEditDlgColorBoxStyle = (color) => ({
-    ...colorBoxhoverStyle,
-    ...tw(`bg-${color}`),
-});
-
 
 
 export default React.memo(EditGraphDlg);

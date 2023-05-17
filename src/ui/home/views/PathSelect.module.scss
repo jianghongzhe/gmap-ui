@@ -12,11 +12,44 @@
       cursor: pointer;
       transition: all 0.3s 0s;
       transition-timing-function: ease;
+
+      .avator_file{
+        background-color: #40a9ff;
+      }
+
+      .avator_folder{
+        background-color: orange;
+      }
+
+      .extra{
+        margin-right: 16px;
+        width: 48px;
+        height: 48px;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center center;
+        background-image: var(--pic_url),
+      }
     }
+
   }
 }
 
 .list_force_maxh{
   height: var(--max-list-h);
   min-height: var(--max-list-h);
+}
+
+.refresh_btn_container{
+  text-align: right;
+}
+
+.top_divider{
+  margin-top: 10px !important;
+  margin-bottom: 0 !important;
+}
+
+.backtop{
+  right: var(--backtop-right) !important;
+  bottom: var(--backtop-bottom) !important;
 }

@@ -21,7 +21,6 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
         onselectFileItem(item);
     });
 
-
     return (
         <React.Fragment>
             <Row>
@@ -36,14 +35,14 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
                         }    
                     </Breadcrumb>
                 </Col>
-                <Col span={2} css={{textAlign:'right'}}>
+                <Col span={2} className={styles.refresh_btn_container}>
                     <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} onClick={onloadCurrDir} />
                 </Col>
             </Row>                          
-            <Divider css={{marginTop:'10px',marginBottom:'0px'}}/>
+            <Divider className={styles.top_divider}/>
             
             {/* id={listWrapperId} */}
-            <div  className={classnames({[styles.list]:true, [styles.list_force_maxh]:forceMaxH})} style={{'--max-list-h': maxH,}}  ref={bindListRef}>
+            <div  className={classnames(styles.list, {[styles.list_force_maxh]:forceMaxH})} style={{'--max-list-h': maxH,}}  ref={bindListRef}>
                 <List
                     itemLayout="horizontal"
                     dataSource={filelist}
@@ -52,7 +51,7 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
                             <List.Item.Meta 
                                 avatar={
                                     <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} 
-                                        css={{ "backgroundColor": (item.isfile?'#40a9ff':'orange') }} />
+                                        className={item.isfile ? 'avator_file' : 'avator_folder'} />
                                 }
                                 title={item.showname}
                                 description={<div>
@@ -72,7 +71,10 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
             
             {
                 (backtopLoc && 2===backtopLoc.length) && (
-                    <BackTop target={getScrollTarget} css={{right:backtopLoc[0],bottom:backtopLoc[1]}}/>
+                    <BackTop target={getScrollTarget}
+                             className={styles.backtop}
+                             style={{'--backtop-right':backtopLoc[0], '--backtop-bottom':backtopLoc[1]}}
+                    />
                 )
             }
         </React.Fragment>
@@ -83,11 +85,8 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
 const getListItemExtra=(item)=>{
     if(item.pic){
         return {
-            extra: <div css={{marginRight:16,width:48,height:48,
-                    backgroundImage:`url('${item.pic}')`,
-                    backgroundRepeat:'no-repeat',
-                    backgroundSize:'cover',
-                    backgroundPosition:'center center'}}></div>
+            extra: <div className='extra'
+                        style={{'--pic_url':`url("${item.pic}")`}}></div>
         };
     }
     return {};

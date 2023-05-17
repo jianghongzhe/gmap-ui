@@ -1,0 +1,139 @@
+.title{
+  :global{
+    .theme_selector{
+      margin-left: 30px;
+      margin-right: 0;
+      width: 200px;
+    }
+    .tag_container{
+      margin-left: 40px;
+    }
+    .tag_input{
+      width: 100px;
+    }
+  }
+}
+
+.toolbar{
+  margin-bottom: 6px;
+}
+
+.baseHoverStyle {
+  cursor: pointer;
+  transition: all;
+  transition-duration: 0.2s;
+  transition-delay: 0.1s;
+
+  &:hover{
+    border-radius: 6px;
+    opacity: 0.6;
+  }
+
+}
+
+.colorBoxStyle {
+  composes: baseHoverStyle;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+
+
+.selColorStyle {
+  composes: colorBoxStyle;
+  background-image: linear-gradient(135deg, orange 20%, green 100%);
+}
+
+.selColorStyleAdv {
+  composes: colorBoxStyle;
+  background-image: linear-gradient(135deg,orange 20%,pink 40%,green 100%);
+}
+
+.clearColorStyle {
+  composes: colorBoxStyle;
+  background-color: white;
+  border: 1px solid gray;
+}
+
+.assignedColorStyle{
+  composes: colorBoxStyle;
+  background-color: var(--bg_color);
+}
+
+//.txtBtnStyle {
+//  width: 30px;
+//  height: 18px;
+//  font-size: 14px;
+//  line-height: 18px;
+//  text-align: center;
+//  vertical-align: top;
+//  display: inline-block;
+//  margin-left: 10px;
+//  border-radius: 7px;
+//  cursor: pointer;
+//  transition: all;
+//  transition-duration: 0.5s;
+//  // transition-delay: 2.5s;
+//  border: 1px solid grey;
+//
+//
+//  &:hover {
+//    color: #1890ff;
+//    border-radius: 7px;
+//    opacity: 0.8;
+//    border: 1px solid #1890ff;
+//  }
+//
+//}
+
+.refStyle{
+  composes: baseHoverStyle;
+  font-size: 19px;
+  margin-left: 10px;
+  color: #faad14 !important;
+
+  &:hover{
+    transform: rotate(360deg);
+  }
+}
+
+
+.tableStyle {
+  composes: baseHoverStyle;
+  font-size: 19px;
+  margin-left: 10px;
+  color: #1890ff !important;
+
+  &:hover{
+    transform: rotate(180deg);
+  }
+}
+
+.helpStyle {
+  composes: baseHoverStyle;
+  font-size: 19px;
+  margin-left: 10px;
+  color: #1890ff !important;
+  &:hover{
+    transform: rotate(45deg);
+  }
+}
+
+.refNavDlgBody{
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 320px);
+
+  :global {
+
+    .item {
+      cursor: pointer;
+
+      &:hover {
+        color: #1890ff;
+      }
+    }
+  }
+}

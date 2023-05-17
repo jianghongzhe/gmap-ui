@@ -27,7 +27,7 @@ const Welcome=(props)=>{
                     <Col span={14} >
                         <ConnectedPathSelect 
                             maxH='calc(100vh - 160px)'
-                            backtopLoc={['calc(44vw + 80px)',120]}
+                            backtopLoc={['calc(44vw + 80px)','120px']}
                             onSelectMapItem={props.onSelectMapItem}/>
                     </Col>
                     <Col span={10}>                   
