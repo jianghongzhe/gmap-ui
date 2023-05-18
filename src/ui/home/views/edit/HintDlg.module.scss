@@ -1,0 +1,21 @@
+body {
+  :global{
+    .CodeMirror-hints {
+      z-index: 1000;
+      max-height: var(--maxh);
+      left: var(--left);
+      top: var(--top);
+
+      .splitItem{
+        cursor: default;
+
+        div{
+          height: 1px;
+          background-color: #DDD;
+          margin-top: 5px;
+          margin-bottom: 5px;
+        }
+      }
+    }
+  }
+}

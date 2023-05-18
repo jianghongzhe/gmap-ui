@@ -61,21 +61,25 @@ export const useEditorOperation=()=>{
  * @returns 
  */
 export const useRulerStyle=(rulerLineCnt)=>{
-    const [rulerVisible, setRulerVisible]=useState({'.CodeMirror .rulerItem': {height:0, maxHeight:0, minHeight:0},});
+    const [rulerVisible, setRulerVisible]=useState([`body .CodeMirror .rulerItem {height:0; max-height:0, min-height:0}`]);
     
 
     /**
-     * 根据光标位置计算标尺线的样式
+     * 根据光标位置计算标尺线的样式：
+     * 标尺默认为显示且不高亮（codemirror option中指定），如果出现之外的样式，则生成以覆盖
+     *
      */
     const {run: calcRulerStyle} = useDebounceFn((cm)=>{
-        let tmp={};
+        const tmp=[];
         editorSvcEx.getRulerState(cm, rulerLineCnt).forEach((sty,ind)=>{
             if(!sty.show){
-                tmp={...tmp, [`.CodeMirror .rulerItem.ruler${ind}`]: {height:0, maxHeight:0, minHeight:0},};
+                // tmp={...tmp, [`.CodeMirror .rulerItem.ruler${ind}`]: {height:0, maxHeight:0, minHeight:0},};
+                tmp.push(`body .CodeMirror .rulerItem.ruler${ind} {height:0; max-height:0; min-height:0;}`);
                 return;
             }
             if(sty.highlight){
-                tmp={...tmp, [`.CodeMirror .rulerItem.ruler${ind}`]: {borderColor:'grey!important',},};
+                // tmp={...tmp, [`.CodeMirror .rulerItem.ruler${ind}`]: {borderColor:'grey!important',},};
+                tmp.push(`body .CodeMirror .rulerItem.ruler${ind} {border-color:grey!important;}`);
                 return;
             }
         });

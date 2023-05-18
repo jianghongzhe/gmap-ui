@@ -1,0 +1,60 @@
+.root{
+  :global{
+    .inputContainer {
+      width: 100%;
+
+      div {
+        .ipt {
+          width: 80%;
+        }
+
+        .matchCntTxt {
+          margin-left: 30px;
+          font-size: 16px;
+
+          .num {
+            font-weight: bold;
+            font-size: 20px;
+            color: red;
+          }
+        }
+      }
+    }
+
+    .resultContainer{
+      margin-top: 40px;
+      max-height: var(--h);
+      height: var(--h);
+      overflow-y: auto;
+
+      .item{
+        margin-bottom: 30px;
+        padding: 4px 6px;
+        border-radius: 7px;
+        transition: all;
+        transition-duration: 0.1s;
+        transition-delay: 0.1s;
+
+        .txtpart{
+          cursor: pointer;
+          .desc{
+            margin-bottom: 0;
+          }
+        }
+
+        &:hover{
+          background-color: #EEE;
+
+          .txtpart{
+            .title{
+              color: #1890ff;
+            }
+            .desc{
+              color: rgba(0, 0, 0, 1);
+            }
+          }
+        }
+      }
+    }
+  }
+}

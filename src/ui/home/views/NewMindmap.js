@@ -4,6 +4,7 @@ import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
 import {useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
 import {useMemoizedFn} from "ahooks";
+import retryTimeout from "../../../common/retryTimeout";
 
 
 /**
@@ -26,17 +27,18 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
      */
     useEffect(()=>{
         if(ds && ds.tree && ds.list && ds.map){
-            setTimeout(()=>{
+            const func=()=>{
                 const styles= mindLayoutSvcFacade.loadStyles(ds);
                 const relaLineStyles=getRelaLineStyles(styles.ndStyles);
                 setAllStyles({
-                    ndStyles:       styles.ndStyles, 
-                    lineStyles:     styles.lineStyles, 
+                    ndStyles:       styles.ndStyles,
+                    lineStyles:     styles.lineStyles,
                     expBtnStyles:   styles.expBtnStyles,
                     wrapperStyle:   styles.wrapperStyle,
                     relaLineStyles,
                 });
-            }, 5);
+            };
+            setTimeout(func, 20);
         }
     },[ds, setAllStyles]);
 

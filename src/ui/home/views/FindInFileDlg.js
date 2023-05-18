@@ -7,6 +7,7 @@ import {focusRef} from '../../../common/uiUtil';
 import {useDebounceEffect, useMemoizedFn, useRafState, useSize} from 'ahooks';
 import {useSelectFileListItem} from '../../../hooks/tabs';
 import TagItem from "../../common/TagItem";
+import styles from './FindInFileDlg.module.scss';
 
 const { Title,Paragraph } = Typography;
 
@@ -71,6 +72,7 @@ const FindInFileDlg=({visible, onCancel})=>{
      * @param {*} fullTitle 标题的全路径 a/b/c
      */
     const openMap=useMemoizedFn((fullTitle)=>{
+        console.log("open map", fullTitle);
         api.openUrl(`gmap://${fullTitle}`, selectFileListItem);
         onCancel();
     });
@@ -136,8 +138,8 @@ const FindInFileDlg=({visible, onCancel})=>{
             footer={null}
             width={"86vw"}
             onCancel={onCancel}>
-        <div>
-            <Space direction='vertical' css={inputContainerStyle}>
+        <div className={styles.root}>
+            <Space direction='vertical' className='inputContainer'>
                 <div ref={refcondPart}>
                     {/* <label>标题和内容：</label> */}
                     <Input className='ipt' prefix={<SearchOutlined />} 
@@ -160,15 +162,15 @@ const FindInFileDlg=({visible, onCancel})=>{
                     }
                 </div>
             </Space>
-            <div css={{marginTop:'40px', maxHeight: searchResultHeight,height: searchResultHeight, overflowY:'auto'}}>
+            <div className='resultContainer' style={{'--h': searchResultHeight}}>
                 {
-                    searchResults.map((searchItem, ind)=><div key={`resultitem-${ind}`} css={{marginBottom:'30px'}} >
-                        <div style={{cursor:'pointer', }} onClick={openMap.bind(this, searchItem.fullTitle)}>
-                            <Title level={5} >
+                    searchResults.map((searchItem, ind)=><div key={`resultitem-${ind}`} className='item' >
+                        <div className='txtpart' onClick={openMap.bind(this, searchItem.fullTitle)}>
+                            <Title level={5} className='title'>
                                 { searchItem.titleParts.map((item,ind)=><ResultItem key={"title-"+ind} data={item}/>) }
                             </Title>
-                            <Paragraph >
-                                <div style={{cursor:'pointer', }} onClick={openMap.bind(this, searchItem.fullTitle)}>
+                            <Paragraph className='desc'>
+                                <div>
                                 { searchItem.contParts.map((item,ind)=><ResultItem key={"cont-"+ind} data={item} bold={true}/>) }
                                 </div>
                             </Paragraph>

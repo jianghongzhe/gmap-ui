@@ -10,6 +10,9 @@
     .toolbtnFirst {
       margin-left:     15px;
     }
+    .assignedColor{
+      color: var(--color);
+    }
     .divider {
       background-color:#CCC;
       height: 50%;
@@ -20,3 +23,4 @@
     }
   }
 }
+

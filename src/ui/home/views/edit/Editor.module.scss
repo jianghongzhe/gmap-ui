@@ -1,0 +1,22 @@
+.editor{
+  :global{
+    .CodeMirror {
+      border: 1px solid lightgrey;
+      border-radius: 6px;
+      font-size: 16px;
+      height: calc(100vh - 400px);
+      max-height: calc(100vh - 400px);
+      min-height: calc(100vh - 400px);
+    }
+  }
+}
+
+body {
+  :global{
+    .CodeMirror-lint-tooltip {
+      z-index: 1000;
+    }
+  }
+}
+
+

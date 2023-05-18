@@ -99,15 +99,14 @@ import editorSvcEx from '../../../../service/editorSvcEx';
 import api from '../../../../service/api';
 import { tabActivePaneAssetsDir } from '../../../../store/tabs';
 import { useRecoilValue } from 'recoil';
-import { Global } from '@emotion/react';
 import { useEditorOperation, useRulerStyle } from '../../../../hooks/editor';
-import {useMemoizedFn} from "ahooks";
+import {useMemoizedFn, useMount} from "ahooks";
 import HintDlg from "./HintDlg";
 import {useHintMenu} from "../../../../hooks/hintMenu";
 import {useAutoComplateFuncs} from "../../../../hooks/autoComplete";
 import {actionTypes} from "../../../../common/hintMenuConfig";
-import globalStyleConfig from "../../../../common/globalStyleConfig";
 import {editorEvents} from "../../../../common/events";
+import styles from './Editor.module.scss';
 
 const CodeMirror=React.memo(NotMemoedCodeMirror);
 
@@ -360,14 +359,17 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
     /**
      * 标尺的样式和语法检查tooltip的样式
      */
-    const globalStyle=useMemo(()=>({...rulerStyle, ...fixedGlobalStyle,}),[rulerStyle]);
+    const globalStyle=useMemo(()=>(rulerStyle.join("\n")),[rulerStyle]);
 
 
     
     return <React.Fragment>
-        <Global styles={globalStyle}/>
+        {/*<Global styles={globalStyle}/>*/}
+        <style>
+            {globalStyle}
+        </style>
         <CodeMirror
-            css={codeEditorStyle}
+            className={styles.editor}
             editorDidMount={bindCodeMirrorInstRef}
             value={value}
             options={{
@@ -427,13 +429,7 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
 };
 
 
-const fixedGlobalStyle= {
-    'body .CodeMirror-lint-tooltip': {zIndex: 1000,},
-    'body .CodeMirror-hints': {
-        zIndex: 1000,
-        maxHeight: `${globalStyleConfig.hintDlg.maxh}px`,
-    }
-};
+
 
 
 
@@ -449,17 +445,6 @@ const rulers=[...rulerColors, ...rulerColors, ...rulerColors, ...rulerColors].ma
 }));
 
 
-
-
-const codeEditorStyle = {
-    '& .CodeMirror': {
-        border: '1px solid lightgrey',
-        fontSize: 16,
-        height: 'calc(100vh - 400px)',
-        maxHeight: 'calc(100vh - 400px)',
-        minHeight: 'calc(100vh - 400px)',
-    }
-};
 
 
 export default React.memo(Editor);

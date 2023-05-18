@@ -28,6 +28,7 @@ import api from '../../../service/api';
 import {useLoadIcon} from "../../../hooks/loadIcon";
 import {filterShortCuts} from "../../../service/linkFilter";
 import styles from './Toolbar.module.scss';
+import classnames from "classnames";
 
 
 const { Header } = Layout;
@@ -144,7 +145,10 @@ const ShortcutItem=({tooltip, url, shouldConfirm, onClick})=>{
         const IconComp=localIcon.compType;
         return (
             <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
-                <Button shape='circle' icon={<IconComp css={localIcon.color} />} className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm)}/>
+                <Button shape='circle'
+                        icon={<IconComp className='assignedColor' style={{'--color':localIcon.color.color}}/>}
+                        className='toolbtn'
+                        size='large' onClick={onClick.bind(this, url, shouldConfirm)}/>
             </Tooltip>
         );
     }

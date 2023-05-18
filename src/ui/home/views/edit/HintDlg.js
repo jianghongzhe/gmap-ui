@@ -1,4 +1,7 @@
 import React from 'react';
+import globalStyleConfig from "../../../../common/globalStyleConfig";
+import styles from './HintDlg.module.scss';
+import classnames from "classnames";
 
 
 /**
@@ -21,21 +24,28 @@ const HintDlg=({pos, menus, bindRefFunc, onClick, onSelect})=>{
     return (<React.Fragment>
         {
             (pos && menus?.length>0) && (
-                <ul ref={bindRefFunc} className="CodeMirror-hints default" style={{left: `${pos.left}px`, top: `${pos.top}px`,}}>
+                <ul ref={bindRefFunc}
+                    className="CodeMirror-hints default"
+                    style={{
+                        '--left': `${pos.left}px`,
+                        '--top': `${pos.top}px`,
+                        '--maxh': `${globalStyleConfig.hintDlg.maxh}px`
+                    }}
+                >
                     {
                         menus.map((eachMenu, menuInd)=>(<React.Fragment key={`hintmenu-${menuInd}`}>
                             {
                                 "-"!==eachMenu ?
                                 (
-                                    <li     className={`CodeMirror-hint ${eachMenu.selected ? "CodeMirror-hint-active" : ""}`}
+                                    <li     className={classnames('CodeMirror-hint', {"CodeMirror-hint-active":eachMenu.selected})}
                                             onClick={onClick.bind(this, null)}
                                             onMouseOver={onSelect.bind(this, menuInd)}>
                                         {eachMenu.label}
                                     </li>
                                 ) :
                                 (
-                                    <li  className="CodeMirror-hint" style={{cursor:'default',}}>
-                                        <div style={{height:'1px', backgroundColor:"#DDD", marginTop:'5px',marginBottom:'5px',}}></div>
+                                    <li  className="CodeMirror-hint splitItem">
+                                        <div></div>
                                     </li>
                                 )
                             }
