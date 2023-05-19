@@ -364,7 +364,6 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
 
     
     return <React.Fragment>
-        {/*<Global styles={globalStyle}/>*/}
         <style>
             {globalStyle}
         </style>

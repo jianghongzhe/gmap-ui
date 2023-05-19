@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button, Avatar  } from 'antd';
 import {useLoadIcon} from "../../../hooks/loadIcon";
+import styles from './NodeLinkIcon.module.scss';
+import classnames from "classnames";
 
 const NodeLinkIcon=({lindAddr,onClick,})=>{
 
@@ -20,7 +22,8 @@ const NodeLinkIcon=({lindAddr,onClick,})=>{
      */
     if('icon'===localIcon.type){
         const IconComp=localIcon.compType;
-        return getBtn(<IconComp className='themebtnicon' css={localIcon.color}/>, onClick);
+        return getBtn(<IconComp className={classnames('themebtnicon', styles.assignedColor)}
+                                style={{'--color':localIcon.color.color}}/>, onClick);
     }
 
     /*
@@ -31,7 +34,7 @@ const NodeLinkIcon=({lindAddr,onClick,})=>{
         }
      */
     if('image'===localIcon.type){
-        return <Avatar size={18} src={localIcon.url} css={avatarStyle} onClick={onClick}/>;
+        return <Avatar size={18} src={localIcon.url} className={styles.avatarStyle} onClick={onClick}/>;
     }
 };
 
@@ -45,16 +48,6 @@ const getBtn=(icon, onClick)=>{
         icon={icon}  
         onClick={onClick}
     />;
-};
-
-const avatarStyle={
-    marginLeft:3,
-    verticalAlign:'bottom',
-    marginBottom:1,
-    cursor:'pointer',
-    borderRadius:0,
-    // color: '#f56a00', 
-    // backgroundColor: '#fde3cf',
 };
 
 

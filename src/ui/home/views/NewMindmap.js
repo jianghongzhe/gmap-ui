@@ -4,7 +4,8 @@ import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
 import {useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
 import {useMemoizedFn} from "ahooks";
-import retryTimeout from "../../../common/retryTimeout";
+import styles from './NewMindmap.module.scss';
+
 
 
 /**
@@ -122,7 +123,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         return (<Row>
             <Col span={8} offset={8}>
                 <Alert
-                    css={{marginTop:50}}
+                    className={styles.alert}
                     message='状态异常'
                     description='读取图表文件时出现错误'
                     type="error"/>
@@ -133,7 +134,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         return (<Row>
             <Col span={8} offset={8}>
                 <Alert
-                    css={{marginTop:50}}
+                    className={styles.alert}
                     message={ds.msg}
                     description={ds.desc}
                     type="error"/>

@@ -9,6 +9,7 @@ import {tabActiveKey, tabPanes} from '../../../store/tabs';
 import {useRecoilValue} from 'recoil';
 import { useMoveNextTab, useMovePreTab, useRemoveAllTabs, useRemoveLeftTabs, useRemoveOtherTabs, useRemoveRightTabs, useRemoveTab, useSetAssignedTabKey, useToggleExpand, useToggleNextTab, useTogglePreTab } from '../../../hooks/tabs';
 import {useMemoizedFn} from "ahooks";
+import styles from './GraphTabs.module.scss';
 
 
 /**
@@ -48,9 +49,6 @@ const GraphTabs=(props)=>{
 
     /**
      * 折叠按钮的render props
-     *
-     * <MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>
-     * <PlusCircleOutlined className='expbtnicon' css={colors.toggle2}/>
      */
     const ndExpBtnRenderer=(nd, expands)=>{
         // 按钮已展开，显示为折叠
@@ -60,15 +58,15 @@ const GraphTabs=(props)=>{
                     type="link"
                     size='small'
                     title={nd.expand?"折叠":"展开"}
-                    css={styles.expbtn}
-                    icon={<MinusCircleOutlined className='expbtnicon' css={colors.toggle}/>}
+                    className={styles.expbtn_minus}
+                    icon={<MinusCircleOutlined className='expbtnicon'/>}
                     onClick={toggleExpand.bind(this,nd)}/>
             );
         }
 
         // 按钮已折叠，显示为展开，同时显示子节点数量
         return (
-            <span style={collapsedExpBtnStyle} onClick={toggleExpand.bind(this,nd)} title='展开'>
+            <span className={styles.expbtn_plus} onClick={toggleExpand.bind(this,nd)} title='展开'>
                 {nd.childs.length}
             </span>
         );
@@ -164,7 +162,7 @@ const GraphTabs=(props)=>{
             hideAdd={true}
             type="editable-card"
             activeKey={activeKey}
-            css={{ height:'calc(100vh - 64px)', 'backgroundColor': 'white' }}
+            className={styles.tab}
             onChange={setAssignedTabKey}
             onEdit={onEditTab}
             items={
@@ -178,15 +176,7 @@ const GraphTabs=(props)=>{
                     ),
                     closable: true,
                     children: (
-                        <div css={getTabItemContainerStyle(tabContentH)}>
-                            {/*<div style={{position:'absolute',top:'-110px',right:25,zIndex:5,backgroundColor:'transparent'}}>*/}
-
-                            {/*    /!*<Card size='small' style={{borderRadius:'10px',padding:0,margin:0,}}>*!/*/}
-                            {/*        <NodeLinkIcon lindAddr={"https://baidu.com"} onClick={()=>{}}/>*/}
-                            {/*        <NodeLinkIcon lindAddr={"https://baidu.com"} onClick={()=>{}}/>*/}
-                            {/*    /!*</Card>*!/*/}
-
-                            {/*</div>*/}
+                        <div className={styles.tabItemContainer}>
                             <NewMindmap
                                 ind={ind}
                                 ds={pane.ds}
@@ -200,66 +190,6 @@ const GraphTabs=(props)=>{
         />
     </React.Fragment>);
 }
-
-
-
-// 100vh- 64 - 55-1
-const tabContentH='calc(100vh - 120px)';
-
-const colors={
-    toggle: {color:'#7cb305'},
-    toggle2: {color:'#eb2f96'},//#eb2f96 #9254de
-};
-
-
-const collapsedExpBtnStyle={
-    marginLeft:'5px',
-    marginRight:'5px',
-    display:'block',
-    cursor:'pointer',
-    boxSizing:'border-box',
-    color: colors.toggle2.color,
-    border:`1px solid ${ colors.toggle2.color}`,
-    borderRadius:'50%',
-    width:'16px',
-    height:'16px',
-    lineHeight:'12px',
-    fontSize:'12px',
-    overflow:'hidden',
-    padding:0,
-    textAlign:'center',
-    verticalAlign:'top',
-};
-
-
-const styles={
-    expbtn:{
-        width:14,
-        height:14,
-        verticalAlign:'bottom',
-        padding:0,
-        lineHeight:'14px',
-
-        '& .expbtnicon':{
-            fontSize:14,
-            lineHeight:'14px',
-            margin:0,
-            padding:0,
-        }
-    },
-};
-
-
-
-
-const getTabItemContainerStyle=(h)=>({
-    height: h,
-    maxHeight: h,
-    overflowY: 'auto',
-    overflowX: 'auto',
-    width:'100%',
-    paddingBottom:'30px'
-});
 
 
 export default React.memo(GraphTabs);

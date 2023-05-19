@@ -1,0 +1,51 @@
+.tab{
+  height: calc(100vh - 64px);
+  background-color: white;
+}
+
+.tabItemContainer{
+  // 100vh- 64 - 55-1
+  height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  padding-bottom: 30px;
+}
+
+.expbtn_minus {
+  width: 14px;
+  height: 14px;
+  vertical-align: bottom;
+  padding: 0;
+  line-height: 14px;
+
+  :global{
+    .expbtnicon {
+      font-size: 14px;
+      line-height: 14px;
+      margin: 0;
+      padding: 0;
+      color: #7cb305;
+    }
+  }
+}
+
+.expbtn_plus{
+  margin-left: 5px;
+  margin-right: 5px;
+  display: block;
+  cursor: pointer;
+  box-sizing: border-box;
+  color: #eb2f96;
+  border: 1px solid #eb2f96;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  line-height: 12px;
+  font-size: 12px;
+  overflow: hidden;
+  padding: 0;
+  text-align: center;
+  vertical-align: top;
+}

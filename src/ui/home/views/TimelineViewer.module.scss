@@ -1,0 +1,11 @@
+.root{
+  margin-top: 20px;
+
+  :global{
+    .clockIcon{
+      font-size: 16px;
+      color: var(--color);
+      margin-bottom: 4px;
+    }
+  }
+}

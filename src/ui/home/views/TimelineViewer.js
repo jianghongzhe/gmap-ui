@@ -2,6 +2,7 @@ import React from 'react';
 import {  Modal, Timeline } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
+import styles from './TimelineViewer.module.scss';
 
 const EnhDlg=withEnh(Modal);
 const dlgW= 900;
@@ -18,11 +19,16 @@ const TimelineViewer=(props)=>{
                 maskClosable={true}              
                 onCancel={props.onCancel}>
                     
-            <Timeline mode='left' css={{marginTop:20}}>
+            <Timeline mode='left' className={styles.root}>
                 {
                     props.timelineObj.map((item,ind)=>
                         <Timeline.Item key={ind}  
-                                {...(item.near?{dot:<ClockCircleOutlined css={{ fontSize: '16px',color:item.color,marginBottom:4 }} />}:{})}   
+                                {...(item.near
+                                        ?
+                                    {dot:<ClockCircleOutlined className='clockIcon' style={{'--color':item.color}}/>}
+                                        :
+                                    {}
+                                )}
                                 label={"（"+item.msg+"）"+item.fullDate} color={item.color}>
                             <>{item.txt.map((line,ind)=><>{0<ind && <br/>}{line}</>)}</>
                         </Timeline.Item>

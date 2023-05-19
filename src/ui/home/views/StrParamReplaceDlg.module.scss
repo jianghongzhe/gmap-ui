@@ -1,0 +1,25 @@
+.root{
+  max-height: calc(100vh - 350px);
+  overflow-y: auto;
+
+  :global{
+    .item {
+      .label{
+        font-weight: bold;
+      }
+      .ipt_container{
+        margin-top: 5px;
+        .ipt {
+          width: 96%;
+        }
+      }
+    }
+    .item + .item{
+      margin-top: 15px;
+    }
+
+
+
+
+  }
+}

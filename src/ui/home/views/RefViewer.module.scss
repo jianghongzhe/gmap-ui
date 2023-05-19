@@ -1,11 +1,39 @@
+$table_color_title: #409EFF;
+$table_color_border: #d0d7de;
 
+:global {
+  .markdown_body {
+    margin: 0 auto;
+    width: 98%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
 
-.markdown_body{
-  margin: 0 auto;
-  width: 98%;
-  overflow-x: hidden;
-  overflow-y: hidden;
+  .markdown-body blockquote {
+    border-left: .25em solid lightgreen !important;
+  }
+
+  .markdown-body table > thead > tr {
+    color: #fff;
+    background-color: $table_color_title;
+  }
+
+  .markdown-body table > thead > tr > th {
+    border: 1px solid $table_color_title;
+    border-left: 1px solid $table_color_border;
+    border-right: 1px solid $table_color_border;
+  }
+
+  .markdown-body table > thead > tr > th:first-child {
+    border-left: 1px solid $table_color_title;
+  }
+
+  .markdown-body table > thead > tr > th:last-child {
+    border-right: 1px solid $table_color_title;
+  }
 }
+
+
 
 .backtop {
   right: 140px !important;

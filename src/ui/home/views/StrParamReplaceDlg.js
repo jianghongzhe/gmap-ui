@@ -4,6 +4,7 @@ import {withEnh} from '../../common/specialDlg';
 import strTmpl from '../../../common/strTmpl';
 import { useBindAndGetRefs } from '../../../common/commonHooks';
 import {useMemoizedFn} from "ahooks";
+import styles from './StrParamReplaceDlg.module.scss';
 
 const EnhDlg=withEnh(Modal);
 
@@ -77,21 +78,21 @@ const StrParamReplaceDlg=(props)=>{
                 visible={props.visible}
                 onCancel={props.onCancel}
                 onOk={props.onOk.bind(this, previewUrl)}>
-            <div css={{maxHeight: 'calc(100vh - 350px)', overflowY:'auto'}}>
-                <div>
-                    <span css={{fontWeight:'bold'}}>原地址：　</span>{props.currLinkUrl}
+            <div className={styles.root}>
+                <div className='item'>
+                    <span className='label'>原地址：　</span>{props.currLinkUrl}
                 </div>
-                <div css={{marginTop:'15px',}}>
-                    <span css={{fontWeight:'bold'}}>结果预览：</span>{previewUrl}
+                <div className='item'>
+                    <span className='label'>结果预览：</span>{previewUrl}
                 </div>
                 {
                     items.map((item, ind)=>(
-                        <div key={ind} css={{marginTop:'15px'}}>
-                            <div><span css={{fontWeight:'bold'}}>参数{ind+1} - {item.name}：</span></div>
-                            <div css={{marginTop:'5px'}}>
+                        <div key={`paramItem-${ind}`} className='item'>
+                            <div><span className='label'>参数{ind+1} - {item.name}：</span></div>
+                            <div className='ipt_container'>
                                 <Input  ref={bindIptByKey.bind(this,`paramdlg-${ind}`)}
                                         onPressEnter={ind<items.length-1 ? setFocusByKey.bind(this, `paramdlg-${ind+1}`, false) : props.onOk.bind(this, previewUrl)} 
-                                        css={{width:'96%'}} 
+                                        className='ipt'
                                         value={item.value} 
                                         onChange={onChange.bind(this, ind)} placeholder="请输入参数值"/>
                             </div>
