@@ -115,7 +115,19 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
     },[ndExpBtnRenderer])
 
 
-    console.log("数据。。。。。", ds);
+    const extraContainerStyle=useMemo(()=>{
+        if(!wrapperStyle){
+            return {};
+        }
+        const extraStyle={};
+        if('undefined'!==typeof(wrapperStyle.width)){
+            extraStyle['--width']=`${wrapperStyle.width}px`;
+        }
+        if('undefined'!==typeof(wrapperStyle.height)){
+            extraStyle['--height']=`${wrapperStyle.height}px`;
+        }
+        return extraStyle;
+    },[wrapperStyle]);
 
     
     // 非正常状态时的渲染
@@ -145,12 +157,21 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         return null;
     }
 
+
+
+
+
     // 正常渲染
     return (
-        <div css={{...defaultWrapperStyle, ...wrapperStyle}}  id={`graphwrapper_${tabInd}`}>
+        <div className={styles.defaultWrapperStyle} style={{
+            '--node_zIndex': globalStyleConfig.nodeZIndex,
+            '--expbtn_zIndex': globalStyleConfig.expBtnZIndex,
+            '--relaLine_zIndex': globalStyleConfig.relaLineZIndex,
+            ...extraContainerStyle,
+        }} id={`graphwrapper_${tabInd}`}>
             {
                 ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
-                    {/* 节点内容  css={nd.parid?{borderBottom:'1px solid lightgray'}:{}}*/}
+                    {/* 节点内容  */}
                     <div className='item'  id={nd.id} style={getNdStyle(nd)}>
                         {actNdRenderer(nd, ds.tree)}
                     </div>
@@ -228,71 +249,8 @@ const getNdBorderStyle=(nd, rootNd)=>{
 
 
 
-const outOfViewStyle={
-    left:'-800px',
-    top:'-800px',
-};
-
-const baseFloatBlockStyle={
-    position: 'absolute',
-    backgroundColor: 'transparent',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-}
 
 
-const defaultWrapperStyle={
-    overflow:'hidden',
-    border:'0px solid red',
-    position:'relative',    //容器本身使用相对定位，其中内容使用绝对定位相对它来布局
-    marginLeft:'auto',
-    marginRight:'auto',
-
-    '& .item':{
-        whiteSpace:'nowrap',
-        position:'absolute',
-        display:'inline-block',
-        border:'0px solid green',
-        paddingBottom:0,
-        // paddingTop:10,
-        paddingTop:0,
-        // paddingLeft:20,
-        // paddingRight:20,
-        verticalAlign: 'bottom',
-        // backgroundColor: 'lightblue',
-        ...outOfViewStyle,
-        zIndex: globalStyleConfig.nodeZIndex,
-    },
-
-    '& .expBtn':{
-        ...baseFloatBlockStyle,
-        ...outOfViewStyle,
-        zIndex: globalStyleConfig.expBtnZIndex,   //折叠按钮显示在连接线的上层
-    },
-
-    '& .linewrapper': {
-        ...baseFloatBlockStyle,
-        ...outOfViewStyle,
-    },
-  
-    '& .linewrapper .lineExp': {
-        ...baseFloatBlockStyle,
-    },
-
-    '& .linewrapper .linefrom': {
-        ...baseFloatBlockStyle,
-    },
-
-    '& .linewrapper .lineto': {
-        ...baseFloatBlockStyle,
-    },
-
-    '& .relaLine':{
-        position:"absolute",
-        zIndex: globalStyleConfig.relaLineZIndex,
-        backgroundColor: "#EEEEEE00"
-    },
-};
 
 
 /**

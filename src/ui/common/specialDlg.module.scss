@@ -1,0 +1,16 @@
+.widthStyle{
+  width: var(--width);
+  min-width: var(--width);
+  max-width: var(--width);
+}
+
+.maxHeightStyle{
+  max-height: var(--height);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.fixHeightStyle{
+  min-height: var(--height);
+  height: var(--height);
+}

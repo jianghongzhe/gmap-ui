@@ -7,8 +7,6 @@
   "main": "./main/main.js",
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
-    "@emotion/react": "^11.10.5",
-    "@emotion/styled": "^11.10.5",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
@@ -19,7 +17,7 @@
     "echarts": "^5.4.2",
     "flowchart.js": "^1.17.1",
     "github-markdown-css": "^5.2.0",
-    "gstyle-creater": "^1.0.0",
+
     "highlight.js": "^11.8.0",
     "imports-loader": "^4.0.1",
     "js-sequence-diagram": "^2.0.1",
@@ -68,10 +66,19 @@
     ]
   },
   "devDependencies": {
-    "@emotion/babel-plugin": "^11.10.5",
     "customize-cra": "^1.0.0",
     "electron": "^22.2.0",
     "react-app-rewired": "^2.2.1",
     "sass": "^1.62.1"
+  },
+  "__unused":{
+    "dependencies": {
+      "@emotion/react": "^11.10.5",
+      "@emotion/styled": "^11.10.5",
+      "gstyle-creater": "^1.0.0"
+    },
+    "devDependencies": {
+      "@emotion/babel-plugin": "^11.10.5"
+    }
   }
 }

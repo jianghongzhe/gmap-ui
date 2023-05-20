@@ -1,3 +1,4 @@
+import styles from './specialDlg.module.scss';
 
 /**
  * 对话框的增强：支持无头、无底部、指定宽高、固定高等
@@ -34,10 +35,9 @@ const withEnh=(WrappedDlg)=>{
 
         //宽度
         if(size && size.w){
-            enhProps.css={
-                width: size.w ,
-                minWidth: size.w,
-                maxWidth: size.w
+            enhProps.className=styles.widthStyle;
+            enhProps.style={
+                '--width': appendPx(size.w),
             };
         }
 
@@ -46,16 +46,14 @@ const withEnh=(WrappedDlg)=>{
         if(size && size.h){
             //设置最大高：当内容小于该高度时会自动调整，但不会超过该高度
             wrapperProps={
-                css:{
-                    maxHeight:size.h,
-                    overflowY:'auto',
-                    overflowX:'hidden'
-                }
+                className: styles.maxHeightStyle,
+                style: {
+                    '--height': appendPx(size.h),
+                },
             };
             //固定高度：起始显示为该高度，不随内容高度调整
             if(true===size.fixh){
-                wrapperProps.css.minHeight=size.h;
-                wrapperProps.css.height=size.h;
+                wrapperProps.className+=` ${styles.fixHeightStyle}`;
             }
             //指定包装容器的id
             if(size.wrapperId){
@@ -71,6 +69,15 @@ const withEnh=(WrappedDlg)=>{
         }
         return <WrappedDlg {...enhProps} {...otherPropsEx}>{children}</WrappedDlg>;
     }
+};
+
+
+const appendPx=(str)=>{
+    str=(''+str).trim();
+    if(/^[0-9]+$/.test(str)){
+        return `${str}px`;
+    }
+    return str;
 };
 
 export {withEnh};

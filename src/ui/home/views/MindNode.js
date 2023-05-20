@@ -9,6 +9,7 @@ import strTmpl from "../../../common/strTmpl";
 import api from "../../../service/api";
 import styles from './MindNode.module.scss';
 import {filterGroupLinks, filterSingleLink} from "../../../service/linkFilter";
+import classnames from "classnames";
 
 
 
@@ -22,9 +23,9 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
     //根主题的样式，根据是否有文本之外的内容显示不同样式
     //有额外内容：显示一个边框
     //无额外内容，背景设为蓝色，文字设为白色
-    const centerThemeStyle =useMemo(() =>  {
+    const centerThemeCls =useMemo(() =>  {
         if(!nd || 0!==nd.lev){
-            return {};
+            return '';
         }
         const hasExtraItems=(
             nd.dateItem || 
@@ -34,19 +35,19 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
             (nd.refs && 0<nd.refs.length) ||
             (nd.links && 0<nd.links.length)
         );
-        return getCenterThemeStyle(hasExtraItems);
+        return hasExtraItems ? styles.centerThemeStyle_extra : styles.centerThemeStyle_noExtra;
     },[nd]);
 
 
 
-    const themeStyle=useMemo(()=>{
+    const themeCls=useMemo(()=>{
         if(!nd){
-            return {};
+            return '';
         }
 
-        const allLevelStyles=[centerThemeStyle, secendThemeStyle, otherThemeStyle];
+        const allLevelStyles=[centerThemeCls, styles.secendThemeStyle, styles.otherThemeStyle];
         return allLevelStyles[nd.lev>2 ? 2 : nd.lev];
-    },[nd, centerThemeStyle]);
+    },[nd, centerThemeCls]);
 
 
     const [generalLinks,grouplinks]=useMemo(()=>{
@@ -61,14 +62,14 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
 
     
     if(!nd){return null;}
-    return (<span css={themeStyle}>
+    return (<span className={classnames(themeCls, styles.root)}>
         {/* 日期部分 */}
         {
             (nd && nd.dateItem) && (
                 <Tooltip color='cyan' mouseEnterDelay={0.4} title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
-                    <div css={dateStyle} onClick={onShowTimeline.bind(this,nd.dateItem.timeline)}>
-                        <ClockCircleOutlined className='themeicon' css={{color:nd.dateItem.color}}/>
-                        <span className='themedatetxt' css={{color:nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
+                    <div className='dateStyle' onClick={onShowTimeline.bind(this,nd.dateItem.timeline)}>
+                        <ClockCircleOutlined className='themeicon' style={{'--color': nd.dateItem.color}}/>
+                        <span className='themedatetxt' style={{'--color':nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
                     </div>
                 </Tooltip>
             )
@@ -77,22 +78,22 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
 
         {/* 主题文本 markdown-body*/}
         <Tooltip color='cyan' mouseEnterDelay={0.4} title={
-            <div>
+            <div className={styles.themeTxtTooltip}>
                 <div>节点操作</div>
-                <div style={{marginTop:'10px'}}>
+                <div className='btnContainer'>
                     <Button type='dashed' ghost size='small' shape='round'
-                            style={{marginRight:"8px", marginBottom:'8px',}}
+                            className='btn'
                             onClick={onNodeOp.bind(this,nd,'edit')}>编辑节点</Button>
                     <Button type='dashed' ghost size='small' shape='round'
-                            style={{marginRight:"8px", marginBottom:'8px',}}
+                            className='btn'
                             onClick={onNodeOp.bind(this,nd,'appendChild')}>添加子节点</Button>
                     {
                         nd.par && (<React.Fragment>
                             <Button type='dashed' ghost size='small' shape='round'
-                                    style={{marginRight:"8px", marginBottom:'8px',}}
+                                    className='btn'
                                     onClick={onNodeOp.bind(this,nd,'addSiblingBefore')}>添加兄弟节点（之前）</Button>
                             <Button type='dashed' ghost size='small' shape='round'
-                                    style={{marginRight:"8px", marginBottom:'8px',}}
+                                    className='btn'
                                     onClick={onNodeOp.bind(this,nd,'addSiblingAfter')}>添加兄弟节点（之后）</Button>
                         </React.Fragment>)
                     }
@@ -118,7 +119,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                 <Progress type="circle" 
                     trailColor={progStyle.trailColor}
                     format={progressFormater.bind(this,nd.prog.st)}
-                    css={progStyle.style}
+                    className='progStyle'
                     percent={nd.prog.err ? 100 : nd.prog.num} 
                     width={progStyle.size} 
                     status={nd.prog.st}
@@ -139,7 +140,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                         }
                     </div>
                 }>
-                    <FormOutlined  css={{...themeIconStyle, ...colors.memo}}/>
+                    <FormOutlined className='memoStyle'/>
                 </Tooltip>
             )
         }
@@ -154,7 +155,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                                 type="link" 
                                 size='small' 
                                 className='themebtn'
-                                icon={<ReadOutlined className='themebtnicon' css={refItem.combined ? colors.combinedRef : colors.ref}/>}  
+                                icon={<ReadOutlined className='themebtnicon' style={{'--color': refItem.combined ? colors.combinedRef.color : colors.ref.color}}/>}
                                 onClick={onOpenRef.bind(this,refItem)}/>
                         </span>
                     </Tooltip>
@@ -223,10 +224,10 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
 
     return (
         <Tooltip color='cyan' placement="top" mouseEnterDelay={0.4} onOpenChange={onOpenChange} title={
-            <div>
+            <div className={styles.linkTooltip}>
                 <div>{tooltip}</div>
                 {
-                    (ctxMenuItems && ctxMenuItems.length>0) && <div style={{marginTop:'10px'}}>
+                    (ctxMenuItems && ctxMenuItems.length>0) && <div className='btnContainer'>
                         {
                             ctxMenuItems.map((ctxMenu,menuInd)=>(
                                 <Button key={`menu-${menuInd}`}
@@ -234,10 +235,7 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
                                         ghost
                                         size='small'
                                         shape='round'
-                                        style={{
-                                            marginRight:"8px",
-                                            marginBottom:'8px',
-                                        }}
+                                        className='btn'
                                         onClick={api.openUrl.bind(this, ctxMenu.url)}>{ctxMenu.name}</Button>
                             ))
                         }
@@ -288,7 +286,7 @@ const progressFormater=(st,percent)=>{
     if(100===percent){
         return <CheckOutlined />;
     }
-    return <span css={progStyle.font}>{`${percent}`}</span>;
+    return <span className='progTxtStyle'>{`${percent}`}</span>;
 }
 
 
@@ -300,34 +298,6 @@ const handleSingleLine=(str)=>{
     return tmp;
 }
 
-
-// const themeBtnWrapperStyle={
-//     '& .themebtn':{
-//         width:16,
-//         height:16,
-//         verticalAlign:'bottom',
-//         padding:0,
-//         lineHeight:'16px',
-//         marginBottom:2,
-//         marginLeft:3,
-//     },
-//
-//     '& .themebtn .themebtnicon':{
-//         fontSize:16,
-//         lineHeight:'16px',
-//         margin:0,
-//         padding:0,
-//     }
-// };
-
-
-const themeIconStyle={
-    fontSize:16,
-    lineHeight:'16px',
-    marginLeft:3,
-    verticalAlign:'bottom',
-    marginBottom:0,
-};
 
 const colors={
     combinedRef: {color:'#1890ff'},
@@ -344,111 +314,12 @@ const colors={
 const progStyle={
     trailColor: '#CCC',
     size:24,
-    font:{fontSize:12},
-
-    style:{
-        marginLeft:3,
-        verticalAlign:'bottom',
-        marginBottom:1,
-        cursor:'pointer',
-    },
-};
-
-const dateStyle={
-    display:'inline-block',
-    cursor:'pointer',
-    marginRight:5,
-    lineHeight:'16px',
-    verticalAlign:'bottom',
-
-    '& .themedatetxt':{
-        display:'inline-block',
-        lineHeight:'16px',
-        marginLeft:3,
-        marginBottom:2
-    },    
-};
-
-const baseThemeStyle={
-    whiteSpace: 'nowrap',
-    display: 'inline-block',
-    marginBottom: 0,
-    paddingBottom: 0,
-    verticalAlign: 'bottom',
-};
-
-const baseThemeNameStyle={
-    whiteSpace: 'nowrap',
-    display: 'inline-block',
 };
 
 
 
 
-const getCenterThemeStyle =(hasExtraItems) =>  {
-    let baseStyle= {
-        ...baseThemeStyle,
-        fontSize: '18px !important',
-        borderRadius: 10,
-        paddingLeft:6,
-        paddingRight:6,
-        paddingBottom:10,
-        paddingTop:10,
-        lineHeight: '20px',
-          
-        '& .themename': {
-            ...baseThemeNameStyle,
-            fontSize: '18px !important',
-            lineHeight: '20px',
-            padding: '0px 2px',
-            
-            marginLeft: 0,
-            marginRight: 0,
-            verticalAlign: 'bottom',
-        }, 
-    };
 
-    //除了文本内容，还有别的项
-    if(hasExtraItems){
-        baseStyle.border='2px solid #108ee9';
-        baseStyle.backgroundColor= '#FFF';
-        return baseStyle;
-    }
-
-    //没有别的项
-    baseStyle.backgroundColor= '#108ee9';
-    baseStyle['& .themename'].color='white';
-    baseStyle['& .themename'].padding= '0px 8px';
-    return baseStyle;
-};
-
-
-const secendThemeStyle = {
-    ...baseThemeStyle,
-    fontSize: '16px !important',
-    lineHeight: '20px',
-    paddingBottom:5,
-    paddingTop:5,
-    paddingLeft:5,
-    paddingRight:5,
-
-    
-    '& .themename': {
-        ...baseThemeNameStyle,
-    },
-};
-
-const otherThemeStyle = {
-    ...baseThemeStyle,
-    fontSize: '14px !important',
-    lineHeight: '18px',
-    paddingLeft:2,
-    paddingRight:2,
-    
-    '& .themename': {
-        ...baseThemeNameStyle,
-    },
-};
 
 
 

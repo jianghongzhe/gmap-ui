@@ -1,9 +1,12 @@
-- aaasss|ref:aaasss|[baiduddd#confirm](https://baidu{{.}}com)|m:123
-	- aaa|[ss#confirm](grp://file:///notepad)|[](grp://file:///emeditor)
+- aaasss|ref:aaasss|[baiduddd#confirm](https://baidu.com)|m:123
+	- aaa|[ss#confirm](grp://file:///notepad)|[](grp://file:///emeditor)|d:23.05.23
 	- bbb
-		- 百度搜索|[#confirm](cmd://ping {{ip:127.0.0.1}})
+		- 百度搜索|[#confirm](cmd://ping {{ip:127.0.0.1}})|ref:百度搜索
 		
 ***
+# ref:百度搜索
+qqqqq
+
 # shortcuts
 - [百度#confirm](https://baidu.c{{o}}m)
 - 组合

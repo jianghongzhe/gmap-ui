@@ -1,3 +1,82 @@
 .alert{
   margin-top: 50px;
 }
+
+
+.defaultWrapperStyle {
+  overflow: hidden;
+  border: 0px solid red;
+  //容器本身使用相对定位，其中内容使用绝对定位相对它来布局
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  width: var(--width, 800px);
+  height: var(--height, 600px);
+
+  :global{
+    .item {
+      white-space: nowrap;
+      position: absolute;
+      display: inline-block;
+      border: 0px solid green;
+      padding-bottom: 0;
+      // padding-top:10px;
+      padding-top: 0;
+      // padding-left:20px;
+      // padding-right:20px;
+      vertical-align: bottom;
+      // background-color: lightblue;
+      left: -800px;
+      top: -800px;
+      z-index: var(--node_zIndex);
+    }
+
+    .expBtn {
+      position: absolute;
+      background-color: transparent;
+      overflow: hidden;
+      box-sizing: border-box;
+      left: -800px;
+      top: -800px;
+      z-Index: var(--expbtn_zIndex);
+    }
+
+    .linewrapper {
+      position: absolute;
+      background-color: transparent;
+      overflow: hidden;
+      box-sizing: border-box;
+      left: -800px;
+      top: -800px;
+
+      .lineExp {
+        position: absolute;
+        background-color: transparent;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      .linefrom {
+        position: absolute;
+        background-color: transparent;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      .lineto {
+        position: absolute;
+        background-color: transparent;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+    }
+
+
+
+    .relaLine {
+      position: absolute;
+      z-index: var(--relaLine_zIndex);
+      background-color: #EEEEEE00;
+    }
+  }
+};
