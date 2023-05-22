@@ -15,6 +15,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
     const [currLinkUrl, setCurrLinkUrl]=useState(null);
     const [paramReplItems, setParamReplItems]=useState([]);
     const [shouldConfirm, setShouldConfirm]= useState(false);
+    const [confirmMsg, setConfirmMsg]= useState(null);
 
 
 
@@ -23,7 +24,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * @param addr
      * @param needConfirm
      */
-    const confirmOrNot=useMemoizedFn((addr, needConfirm=false)=>{
+    const confirmOrNot=useMemoizedFn((addr, needConfirm=false, confirmTxt=null)=>{
         const openLink=()=>{
             if(Array.isArray(addr)){
                 addr.forEach(eachAddr=>openUrlFunc(eachAddr));
@@ -34,7 +35,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
 
         if(needConfirm){
             confirm({
-                title: '确定要打开如下链接吗？',
+                title: confirmTxt??'确定要打开如下链接吗？',
                 content: Array.isArray(addr) ? <div>{addr.map(eachUrl=><div>{eachUrl}</div>)}</div> : addr,
                 onOk: ()=>{
                     onDlgCancel();
@@ -52,7 +53,10 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * @param {*} url
      * @returns
      */
-    const onClickLink=useMemoizedFn((url, needConfirm=false)=>{
+    const onClickLink=useMemoizedFn((url, needConfirm=false, confirmTxt=null)=>{
+        if('string'!==typeof(confirmTxt)){
+            confirmTxt=null;
+        }
 
         /**
          * 打开一个链接：
@@ -61,13 +65,14 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
          * @param addr
          * @param needConfirm
          */
-        const openOneLink=(addr, needConfirm)=>{
+        const openOneLink=(addr, needConfirm, confirmTxt)=>{
             const replaceItems= strTmpl.parse(addr);
             if(null===replaceItems){
-                confirmOrNot(addr, needConfirm);
+                confirmOrNot(addr, needConfirm, confirmTxt);
                 return;
             }
             setCurrLinkUrl(addr);
+            setConfirmMsg(confirmTxt);
             setShouldConfirm(!!needConfirm);
             setParamReplItems(replaceItems);
             showDlg();
@@ -79,8 +84,8 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
          * @param addrs
          * @param needConfirm
          */
-        const openMultiLink=(addrs, needConfirm)=>{
-            confirmOrNot(addrs, needConfirm);
+        const openMultiLink=(addrs, needConfirm, confirmTxt)=>{
+            confirmOrNot(addrs, needConfirm, confirmTxt);
         };
 
 
@@ -89,7 +94,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
                 return;
             }
             else if(1===url.length){
-                openOneLink(url[0], needConfirm);
+                openOneLink(url[0], needConfirm, confirmTxt);
                 return;
             }
             else{
@@ -97,15 +102,15 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
                 if(0===validUrls){
                     return;
                 }else if(1===validUrls){
-                    openOneLink(validUrls[0], needConfirm);
+                    openOneLink(validUrls[0], needConfirm, confirmTxt);
                     return;
                 }else{
-                    openMultiLink(validUrls, needConfirm);
+                    openMultiLink(validUrls, needConfirm, confirmTxt);
                     return;
                 }
             }
         }
-        openOneLink(url, needConfirm);
+        openOneLink(url, needConfirm, confirmTxt);
     });
 
 
@@ -117,11 +122,11 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      */
     const onDlgOk=useMemoizedFn((url)=>{
         if(shouldConfirm){
-            confirmOrNot(url, true);
+            confirmOrNot(url, true, confirmMsg);
             return;
         }
         onDlgCancel();
-        confirmOrNot(url, false);
+        confirmOrNot(url, false, confirmMsg);
     });
 
 

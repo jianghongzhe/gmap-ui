@@ -185,12 +185,13 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
         tooltip,
         url: factUrl,
         shouldConfirm,
+        confirmTxt,
     }=useMemo(()=>filterSingleLink(link.name, link.addr), [link]);
 
     return <LinkItem key={'link-'+linkInd}
                      tooltip={tooltip}
                      addr={factUrl}
-                     openLinkFunc={onOpenLink.bind(this, factUrl, shouldConfirm)}/>;
+                     openLinkFunc={onOpenLink.bind(this, factUrl, shouldConfirm, confirmTxt)}/>;
 };
 
 
@@ -267,11 +268,11 @@ const GroupLinkItem=({links, openLinkFunc})=>{
         return null;
     }
     if(!Array.isArray(val.url)){
-        return <LinkItem tooltip={val.tooltip} addr={val.url} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm)}/>;
+        return <LinkItem tooltip={val.tooltip} addr={val.url} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm, val.confirmTxt)}/>;
     }
     return <Tooltip  color='cyan' placement="top" title={val.tooltip}>
         <span className={classnames('node_part', styles.themeBtnWrapper)}>
-            <NodeLinkIcon lindAddr="group_links" onClick={openLinkFunc.bind(this, val.url, val.shouldConfirm)}/>
+            <NodeLinkIcon lindAddr="group_links" onClick={openLinkFunc.bind(this, val.url, val.shouldConfirm, val.confirmTxt)}/>
         </span>
     </Tooltip>
 };

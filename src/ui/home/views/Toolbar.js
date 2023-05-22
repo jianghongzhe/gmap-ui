@@ -72,7 +72,6 @@ const Toolbar=({
      */
     const validShortCuts=useMemo(()=>filterShortCuts(currPane?.ds?.tree?.shortcuts),[currPane]);
 
-
     return (
         <Header className={styles.toolbar}>
             <ToolbarItem title='新建' icon={<PlusOutlined />} className='toolbtnFirst' onClick={onShowNewMapDlg}/>
@@ -113,7 +112,12 @@ const Toolbar=({
                     <Text style={{marginLeft:'14px',fontSize:'16px',lineHeight:'20px',}}>快捷入口：</Text>
                     {
                         validShortCuts.map((shortItem, shortInd)=>(
-                            <ShortcutItem key={`shortcutbtn-${shortInd}`} tooltip={shortItem.tooltip} url={shortItem.url} shouldConfirm={shortItem.shouldConfirm} onClick={onOpenLink}/>
+                            <ShortcutItem key={`shortcutbtn-${shortInd}`}
+                                          tooltip={shortItem.tooltip}
+                                          url={shortItem.url}
+                                          confirmTxt={shortItem.confirmTxt}
+                                          shouldConfirm={shortItem.shouldConfirm}
+                                          onClick={onOpenLink}/>
                         ))
                     }
                 </React.Fragment>
@@ -124,10 +128,8 @@ const Toolbar=({
 
 
 
-const ShortcutItem=({tooltip, url, shouldConfirm, onClick})=>{
-
+const ShortcutItem=({tooltip, url, shouldConfirm, confirmTxt, onClick})=>{
     const [localIcon] = useLoadIcon({lindAddr: Array.isArray(url) ? "group_links" : url});
-
 
     if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
         return null;
@@ -148,7 +150,7 @@ const ShortcutItem=({tooltip, url, shouldConfirm, onClick})=>{
                 <Button shape='circle'
                         icon={<IconComp className='assignedColor' style={{'--color':localIcon.color.color}}/>}
                         className='toolbtn'
-                        size='large' onClick={onClick.bind(this, url, shouldConfirm)}/>
+                        size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}/>
             </Tooltip>
         );
     }
@@ -163,7 +165,7 @@ const ShortcutItem=({tooltip, url, shouldConfirm, onClick})=>{
     if('image'===localIcon.type){
         return (
             <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
-                <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm)}>
+                <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
                     <Avatar src={localIcon.url} size='small'/>
                 </Button>
             </Tooltip>

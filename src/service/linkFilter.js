@@ -1,4 +1,4 @@
-import loadMetadata from '../common/metadataLoader';
+import loadMetadata,{parseMetadata} from '../common/metadataLoader';
 import strTmpl from '../common/strTmpl';
 
 
@@ -18,6 +18,7 @@ import strTmpl from '../common/strTmpl';
  *      tooltip,
  *      url,
  *      shouldConfirm,
+ *      confirmTxt,
  *  }
  * ]
  */
@@ -33,32 +34,49 @@ const filterShortCuts=(shortcuts)=>{
             }
             let newArray=shortcut.url.map((eachUrl,ind)=>({url:eachUrl, name:shortcut.subNames[ind]}));
             if(1<shortcut.url.length){
-                newArray=newArray.filter(({url})=>!strTmpl.containsParam(url))
+                newArray=newArray.filter(({url})=>!strTmpl.containsParam(url));
             }
             if(0===newArray.length){
                 return null;
             }
-            const shouldConfirm=newArray.some(({name})=>loadMetadata(name??'')[1].includes("confirm"));
+            let shouldConfirm=false;
+            let confirmTxt=[];
+            newArray.forEach(({name})=>{
+                const [, flag, txt]=loadConfirmMeta(name??'');
+                // console.log("filterShortCuts", flag);
+                // console.log("filterShortCuts", txt);
+                if(flag){
+                    shouldConfirm=true;
+                    if(txt){
+                        confirmTxt.push(txt);
+                    }
+                }
+            });
+
             let url=newArray.map(({url})=>url);
             url=(1===url.length ? url[0] : url);
             const tooltip=shortcut.name+"  "+ (Array.isArray(url) ? url.join(" + ") : url);
 
+            // 当只有一个链接时，confirmTxt才有效，否则为null
             return {
                 tooltip,
                 url,
                 shouldConfirm,
+                confirmTxt: (1===newArray.length && confirmTxt.length>0 ? confirmTxt[0] : null),
             };
         }
 
         // 是单个链接
         // 元数据从name中取
-        const [newName, metas]=loadMetadata(shortcut.name??'');
-        const shouldConfirm=metas.includes("confirm");
-        const tooltip=newName+"  "+shortcut.url;
+        const hasSubName=(shortcut.subNames && shortcut.subNames.length>0);
+        const [newName, flag, txt]= loadConfirmMeta(hasSubName ? shortcut.subNames[0] : shortcut.name);
+        const tooltip=(hasSubName ? shortcut.name : newName)+"  "+shortcut.url;
         return {
             tooltip,
             url: shortcut.url,
-            shouldConfirm,
+            shouldConfirm: flag,
+            confirmTxt: txt,
+
         };
     }).filter(eachItem=>null!==eachItem);
 };
@@ -74,6 +92,7 @@ const filterShortCuts=(shortcuts)=>{
  *     tooltip,
  *     url,
  *     shouldConfirm,
+ *     confirmTxt,
  * }
  */
 const filterGroupLinks=(grouplinks)=>{
@@ -84,6 +103,7 @@ const filterGroupLinks=(grouplinks)=>{
         return url.trim();
     };
     grouplinks=(grouplinks??[]).map(({name,addr})=>({name,addr:trimPrefix(addr)}));
+    // 如果有两个以上链接，则只保留不带插值参数的
     if(1<grouplinks.length){
         grouplinks=grouplinks.filter(({addr})=>!strTmpl.containsParam(addr))
     }
@@ -92,10 +112,14 @@ const filterGroupLinks=(grouplinks)=>{
     }
 
     let shouldConfirm=false;
+    let confirmTxt=[];
     grouplinks=grouplinks.map(({name,addr})=>{
-        const [handledName, metas]= loadMetadata(name);
-        if(metas.includes("confirm")){
+        const [handledName, flag, txt]= loadConfirmMeta(name);
+        if(flag){
             shouldConfirm=true;
+            if(txt){
+                confirmTxt.push(txt);
+            }
         }
         return {name:handledName, addr};
     });
@@ -113,21 +137,64 @@ const filterGroupLinks=(grouplinks)=>{
         tooltip,
         url,
         shouldConfirm,
+        confirmTxt: (1===grouplinks.length && confirmTxt.length>0 ? confirmTxt[0] : null),
     };
 };
 
 
+/**
+ *
+ * @param name
+ * @param addr
+ * @return
+ * {
+ *     tooltip,
+ *     url,
+ *     shouldConfirm,
+ *     confirmTxt
+ * }
+ */
 const filterSingleLink=(name, addr)=>{
-    const [handledLinkName, metas]=loadMetadata(name);
-    const shouldConfirm= metas.includes("confirm")
+    const [handledLinkName, flag, txt]=loadConfirmMeta(name);
     const tooltip=(handledLinkName ? handledLinkName+"  "+addr : addr);
     return {
         tooltip,
         url: addr,
-        shouldConfirm,
+        shouldConfirm: flag,
+        confirmTxt: txt,
     };
-
 };
+
+
+/**
+ *
+ * @param name
+ * @return
+ * [
+ *  'handled name',
+ *  true/false,
+ *  null/'是否要打开链接'
+ * ]
+ */
+const loadConfirmMeta=(name)=>{
+    const [handledName, metas]=loadMetadata(name??'');
+    let shouldConfirm=false;
+    let confirmTxt=null;
+
+    metas.forEach(meta=>{
+        const {type, opts} =parseMetadata(meta);
+        if('confirm'===type){
+            shouldConfirm=true;
+
+            let optTxt= opts.find(opt=> (opt.startsWith("txt ") && opt.length>"txt ".length));
+            if(optTxt){
+                confirmTxt=optTxt.substring("txt ".length).trim();
+            }
+        }
+    });
+    return [handledName, shouldConfirm, confirmTxt];
+};
+
 
 
 export {
