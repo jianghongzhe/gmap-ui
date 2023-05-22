@@ -1,20 +1,42 @@
+@mixin baseThemeStyle{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+}
+
+@mixin baseThemeName {
+  white-space: nowrap;
+  display: inline-block;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@mixin baseCenterThemeStyle {
+  @include baseThemeStyle;
+  font-size: 18px !important;
+  border-radius: 10px;
+  padding: 10px 6px;
+  line-height: 20px;
+}
+
+
+
+
 .root{
   :global{
+    .node_part + .node_part{
+      margin-left: 3px;
+    }
+
     .memoStyle {
       font-size: 16px;
       line-height: 16px;
-      margin-left: 3px;
-      vertical-align: bottom;
-      margin-bottom: 0;
       color: #faad14;
     }
 
     .progStyle {
-      margin-left: 3px;
-      vertical-align: bottom;
-      margin-bottom: 1px;
       cursor: pointer;
-
       .progTxtStyle{
         font-size: 12px;
       }
@@ -23,7 +45,6 @@
     .dateStyle {
       display: inline-block;
       cursor: pointer;
-      margin-right: 5px;
       line-height: 16px;
       vertical-align: bottom;
 
@@ -38,9 +59,7 @@
       .themeicon{
         color: var(--color);
       }
-
     }
-
   }
 }
 
@@ -53,8 +72,6 @@
       vertical-align: bottom;
       padding: 0 !important;
       line-height: 16px;
-      margin-bottom: 2px;
-      margin-left: 3px;
 
       .themebtnicon{
         font-size: 16px;
@@ -67,96 +84,61 @@
   }
 }
 
-.baseThemeStyle {
-  white-space: nowrap;
-  display: inline-block;
-  margin-bottom: 0;
-  //padding-bottom: 0;
-  vertical-align: bottom;
-}
 
-
-.baseCenterThemeStyle {
-  composes: baseThemeStyle;
-  font-size: 18px !important;
-  border-radius: 10px;
-  padding-left: 6px;
-  padding-right: 6px;
-  padding-bottom: 10px !important;
-  padding-top: 10px;
-  line-height: 20px;
-
-  :global {
-    .themename {
-      white-space: nowrap;
-      display: inline-block;
-      font-size: 18px !important;
-      line-height: 20px;
-      margin-left: 0px;
-      margin-right: 0px;
-      vertical-align: bottom;
-    }
-  }
-}
 
 
 .centerThemeStyle_extra {
-  composes: baseCenterThemeStyle;
+  @include baseCenterThemeStyle;
   border: 2px solid #108ee9;
   background-color: #FFF;
 
   :global {
     .themename {
-      padding: 0px 2px;
+      @include baseThemeName;
+      padding: 0;
     }
   }
 }
 
+
 .centerThemeStyle_noExtra {
-  composes: baseCenterThemeStyle;
+  @include baseCenterThemeStyle;
+  border: 0;
   background-color: #108ee9;
 
   :global {
     .themename {
-      padding: 0px 8px;
+      @include baseThemeName;
+      padding: 0 8px;
       color: white;
     }
   }
 }
 
 
-
-
-
 .secendThemeStyle {
-  composes: baseThemeStyle;
+  @include baseThemeStyle;
   font-size: 16px !important;
   line-height: 20px;
-  padding-bottom: 5px;
-  padding-top: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 5px;
 
   :global{
     .themename {
-      white-space: nowrap;
-      display: inline-block;
+      @include baseThemeName;
     }
   }
 };
 
+
 .otherThemeStyle {
-  composes: baseThemeStyle;
+  @include baseThemeStyle;
   font-size: 14px !important;
   line-height: 18px;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-bottom: 0;
+  padding: 0 2px 1px;
 
   :global{
     .themename {
-      white-space: nowrap;
-      display: inline-block;
+      @include baseThemeName;
     }
   }
 }

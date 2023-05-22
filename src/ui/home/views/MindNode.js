@@ -67,7 +67,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
         {
             (nd && nd.dateItem) && (
                 <Tooltip color='cyan' mouseEnterDelay={0.4} title={<div >{nd.dateItem.fullDate}，{nd.dateItem.msg}</div>}>
-                    <div className='dateStyle' onClick={onShowTimeline.bind(this,nd.dateItem.timeline)}>
+                    <div className='dateStyle node_part' onClick={onShowTimeline.bind(this,nd.dateItem.timeline)}>
                         <ClockCircleOutlined className='themeicon' style={{'--color': nd.dateItem.color}}/>
                         <span className='themedatetxt' style={{'--color':nd.dateItem.color}}>{nd.dateItem.abbrDate}</span>
                     </div>
@@ -100,7 +100,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                 </div>
             </div>
         }>
-            <span className='themename markdown-body-node' >
+            <span className='themename markdown-body-node node_part' >
                 {
                     "string"===typeof(nd.str) ?
                         <span dangerouslySetInnerHTML={{__html:handleSingleLine(nd.str)}}></span>
@@ -119,7 +119,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                 <Progress type="circle" 
                     trailColor={progStyle.trailColor}
                     format={progressFormater.bind(this,nd.prog.st)}
-                    className='progStyle'
+                    className='progStyle node_part'
                     percent={nd.prog.err ? 100 : nd.prog.num} 
                     width={progStyle.size} 
                     status={nd.prog.st}
@@ -140,7 +140,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                         }
                     </div>
                 }>
-                    <FormOutlined className='memoStyle'/>
+                    <FormOutlined className='memoStyle node_part'/>
                 </Tooltip>
             )
         }
@@ -150,7 +150,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
             (nd && nd.refs && 0<nd.refs.length) && (
                 nd.refs.map((refItem,refInd)=>(                
                     <Tooltip key={refInd} color='cyan' placement="top" title={'查看引用 - '+refItem.showname} mouseEnterDelay={0.4}>
-                        <span className={styles.themeBtnWrapper}>
+                        <span className={classnames('node_part', styles.themeBtnWrapper)}>
                             <Button 
                                 type="link" 
                                 size='small' 
@@ -243,7 +243,7 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
                 }
             </div>
         } >
-            <span className={styles.themeBtnWrapper}>
+            <span className={classnames('node_part', styles.themeBtnWrapper)}>
                 <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
             </span>
         </Tooltip>
@@ -270,7 +270,7 @@ const GroupLinkItem=({links, openLinkFunc})=>{
         return <LinkItem tooltip={val.tooltip} addr={val.url} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm)}/>;
     }
     return <Tooltip  color='cyan' placement="top" title={val.tooltip}>
-        <span className={styles.themeBtnWrapper}>
+        <span className={classnames('node_part', styles.themeBtnWrapper)}>
             <NodeLinkIcon lindAddr="group_links" onClick={openLinkFunc.bind(this, val.url, val.shouldConfirm)}/>
         </span>
     </Tooltip>
