@@ -68,7 +68,10 @@ export const useAutoComplateFuncs=()=>{
                 editorSvcEx.setWrapperMark(cm, subActionType.txt[0], subActionType.txt[1], subActionType.cursorOffset);
                 return;
             }
-            editorSvcEx.setWrapperMark(cm, subActionType.txt2[0], subActionType.txt2[1], subActionType.cursorOffset2);
+            const beginMark=subActionType.txt2 ? subActionType.txt2[0] : subActionType.txt[0];
+            const endMark=subActionType.txt2 ? subActionType.txt2[1] :subActionType.txt[1];
+            const offset='undefined'!==typeof(subActionType.cursorOffset2) ? subActionType.cursorOffset2 : subActionType.cursorOffset;
+            editorSvcEx.setWrapperMark(cm, beginMark, endMark, offset);
             return;
         }
         insertTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
