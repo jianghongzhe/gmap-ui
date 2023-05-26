@@ -64,7 +64,11 @@ export const useAutoComplateFuncs=()=>{
             return;
         }
         if(subActionType.wrap){
-            wrapTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
+            if(!editorSvcEx.isSelMultiLine(cm)){
+                editorSvcEx.setWrapperMark(cm, subActionType.txt[0], subActionType.txt[1], subActionType.cursorOffset);
+                return;
+            }
+            editorSvcEx.setWrapperMark(cm, subActionType.txt2[0], subActionType.txt2[1], subActionType.cursorOffset2);
             return;
         }
         insertTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
@@ -195,41 +199,11 @@ const insertNodePart=(cm, txt)=>{
 };
 
 
-/**
- * 用指定文字包裹选中的内容
- * @param cm
- * @param txts ['前面的部分', '后面的部分']
- * @param cursorOffset 光标位置
- *      非负数为从替换的起始位置向后偏移；
- *      负数为从替换后的结束位置向前偏移
- */
-const wrapTxtAndMoveCursor=(cm, txts, cursorOffset=null)=>{
-    let pos=cm.doc.getCursor();// { ch: 3  line: 0}
-    let pos2=pos;
-    const selections=cm.doc.listSelections();
-    if(0<selections.length){
-        pos=selections[0].anchor;
-        pos2=selections[0].head;
+const sortCursor=(pos1, pos2)=>{
+    if(pos1.line!==pos2.line){
+        return pos1.line<pos2.line ? [pos1, pos2] : [pos2, pos1];
     }
-
-    const originTxt=(cm.doc.getRange(pos, pos2))??'';
-    const replTxt=`${txts[0]}${originTxt}${txts[1]}`;
-    cm.doc.replaceRange(replTxt, pos, pos2);
-
-    let line=pos.line;
-    let ch=pos.ch+replTxt.length;
-
-    if('number'===typeof(cursorOffset)){
-        if(cursorOffset>=0){
-            ch=pos.ch+cursorOffset;
-        }else{
-            ch=pos.ch+replTxt.length+cursorOffset;
-        }
-    }else{
-        console.log("不支持数字以外的类型");
-    }
-    cm.focus();
-    cm.doc.setCursor({line, ch});
+    return pos1.ch<pos2.ch ? [pos1, pos2] : [pos2, pos1];
 };
 
 

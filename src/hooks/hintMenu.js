@@ -430,6 +430,8 @@ const fixedHintMenuList=[
                 wrap: true,
                 txt: ["$\\textcolor{}{", "}$"],
                 cursorOffset: "$\\textcolor{".length,
+                txt2: ['<font color="">', '</font>'],
+                cursorOffset2: '<font color="'.length,
             }
         }
     },

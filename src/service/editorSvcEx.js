@@ -1,3 +1,5 @@
+import editorSvc from "./editorSvc";
+
 const editorSvcExInstWrapper=(function(){
     // ------------------------------- 基础方法：不涉及codemirror对象的操作 ------------------------------------------------------
     /**
@@ -1230,49 +1232,92 @@ const editorSvcExInstWrapper=(function(){
     };
 
     const setBold=(cm)=>{
-        setWrapperMark(cm,"**");
+        setWrapperMark(cm,"**", "**", -2);
     };
 
     const setItalic=(cm)=>{
-        setWrapperMark(cm,"*");
+        setWrapperMark(cm,"*", "*", -1);
     };
 
     const setStrikeLine=(cm)=>{
-        setWrapperMark(cm,"~~");
+        setWrapperMark(cm,"~~", "~~", -1);
     };
 
-    const setWrapperMark=(cm, mark)=>{
-        let sel=cm.doc.listSelections();
-        if(!sel[0]){
-            return;
+    const isSelMultiLine=(cm)=>{
+        const selections=cm.doc.listSelections();
+        return (0<selections.length && selections[0].anchor.line!==selections[0].head.line);
+    };
+
+    /**
+     * 在选中区域包裹指定内容
+     * @param cm
+     * @param beginMark 前半段内容
+     * @param endMark 后半段内容
+     * @param cursorOffset 包裹后光标位置：非负数为从替换的起始位置向后偏移；负数为从替换后的结束位置向前偏移
+     */
+    const setWrapperMark=(cm, beginMark, endMark, cursorOffset=null)=>{
+        if('number'!==typeof(cursorOffset)){
+            console.log("cursorOffset不支持数字以外的类型");
         }
-        sel=sel[0];
-        
-        // 没有选中区域
-        if(sel.anchor.line===sel.head.line && sel.anchor.ch===sel.head.ch){
-            const replTxt=mark.repeat("2");
-            cm.doc.replaceRange(replTxt, sel.anchor, sel.anchor);
-            cm.doc.setCursor({line:sel.anchor.line, ch:sel.anchor.ch+replTxt.length/2});
-            return;
+
+        // 选中区域计算
+        // 当没有选中区域时，取光标位置当作起始和结束区域
+        // 有选中区域时，取第一个选中区域的开头与结束的位置作为起始和结束区域，同时要考虑从后向前选的情况
+        let pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        let pos2=pos;
+        const selections=cm.doc.listSelections();
+        if(0<selections.length){
+            [pos, pos2]=sortCursor(selections[0].anchor, selections[0].head);
         }
-        // 有选中区域，在同一行，如果是从后向前选择，则需要交换后处理
-        if(sel.anchor.line===sel.head.line && sel.anchor.ch!==sel.head.ch){
-            let from=sel.anchor;
-            let to=sel.head;
-            if(sel.anchor.ch > sel.head.ch){
-                from=sel.head;
-                to=sel.anchor;
+
+        let line=0;
+        let ch=0;
+
+        // 如果选中区为单行内容，则直接替换处理
+        // 如果为多行，则在开头行和最后行分别加入包裹标记
+        if(pos.line===pos2.line){
+            const originTxt=(cm.doc.getRange(pos, pos2))??'';
+            const replTxt=`${beginMark}${originTxt}${endMark}`;
+            cm.doc.replaceRange(replTxt, pos, pos2);
+
+            line=pos.line;
+            ch=pos.ch+replTxt.length;
+
+            if('number'===typeof(cursorOffset)){
+                if(cursorOffset>=0){
+                    ch=pos.ch+cursorOffset;
+                }else{
+                    ch=pos.ch+replTxt.length+cursorOffset;
+                }
             }
-            to={line:to.line, ch:to.ch+mark.length};
-            cm.doc.replaceRange(mark, from, from);
-            cm.doc.replaceRange(mark, to , to);
-            cm.doc.setCursor(to);
-            return;
+        }else{
+            line=pos2.line;
+            ch=pos2.ch+endMark.length;
+
+            cm.doc.replaceRange(beginMark, pos, pos);
+            cm.doc.replaceRange(endMark, pos2 , pos2);
+
+            if('number'===typeof(cursorOffset)){
+                if(cursorOffset>=0){
+                    line=pos.line;
+                    ch=pos.ch+cursorOffset;
+                }else{
+                    line=pos2.line;
+                    ch=pos2.ch+endMark.length+cursorOffset;
+                }
+            }
         }
-        // 有选中区域，不在同一行
-        cm.doc.replaceRange(mark, sel.anchor, sel.anchor);
-        cm.doc.replaceRange(mark, sel.head , sel.head);
-        cm.doc.setCursor(sel.head);
+
+
+        cm.focus();
+        cm.doc.setCursor({line, ch});
+    };
+
+    const sortCursor=(pos1, pos2)=>{
+        if(pos1.line!==pos2.line){
+            return pos1.line<pos2.line ? [pos1, pos2] : [pos2, pos1];
+        }
+        return pos1.ch<pos2.ch ? [pos1, pos2] : [pos2, pos1];
     };
 
     const clearSelection=(cm)=>{
@@ -1533,6 +1578,8 @@ const editorSvcExInstWrapper=(function(){
         isCursorInNodePart,
         getRulerState,
         getFirstGeneralTxt,
+        isSelMultiLine,
+        setWrapperMark,
     };
 })();
 
