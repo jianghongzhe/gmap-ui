@@ -1231,7 +1231,100 @@ const editorSvcExInstWrapper=(function(){
         cm.doc.setCursor({line, ch:newData.length});
     };
 
+    /**
+     * aa
+     * xxx ![qqq]() yyy
+     *        ^          -->> 光标位置
+     *
+     * @param cm
+     * @return {boolean}
+     */
+    const isInImgNamePart=(cm)=>{
+        const {type, pos, pos2}=getSelectionType(cm);
+        if('cursor'===type){
+            const line=cm.doc.getLine(pos.line);
+            const frontPart=line.substring(0, pos.ch);
+            const endPart=line.substring(pos.ch);
+            const flag= (/^.*[!]\[[^\]]*$/.test(frontPart) && /^[^\]]*\][(][^()]*[)].*$/.test(endPart));
+            if(!flag){
+                return false;
+            }
+            return {
+                pos: {
+                    line: pos.line,
+                    ch: frontPart.length+endPart.indexOf("]"),
+                }
+            };
+        }
+        return false;
+    };
+
+    const isInLinkNamePart=(cm)=>{
+        const {type, pos, pos2}=getSelectionType(cm);
+        if('cursor'===type){
+            const line=cm.doc.getLine(pos.line);
+            const frontPart=line.substring(0, pos.ch);
+            const endPart=line.substring(pos.ch);
+            const flag= (/^(.*[^!])?\[[^\]]*$/.test(frontPart) && /^[^\]]*\][(][^()]*[)].*$/.test(endPart));
+            if(!flag){
+                return false;
+            }
+            return {
+                pos: {
+                    line: pos.line,
+                    ch: frontPart.length+endPart.indexOf("]"),
+                }
+            };
+        }
+        return false;
+    };
+
+    const isInTable=(cm)=>{
+        const {type, pos, pos2}=getSelectionType(cm);
+        if('cursor'===type){
+            const result= parseTable(cm, false);
+            if(false===result){
+                return false;
+            }
+
+            // 判断是否为第一个单元格，如果是，返回第一个单元格最后一个字符的位置，以便插入内容，否则返回false
+            const isFirstCol=(()=>{
+                const vline=`___vline_${new Date().getTime()}___`;
+                const line=cm.doc.getLine(pos.line);
+                const front=line.substring(0, pos.ch).replace(/[\\][|]/g,vline).trim();
+                const end=line.substring(pos.ch).replace(/[\\][|]/g,vline).trim();
+                if(/^[|][^|]*$/.test(front) && /^([^|]*[|])+$/.test(end)){
+                    let tmp=-1;
+                    for(let i=pos.ch;i<line.length;++i){
+                        if('|'===line[i] && '\\'!==line[i-1]){
+                            tmp=i;
+                            break;
+                        }
+                    }
+                    if(tmp<0) {
+                        return false;
+                    }
+                    return {
+                        line: pos.line,
+                        ch: tmp,
+                    };
+                }
+                return false;
+            })();
+
+            return {
+                ...result,
+                titleLineFirstCol: (pos.line===result.fromPos.line && isFirstCol),
+                dataLineFirstCol: (pos.line>=result.fromPos.line+2 && pos.line<=result.toPos.line && isFirstCol),
+            };
+        }
+        return false;
+    };
+
+
+
     const setBold=(cm)=>{
+        console.log("isInTable", isInTable(cm));
         wrapperOrTrimMark(cm, "**");
     };
 
@@ -1300,6 +1393,46 @@ const editorSvcExInstWrapper=(function(){
         }
         const selContent=cm.doc.getRange(pos, pos2);
         return (selContent.startsWith(mark) && selContent.endsWith(mark));
+    };
+
+    /**
+     *
+     * @param cm
+     * @return
+     * {
+     *     type: 'cursor/line/multi',   // cursor: 未选中内容，只取光标位置
+     *                                  // line: 选中单行内容
+     *                                  // multi: 选中多行内容
+     *     pos,
+     *     pos2,
+     * }
+     */
+    const getSelectionType=(cm)=>{
+        let pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        let pos2=pos;
+        const selections=cm.doc.listSelections();
+        if(0<selections.length){
+            [pos, pos2]=sortCursor(selections[0].anchor, selections[0].head);
+        }
+        if(pos.line===pos2.line && pos.ch===pos2.ch){
+            return {
+                type: 'cursor',
+                pos,
+                pos2: pos,
+            };
+        }
+        if(pos.line===pos2.line){
+            return {
+                type: 'line',
+                pos,
+                pos2: pos,
+            };
+        }
+        return {
+            type: 'multi',
+            pos,
+            pos2: pos,
+        };
     };
 
     /**
@@ -1454,13 +1587,16 @@ const editorSvcExInstWrapper=(function(){
      *      needExtraBlankLine: true,       // 生成的结果markdown文本中是否包含前后的空行，当光标所在行为空时会指定为true，以与其它部分区别开
      * }
      */
-    const parseTable=(cm)=>{
+    const parseTable=(cm, allowBlankLine=true)=>{
         const pos=cm.doc.getCursor();// { ch: 3  line: 0}
         const lineTxt=cm.doc.getLine(pos.line);
         const lineCnt=cm.doc.lineCount();
     
         // 是空行
         if(''===lineTxt.trim()){
+            if(!allowBlankLine){
+                return false;
+            }
             return {
                 hasInitData:        false,
                 data:               null,

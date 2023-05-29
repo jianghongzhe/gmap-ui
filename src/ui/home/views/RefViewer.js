@@ -210,19 +210,20 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                             msg=`Echart图表格式有误：${e.message}`;
                         }
                         if(nd){
-                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20x;margin-bottom:20px;'>${msg}</div>`;
+                            nd.innerHTML=`<div style='color:red; border:1px solid red; padding:15px;width:400px;margin-top:20px;margin-bottom:20px;'>${msg}</div>`;
                         }
                     }
                 });
                 resizeEchartGraphs();
 
-                // 对代码片段增加鼠标右键复制代码片段的功能
+                // 对代码片段增加点击复制代码按钮进行复制的功能
                 document.querySelectorAll(".markdown-body code.hljs").forEach(ele=>{
+                    const btn=ele.parentNode.parentNode.querySelector(".copy_btn");
                     const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
-                    ele.parentNode.addEventListener("contextmenu", ctxMenuHandler);
-                    const unbindFuncs=[]
-                    unbindFuncs.push(unbindEvent.bind(this, ele.parentNode, "contextmenu", ctxMenuHandler));
-                    cleanupFuncs.current=unbindFuncs;
+                    btn.addEventListener("click", ctxMenuHandler);
+                    cleanupFuncs.current=[
+                        unbindEvent.bind(this, btn, "click", ctxMenuHandler)
+                    ];
                 });
             }, 500);
         }

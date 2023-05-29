@@ -148,11 +148,15 @@ class MarkedHighlightUtil {
                 //结果生成
                 const finalCodeHtml = (escaped ? code : doEscape(code, true));
                 const bgStyle = codeConfig.bg ? `style="background-color:${codeConfig.bg}"` : "";
-                if (!lang) {
-                    return `<pre ${bgStyle}><code class="hljs">${finalCodeHtml}</code></pre>`;
+                let cls="hljs";
+                if(lang){
+                    cls=`hljs ${this.options.langPrefix + doEscape(lang, true)}`;
                 }
-                return `<pre ${bgStyle}><code class="hljs ${this.options.langPrefix + doEscape(lang, true)}">${finalCodeHtml}</code></pre>
-                    `;
+                //
+                return `<div class="code_wrapper">
+                    <div class="copy_btn">复制代码</div>
+                    <pre ${bgStyle}><code class="${cls}">${finalCodeHtml}</code></pre>
+                </div>`;
             };
         }
 

@@ -31,6 +31,23 @@ $table_color_border: #d0d7de;
   .markdown-body table > thead > tr > th:last-child {
     border-right: 1px solid $table_color_title;
   }
+
+  .markdown-body .code_wrapper {
+    position: relative;
+
+    .copy_btn{
+      position: absolute;
+      top:5px;
+      right:10px;
+      display: none;
+      color:rgba(255,255,255,0.75);
+      cursor: pointer;
+    }
+
+    &:hover .copy_btn{
+      display: inline-block;
+    }
+  }
 }
 
 

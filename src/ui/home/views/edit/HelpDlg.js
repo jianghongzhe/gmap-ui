@@ -753,13 +753,14 @@ const refs=[
 
 
 const shortcuts=[
+
     {
         title:'导图编辑窗口',
         rows:[
             ['Ctrl + S','只保存'],
             ['Ctrl + Shift + S','保存并关闭'],
+
             ['Ctrl + F','查找对话框'],
-            ['Ctrl + Shift + F','在文件中查找对话框'],
             ['Enter','下一个'],
             ['Shift + Enter','上一个'],
             ['Ctrl + G','跳转到指定行'],
@@ -790,6 +791,8 @@ const shortcuts=[
     {
         title:'导图浏览窗口',
         rows:[
+            ['Ctrl + F','查找对话框'],
+            ['Ctrl + Shift + F','在文件中查找对话框'],
             ['Alt+W','关闭当前选项卡'],
             ['Alt+Shift+W','关闭所有选项卡'],
             ['Alt+O','关闭其它选项卡'],
@@ -802,12 +805,12 @@ const shortcuts=[
             ['Ctrl + H','打开帮助页'],
         ]
     },
-    {
-        title:'引用窗口',
-        rows:[
-            ['鼠标右键','在代码片段中右键可复制当前代码片段'],
-        ]
-    }
+    // {
+    //     title:'引用窗口',
+    //     rows:[
+    //         ['鼠标右键','在代码片段中右键可复制当前代码片段'],
+    //     ]
+    // }
 ];
 
 
