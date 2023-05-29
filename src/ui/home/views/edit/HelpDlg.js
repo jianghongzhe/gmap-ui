@@ -753,25 +753,27 @@ const refs=[
 
 
 const shortcuts=[
-
+    {
+        title: '通用快捷键',
+        rows: [
+            ['Ctrl + F','查找对话框'],
+            ['Enter','查找下一个'],
+            ['Shift + Enter','查找上一个'],
+            ['Ctrl + H','打开帮助页'],
+        ]
+    },
     {
         title:'导图编辑窗口',
         rows:[
             ['Ctrl + S','只保存'],
             ['Ctrl + Shift + S','保存并关闭'],
-
-            ['Ctrl + F','查找对话框'],
-            ['Enter','下一个'],
-            ['Shift + Enter','上一个'],
             ['Ctrl + G','跳转到指定行'],
-           
             ["Ctrl + B", "加粗"],
             ["Ctrl + I","倾斜"],
             ["Ctrl + D", "删除线"],
             ["Ctrl + E", "高亮"],
             ["Ctrl + ↑", "上标"],
             ["Ctrl + ↓", "下标"],
-            ['Ctrl + H','打开帮助页'],
            
             ["Ctrl + 0", "去掉标题"],
             ["Ctrl + 1", "一级标题"],
@@ -781,6 +783,7 @@ const shortcuts=[
             ["Ctrl + 5", "五级标题"],
             ["Ctrl + 6", "六级标题"],
 
+            ['Ctrl + Y','删除当前行'],
             ['Ctrl + Alt+ ↓','复制当前行到下一行'],
             ['Ctrl + Alt+ ↑','复制当前行到上一行'],
             ['Alt + /','打开自动完成菜单'],
@@ -791,7 +794,6 @@ const shortcuts=[
     {
         title:'导图浏览窗口',
         rows:[
-            ['Ctrl + F','查找对话框'],
             ['Ctrl + Shift + F','在文件中查找对话框'],
             ['Alt+W','关闭当前选项卡'],
             ['Alt+Shift+W','关闭所有选项卡'],
@@ -802,7 +804,7 @@ const shortcuts=[
             ['Ctrl+PageDown','选中后一个选项卡'],
             ['Ctrl+Shift+PageUp','当前选项卡前移'],
             ['Ctrl+Shift+PageDown','当前选项卡后移'],
-            ['Ctrl + H','打开帮助页'],
+
         ]
     },
     // {

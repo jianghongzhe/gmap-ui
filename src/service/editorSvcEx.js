@@ -1356,9 +1356,40 @@ const editorSvcExInstWrapper=(function(){
         setWrapperMark(cm,mark, mark, 0-mark.length);
     };
 
+
+    /**
+     * 删除当前行
+     * @param cm
+     */
+    const delCurrLine=(cm)=>{
+        const {type, pos, pos2}=getSelectionType(cm);
+
+        // 有下一行，把选中区与下一行一起替换为下一行内容
+        if(pos2.line<cm.doc.lineCount()-1){
+            const nextLine=cm.doc.getLine(pos2.line+1);
+            const len=nextLine.length;
+            cm.doc.replaceRange(nextLine, {line:pos.line, ch:0,}, {line:pos2.line+1, ch:len});
+            cm.focus();
+            cm.doc.setCursor({line:pos.line, ch:len,});
+            return;
+        }
+        // 有上一行，把上一行与选中区一起替换为上一行内容
+        if(pos.line>0){
+            const lastLine=cm.doc.getLine(pos.line-1);
+            const len=lastLine.length;
+            cm.doc.replaceRange(lastLine, {line:pos.line-1, ch:0,}, {line:pos2.line, ch:cm.doc.getLine(pos2.line).length});
+            cm.focus();
+            cm.doc.setCursor({line:pos.line-1, ch:len,});
+            return;
+        }
+        // 即没上一行也没下一行，直接把选中区替换为空
+        cm.doc.replaceRange('', {line:pos.line, ch:0,}, {line:pos2.line, ch:cm.doc.getLine(pos2.line).length});
+        cm.focus();
+        cm.doc.setCursor({line:pos.line, ch:0,});
+    };
+
     const isSelMultiLine=(cm)=>{
-        const selections=cm.doc.listSelections();
-        return (0<selections.length && selections[0].anchor.line!==selections[0].head.line);
+        return 'multi'===getSelectionType(cm).type;
     };
 
     const trimWrapperMark=(cm, mark)=>{
@@ -1418,20 +1449,20 @@ const editorSvcExInstWrapper=(function(){
             return {
                 type: 'cursor',
                 pos,
-                pos2: pos,
+                pos2,
             };
         }
         if(pos.line===pos2.line){
             return {
                 type: 'line',
                 pos,
-                pos2: pos,
+                pos2,
             };
         }
         return {
             type: 'multi',
             pos,
-            pos2: pos,
+            pos2,
         };
     };
 
@@ -1773,6 +1804,7 @@ const editorSvcExInstWrapper=(function(){
         setSuperscript,
         setSubscript,
         setEmphasize,
+        delCurrLine,
     };
 })();
 

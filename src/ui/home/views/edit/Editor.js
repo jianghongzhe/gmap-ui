@@ -397,6 +397,7 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
                     "Ctrl-Up": editorSvcEx.setSuperscript,
                     "Ctrl-Down": editorSvcEx.setSubscript,
                     "Ctrl-E": editorSvcEx.setEmphasize,
+                    "Ctrl-Y": editorSvcEx.delCurrLine,
                     "Ctrl-H": onShowHelpDlg,
                     "Ctrl-0": setTitle0,
                     "Ctrl-1": setTitle1,
