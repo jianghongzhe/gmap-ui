@@ -1232,20 +1232,74 @@ const editorSvcExInstWrapper=(function(){
     };
 
     const setBold=(cm)=>{
-        setWrapperMark(cm,"**", "**", -2);
+        wrapperOrTrimMark(cm, "**");
     };
 
     const setItalic=(cm)=>{
-        setWrapperMark(cm,"*", "*", -1);
+        wrapperOrTrimMark(cm, "*");
     };
 
     const setStrikeLine=(cm)=>{
-        setWrapperMark(cm,"~~", "~~", -1);
+        wrapperOrTrimMark(cm, "~~");
+    };
+
+    const setSuperscript=(cm)=>{
+        wrapperOrTrimMark(cm, "^");
+    };
+
+    const setSubscript=(cm)=>{
+        wrapperOrTrimMark(cm, "--");
+    };
+
+    const setEmphasize=(cm)=>{
+        wrapperOrTrimMark(cm, "==");
+    };
+
+    const wrapperOrTrimMark=(cm, mark)=>{
+        if(isWrappWith(cm, mark)){
+            trimWrapperMark(cm, mark);
+            return;
+        }
+        setWrapperMark(cm,mark, mark, 0-mark.length);
     };
 
     const isSelMultiLine=(cm)=>{
         const selections=cm.doc.listSelections();
         return (0<selections.length && selections[0].anchor.line!==selections[0].head.line);
+    };
+
+    const trimWrapperMark=(cm, mark)=>{
+        let pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        let pos2=pos;
+        const selections=cm.doc.listSelections();
+        if(0<selections.length){
+            [pos, pos2]=sortCursor(selections[0].anchor, selections[0].head);
+        }
+        const selContent=cm.doc.getRange(pos, pos2);
+        if(selContent.length>=2*mark.length && selContent.startsWith(mark) && selContent.endsWith(mark)){
+            if(pos.line===pos2.line){
+                const replContent=selContent.substring(mark.length, selContent.length-mark.length).trim();
+                cm.doc.replaceRange(replContent, pos , pos2);
+                cm.focus();
+                cm.doc.setCursor({line:pos.line, ch:pos.ch+replContent.length,});
+            }else{
+                cm.doc.replaceRange("", pos , {line:pos.line, ch:pos.ch+mark.length});
+                cm.doc.replaceRange("", {line:pos2.line, ch:pos2.ch-mark.length}, pos2);
+                cm.focus();
+                cm.doc.setCursor({line:pos2.line, ch:pos2.ch-mark.length,});
+            }
+        }
+    };
+
+    const isWrappWith=(cm, mark)=>{
+        let pos=cm.doc.getCursor();// { ch: 3  line: 0}
+        let pos2=pos;
+        const selections=cm.doc.listSelections();
+        if(0<selections.length){
+            [pos, pos2]=sortCursor(selections[0].anchor, selections[0].head);
+        }
+        const selContent=cm.doc.getRange(pos, pos2);
+        return (selContent.startsWith(mark) && selContent.endsWith(mark));
     };
 
     /**
@@ -1580,6 +1634,9 @@ const editorSvcExInstWrapper=(function(){
         getFirstGeneralTxt,
         isSelMultiLine,
         setWrapperMark,
+        setSuperscript,
+        setSubscript,
+        setEmphasize,
     };
 })();
 
