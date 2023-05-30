@@ -986,14 +986,111 @@ const editorSvcExInstWrapper=(function(){
         return -1;
     };
 
+    const isInRefPart=(cm)=>{
+        const {type,pos, pos2}= getSelectionType(cm);
+        let refPartLineInd=getRefPartSplitLineInd(cm);
+        if(-1===refPartLineInd){
+            return false;
+        }
+        if(pos.line<=refPartLineInd || pos2.line<=refPartLineInd){
+            return false;
+        }
+
+        return {
+
+        }
+    };
 
     /**
-     * 检查指定行是否在节点部分：满足节点格式并且在引用部分之前，若无引用部分则可忽略该条件
-     * 节点格式如：[tab][tab]...- abc
+     * 检查当前选中部分是否在节点部分：节点格式如：[tab][tab]...- abc
+     * 选中部分只有未选中或选中同一行中的内容时才有效；
+     * 只有不存在引用部分分隔符或当前选中行在分隔符之前时才有效；
+     *
      */
-    const isInNodePart=(lineInd, line, cm)=>{
+    const isInNodePart=(cm)=>{
+        const {type,pos, pos2}= getSelectionType(cm);
+        if(!('cursor'===type || 'line'===type)){
+            return false;
+        }
         let refPartLineInd=getRefPartSplitLineInd(cm);
-        return line.trim().startsWith("- ") && (-1===refPartLineInd || (-1!==refPartLineInd && lineInd<refPartLineInd))
+        if(!(-1===refPartLineInd || pos.line<refPartLineInd)){
+            return false;
+        }
+
+        // 计算插入位置与填充字符
+        // 插入位置在最后一个非空字符的后面，若一直未找到，则取0
+        // 当插入位置前只有节点行标识时，填充字符为空格；当插入位置前不以|结尾或以\|结尾，填充字符为|；否则填充字符为空字符
+        // -  ->  -_xxx
+        // - abc  ->  - abc|xxx
+        // - abc\|  ->  - abc\||xxx
+        const currLine=cm.doc.getLine(pos.line);
+        const ch2=currLine.length;
+        let ch=0;
+        for(let i=currLine.length-1;i>=0;--i){
+            if(' '!==currLine[i] && '　'!==currLine[i] && '\t'!==currLine[i]){
+                ch=i+1;
+                break;
+            }
+        }
+        const frontPart=currLine.substring(0,ch)??'';
+        let fill='';
+        if('-'===frontPart.trim()){
+            fill=' ';
+        }
+        else if(!frontPart.endsWith("|") || frontPart.endsWith("\\|")){
+            fill='|';
+        }
+        const fixedPart={
+            pos: {line:pos.line, ch, ch2},
+            fill,
+        };
+
+        // 计算节点类型：是否根节点，是否节点首行
+        // 根节点的第一行
+        if(currLine.startsWith("-")){
+            return {
+                inRoot: true,
+                titleLine: true,
+                ...fixedPart,
+            };
+        }
+        // 非根节点的第一行
+        else if(currLine.trim().startsWith("-")){
+            return {
+                inRoot: false,
+                titleLine: true,
+                ...fixedPart,
+            };
+        }
+        // 其它情况：
+        // 不停向上一行找，直到遇到标识符 '-' ;
+        // 若一直未找到，则认为当前就是根节点；
+        // 若找到，则根据标识符前是否有缩进来决定是否为根节点；
+        else{
+            let hasTitleLine=false;
+            let titleLineRoot=false;
+            let hasNotBlankLine=false;
+            for(let i=pos.line-1;i>=0;--i){
+                const eachLine=cm.doc.getLine(i);
+                if(eachLine.trim().startsWith("-")){
+                    hasTitleLine=true;
+                    titleLineRoot=eachLine.startsWith("-");
+                    break;
+                }
+            }
+            for(let i=pos.line-1;i>=0;--i){
+                const eachLine=cm.doc.getLine(i);
+                if(''!==eachLine.trim()){
+                    hasNotBlankLine=true;
+                    break;
+                }
+            }
+            return {
+                inRoot: (!hasTitleLine || (hasTitleLine && titleLineRoot)),
+                titleLine: hasTitleLine ? false : !hasNotBlankLine,
+                ...fixedPart,
+            };
+        }
     };
 
 
@@ -1265,7 +1362,7 @@ const editorSvcExInstWrapper=(function(){
             const line=cm.doc.getLine(pos.line);
             const frontPart=line.substring(0, pos.ch);
             const endPart=line.substring(pos.ch);
-            const flag= (/^(.*[^!])?\[[^\]]*$/.test(frontPart) && /^[^\]]*\][(][^()]*[)].*$/.test(endPart));
+            const flag= (/^.*(?<![!])\[[^\]]*$/.test(frontPart) && /^[^\]]*\][(][^()]*[)].*$/.test(endPart));
             if(!flag){
                 return false;
             }
@@ -1324,7 +1421,6 @@ const editorSvcExInstWrapper=(function(){
 
 
     const setBold=(cm)=>{
-        console.log("isInTable", isInTable(cm));
         wrapperOrTrimMark(cm, "**");
     };
 
@@ -1805,6 +1901,12 @@ const editorSvcExInstWrapper=(function(){
         setSubscript,
         setEmphasize,
         delCurrLine,
+        getSelectionType,
+        isInImgNamePart,
+        isInLinkNamePart,
+        isInTable,
+        isInNodePart,
+        isInRefPart,
     };
 })();
 

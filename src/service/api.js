@@ -461,6 +461,10 @@ class Api{
         return ipcRenderer.invoke('getUrlFromClipboard', {});
     };
 
+    getClipboardHasContent=()=>{
+        return ipcRenderer.invoke('getClipboardHasContent', {});
+    }
+
     getImgUrlFromClipboard=()=>{
         return ipcRenderer.invoke('getImgUrlFromClipboard', {});
     };

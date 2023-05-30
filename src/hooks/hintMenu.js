@@ -3,6 +3,7 @@ import {useMemoizedFn} from "ahooks";
 import {actionTypes} from "../common/hintMenuConfig";
 import editorSvcEx from "../service/editorSvcEx";
 import globalStyleConfig from "../common/globalStyleConfig";
+import api from '../service/api';
 
 
 export const useHintMenu=()=>{
@@ -213,6 +214,31 @@ export const useHintMenu=()=>{
      * @type {(function(*): void)|*}
      */
     const showMenu=useMemoizedFn((cm)=>{
+
+        (async ()=>{
+            const resp=await api.getClipboardHasContent();
+            if(true!==resp.succ){
+                return;
+            }
+
+            const parseResult={
+                clipboardHasContent: resp.data,
+                selectionType: editorSvcEx.getSelectionType(cm),
+                cursorScope: {
+                    inImgNamePart: editorSvcEx.isInImgNamePart(cm),
+                    inLinkNamePart: editorSvcEx.isInLinkNamePart(cm),
+                    inTablePart: editorSvcEx.isInTable(cm),
+                },
+                cursorLineScope:{
+                    inNodePart: editorSvcEx.isInNodePart(cm),
+                },
+                cursorLineMultiScope: {
+                    inRefPart: editorSvcEx.isInRefPart(cm),
+                },
+            }
+            console.log("parseResult", parseResult);
+        })();
+
         // 菜单组装：动态菜单项 + 固定菜单项
         let list=[
             ...(shouldShowRootMenu(cm) ? rootNdDlgMenus : []),

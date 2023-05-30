@@ -932,12 +932,18 @@ const saveFileFromClipboard=({img, saveDir, saveToPicHost})=>{
     return sendCmdToServer("saveFileFromClipboard", {img, saveDir, saveToPicHost});
 };
 
+
+
 const getUrlFromClipboard=(paramsObj)=>{
     return sendCmdToServer("getUrlFromClipboard", paramsObj);
 };
 
 const getImgUrlFromClipboard=(paramsObj)=>{
     return sendCmdToServer("getImgUrlFromClipboard", paramsObj);
+};
+
+const getClipboardHasContent=()=>{
+    return sendCmdToServer("clipboardHasContent", {});
 };
 
 
@@ -1725,6 +1731,7 @@ const ipcHandlers={
     saveFileFromClipboard,
     getUrlFromClipboard,
     getImgUrlFromClipboard,
+    getClipboardHasContent,
     getSettingValue,
     saveSettingValue,
 };
