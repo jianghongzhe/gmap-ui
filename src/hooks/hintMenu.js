@@ -214,13 +214,13 @@ export const useHintMenu=()=>{
      * @type {(function(*): void)|*}
      */
     const showMenu=useMemoizedFn((cm)=>{
-
         (async ()=>{
             const resp=await api.getClipboardHasContent();
-            if(true!==resp.succ){
+            if(!resp || true!==resp.succ){
                 return;
             }
 
+            // 当前环境信息汇总
             const parseResult={
                 clipboardHasContent: resp.data,
                 selectionType: editorSvcEx.getSelectionType(cm),
@@ -235,28 +235,59 @@ export const useHintMenu=()=>{
                 cursorLineMultiScope: {
                     inRefPart: editorSvcEx.isInRefPart(cm),
                 },
-            }
+            };
             console.log("parseResult", parseResult);
+
+            // 菜单项过滤：
+            // 先按selectionTypes过滤；
+            // 再按matcher函数过滤: 如果匹配，则把函数返回结果附加到函数的data对象中
+            const visibleMenus= menuConfig.filter(menu=>menu.selectionTypes.includes(parseResult.selectionType.type))
+                .map(menu=>{
+                    const match=menu.matcher(cm, parseResult);
+                    if(!match){
+                        return null;
+                    }
+                    const item={
+                        label: menu.label,
+                        option: menu.option,
+                    };
+                    item.option.data={
+                        ...item.option.data,
+                        extra: match,
+                    };
+                    return item;
+                })
+                .filter(menu=>null!==menu);
+
+            if(0===visibleMenus.length){
+                closeHintMenu();
+                return;
+            }
+            cm.scrollIntoView(parseResult.selectionType.pos2);
+            setTimeout(()=>{
+                console.log("visibleMenus", visibleMenus);
+                showMenuInner(visibleMenus, getHintMenuPos(cm, parseResult.selectionType.pos2));
+            },50);
         })();
 
-        // 菜单组装：动态菜单项 + 固定菜单项
-        let list=[
-            ...(shouldShowRootMenu(cm) ? rootNdDlgMenus : []),
-            ...(shouldShowRefMenu(cm) ? hintRefMenus : []),
-            ...(shouldShowEditTableMenu(cm) ? editTableMenus : []),
-            ...(shouldShowContMenu(cm) ? hintContMenus : []),
-        ];
-        if(0<list.length){
-            list=[...list, "-"];
-        }
-        list=[...list, ...fixedHintMenuList];
-
-        // 先使光标位置可见，再打开菜单。打开菜单前增加延时以确保光标位置已滚动到可见处。
-        const cur = cm.getCursor();
-        cm.scrollIntoView(cur);
-        setTimeout(()=>{
-            showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm));
-        },50);
+        // // 菜单组装：动态菜单项 + 固定菜单项
+        // let list=[
+        //     ...(shouldShowRootMenu(cm) ? rootNdDlgMenus : []),
+        //     ...(shouldShowRefMenu(cm) ? hintRefMenus : []),
+        //     ...(shouldShowEditTableMenu(cm) ? editTableMenus : []),
+        //     ...(shouldShowContMenu(cm) ? hintContMenus : []),
+        // ];
+        // if(0<list.length){
+        //     list=[...list, "-"];
+        // }
+        // list=[...list, ...fixedHintMenuList];
+        //
+        // // 先使光标位置可见，再打开菜单。打开菜单前增加延时以确保光标位置已滚动到可见处。
+        // const cur = cm.getCursor();
+        // cm.scrollIntoView(cur);
+        // setTimeout(()=>{
+        //     showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm));
+        // },50);
     });
 
 
@@ -279,6 +310,205 @@ export const useHintMenu=()=>{
 };
 
 
+const menuConfig=[
+    // 图片元数据
+    ...(["#left", "#center", "#right", "#float-left", "#float-right", "#inline",].map(item=>{
+        return {
+            selectionTypes: ['cursor'],
+            matcher: (cm, parseResult)=>parseResult.cursorScope.inImgNamePart,
+            label: `图片属性　${item}`,
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: item,
+                    cursorOffset: item.length,
+                }
+            }
+        };
+    })),
+
+    // 链接元数据
+    ...(["#confirm", "#confirm{txt aa}"].map(item=>{
+        return {
+            selectionTypes: ['cursor'],
+            matcher: (cm, parseResult)=>parseResult.cursorScope.inLinkNamePart,
+            label: `链接属性　${item}`,
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: item,
+                    cursorOffset: item.length,
+                }
+            }
+        };
+    })),
+
+    // 表格第一行第一列元数据
+    ...(["#bar", "#line", "#stack", "#pie", "#bar-line"].map(item=>{
+        return {
+            selectionTypes: ['cursor'],
+            matcher: (cm, parseResult)=> parseResult.cursorScope.inTablePart?.titleLineFirstCol,
+            label: `表格属性　${item}`,
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: item,
+                    cursorOffset: item.length,
+                }
+            }
+        };
+    })),
+
+    // 表格数据行第一列元数据： 当表头第一列中有#bar-line元数据时才有效
+    ...(["#bar", "#line", "#stack:xx"].map(item=>{
+        return {
+            selectionTypes: ['cursor'],
+            matcher: (cm, parseResult)=>{
+                if(parseResult.cursorScope.inTablePart?.dataLineFirstCol){
+                    const titleFirstCell= parseResult.cursorScope.inTablePart?.data?.heads?.[0]??'';
+                    return titleFirstCell.includes("#bar-line") ? parseResult.cursorScope.inTablePart.dataLineFirstCol : false;
+                }
+                return false;
+            },
+            label: `系列属性　${item}`,
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: item,
+                    cursorOffset: item.length,
+                }
+            }
+        };
+    })),
+
+    // 表格编辑
+    {
+        selectionTypes: ['cursor'],
+        matcher: (cm, parseResult)=>parseResult.inTablePart,
+        label: '表格编辑　',
+        option: {
+            type: actionTypes.editTable,
+        }
+    },
+
+
+    // 根节点功能
+    ...([
+        {lab:'节点在右　right:', val:'right:'},
+        {lab:'上下结构　down:', val:'down:'},
+        {lab:'下上结构　up:', val:'up:'},
+    ].map(({lab,val})=>{
+        return {
+            selectionTypes: ['cursor', 'line'],
+            matcher: (cm, parseResult)=> {
+                if(parseResult.cursorLineScope.inNodePart?.inRoot){
+                    const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
+                    return {pos, pos2, fill};
+                }
+                return false;
+            },
+            label: lab,
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: val,
+                    cursorOffset: val.length,
+                }
+            }
+        };
+    })),
+
+    // 所有节点功能
+    {
+        selectionTypes: ['cursor', 'line'],
+        matcher: (cm, parseResult)=> {
+            if(parseResult.cursorLineScope.inNodePart){
+                const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
+                return {pos, pos2, fill};
+            }
+            return false;
+        },
+        label: '引用　　　ref:xx',
+        option: {
+            type: actionTypes.refAction,
+            data: {
+                ref:true,
+                tref:false,
+            }
+        }
+    },
+    {
+        selectionTypes: ['cursor', 'line'],
+        matcher: (cm, parseResult)=> {
+            if(parseResult.cursorLineScope.inNodePart){
+                const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
+                return {pos, pos2, fill};
+            }
+            return false;
+        },
+        label: '文本引用　tref:yy',
+        option: {
+            type: actionTypes.refAction,
+            data:{
+                ref:false,
+                tref:true,
+            }
+        }
+    },
+    {
+        selectionTypes: ['cursor', 'line'],
+        matcher: (cm, parseResult)=> {
+            if(parseResult.cursorLineScope.inNodePart){
+                const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
+                return {pos, pos2, fill};
+            }
+            return false;
+        },
+        label: '折叠节点　zip:',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: 'zip:',
+                cursorOffset: 'zip:'.length,
+            }
+        }
+    },
+
+
+
+    // 文字颜色
+    {
+        selectionTypes: ['cursor','line','multi'],
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
+                return false;
+            }
+            if(parseResult.cursorLineScope.inNodePart){
+                return {
+                    pos: parseResult.cursorLineScope.inNodePart.pos,
+                    fill: parseResult.cursorLineScope.inNodePart.fill,
+                };
+            }
+            if(parseResult.cursorLineMultiScope.inRefPart){
+                return {};
+            }
+            console.log("aaasss")
+            return false;
+        },
+        label: '文字颜色　',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                wrap: true,
+                txt: ["$\\textcolor{}{", "}$"],
+                cursorOffset: "$\\textcolor{".length,
+                txt2: ['<font color="">', '</font>'],
+                cursorOffset2: '<font color="'.length,
+            }
+        }
+    },
+];
+
 
 
 
@@ -292,51 +522,51 @@ const aliasSample=`# alias
 ${aliasSampleLine2}`;
 
 
-/**
- * 动态生成的自动提示菜单项 - 表格编辑
- * @type {[{label: string, option: {type: string}}]}
- */
-const editTableMenus=[
-    {
-        label: '表格编辑（可视化）',
-        option: {
-            type: actionTypes.editTable,
-        }
-    },
-];
+// /**
+//  * 动态生成的自动提示菜单项 - 表格编辑
+//  * @type {[{label: string, option: {type: string}}]}
+//  */
+// const editTableMenus=[
+//     {
+//         label: '表格编辑（可视化）',
+//         option: {
+//             type: actionTypes.editTable,
+//         }
+//     },
+// ];
 
-const rootNdDlgMenus=[
-    {
-        label: '节点在右　right:',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: 'right:',
-                appendNodePart:true,
-            }
-        }
-    },
-    {
-        label: '上下结构　down:',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: 'down:',
-                appendNodePart:true,
-            }
-        }
-    },
-    {
-        label: '下上结构　up:',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: 'up:',
-                appendNodePart:true,
-            }
-        }
-    },
-];
+// const rootNdDlgMenus=[
+//     {
+//         label: '节点在右　right:',
+//         option: {
+//             type: actionTypes.literal,
+//             data: {
+//                 txt: 'right:',
+//                 appendNodePart:true,
+//             }
+//         }
+//     },
+//     {
+//         label: '上下结构　down:',
+//         option: {
+//             type: actionTypes.literal,
+//             data: {
+//                 txt: 'down:',
+//                 appendNodePart:true,
+//             }
+//         }
+//     },
+//     {
+//         label: '下上结构　up:',
+//         option: {
+//             type: actionTypes.literal,
+//             data: {
+//                 txt: 'up:',
+//                 appendNodePart:true,
+//             }
+//         }
+//     },
+// ];
 
 
 /**
@@ -611,9 +841,11 @@ const fixedHintMenuList=[
  * @param cm
  * @return {{top: *, left: *}}
  */
-const getHintMenuPos=(cm)=>{
+const getHintMenuPos=(cm, cur=null)=>{
     // 光标为相对于codemirror编辑器的位置
-    const cur = cm.getCursor();
+    if(!cur){
+        cur = cm.getCursor();
+    }
     let {left,top}=cm.cursorCoords(cur, "page");
 
     // 增加校正值后变为相对于编辑器对话框的位置，返回结果也需要这种相对位置

@@ -1037,11 +1037,12 @@ const editorSvcExInstWrapper=(function(){
         if('-'===frontPart.trim()){
             fill=' ';
         }
-        else if(!frontPart.endsWith("|") || frontPart.endsWith("\\|")){
+        else if((''!==frontPart.trim() && !frontPart.endsWith("|")) || frontPart.endsWith("\\|")){
             fill='|';
         }
         const fixedPart={
-            pos: {line:pos.line, ch, ch2},
+            pos: {line:pos.line, ch},
+            pos2: {line:pos.line, ch:ch2},
             fill,
         };
 
@@ -1402,8 +1403,10 @@ const editorSvcExInstWrapper=(function(){
                         return false;
                     }
                     return {
-                        line: pos.line,
-                        ch: tmp,
+                        pos: {
+                            line: pos.line,
+                            ch: tmp,
+                        },
                     };
                 }
                 return false;

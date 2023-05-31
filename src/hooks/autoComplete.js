@@ -59,6 +59,8 @@ export const useAutoComplateFuncs=()=>{
     });
 
     const doLiteralAction=useMemoizedFn((subActionType, cm)=>{
+        console.log("subActionType", subActionType);
+
         if(subActionType.appendNodePart){
             insertNodePart(cm, subActionType.txt);
             return;
@@ -74,7 +76,14 @@ export const useAutoComplateFuncs=()=>{
             editorSvcEx.setWrapperMark(cm, beginMark, endMark, offset);
             return;
         }
-        insertTxtAndMoveCursor(cm, subActionType.txt, subActionType.cursorOffset);
+        insertTxtAndMoveCursor(
+            cm,
+            subActionType.txt,
+            subActionType.cursorOffset,
+            subActionType?.extra?.pos??null,
+            subActionType?.extra?.pos2??null,
+            (subActionType?.extra?.fill??'')
+        );
     });
 
 
@@ -113,29 +122,65 @@ export const useAutoComplateFuncs=()=>{
      * 添加位置为节点的最后一个为空字符之后，若最后一个为空字符不是'|'，则自动生成一个用为分隔
      * @type {(function({ref: *, tref: *}, *): void)|*}
      */
-    const doRefAction=useMemoizedFn(({ref, tref}, cm)=>{
-        const typeName=(ref? "引用" : "文本引用");
-        const cursor= cm.doc.getCursor();
-        const lineTxt=cm.doc.getLine(cursor.line);
+    const doRefAction=useMemoizedFn((option, cm)=>{
+        const cursor= option.extra.pos;
 
-        if(!editorSvcEx.isCursorInNodePart(cm) || null===lineTxt || ""===lineTxt.trim()){
-            api.showNotification("警告",`当前位置不允许生成${typeName}`,"warn");
-            return;
+        // 多行节点内容拼接到一起
+        let lineTxt=cm.doc.getLine(cursor.line);
+        let firstLine=cursor.line;
+        let lastLine=cursor.line;
+        if(!lineTxt.trim().startsWith("-")){
+            for(let i=cursor.line-1;i>=0;--i){
+                firstLine=i;
+                if(cm.doc.getLine(i).trim().startsWith("-")){
+                    break;
+                }
+            }
         }
-
-        const refName=editorSvcEx.getFirstGeneralTxt(lineTxt);
-        if(false===refName || ""===refName.trim()){
-            api.showNotification("操作有误",`当前位置无法生成${typeName}`,"err");
-            return;
+        const len=cm.doc.lineCount();
+        console.log("len", len);
+        for(let i=firstLine+1; i<len; ++i){
+            const nextLine=cm.doc.getLine(i);
+            if('***'===nextLine.trim() || nextLine.trim().startsWith("-")){
+                break;
+            }
+            lastLine=i;
         }
+        lineTxt=cm.doc.getRange({line: firstLine, ch: 0,}, {line: lastLine, ch: cm.doc.getLine(lastLine).length}).replace(/\r/g,'').replace(/\n/g,'|');
 
-        let handledLine=lineTxt.trimEnd();
-        const replTxt=`${handledLine.endsWith("|")?"":"|"}${ref ? "ref" : "tref"}:${refName.trim()}`;
-        const insertPos={line:cursor.line, ch:handledLine.length};
-        const insertPos2={line:cursor.line, ch:lineTxt.length};
-        const newPos={line:cursor.line, ch:handledLine.length+replTxt.length};
-        insertTxtToAssignedPos(cm, replTxt, [insertPos,insertPos2] , newPos);
-        return;
+
+        let refName=editorSvcEx.getFirstGeneralTxt(lineTxt);
+        if(!refName){
+            refName=(option.ref? "引用名称" : "文本引用名称");
+        }
+        const replTxt=`${option.ref ? "ref" : "tref"}:${refName.trim()}`;
+        insertTxtAndMoveCursor(
+            cm,
+            replTxt,
+            refName.length,
+            option?.extra?.pos??null,
+            option?.extra?.pos2??null,
+            option?.extra?.fill??''
+        );
+
+        // if(!editorSvcEx.isCursorInNodePart(cm) || null===lineTxt || ""===lineTxt.trim()){
+        //     api.showNotification("警告",`当前位置不允许生成${typeName}`,"warn");
+        //     return;
+        // }
+        //
+        //
+        // if(false===refName || ""===refName.trim()){
+        //     api.showNotification("操作有误",`当前位置无法生成${typeName}`,"err");
+        //     return;
+        // }
+
+        // let handledLine=lineTxt.trimEnd();
+        // const replTxt=`${handledLine.endsWith("|")?"":"|"}${ref ? "ref" : "tref"}:${refName.trim()}`;
+        // const insertPos={line:cursor.line, ch:handledLine.length};
+        // const insertPos2={line:cursor.line, ch:lineTxt.length};
+        // const newPos={line:cursor.line, ch:handledLine.length+replTxt.length};
+        // insertTxtToAssignedPos(cm, replTxt, [insertPos,insertPos2] , newPos);
+        // return;
     });
 
 
@@ -219,15 +264,17 @@ const sortCursor=(pos1, pos2)=>{
  * 情况2：[number, number]  行的偏移量和列的偏移量
  * @param wrap
  * */
-const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null, wrap=false)=>{
-    let pos=cm.doc.getCursor();// { ch: 3  line: 0}
-    cm.doc.replaceRange(txt, pos, pos);
+const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null, pos=null, pos2=null, fill='')=>{
+    if(!pos){
+        pos=cm.doc.getCursor();// { ch: 3  line: 0}
+    }
+    cm.doc.replaceRange(fill+txt, pos, (pos2 ? pos2 : pos));
 
     let line=pos.line;
     let ch=pos.ch+txt.length;
 
     if('number'===typeof(cursorOffset)){
-        ch=pos.ch+cursorOffset;
+        ch=pos.ch+cursorOffset+fill.length;
     }else if(Array.isArray(cursorOffset) && 2===cursorOffset.length && 'number'===typeof(cursorOffset[0]) && 'number'===typeof(cursorOffset[1])){
         line=pos.line+cursorOffset[0];
         ch=pos.ch+cursorOffset[1];
