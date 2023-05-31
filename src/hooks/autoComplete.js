@@ -11,42 +11,104 @@ export const useAutoComplateFuncs=()=>{
      * 剪切板操作
      * @type {(function(*, *, *): void)|*}
      */
-    const doClipboardAction=useMemoizedFn((subActionType, cm, currAssetsDir)=>{
+    const doClipboardAction=useMemoizedFn((opt, cm, currAssetsDir)=>{
+        const {subActionType}=opt;
+        console.log("subActionType", subActionType);
+
         const actionHandlerMap={
             [actionTypes.getUrlFromClipboard]: ()=>{
                 respHandler(
                     api.getUrlFromClipboard,
-                    resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](${resp.data.url})`)
+                    resp=>{
+                        const txt=`[${resp.data.title}](${resp.data.url})`;
+                        insertTxtAndMoveCursor(
+                            cm,
+                            txt,
+                            txt.length,
+                            opt?.extra?.pos??null,
+                            opt?.extra?.pos2??null,
+                            opt?.extra?.fill??''
+                        );
+
+                    }
                 ).then();
             },
             [actionTypes.getImgUrlFromClipboard]: ()=>{
                 respHandler(
                     api.getImgUrlFromClipboard,
-                    resp=>insertTxtAndMoveCursor(cm, `![${resp.data.title}](${resp.data.url})`)
+                    resp=>{
+                        const txt=`![${resp.data.title}](${resp.data.url})`;
+                        insertTxtAndMoveCursor(
+                            cm,
+                            txt,
+                            txt.length,
+                            opt?.extra?.pos??null,
+                            opt?.extra?.pos2??null,
+                            opt?.extra?.fill??''
+                        );
+                    }
                 ).then();
             },
             [actionTypes.clipboardImgToLocal]: ()=>{
                 respHandler(
                     api.saveFileFromClipboard.bind(this, {img:true, saveDir:currAssetsDir, saveToPicHost:false}),
-                    resp=>insertTxtAndMoveCursor(cm, `![](assets/${resp.data.filename})`)
+                    resp=>{
+                        const txt=`![](assets/${resp.data.filename})`;
+                        insertTxtAndMoveCursor(
+                            cm,
+                            txt,
+                            txt.length,
+                            opt?.extra?.pos??null,
+                            opt?.extra?.pos2??null,
+                            opt?.extra?.fill??''
+                        );
+                    }
                 ).then();
             },
             [actionTypes.clipboardFileToLocal]: ()=>{
                 respHandler(
                     api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:false}),
-                    resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](assets/${resp.data.filename})`)
+                    resp=>{
+                        const txt=`[${resp.data.title}](assets/${resp.data.filename})`;
+                        insertTxtAndMoveCursor(
+                            cm,
+                            txt,
+                            txt.length,
+                            opt?.extra?.pos??null,
+                            opt?.extra?.pos2??null,
+                            opt?.extra?.fill??''
+                        );
+                    }
                 ).then();
             },
             [actionTypes.clipboardImgToPicHost]: ()=>{
                 respHandler(
                     api.saveFileFromClipboard.bind(this,{img:true, saveDir:currAssetsDir, saveToPicHost:true}),
-                    resp=>insertTxtAndMoveCursor(cm, `![](${resp.data.url})`)
+                    resp=>{
+                        const txt=`![](${resp.data.url})`;
+                        insertTxtAndMoveCursor(cm,
+                            txt,
+                            txt.length,
+                            opt?.extra?.pos??null,
+                            opt?.extra?.pos2??null,
+                            opt?.extra?.fill??''
+                        );
+                    }
                 ).then();
             },
             [actionTypes.clipboardFileToPicHost]: ()=>{
                 respHandler(
                     api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:true}),
-                    resp=>insertTxtAndMoveCursor(cm, `[${resp.data.title}](${resp.data.url})`)
+                    resp=>{
+                        const txt=`[${resp.data.title}](${resp.data.url})`;
+                        insertTxtAndMoveCursor(
+                            txt,
+                            txt.length,
+                            opt?.extra?.pos??null,
+                            opt?.extra?.pos2??null,
+                            opt?.extra?.fill??''
+                        );
+                    }
                 ).then();
             },
         };
@@ -96,21 +158,45 @@ export const useAutoComplateFuncs=()=>{
      *      dateOffset:-2,
      * }
      */
-    const doDateTimeAction=useMemoizedFn(({date,time,dateOffset}, cm)=>{
+    const doDateTimeAction=useMemoizedFn((opt, cm)=>{
+        let {date,time,dateOffset}=opt;
         const now = new Date();
         if(time && !date){
-           insertTxtAndMoveCursor(cm, editorSvcEx.toTimeFmt(now));
-           return;
+            const txt=editorSvcEx.toTimeFmt(now);
+            insertTxtAndMoveCursor(
+                cm,
+                txt,
+                txt.length,
+                opt?.extra?.pos??null,
+                opt?.extra?.pos2??null,
+                opt?.extra?.fill??''
+            );
+            return;
         }
         if(date && time){
-
-           insertTxtAndMoveCursor(cm, editorSvcEx.toDateFmt(now)+" "+editorSvcEx.toTimeFmt(now));
-           return;
+            const txt=editorSvcEx.toDateFmt(now)+" "+editorSvcEx.toTimeFmt(now);
+            insertTxtAndMoveCursor(
+                cm,
+                txt,
+                txt.length,
+                opt?.extra?.pos??null,
+                opt?.extra?.pos2??null,
+                opt?.extra?.fill??''
+            );
+            return;
         }
         if(date && !time){
-           dateOffset=(dateOffset??0);
-           const assignedDate=new Date(new Date().getTime()+86400000*dateOffset);
-           insertTxtAndMoveCursor(cm, editorSvcEx.toDateFmt(assignedDate));
+            dateOffset=(dateOffset??0);
+            const assignedDate=new Date(new Date().getTime()+86400000*dateOffset);
+            const txt=editorSvcEx.toDateFmt(assignedDate);
+            insertTxtAndMoveCursor(
+                cm,
+                txt,
+                txt.length,
+                opt?.extra?.pos??null,
+                opt?.extra?.pos2??null,
+                opt?.extra?.fill??''
+            );
            return;
         }
         api.showNotification("操作有误","该操作目前还不支持","err");

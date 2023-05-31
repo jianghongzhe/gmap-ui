@@ -996,8 +996,21 @@ const editorSvcExInstWrapper=(function(){
             return false;
         }
 
+        let hasShortcutPart=false;
+        let hasAliasPart=false;
+        const len=cm.doc.lineCount();
+        for(let i=refPartLineInd+1;i<len;++i){
+            const eachLine=cm.doc.getLine(i).trim();
+            if('# shortcuts'===eachLine){
+                hasShortcutPart=true;
+            }
+            if('# alias'===eachLine){
+                hasAliasPart=true;
+            }
+        }
         return {
-
+            hasShortcutPart,
+            hasAliasPart,
         }
     };
 

@@ -161,53 +161,6 @@ export const useHintMenu=()=>{
     });
 
 
-    /**
-     * 是否显示添加引用菜单：
-     * 1、光标在节点部分
-     * 2、节点中有有效文本
-     * @type {(function(*): (boolean))|*}
-     */
-    const shouldShowRefMenu=useMemoizedFn((cm)=>{
-        const cursor= cm.doc.getCursor();
-        const lineTxt=cm.doc.getLine(cursor.line);
-
-        if(!editorSvcEx.isCursorInNodePart(cm) || null===lineTxt || ""===lineTxt.trim()){
-            return false;
-        }
-
-        const refName=editorSvcEx.getFirstGeneralTxt(lineTxt);
-        if(false===refName || ""===refName.trim()){
-            return false;
-        }
-        return true;
-    });
-
-    const shouldShowRootMenu=useMemoizedFn((cm)=>{
-        if(!shouldShowRefMenu(cm)){
-            return false;
-        }
-        const cursor= cm.doc.getCursor();
-        const lineTxt=cm.doc.getLine(cursor.line);
-        for(let i=0;i<cursor.line;++i){
-            if(''!==cm.doc.getLine(i).trim()){
-                return false;
-            }
-        }
-        if(!lineTxt.startsWith("- ")){
-            return false;
-        }
-        return true;
-    });
-
-    const shouldShowContMenu=useMemoizedFn((cm)=>{
-        return !editorSvcEx.isCursorInNodePart(cm);
-    });
-
-    const shouldShowEditTableMenu=useMemoizedFn((cm)=>{
-        const data=editorSvcEx.parseTable(cm);
-        return !(false===data) && !editorSvcEx.isCursorInNodePart(cm);
-    });
-
 
     /**
      * 动态组装自动提示菜单项：
@@ -220,10 +173,16 @@ export const useHintMenu=()=>{
                 return;
             }
 
-            // 当前环境信息汇总
+            // 当前环境信息汇总，用于被各菜单项的匹配器函数使用
+            const selectionType= editorSvcEx.getSelectionType(cm);
+            const lines=[];
+            for(let i=selectionType.pos.line; i<=selectionType.pos2.line; ++i){
+                lines.push(cm.doc.getLine(i));
+            }
             const parseResult={
                 clipboardHasContent: resp.data,
-                selectionType: editorSvcEx.getSelectionType(cm),
+                selectionType,
+                lines,
                 cursorScope: {
                     inImgNamePart: editorSvcEx.isInImgNamePart(cm),
                     inLinkNamePart: editorSvcEx.isInLinkNamePart(cm),
@@ -236,12 +195,13 @@ export const useHintMenu=()=>{
                     inRefPart: editorSvcEx.isInRefPart(cm),
                 },
             };
-            console.log("parseResult", parseResult);
 
-            // 菜单项过滤：
+            // 菜单项过滤并插入分隔符
             // 先按selectionTypes过滤；
             // 再按matcher函数过滤: 如果匹配，则把函数返回结果附加到函数的data对象中
-            const visibleMenus= menuConfig.filter(menu=>menu.selectionTypes.includes(parseResult.selectionType.type))
+            const visibleMenus= menuConfig
+                .filter(menu=>menu.selectionTypes && menu.matcher)
+                .filter(menu=>menu.selectionTypes.includes(parseResult.selectionType.type))
                 .map(menu=>{
                     const match=menu.matcher(cm, parseResult);
                     if(!match){
@@ -250,6 +210,7 @@ export const useHintMenu=()=>{
                     const item={
                         label: menu.label,
                         option: menu.option,
+                        cate: menu.cate,
                     };
                     item.option.data={
                         ...item.option.data,
@@ -258,6 +219,11 @@ export const useHintMenu=()=>{
                     return item;
                 })
                 .filter(menu=>null!==menu);
+            for (let i=visibleMenus.length-1;i>0;--i){
+                if(visibleMenus[i].cate!==visibleMenus[i-1].cate){
+                    visibleMenus.splice(i, 0, "-");
+                }
+            }
 
             if(0===visibleMenus.length){
                 closeHintMenu();
@@ -265,32 +231,10 @@ export const useHintMenu=()=>{
             }
             cm.scrollIntoView(parseResult.selectionType.pos2);
             setTimeout(()=>{
-                console.log("visibleMenus", visibleMenus);
                 showMenuInner(visibleMenus, getHintMenuPos(cm, parseResult.selectionType.pos2));
             },50);
         })();
-
-        // // 菜单组装：动态菜单项 + 固定菜单项
-        // let list=[
-        //     ...(shouldShowRootMenu(cm) ? rootNdDlgMenus : []),
-        //     ...(shouldShowRefMenu(cm) ? hintRefMenus : []),
-        //     ...(shouldShowEditTableMenu(cm) ? editTableMenus : []),
-        //     ...(shouldShowContMenu(cm) ? hintContMenus : []),
-        // ];
-        // if(0<list.length){
-        //     list=[...list, "-"];
-        // }
-        // list=[...list, ...fixedHintMenuList];
-        //
-        // // 先使光标位置可见，再打开菜单。打开菜单前增加延时以确保光标位置已滚动到可见处。
-        // const cur = cm.getCursor();
-        // cm.scrollIntoView(cur);
-        // setTimeout(()=>{
-        //     showMenuInner(list.filter(item=>null!=item), getHintMenuPos(cm));
-        // },50);
     });
-
-
 
     return {
         // 状态
@@ -310,10 +254,37 @@ export const useHintMenu=()=>{
 };
 
 
+
+const shortcutsSampleLastLine="\t- [](https://mm.nn.oo)";
+const shortcutsSample=`# shortcuts
+- [某网](https://xx.yy.zz)
+- 多个链接
+\t- [](https://aa.bb.cc)
+${shortcutsSampleLastLine}`;
+const shortCutLastLineOffset=4;
+
+
+const threeQuote="```";
+const aliasSampleLastLine=threeQuote;
+const aliasSample=`# alias
+[xxx]: 单行内容
+[yyy]:
+${threeQuote}bat
+多行内容第一行
+多行内容第二行
+${threeQuote}`;
+const aliasLastLineOffset=6
+
+
+/**
+ * 菜单项配置
+ * @type {}
+ */
 const menuConfig=[
     // 图片元数据
     ...(["#left", "#center", "#right", "#float-left", "#float-right", "#inline",].map(item=>{
         return {
+            cate:'metadata',
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=>parseResult.cursorScope.inImgNamePart,
             label: `图片属性　${item}`,
@@ -330,6 +301,7 @@ const menuConfig=[
     // 链接元数据
     ...(["#confirm", "#confirm{txt aa}"].map(item=>{
         return {
+            cate:'metadata',
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=>parseResult.cursorScope.inLinkNamePart,
             label: `链接属性　${item}`,
@@ -346,6 +318,7 @@ const menuConfig=[
     // 表格第一行第一列元数据
     ...(["#bar", "#line", "#stack", "#pie", "#bar-line"].map(item=>{
         return {
+            cate:'metadata',
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=> parseResult.cursorScope.inTablePart?.titleLineFirstCol,
             label: `表格属性　${item}`,
@@ -362,6 +335,7 @@ const menuConfig=[
     // 表格数据行第一列元数据： 当表头第一列中有#bar-line元数据时才有效
     ...(["#bar", "#line", "#stack:xx"].map(item=>{
         return {
+            cate:'metadata',
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=>{
                 if(parseResult.cursorScope.inTablePart?.dataLineFirstCol){
@@ -383,6 +357,7 @@ const menuConfig=[
 
     // 表格编辑
     {
+        cate:'metadata',
         selectionTypes: ['cursor'],
         matcher: (cm, parseResult)=>parseResult.inTablePart,
         label: '表格编辑　',
@@ -399,6 +374,7 @@ const menuConfig=[
         {lab:'下上结构　up:', val:'up:'},
     ].map(({lab,val})=>{
         return {
+            cate:'node_operate',
             selectionTypes: ['cursor', 'line'],
             matcher: (cm, parseResult)=> {
                 if(parseResult.cursorLineScope.inNodePart?.inRoot){
@@ -419,7 +395,40 @@ const menuConfig=[
     })),
 
     // 所有节点功能
-    {
+    ...([
+        {
+            label: '引用　　　ref:xx',
+            option: {
+                type: actionTypes.refAction,
+                data: {
+                    ref:true,
+                    tref:false,
+                }
+            }
+        },
+        {
+            label: '文本引用　tref:yy',
+            option: {
+                type: actionTypes.refAction,
+                data:{
+                    ref:false,
+                    tref:true,
+                }
+            }
+        },
+        {
+            label: '折叠节点　zip:',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: 'zip:',
+                    cursorOffset: 'zip:'.length,
+                }
+            }
+        },
+    ].map(item=>({
+        ...item,
+        cate:'node_operate',
         selectionTypes: ['cursor', 'line'],
         matcher: (cm, parseResult)=> {
             if(parseResult.cursorLineScope.inNodePart){
@@ -428,56 +437,121 @@ const menuConfig=[
             }
             return false;
         },
-        label: '引用　　　ref:xx',
-        option: {
-            type: actionTypes.refAction,
-            data: {
-                ref:true,
-                tref:false,
-            }
-        }
-    },
+    }))),
+
+    // 生成 shortcut段与alias段
+    // 当未选中或单行选中时有效，且行为空或行中只有空字符
+    // 生成shortcut段需要整个引用部分中没有shortcut段，alias段同理
     {
+        cate:'shortcut_alias_frag',
         selectionTypes: ['cursor', 'line'],
-        matcher: (cm, parseResult)=> {
-            if(parseResult.cursorLineScope.inNodePart){
-                const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
-                return {pos, pos2, fill};
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorLineMultiScope.inRefPart &&
+                !parseResult.cursorLineMultiScope.inRefPart.hasShortcutPart &&
+                ''===parseResult.lines[0].trim()
+            ){
+                return {
+                    pos: {...parseResult.selectionType.pos, ch:0,},
+                    pos2: {...parseResult.selectionType.pos, ch:parseResult.lines[0].length,},
+                };
             }
             return false;
         },
-        label: '文本引用　tref:yy',
-        option: {
-            type: actionTypes.refAction,
-            data:{
-                ref:false,
-                tref:true,
-            }
-        }
-    },
-    {
-        selectionTypes: ['cursor', 'line'],
-        matcher: (cm, parseResult)=> {
-            if(parseResult.cursorLineScope.inNodePart){
-                const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
-                return {pos, pos2, fill};
-            }
-            return false;
-        },
-        label: '折叠节点　zip:',
+        label: '快捷方式　# shortcuts',
         option: {
             type: actionTypes.literal,
             data: {
-                txt: 'zip:',
-                cursorOffset: 'zip:'.length,
+                txt: shortcutsSample,
+                cursorOffset: [shortCutLastLineOffset, shortcutsSampleLastLine.length],
+            }
+        }
+    },
+    {
+        cate:'shortcut_alias_frag',
+        selectionTypes: ['cursor', 'line'],
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorLineMultiScope.inRefPart &&
+                !parseResult.cursorLineMultiScope.inRefPart.hasAliasPart &&
+                ''===parseResult.lines[0].trim()
+            ){
+                return {
+                    pos: {...parseResult.selectionType.pos, ch:0,},
+                    pos2: {...parseResult.selectionType.pos, ch:parseResult.lines[0].length,},
+                };
+            }
+            return false;
+        },
+        label: '别名　　　# alias',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                txt: aliasSample,
+                cursorOffset: [aliasLastLineOffset, aliasSampleLastLine.length],
             }
         }
     },
 
-
+    // 插入链接
+    ...([
+        {
+            label: '插入图片　![]()',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    wrap: true,
+                    txt: ["![](", ")"],
+                    cursorOffset: -1,
+                }
+            }
+        },
+        {
+            label: '插入链接　[]()',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    wrap: true,
+                    txt: ["[](", ")"],
+                    cursorOffset: -1,
+                }
+            }
+        },
+        {
+            label: '文件链接　[](file:///)',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    wrap: true,
+                    txt: ["[](file:///", ")"],
+                    cursorOffset: -1,
+                }
+            }
+        },
+        {
+            label: '命令链接　[](cmd://)',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    wrap: true,
+                    txt: ["[](cmd://", ")"],
+                    cursorOffset: -1,
+                }
+            }
+        },
+    ].map(item=>({
+        ...item,
+        cate:'link_color',
+        selectionTypes: ['cursor','line'],
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
+                return false;
+            }
+            return (parseResult.cursorLineScope.inNodePart || parseResult.cursorLineMultiScope.inRefPart) ? {} : false;
+        },
+    }))),
 
     // 文字颜色
     {
+        cate:'link_color',
         selectionTypes: ['cursor','line','multi'],
         matcher: (cm, parseResult)=>{
             if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
@@ -492,7 +566,6 @@ const menuConfig=[
             if(parseResult.cursorLineMultiScope.inRefPart){
                 return {};
             }
-            console.log("aaasss")
             return false;
         },
         label: '文字颜色　',
@@ -507,331 +580,196 @@ const menuConfig=[
             }
         }
     },
+
+
+    // 剪切板菜单项
+    ...([
+        {
+            label: '剪切板　　　->　url',
+            option: {
+                type: actionTypes.clipboardAction,
+                data: {subActionType: actionTypes.getUrlFromClipboard},
+            }
+        },
+        {
+
+            label: '剪切板　　　->　图片引用',
+            option: {
+                type: actionTypes.clipboardAction,
+                data: {subActionType: actionTypes.getImgUrlFromClipboard},
+            }
+        },
+        {
+
+            label: '剪切板图片　->　本地',
+            option: {
+                type: actionTypes.clipboardAction,
+                data: {subActionType: actionTypes.clipboardImgToLocal},
+            }
+        },
+        {
+
+            label: '剪切板图片　->　图床',
+            option: {
+                type: actionTypes.clipboardAction,
+                data: {subActionType: actionTypes.clipboardImgToPicHost},
+            }
+        },
+        {
+
+            label: '剪切板文件　->　本地',
+            option: {
+                type: actionTypes.clipboardAction,
+                data: {subActionType: actionTypes.clipboardFileToLocal},
+            }
+        },
+        {
+
+            label: '剪切板文件　->　图床',
+            option: {
+                type: actionTypes.clipboardAction,
+                data: {subActionType: actionTypes.clipboardFileToPicHost},
+            }
+        },
+    ].map(item=>({
+        ...item,
+        cate:'clipboard',
+        selectionTypes: ['cursor'],
+        // 在图片元数据、链接元数据位置，或剪切板为空，则不显示菜单项
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart || !parseResult.clipboardHasContent){
+                return false;
+            }
+            if(parseResult.cursorLineScope.inNodePart){
+                const {pos, pos2, fill}=parseResult.cursorLineScope.inNodePart;
+                return {pos, pos2, fill};
+            }
+            if(parseResult.cursorLineMultiScope.inRefPart){
+                return {pos: parseResult.selectionType.pos,};
+            }
+            return false;
+        },
+    }))),
+
+
+    // 时间项
+    ...([
+        {
+            label: '当前时间',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:false,
+                    time:true,
+                },
+            }
+        },
+        {
+            label: '当前日期时间',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:true,
+                    time:true,
+                },
+            }
+        },
+        {
+            label: '今天的日期',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:true,
+                    time:false,
+                    dateOffset:0,
+                },
+            }
+        },
+        {
+            label: '明天的日期',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:true,
+                    time:false,
+                    dateOffset:1,
+                },
+            }
+        },
+        {
+            label: '后天的日期',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:true,
+                    time:false,
+                    dateOffset:2,
+                },
+            }
+        },
+        {
+            label: '之后的日期　{d+}',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: '{d+}',
+                    cursorOffset: '{d+}'.length-1,
+                }
+            }
+        },
+        {
+            label: '昨天的日期',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:true,
+                    time:false,
+                    dateOffset:-1,
+                },
+            }
+        },
+        {
+            label: '前天的日期',
+            option: {
+                type: actionTypes.dateTimeAction,
+                data:{
+                    date:true,
+                    time:false,
+                    dateOffset:-2,
+                },
+            }
+        },
+        {
+            label: '之前的日期　{d-}',
+            option: {
+                type: actionTypes.literal,
+                data: {
+                    txt: '{d-}',
+                    cursorOffset: '{d-}'.length-1,
+                }
+            }
+        },
+    ].map(item=>({
+        ...item,
+        cate:'date',
+        selectionTypes: ['cursor'],
+        matcher: (cm, parseResult)=> {
+            if (parseResult.cursorLineScope.inNodePart) {
+                const {pos, pos2, fill} = parseResult.cursorLineScope.inNodePart;
+                return {pos, pos2, fill};
+            }
+            if (parseResult.cursorLineMultiScope.inRefPart) {
+                return {pos: parseResult.selectionType.pos,};
+            }
+            return false;
+        }
+    }))),
 ];
 
 
 
 
-const shortcutsSampleLine2="- [百度](https://baidu.com)";
-const shortcutsSample=`# shortcuts
-${shortcutsSampleLine2}`;
 
-
-const aliasSampleLine2="[xxx]: yyy";
-const aliasSample=`# alias
-${aliasSampleLine2}`;
-
-
-// /**
-//  * 动态生成的自动提示菜单项 - 表格编辑
-//  * @type {[{label: string, option: {type: string}}]}
-//  */
-// const editTableMenus=[
-//     {
-//         label: '表格编辑（可视化）',
-//         option: {
-//             type: actionTypes.editTable,
-//         }
-//     },
-// ];
-
-// const rootNdDlgMenus=[
-//     {
-//         label: '节点在右　right:',
-//         option: {
-//             type: actionTypes.literal,
-//             data: {
-//                 txt: 'right:',
-//                 appendNodePart:true,
-//             }
-//         }
-//     },
-//     {
-//         label: '上下结构　down:',
-//         option: {
-//             type: actionTypes.literal,
-//             data: {
-//                 txt: 'down:',
-//                 appendNodePart:true,
-//             }
-//         }
-//     },
-//     {
-//         label: '下上结构　up:',
-//         option: {
-//             type: actionTypes.literal,
-//             data: {
-//                 txt: 'up:',
-//                 appendNodePart:true,
-//             }
-//         }
-//     },
-// ];
-
-
-/**
- * 动态生成的自动提示菜单项 - 节点部分
- * @type
- */
-const hintRefMenus=[
-    {
-        label: '引用　　　ref:xx',
-        option: {
-            type: actionTypes.refAction,
-            data: {
-                ref:true,
-                tref:false,
-            }
-        }
-    },
-    {
-        label: '文本引用　tref:yy',
-        option: {
-            type: actionTypes.refAction,
-            data:{
-                ref:false,
-                tref:true,
-            }
-        }
-    },
-    {
-        label: '折叠节点　zip:',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: 'zip:',
-                appendNodePart:true,
-            }
-        }
-    },
-];
-
-/**
- * 动态生成的自动提示菜单项 - 引用部分
- * @type
- */
-const hintContMenus=[
-    {
-        label: '快捷方式　# shortcuts',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: shortcutsSample,
-                cursorOffset: [1, shortcutsSampleLine2.length],
-            }
-        }
-    },
-    {
-        label: '别名　　　# alias',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: aliasSample,
-                cursorOffset: [1, aliasSampleLine2.length],
-            }
-        }
-    },
-];
-
-/**
- * 固定的自动提示菜单项
- * @type
- */
-const fixedHintMenuList=[
-    {
-        label: '插入图片　![]()',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: "![]()",
-                cursorOffset: "![]()".length-1,
-            }
-        }
-    },
-    {
-        label: '插入链接　[]()',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: "[]()",
-                cursorOffset: "[]()".length-1,
-            }
-        }
-    },
-    {
-        label: '文件链接　[](file:///)',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: "[](file:///)",
-                cursorOffset: "[文件](file:///)".length-1,
-            }
-        }
-    },
-    {
-        label: '命令链接　[](cmd://)',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: "[](cmd://)",
-                cursorOffset: "[](cmd://)".length-1,
-            }
-        }
-    },
-    {
-        label: '文字颜色　',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                wrap: true,
-                txt: ["$\\textcolor{}{", "}$"],
-                cursorOffset: "$\\textcolor{".length,
-                txt2: ['<font color="">', '</font>'],
-                cursorOffset2: '<font color="'.length,
-            }
-        }
-    },
-
-    "-",
-    {
-        label: '剪切板　　　->　url',
-        option: {
-            type: actionTypes.clipboardAction,
-            data: actionTypes.getUrlFromClipboard,
-        }
-    },
-    {
-        label: '剪切板　　　->　图片引用',
-        option: {
-            type: actionTypes.clipboardAction,
-            data: actionTypes.getImgUrlFromClipboard,
-        }
-    },
-    {
-        label: '剪切板图片　->　本地',
-        option: {
-            type: actionTypes.clipboardAction,
-            data: actionTypes.clipboardImgToLocal,
-        }
-    },
-    {
-        label: '剪切板图片　->　图床',
-        option: {
-            type: actionTypes.clipboardAction,
-            data: actionTypes.clipboardImgToPicHost,
-        }
-    },
-    {
-        label: '剪切板文件　->　本地',
-        option: {
-            type: actionTypes.clipboardAction,
-            data: actionTypes.clipboardFileToLocal,
-        }
-    },
-    {
-        label: '剪切板文件　->　图床',
-        option: {
-            type: actionTypes.clipboardAction,
-            data: actionTypes.clipboardFileToPicHost,
-        }
-    },
-    "-",
-    {
-        label: '当前时间',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:false,
-                time:true,
-            },
-        }
-    },
-    {
-        label: '当前日期时间',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:true,
-                time:true,
-            },
-        }
-    },
-    {
-        label: '今天的日期',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:true,
-                time:false,
-                dateOffset:0,
-            },
-        }
-    },
-    {
-        label: '明天的日期',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:true,
-                time:false,
-                dateOffset:1,
-            },
-        }
-    },
-    {
-        label: '后天的日期',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:true,
-                time:false,
-                dateOffset:2,
-            },
-        }
-    },
-    {
-        label: '之后的日期　{d+}',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: '{d+}',
-                cursorOffset: '{d+}'.length-1,
-            }
-        }
-    },
-    {
-        label: '昨天的日期',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:true,
-                time:false,
-                dateOffset:-1,
-            },
-        }
-    },
-    {
-        label: '前天的日期',
-        option: {
-            type: actionTypes.dateTimeAction,
-            data:{
-                date:true,
-                time:false,
-                dateOffset:-2,
-            },
-        }
-    },
-    {
-        label: '之前的日期　{d-}',
-        option: {
-            type: actionTypes.literal,
-            data: {
-                txt: '{d-}',
-                cursorOffset: '{d-}'.length-1,
-            }
-        }
-    },
-];
 
 
 
