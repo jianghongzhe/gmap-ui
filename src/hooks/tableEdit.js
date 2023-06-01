@@ -31,9 +31,7 @@ const useEditTableData=()=>{
         return tmp;
     });
 
-    const handleVLine=useMemoizedFn((txt)=>{
-        return txt.replace(/[\\][|]/g, "|").replace(/[|]/g, "\\|");
-    });
+
 
 
 
@@ -188,6 +186,9 @@ const useEditTableData=()=>{
      * 生成markdown文本
      */
     const createTableMd=useMemoizedFn((needExtraBlankLine)=>{
+        // 对内容中出现的 | 转义为 \|，如果原来为 \| 则不变
+        // 若不转义则 | 会破坏原单元格的分布
+        const handleVLine=(txt)=>txt.replace(/(?<![\\])[|]/g, "\\|");
         let lineSep=`
 `;
         let tableMd=""+

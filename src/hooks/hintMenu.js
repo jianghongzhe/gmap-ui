@@ -196,6 +196,8 @@ export const useHintMenu=()=>{
                 },
             };
 
+            console.log("inTablePart", parseResult.cursorScope.inTablePart)
+
             // 菜单项过滤并插入分隔符
             // 先按selectionTypes过滤；
             // 再按matcher函数过滤: 如果匹配，则把函数返回结果附加到函数的data对象中
@@ -355,16 +357,18 @@ const menuConfig=[
         };
     })),
 
-    // 表格编辑
-    {
-        cate:'metadata',
-        selectionTypes: ['cursor'],
-        matcher: (cm, parseResult)=>parseResult.inTablePart,
-        label: '表格编辑　',
-        option: {
-            type: actionTypes.editTable,
-        }
-    },
+    // 表格编辑：该菜单项已对应工具栏上的按钮功能以及快捷键功能，此处不再放在自动提示菜单中
+    // {
+    //     cate:'metadata',
+    //     selectionTypes: ['cursor'],
+    //     matcher: (cm, parseResult)=>{
+    //         return parseResult.cursorScope.inTablePart;
+    //     },
+    //     label: '表格编辑　',
+    //     option: {
+    //         type: actionTypes.editTable,
+    //     }
+    // },
 
 
     // 根节点功能

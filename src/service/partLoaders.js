@@ -263,9 +263,13 @@ class TRefLoader extends PartLoader{
     postHandle=(result)=>{
         // 文字引用直接替换到原文中
         result.ndLines=result.ndLines.map(({str, lineInd, lineInd2})=>{
-            let splitPos=str.indexOf("- ")+2;
+            let splitPos=0;
+            const ind=str.indexOf("- ");
+            if(ind>=0 && ''===str.substring(0, ind).trim()){
+                splitPos=ind+2;
+            }
             let front=str.substring(0,splitPos);
-            let end="|"+escapeVLine(str.substring(splitPos).trim())+"|";
+            let end="|"+(str.substring(splitPos).trim())+"|";
 
             for(let key in result.trefs){
                 end=end.replace("|"+key+"|","|"+result.trefs[key]+"|");
@@ -277,7 +281,7 @@ class TRefLoader extends PartLoader{
                 end=end.substring(0,end.length-1);
             }
             return {
-                str: front+unescapeVLineRestore(end.trim()),
+                str: front+(end.trim()),
                 lineInd,
                 lineInd2,
             };
@@ -395,15 +399,6 @@ const replaceLinkAlias=(url, alias)=>{
     return url;
 }
 
-
-//竖线转义相差工具方法
-const vlineEscapeTxt='___vline___';
-const escapeVLineReg=/[\\][|]/g;
-const unescapeVLineReg=new RegExp(vlineEscapeTxt,"g");
-
-const escapeVLine=(str)=>str.replace(escapeVLineReg,vlineEscapeTxt);
-const unescapeVLine=(str)=>str.replace(unescapeVLineReg,'|');
-const unescapeVLineRestore=(str)=>str.replace(unescapeVLineReg,'\\|');
 
 
 /**

@@ -261,168 +261,160 @@ class MindmapSvc {
             let relaLineColors=[];
             let kws=[];
 
-            //内容是简单类型，把转换的竖线再恢复回来
-            let replTxt=escapeVLine(txt);
-            if (0 > replTxt.indexOf("|")) {
-                txt=unescapeVLine(replTxt);
-                txts=[txt];
-            }
 
-            //内容是复合类型，则分别计算每一部分
-            if (0 <= replTxt.indexOf("|")) {
-                txts=[];
-                replTxt.split('|').map(txt=>unescapeVLine(txt)).filter(txt=>null!=txt && ""!==txt.trim()).map(txt=>txt.trim()).forEach(tmp => {
-                    //=============指定行的项开始======================
-                    
-                    let item = tmp.trim();
-                    if (null == item || "" === item) { return; }
+            //分别计算 | 分隔的每一部分
+            txts=[];
+            txt.split(/(?<![\\])[|]/g).map(txt=>txt.replace(/[\\][|]/g, '|')).filter(txt=>null!=txt && ""!==txt.trim()).map(txt=>txt.trim()).forEach(tmp => {
+                //=============指定行的项开始======================
 
-                    //forceRight
-                    let [handled,hasVal,val]=linePartHandlers.handleForceRight(item);
-                    if(handled){
-                        if(hasVal){
-                            forceRight = val;
-                        }
-                        return;
+                let item = tmp.trim();
+                if (null == item || "" === item) { return; }
+
+                //forceRight
+                let [handled,hasVal,val]=linePartHandlers.handleForceRight(item);
+                if(handled){
+                    if(hasVal){
+                        forceRight = val;
                     }
+                    return;
+                }
 
-                    // down layout
-                    [handled,hasVal,val]=linePartHandlers.handleDownLayout(item);
-                    if(handled){
-                        if(hasVal){
-                            down=val;
-                        }
-                        return;
+                // down layout
+                [handled,hasVal,val]=linePartHandlers.handleDownLayout(item);
+                if(handled){
+                    if(hasVal){
+                        down=val;
                     }
-                    // up layout
-                    [handled,hasVal,val]=linePartHandlers.handleUpLayout(item);
-                    if(handled){
-                        if(hasVal){
-                            up=val;
-                        }
-                        return;
+                    return;
+                }
+                // up layout
+                [handled,hasVal,val]=linePartHandlers.handleUpLayout(item);
+                if(handled){
+                    if(hasVal){
+                        up=val;
                     }
+                    return;
+                }
 
 
 
 
 
-                    // id
-                    [handled,hasVal,val]=linePartHandlers.handleId(item);
-                    if(handled){
-                        if(hasVal){
-                            logicId=val;
-                        }
-                        return;
+                // id
+                [handled,hasVal,val]=linePartHandlers.handleId(item);
+                if(handled){
+                    if(hasVal){
+                        logicId=val;
                     }
+                    return;
+                }
 
-                    // toid
-                    [handled,hasVal,val]=linePartHandlers.handleToId(item);
-                    if(handled){
-                        if(hasVal){
-                            logicToIds.push(val.id);
-                            relaLineColors.push(val.color ? val.color : defaultRelaLineColor);
-                        }
-                        return;
+                // toid
+                [handled,hasVal,val]=linePartHandlers.handleToId(item);
+                if(handled){
+                    if(hasVal){
+                        logicToIds.push(val.id);
+                        relaLineColors.push(val.color ? val.color : defaultRelaLineColor);
                     }
+                    return;
+                }
 
-                    //节点默认是折叠状态
-                    [handled,hasVal,val]=linePartHandlers.handleZip(item);
-                    if(handled){
-                        if(hasVal){
-                            expand = val;
-                        }
-                        return;
+                //节点默认是折叠状态
+                [handled,hasVal,val]=linePartHandlers.handleZip(item);
+                if(handled){
+                    if(hasVal){
+                        expand = val;
                     }
+                    return;
+                }
 
-                    //是引用
-                    [handled,hasVal,val]=linePartHandlers.handleRef(item, refs);
-                    if(handled){
-                        if(hasVal){
-                            if(!refNames.includes(val.name)){
-                                refNames.push(val.name);
-                            }
-                            ref.push(val);
+                //是引用
+                [handled,hasVal,val]=linePartHandlers.handleRef(item, refs);
+                if(handled){
+                    if(hasVal){
+                        if(!refNames.includes(val.name)){
+                            refNames.push(val.name);
                         }
-                        return;
+                        ref.push(val);
                     }
+                    return;
+                }
 
-                    //是打开为
-                    [handled,hasVal,val]=linePartHandlers.handleOpener(item, alias);
-                    if(handled){
-                        if(hasVal){
-                            links.push(val);
-                        }
-                        return;
+                //是打开为
+                [handled,hasVal,val]=linePartHandlers.handleOpener(item, alias);
+                if(handled){
+                    if(hasVal){
+                        links.push(val);
                     }
+                    return;
+                }
 
-                    //是颜色标记  c:red  c:#fcfcfc 
-                    [handled,hasVal,val]=linePartHandlers.handleLineColor(item);
-                    if(handled){
-                        if(hasVal){
-                            lineColor=val;
-                        }
-                        return;
+                //是颜色标记  c:red  c:#fcfcfc
+                [handled,hasVal,val]=linePartHandlers.handleLineColor(item);
+                if(handled){
+                    if(hasVal){
+                        lineColor=val;
                     }
+                    return;
+                }
 
-                    //是备注标记  m:说明
-                    [handled,hasVal,val]=linePartHandlers.handleMemo(item);
-                    if(handled){
-                        if(hasVal){
-                            memo.push(val);
-                        }
-                        return;
+                //是备注标记  m:说明
+                [handled,hasVal,val]=linePartHandlers.handleMemo(item);
+                if(handled){
+                    if(hasVal){
+                        memo.push(val);
                     }
+                    return;
+                }
 
-                    //是普通链接  http://www.xxx.com
-                    [handled,hasVal,val]=linePartHandlers.handleCommonLink(item, this.isUrlPattern);
-                    if(handled){
-                        if(hasVal){
-                            links.push(val);
-                        }
-                        return;
+                //是普通链接  http://www.xxx.com
+                [handled,hasVal,val]=linePartHandlers.handleCommonLink(item, this.isUrlPattern);
+                if(handled){
+                    if(hasVal){
+                        links.push(val);
                     }
+                    return;
+                }
 
-                    //进度   p:10   p:-20   
-                    [handled,hasVal,val]=linePartHandlers.handleProg(item, progs);
-                    if(handled){
-                        if(hasVal){
-                            if(!prog){
-                                prog=val;
-                                progs.push(prog);//保持加入的顺序不变，后面不用排序
-                                return;
-                            }
+                //进度   p:10   p:-20
+                [handled,hasVal,val]=linePartHandlers.handleProg(item, progs);
+                if(handled){
+                    if(hasVal){
+                        if(!prog){
                             prog=val;
-                            progs[progs.length-1]=prog;
+                            progs.push(prog);//保持加入的顺序不变，后面不用排序
+                            return;
                         }
-                        return;
+                        prog=val;
+                        progs[progs.length-1]=prog;
                     }
+                    return;
+                }
 
-                    //日期类型 d:20.1.8、d:20.1.8,purple
-                    [handled,hasVal,val]=linePartHandlers.handleDate(item,timeline,this.parseDateInfo);
-                    if(handled){
-                        if(hasVal){
-                            dateItem=val;
-                            timeline.push(dateItem);//保持加入的顺序不变，后面不用排序
-                        }
-                        return;
+                //日期类型 d:20.1.8、d:20.1.8,purple
+                [handled,hasVal,val]=linePartHandlers.handleDate(item,timeline,this.parseDateInfo);
+                if(handled){
+                    if(hasVal){
+                        dateItem=val;
+                        timeline.push(dateItem);//保持加入的顺序不变，后面不用排序
                     }
+                    return;
+                }
 
-                    //是markdown链接 [文字](地址)
-                    [handled,hasVal,val]=linePartHandlers.handleMarkdownLink(item,this.hasUrlPrefix);
-                    if(handled){
-                        if(hasVal){
-                            links.push(val);
-                        }
-                        return;
+                //是markdown链接 [文字](地址)
+                [handled,hasVal,val]=linePartHandlers.handleMarkdownLink(item,this.hasUrlPrefix);
+                if(handled){
+                    if(hasVal){
+                        links.push(val);
                     }
+                    return;
+                }
 
-                    //都不是，即为文本内容
-                    txts.push(item);//如出现多次，只保留最后一次
+                //都不是，即为文本内容
+                txts.push(item);//如出现多次，只保留最后一次
 
-                    //-------------指定行的项结束----------------------
-                });
-            }
+                //-------------指定行的项结束----------------------
+            });
 
             // 从文本中提取关键词，文本中关键词部分加下划线
             // abc##hello##dddd -> 关键词 hello -> 文本变为 abc<u>hello</u>dddd
@@ -703,22 +695,6 @@ class MindmapSvc {
         return false;
     }
 }
-
-
-
-
-
-
-
-//竖线转义相差工具方法
-const vlineEscapeTxt='___vline___';
-const escapeVLineReg=/[\\][|]/g;
-const unescapeVLineReg=new RegExp(vlineEscapeTxt,"g");
-
-const escapeVLine=(str)=>str.replace(escapeVLineReg,vlineEscapeTxt);
-const unescapeVLine=(str)=>str.replace(unescapeVLineReg,'|');
-const unescapeVLineRestore=(str)=>str.replace(unescapeVLineReg,'\\|');
-
 
 
 

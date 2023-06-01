@@ -524,19 +524,13 @@ const editorSvcExInstWrapper=(function(){
 
 
     const getFirstGeneralTxt=(line)=>{
-        const vlineEscapeTxt='___vline___';
-        const escapeVLineReg=/[\\][|]/g;
-        const unescapeVLineReg=new RegExp(vlineEscapeTxt,"g");
-        const escapeVLine=(str)=>str.replace(escapeVLineReg,vlineEscapeTxt);
-        const unescapeVLine=(str)=>str.replace(unescapeVLineReg,'|');
-    
         const fixVals=['right:','zip:','r','t'];
         const prefixs=["id:","toid:","ref:","tref:","c:","m:","p:","d:"];
         const regs=[/^\[.*?\]\(.+?\)$/];
     
         line=line.trim();
-        const generalTxts=escapeVLine(line.startsWith("- ") ? line.substring(2) : line).split("|")
-                .map(item=>unescapeVLine(item))
+        const generalTxts=(line.startsWith("- ") ? line.substring(2) : line).split(/(?<![\\])[|]/g)
+                .map(item=>item.replace(/[\\][|]/g, '|'))
                 .filter(item=>null!=item && ""!==item.trim())
                 .map(item=>item.trim())
                 .filter(item=>{
@@ -1400,11 +1394,10 @@ const editorSvcExInstWrapper=(function(){
 
             // 判断是否为第一个单元格，如果是，返回第一个单元格最后一个字符的位置，以便插入内容，否则返回false
             const isFirstCol=(()=>{
-                const vline=`___vline_${new Date().getTime()}___`;
                 const line=cm.doc.getLine(pos.line);
-                const front=line.substring(0, pos.ch).replace(/[\\][|]/g,vline).trim();
-                const end=line.substring(pos.ch).replace(/[\\][|]/g,vline).trim();
-                if(/^[|][^|]*$/.test(front) && /^([^|]*[|])+$/.test(end)){
+                const front=line.substring(0, pos.ch).trim();
+                const end=line.substring(pos.ch).trim();
+                if(/^[|]([^|]|[\\][|])*$/.test(front) && /^(([^|]|[\\][|])*[|])+$/.test(end)){
                     let tmp=-1;
                     for(let i=pos.ch;i<line.length;++i){
                         if('|'===line[i] && '\\'!==line[i-1]){
@@ -1697,14 +1690,11 @@ const editorSvcExInstWrapper=(function(){
     
     
     const parseTableLine=(lineTxt)=>{
-        const vline=`___vline_${new Date().getTime()}___`;
-        const vlineReg=new RegExp(vline, "g");
-        const lineTxtRepl=lineTxt.replace(/[\\][|]/g, vline).trim();
-    
-        if(!/^[|]([^|]+[|])+$/.test(lineTxtRepl)){
+        const lineTxtTrim=lineTxt.trim();
+        if(!/^[|](([^|]|[\\][|])*[|])+$/.test(lineTxtTrim)){
             return false;
         }
-        let result=lineTxtRepl.split("|").map(item=>item.replace(vlineReg, "\\|"));
+        let result=lineTxtTrim.split(/(?<![\\])[|]/g);
         result.splice(result.length-1,1);
         result.shift();
         return result;
@@ -1751,11 +1741,13 @@ const editorSvcExInstWrapper=(function(){
     
         // 不是表格的行
         let lines=[];
-        let tmp=parseTableLine(lineTxt)
+        let tmp=parseTableLine(lineTxt);
         if(false===tmp){
             return false;
         }
-        
+
+        console.log("1111111");
+
         // 是表格的行
         // 获取光标所在行附件所有符合表格行结构的行
         let lineIndFrom=99999;
@@ -1793,6 +1785,8 @@ const editorSvcExInstWrapper=(function(){
                 lineIndTo=i;
             }
         }
+
+        console.log("2222222");
     
         // 列数为列数最多行的列数
         const colCnt= lines.map(line=>line.length).reduce((accu, curr)=>Math.max(accu, curr),0);
@@ -1801,7 +1795,9 @@ const editorSvcExInstWrapper=(function(){
         const heads=lines[0];
         appendItems(heads, colCnt-heads.length, (ind)=>"列头_"+(ind+1));
         lines.shift();
-    
+
+        console.log("333333");
+
         // 处理对齐方式行
         let aligns=heads.map(h=>"left");
         if(lines.length>0){
@@ -1812,9 +1808,14 @@ const editorSvcExInstWrapper=(function(){
                 lines.shift();
             }
         }
+
+        console.log("44444");
         
         // 处理数据行
         lines=lines.map(lineItems=>appendItems(lineItems, colCnt-lineItems.length, " "));
+
+        console.log("55555");
+
         return {
             hasInitData:        true,
             data:               {heads, aligns, lines,},

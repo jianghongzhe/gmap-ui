@@ -99,8 +99,8 @@ class ExpSvc{
     if(ndLine.startsWith("- ")){
       ndLine=ndLine.substring(2).trim();
     }
-    return ndLine.replace(/[\\][|]/g,"___vline___").split("|")
-            .map(item=>item.replace(/___vline___/g,"|").trim())
+    return ndLine.split(/(?<![\\])[|]/g)
+            .map(item=>item.replace(/[\\][|]/g,"|").trim())
             .filter(item=>item.startsWith("ref:"));
 };
 
