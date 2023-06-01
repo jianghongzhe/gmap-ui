@@ -8,7 +8,8 @@
             "editor_theme": "default",
             "theme": "default",
             "url_opener": "C:\\Program Files (x86)\\Google\\Chrome Dev\\Application\\chrome.exe",
-            "img_opener": "default"
+            "img_opener": "default",
+            "search_engine": "https://cn.bing.com/search?q=##kw##"
         }
     },
     {
@@ -20,7 +21,8 @@
             "editor_theme": "default",
             "theme": "default",
             "url_opener": "default",
-            "img_opener": "default"
+            "img_opener": "default",
+            "search_engine": "default"
         }
     }
 ]

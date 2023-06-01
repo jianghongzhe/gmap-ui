@@ -259,6 +259,7 @@ class MindmapSvc {
             let logicId=null;
             let logicToIds=[];
             let relaLineColors=[];
+            let kws=[];
 
             //内容是简单类型，把转换的竖线再恢复回来
             let replTxt=escapeVLine(txt);
@@ -423,6 +424,26 @@ class MindmapSvc {
                 });
             }
 
+            // 从文本中提取关键词，文本中关键词部分加下划线
+            // abc##hello##dddd -> 关键词 hello -> 文本变为 abc<u>hello</u>dddd
+            txts=txts.reduce((accu,curr)=>{
+                let line=curr;
+                (curr.match(/[#][#][^#]+?[#][#]/g)??[]).forEach(matchItem=>{
+                    const kw=matchItem.substring(2, matchItem.length-2).trim();
+                    if(''===kw){
+                        line=line.replace(matchItem, '');
+                    }else{
+                        line=line.replace(matchItem, `<u>${kw}</u>`);
+                    }
+
+                    if(''!==kw && !kws.includes(kw)){
+                        kws.push(kw);
+                    }
+                });
+                accu.push(line);
+                return accu;
+            }, []);
+
             //整行加载完之后，设置日期项对应的文本
             if (dateItem) {
                 dateItem.txt = txts;
@@ -437,6 +458,7 @@ class MindmapSvc {
                 lineInd2,
                 lev: lev,
                 str: txts,
+                kws,
                 left: false,
                 par: null,
                 parid:null,

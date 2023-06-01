@@ -247,6 +247,10 @@ class Api{
         return ipcRenderer.invoke('getBasePath');
     }
 
+    searchKeyword=(kw)=>{
+        return ipcRenderer.invoke('searchKeyword', kw);
+    };
+
     /**
      * 打开指定url
      * @param {*} url 
@@ -468,6 +472,8 @@ class Api{
     getImgUrlFromClipboard=()=>{
         return ipcRenderer.invoke('getImgUrlFromClipboard', {});
     };
+
+
 
     /**
      * 复制剪切版中的图片到图片目录

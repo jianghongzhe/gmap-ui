@@ -39,6 +39,12 @@ const icons={
     warn: iconWarnPath,
 };
 
+/**
+ * 默认搜索引擎url字符串，其中关键词部分需要以 ##kw## 包裹
+ * @type {string}
+ */
+const DEFAULT_SEARCH_URL="https://www.baidu.com/s?wd=##kw##";
+
 const ASSIST_STARTED_SYMBOL="started";
 
 
@@ -744,7 +750,24 @@ const screenShotCombine=(opt)=>{
 };
 
 
-
+/**
+ * 搜索指定关键词：
+ * 如果未指定搜索引擎，则使用默认的；
+ * 如果指定，若其中不包含指定字符，则还使用默认引擎，若包含，则使用指定值
+ * @param kw
+ */
+const searchKeyword=(kw)=>{
+    let searchUrl = getSettingValue("search_engine");
+    if('default'===searchUrl){
+        searchUrl=DEFAULT_SEARCH_URL;
+    }else{
+        if(!searchUrl.includes("##kw##")){
+            searchUrl=DEFAULT_SEARCH_URL;
+        }
+    }
+    const url=searchUrl.replace("##kw##", kw);
+    openUrl(url);
+};
 
 /**
  * 打开指定url
@@ -1396,6 +1419,9 @@ const baseFillSettingItems=(item)=>{
     if('undefined'===typeof(item.settings.img_opener)){
         item.settings.img_opener='default';
     }
+    if('undefined'===typeof(item.settings.search_engine)){
+        item.settings.search_engine='default';
+    }
 };
 
 /**
@@ -1697,6 +1723,7 @@ const ipcHandlers={
     isMaximized,
     getBasePath,
     openUrl,
+    searchKeyword,
     existsGraph,
     getFileItem,
     openSaveFileDlg,

@@ -81,21 +81,20 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
             <div className={styles.themeTxtTooltip}>
                 <div>节点操作</div>
                 <div className='btnContainer'>
-                    <Button type='dashed' ghost size='small' shape='round'
-                            className='btn'
-                            onClick={onNodeOp.bind(this,nd,'edit')}>编辑节点</Button>
-                    <Button type='dashed' ghost size='small' shape='round'
-                            className='btn'
-                            onClick={onNodeOp.bind(this,nd,'appendChild')}>添加子节点</Button>
+                    <TooltipBtn value="编辑节点" onClick={onNodeOp.bind(this,nd,'edit')}/>
+                    <TooltipBtn value="添加子节点" onClick={onNodeOp.bind(this,nd,'appendChild')}/>
                     {
                         nd.par && (<React.Fragment>
-                            <Button type='dashed' ghost size='small' shape='round'
-                                    className='btn'
-                                    onClick={onNodeOp.bind(this,nd,'addSiblingBefore')}>添加兄弟节点（之前）</Button>
-                            <Button type='dashed' ghost size='small' shape='round'
-                                    className='btn'
-                                    onClick={onNodeOp.bind(this,nd,'addSiblingAfter')}>添加兄弟节点（之后）</Button>
+                            <TooltipBtn value="添加兄弟节点（之前）" onClick={onNodeOp.bind(this,nd,'addSiblingBefore')}/>
+                            <TooltipBtn value="添加兄弟节点（之后）" onClick={onNodeOp.bind(this,nd,'addSiblingAfter')}/>
                         </React.Fragment>)
+                    }
+                    {
+                        nd.kws.length>0 && <React.Fragment>{
+                            nd.kws.map((kw,kwInd)=>(
+                                <TooltipBtn key={`node_txt_btn_${kwInd}`} value={`搜索: ${kw}`} onClick={api.searchKeyword.bind(this, kw)}/>
+                            ))
+                        }</React.Fragment>
                     }
                 </div>
             </div>
@@ -175,6 +174,17 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
     </span>);
 }
 
+const TooltipBtn=({onClick, value})=>{
+    return (
+        <Button type='dashed'
+                ghost
+                size='small'
+                shape='round'
+                className='btn'
+                onClick={onClick}>{value}</Button>
+    );
+};
+
 
 
 /**
@@ -231,13 +241,7 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
                     (ctxMenuItems && ctxMenuItems.length>0) && <div className='btnContainer'>
                         {
                             ctxMenuItems.map((ctxMenu,menuInd)=>(
-                                <Button key={`menu-${menuInd}`}
-                                        type='dashed'
-                                        ghost
-                                        size='small'
-                                        shape='round'
-                                        className='btn'
-                                        onClick={api.openUrl.bind(this, ctxMenu.url)}>{ctxMenu.name}</Button>
+                                <TooltipBtn key={`menu-${menuInd}`} value={ctxMenu.name} onClick={api.openUrl.bind(this, ctxMenu.url)}/>
                             ))
                         }
                     </div>
