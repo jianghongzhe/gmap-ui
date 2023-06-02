@@ -103,6 +103,16 @@ class MarkedHighlightUtil {
          * @returns 
          */
         renderer.text=function(txt){
+            // 搜索关键词
+            (txt.match(/[#][#][^#]+?[#][#]/g)??[]).forEach(matchItem=>{
+                const kw=matchItem.substring(2, matchItem.length-2).trim();
+                if(''===kw){
+                    txt=txt.replace(matchItem, '');
+                }else{
+                    txt=txt.replace(matchItem, `<u style="cursor: pointer;" class="search_keyword"  handled='false' title="搜索: ${kw}">${kw}</u>`);
+                }
+            });
+
             // 文字颜色
             const colorItems=txt.match(/[$][\\]textcolor[{].+?[}][{].+?[}][$]/g);
             if(colorItems && colorItems.length){

@@ -133,6 +133,8 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
 
         if(visible){
             setTimeout(() => {
+                cleanupFuncs.current=[];
+
                 markedHighlightUtil.bindLinkClickEvent(onOpenLink);
                 markedHighlightUtil.bindImgClickEvent(onOpenLink);
 
@@ -221,10 +223,15 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                     const btn=ele.parentNode.parentNode.querySelector(".copy_btn");
                     const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
                     btn.addEventListener("click", ctxMenuHandler);
-                    cleanupFuncs.current=[
-                        unbindEvent.bind(this, btn, "click", ctxMenuHandler)
-                    ];
+                    cleanupFuncs.current.push(unbindEvent.bind(this, btn, "click", ctxMenuHandler));
                 });
+
+                document.querySelectorAll(".search_keyword[handled='false']").forEach(ele=>{
+                    const clickHandler=api.searchKeyword.bind(this, ele.innerText);
+                    ele.addEventListener("click", clickHandler);
+                    cleanupFuncs.current.push(unbindEvent.bind(this, ele, "click", clickHandler));
+                });
+
             }, 500);
         }
         return ()=>{
