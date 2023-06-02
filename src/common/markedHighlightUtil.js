@@ -103,7 +103,7 @@ class MarkedHighlightUtil {
          * @returns 
          */
         renderer.text=function(txt){
-            // 搜索关键词
+            // 搜索关键词 abc##hello##def
             (txt.match(/[#][#][^#]+?[#][#]/g)??[]).forEach(matchItem=>{
                 const kw=matchItem.substring(2, matchItem.length-2).trim();
                 if(''===kw){
@@ -114,23 +114,17 @@ class MarkedHighlightUtil {
             });
 
             // 文字颜色
-            const colorItems=txt.match(/[$][\\]textcolor[{].+?[}][{].+?[}][$]/g);
-            if(colorItems && colorItems.length){
-                colorItems.forEach(item=>{
-                    const [, color, str]=item.match(/^[$][\\]textcolor[{](.+?)[}][{](.+?)[}][$]$/);
-                    txt=txt.replace(item, `<span style="color:${color}">${str}</span>`);
-                });
-            }
+            (txt.match(/[$][\\]textcolor[{].+?[}][{].+?[}][$]/g)??[]).forEach(item=>{
+                const [, color, str]=item.match(/^[$][\\]textcolor[{](.+?)[}][{](.+?)[}][$]$/);
+                txt=txt.replace(item, `<span style="color:${color}">${str}</span>`);
+            });
 
             // 行内latex公式
-            const latexItems=txt.match(/[$][^$\r\n\t]+?[$]/g);
-            if(latexItems && latexItems.length){
-                for(let i=0; i<latexItems.length; ++i){
-                    const item=latexItems[i].substring(1, latexItems[i].length-1);
-                    const latexStr=katex.renderToString(item,{throwOnError: false});
-                    txt=txt.replace(latexItems[i], latexStr);
-                }
-            }
+            (txt.match(/[$][^$\r\n\t]+?[$]/g)??[]).forEach(latexItem=>{
+                const item=latexItem.substring(1, latexItem.length-1);
+                const latexStr=katex.renderToString(item,{throwOnError: false});
+                txt=txt.replace(latexItem, latexStr);
+            });
 
             // 高亮与上下标
             const newTxt=txt.replace(/(==)([^=\r\n\t]+?)(==)/g,"<span style='background-color:#f8f840;'>$2</span>")
@@ -165,7 +159,7 @@ class MarkedHighlightUtil {
                 //
                 return `<div class="code_wrapper">
                     <div class="copy_btn">复制代码</div>
-                    <pre ${bgStyle}><code class="${cls}">${finalCodeHtml}</code></pre>
+                    <pre ${bgStyle}><code class="${cls}" handled='false'>${finalCodeHtml}</code></pre>
                 </div>`;
             };
         }

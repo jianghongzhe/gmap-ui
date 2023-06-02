@@ -219,17 +219,22 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                 resizeEchartGraphs();
 
                 // 对代码片段增加点击复制代码按钮进行复制的功能
-                document.querySelectorAll(".markdown-body code.hljs").forEach(ele=>{
+                document.querySelectorAll(".markdown-body code.hljs[handled='false']").forEach(ele=>{
                     const btn=ele.parentNode.parentNode.querySelector(".copy_btn");
                     const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
                     btn.addEventListener("click", ctxMenuHandler);
-                    cleanupFuncs.current.push(unbindEvent.bind(this, btn, "click", ctxMenuHandler));
+                    // console.log("bind click event", btn);
+                    // cleanupFuncs.current.push(unbindEvent.bind(this, btn, "click", ctxMenuHandler));
+                    ele.setAttribute("handled",'true');
                 });
 
+                // 关键词点击以搜索
                 document.querySelectorAll(".search_keyword[handled='false']").forEach(ele=>{
                     const clickHandler=api.searchKeyword.bind(this, ele.innerText);
                     ele.addEventListener("click", clickHandler);
-                    cleanupFuncs.current.push(unbindEvent.bind(this, ele, "click", clickHandler));
+                    // console.log("bind click event", ele);
+                    // cleanupFuncs.current.push(unbindEvent.bind(this, ele, "click", clickHandler));
+                    ele.setAttribute("handled",'true');
                 });
 
             }, 500);
@@ -362,7 +367,10 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
 }
 
 const unbindEvent=(ele, evt, func)=>{
-    ele.removeEventListener(evt, func);
+    console.log("移除事件 ele", ele)
+    console.log("移除事件 evt", evt)
+    console.log("移除事件 fun", func)
+    ele?.removeEventListener?.(evt, func);
 };
 
 const copyTxt=(txt)=>{
