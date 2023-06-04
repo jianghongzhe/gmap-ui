@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import tableEnh from './tableEnh';
 import loadMetaData from './metadataLoader';
+import {createId, unbindEvent} from "./uiUtil";
 
 /**
  * marked结合hljs实现语法高亮与点击事件处理等功能
@@ -11,8 +12,8 @@ import loadMetaData from './metadataLoader';
 class MarkedHighlightUtil {
 
     constructor(){
-        this.mdLinkCls="gmap_mk_link_"+new Date().getTime();
-        this.mdImgCls="gmap_mk_img_"+new Date().getTime();
+        this.mdLinkCls=createId("gmap_mk_link_");
+        this.mdImgCls=createId("gmap_mk_img_");
         this.mermaidInited=false;
         this.index=0;
     }
@@ -137,7 +138,7 @@ class MarkedHighlightUtil {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理
                 const lang = (infostring || '').match(/\S*/)[0];
-                if(['mermaid', 'flow', 'sequence', 'echart'].includes(lang)){
+                if(['mermaid', 'flow', 'sequence', 'echart',].includes(lang)){
                     return this.options.highlight(code, lang);
                 }
 
@@ -156,9 +157,10 @@ class MarkedHighlightUtil {
                 if(lang){
                     cls=`hljs ${this.options.langPrefix + doEscape(lang, true)}`;
                 }
-                //
+                // latex公式不支持复制代码，其它类型支持
+                const copyBtn=('latex'===lang ? '' : `<div class="copy_btn">复制代码</div>`);
                 return `<div class="code_wrapper">
-                    <div class="copy_btn">复制代码</div>
+                    ${copyBtn}
                     <pre ${bgStyle}><code class="${cls}" handled='false'>${finalCodeHtml}</code></pre>
                 </div>`;
             };
@@ -305,7 +307,7 @@ class MarkedHighlightUtil {
      * @param {*} cb          (addr, ele)=>...
      * @param {*} filter      (ele)=>...return boolean
      */
-    bindLinkClickEvent=(cb,filter=null)=>{
+    bindLinkClickEvent=(cb, filter=null, cleanupFunsArray=null)=>{
         document.querySelectorAll("."+this.mdLinkCls).forEach(ele=>{
             //如果已绑定过事件、链接地址不存在、过滤条件忽略，则不处理
             let hasBindEvent=ele.getAttribute("hasBindEvent");
@@ -318,6 +320,9 @@ class MarkedHighlightUtil {
             ele.setAttribute("hasBindEvent","yes");
             const handler=delegateOpenUrlFun.bind(this, cb, addr);
             ele.addEventListener("click",handler);//增加点击事件，点击时使用外部浏览器打开
+            if(Array.isArray(cleanupFunsArray)){
+                cleanupFunsArray.push(unbindEvent.bind(this, ele, "click", handler));
+            }
         });
     }
 
@@ -326,7 +331,7 @@ class MarkedHighlightUtil {
      * @param {*} cb          (addr, ele)=>...
      * @param {*} filter      (ele)=>...return boolean
      */
-    bindImgClickEvent=(cb,filter=null)=>{
+    bindImgClickEvent=(cb,filter=null, cleanupFunsArray=null)=>{
         document.querySelectorAll("."+this.mdImgCls).forEach(ele=>{
             let hasBindEvent=ele.getAttribute("hasBindEvent");
             if(hasBindEvent){return;}
@@ -338,6 +343,9 @@ class MarkedHighlightUtil {
 
             const handler=delegateOpenUrlFun.bind(this, cb, addr);
             ele.addEventListener("click", handler);//本地打开时使用不带随机参数的url
+            if(Array.isArray(cleanupFunsArray)){
+                cleanupFunsArray.push(unbindEvent.bind(this, ele, "click", handler));
+            }
         });
     }
 }

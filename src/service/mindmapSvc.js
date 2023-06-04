@@ -3,6 +3,7 @@ import globalStyleConfig from '../common/globalStyleConfig';
 import partLoaders from './partLoaders';
 import {ndLineLoader} from './partLoaders';
 import linePartHandlers from './linePartHandlers';
+import {createId} from "../common/uiUtil";
 
 
 
@@ -233,8 +234,8 @@ class MindmapSvc {
         let root = null;
         let timeline = [];//时间线对象，后面会往里放
         let progs=[];
-        let nodeIdCounter=0;
-        let nodeIdPrefix="nd_"+new Date().getTime()+"_";
+        // let nodeIdCounter=0;
+        // let nodeIdPrefix=`${createId("nd_")}_`;
         const relaLineNds=[];
         let refNames=[];
         let down=false;
@@ -445,7 +446,7 @@ class MindmapSvc {
             }
 
             let nd = {
-                id: nodeIdPrefix+(++nodeIdCounter),
+                id: createId("nd_"), // nodeIdPrefix+(++nodeIdCounter),
                 lineInd,
                 lineInd2,
                 lev: lev,

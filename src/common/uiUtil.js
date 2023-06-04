@@ -34,5 +34,27 @@ const focusRef=(refObj, delay=false)=>{
 
 
 
+const unbindEvent=(ele, evt, func)=>{
+    console.log("移除事件 "+evt, ele, func);
+    try {
+        ele.removeEventListener(evt, func);
+    }catch (e){}
+};
 
-export { focusRef, bindRef};
+const createId=(prefix='')=>{
+    const uuid=crypto.randomUUID().replace(/[-]/g,'');
+    if('string'===typeof(prefix)){
+        prefix=prefix.trim();
+    }else if('number'===typeof(prefix)){
+        prefix=`${prefix}`;
+    }else if('boolean'===typeof(prefix)){
+        prefix=`${prefix}`;
+    }else{
+        prefix='';
+    }
+    return `${prefix}${uuid}`;
+};
+
+console.log("createId", createId("3"));
+
+export { focusRef, bindRef, unbindEvent, createId};

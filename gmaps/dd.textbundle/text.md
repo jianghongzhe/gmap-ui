@@ -1,4 +1,6 @@
-- abbb##xyz##|ref:aaasss
+- abbb|ref:aaasss
+	- ss
+	- dd
 	
 		
 ***
@@ -6,15 +8,7 @@
 
 
 # ref:aaasss
-$a+b_{1}+c=d$   
-这晨有$\textcolor{red}{颜色}$  
-ab##重庆辣子##c  
 
-第一行<font color="purple">颜色  
-第二行</font>颜色
+![图片](https://www.mermaidchart.com/img/logo-full-pink.svg)
 
-### hahah
-
-```javascript
-let qqq=5;
-```
+ssss

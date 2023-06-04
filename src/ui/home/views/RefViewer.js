@@ -29,6 +29,7 @@ import { useRecoilValue } from 'recoil';
 import { useBindAndGetRef } from '../../../common/commonHooks';
 import styles from './RefViewer.module.scss';
 import classnames from "classnames";
+import {createId, unbindEvent} from '../../../common/uiUtil';
 // import seqDiagram from '../../../common/sequence-diagram';
 //import seqDiagram from 'js-sequence-diagram';
 
@@ -53,10 +54,11 @@ const markedHighlightUtil = new MarkedHighlightUtil();
  */
 const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     const activeKey= useRecoilValue(tabActiveKey);
-    const wrapperId=useCreatedId("refviewercontainer");//   useState(()=>"refviewercontainer"+new Date().getTime());
-    const bodyId=useCreatedId("refviewerbody");// useState(()=>"refviewerbody"+new Date().getTime());
-    const backtopId=useCreatedId("backtop");//  useState(()=>"backtop"+new Date().getTime());
+    const wrapperId=useCreatedId("refviewercontainer_");
+    const bodyId=useCreatedId("refviewerbody_");
+    const backtopId=useCreatedId("backtop_");
     const [,bindScrollTarget, getScrollTarget]= useBindAndGetRef();
+    const lastRefCondRef=useRef('');
     
 
     useEffect(()=>{
@@ -76,11 +78,8 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                     if(!oldurl.startsWith("assets/")){
                         return oldurl;
                     }
-                    let a=new Date().getTime();
-                    console.log("link url before ", oldurl);
                     const ret=api.calcAttUrlSync(activeKey, oldurl);
-                    console.log("link url after"+(new Date().getTime()-a), ret);
-                    return ret;                    
+                    return ret;
                 }
             },
             imgConfig: {
@@ -116,27 +115,50 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     
 
     const cleanupFuncs= useRef([]);
-    
+
+    let {result, refname, refCont, txt}=useMemo(()=>{
+        if(!currRefObj || !currRefObj.txt || !currRefObj.showname){
+            return {result:false, refname:'', refCont:'', txt:''};
+        }
+        // if (null == currRefObj.parsedTxt) {
+        //     currRefObj.parsedTxt = marked(currRefObj.txt);
+        // }
+        const parsedTxt = marked(currRefObj.txt);
+        let refname=currRefObj.showname;
+        let refCont=parsedTxt;
+        return {result:true, refname, refCont, txt:currRefObj.txt};
+    },[currRefObj]);
+
+
+
 
     /**
-     * 当窗口显示时初始化以下组件：
-     * 1、链接点击事件
-     * 2、图片点击事件
-     * 3、对未初始化的mermaid图初始化
-     * 4、对未初始化的flowchart图初始化
-     * 5、对未初始化的sequence图初始化
-     * 6、对未初始化的echart图初始化
-     * 7、对所有echart图设置自适应：以防止改变窗口大小后再次打开引用窗口后无法检测到窗口大小已改变
+     * 当窗口显示时的操作：
+     * 1、若html有变动，则清理之前绑定的事件，创建的图片对象等
+     * 2、初始化以下组件：
+     * (1)、链接点击事件
+     * (2)、图片点击事件
+     * (3)、对未初始化的mermaid图初始化
+     * (4)、对未初始化的flowchart图初始化
+     * (5)、对未初始化的sequence图初始化
+     * (6)、对未初始化的echart图初始化
+     * (7)、对所有echart图设置自适应：以防止改变窗口大小后再次打开引用窗口后无法检测到窗口大小已改变
      */
     useEffect(()=>{
-        
-
         if(visible){
-            setTimeout(() => {
+            // 当html内容有变化时移除之前绑定的事件，避免内存泄漏
+            if(lastRefCondRef.current!==refCont){
+                if(cleanupFuncs.current && cleanupFuncs.current.length>0){
+                    cleanupFuncs.current.forEach(unbindFunc=>unbindFunc());
+                }
                 cleanupFuncs.current=[];
+            }
+            lastRefCondRef.current=refCont;
 
-                markedHighlightUtil.bindLinkClickEvent(onOpenLink);
-                markedHighlightUtil.bindImgClickEvent(onOpenLink);
+            // 延时一会再绑定事件
+            setTimeout(() => {
+                markedHighlightUtil.bindLinkClickEvent(onOpenLink, null, cleanupFuncs.current);
+                markedHighlightUtil.bindImgClickEvent(onOpenLink, null, cleanupFuncs.current);
 
                 //绘制mermaid图表
                 markedHighlightUtil.mermaidInit();                
@@ -197,12 +219,19 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                         }else{
                             nd.style.height=conf.h;
                         }
-                        echarts.init(nd).setOption(conf.opt);
+                        const chartObj=echarts.init(nd);
+                        chartObj.setOption(conf.opt);
                         
                         // console.log(echarts.getInstanceByDom(nd));
                         ele.setAttribute("w",conf.w);
                         ele.setAttribute("h",conf.h);
                         ele.setAttribute("handled",'true');//置标识，表示已处理过，下次渲染不再重复绘制
+
+                        cleanupFuncs.current.push(()=>{
+                            console.log("chartObj", chartObj);
+                            console.log("chartObj.dispose", chartObj.dispose);
+                            chartObj?.dispose?.();
+                        });
                     }catch(e){
                         console.log(e);
                         let msg='Echart图表格式有误 !!!';
@@ -219,12 +248,15 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                 resizeEchartGraphs();
 
                 // 对代码片段增加点击复制代码按钮进行复制的功能
+                // 要考虑其中没有复制按钮的情况，比如latex公式
                 document.querySelectorAll(".markdown-body code.hljs[handled='false']").forEach(ele=>{
                     const btn=ele.parentNode.parentNode.querySelector(".copy_btn");
-                    const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
-                    btn.addEventListener("click", ctxMenuHandler);
-                    // console.log("bind click event", btn);
-                    // cleanupFuncs.current.push(unbindEvent.bind(this, btn, "click", ctxMenuHandler));
+                    if(btn){
+                        const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
+                        btn.addEventListener("click", ctxMenuHandler);
+                        // console.log("bind click event", btn);
+                        cleanupFuncs.current.push(unbindEvent.bind(this, btn, "click", ctxMenuHandler));
+                    }
                     ele.setAttribute("handled",'true');
                 });
 
@@ -233,18 +265,18 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                     const clickHandler=api.searchKeyword.bind(this, ele.innerText);
                     ele.addEventListener("click", clickHandler);
                     // console.log("bind click event", ele);
-                    // cleanupFuncs.current.push(unbindEvent.bind(this, ele, "click", clickHandler));
+                    cleanupFuncs.current.push(unbindEvent.bind(this, ele, "click", clickHandler));
                     ele.setAttribute("handled",'true');
                 });
 
             }, 500);
         }
         return ()=>{
-            if(cleanupFuncs.current && cleanupFuncs.current.length>0){
-                cleanupFuncs.current.forEach(unbindFunc=>unbindFunc());
-            }
+            // if(cleanupFuncs.current && cleanupFuncs.current.length>0){
+            //     cleanupFuncs.current.forEach(unbindFunc=>unbindFunc());
+            // }
         };
-    },[visible, onOpenLink, cleanupFuncs]);
+    },[visible, onOpenLink, cleanupFuncs, refCont]);
     
     
     
@@ -252,18 +284,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     
 
 
-    let {result, refname, refCont, txt}=useMemo(()=>{
-        if(!currRefObj || !currRefObj.txt || !currRefObj.showname){
-            return {result:false, refname:'', refCont:'', txt:''};
-        }
-        // if (null == currRefObj.parsedTxt) {
-        //     currRefObj.parsedTxt = marked(currRefObj.txt);
-        // }
-        const parsedTxt = marked(currRefObj.txt);
-        let refname=currRefObj.showname;
-        let refCont=parsedTxt;
-        return {result:true, refname, refCont, txt:currRefObj.txt};
-    },[currRefObj]);
+
 
     
 
@@ -366,12 +387,7 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     
 }
 
-const unbindEvent=(ele, evt, func)=>{
-    console.log("移除事件 ele", ele)
-    console.log("移除事件 evt", evt)
-    console.log("移除事件 fun", func)
-    ele?.removeEventListener?.(evt, func);
-};
+
 
 const copyTxt=(txt)=>{
     api.copyTxtQuiet(txt);
@@ -426,7 +442,7 @@ const ToolbarItem=({title, icon, onClick, isFirst=false})=>(
 
 
 const useCreatedId=(prefix=null)=>{
-    return useState(()=>(prefix ? ""+prefix : "wild")+new Date().getTime())[0];
+    return useState(()=>createId(prefix ? `${prefix}` : "wild"))[0];
 };
 
 
