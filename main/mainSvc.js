@@ -1065,14 +1065,76 @@ const createMapBundle=(bundleFullpath, content)=>{
     }catch(e){
         return {
             succ: false,
-            msg: "写入文件失败，请稍后重试"
+            msg: "创建导图文件失败，请稍后重试"
+        };
+    }
+};
+
+
+/**
+ * 从指定导图克隆
+ * @param bundleFullpath 目标路径
+ * @param fromBundleFullpath 来源路径
+ * @return {txt, tags}
+ */
+const copyMapBundle=(bundleFullpath, fromBundleFullpath)=>{
+    try{
+        const fromMdPath=path.join(fromBundleFullpath, 'text.md');
+        const fromJsonPath=path.join(fromBundleFullpath, 'info.json');
+        const fromAttDir=path.join(fromBundleFullpath, 'assets');
+
+        const attDir=path.join(bundleFullpath, 'assets');
+        const mdFullpath=path.join(bundleFullpath, 'text.md');
+        const jsonFullpath=path.join(bundleFullpath, 'info.json');
+        const placeHolderFilePath=path.join(bundleFullpath, 'assets', '.keep');
+
+        // 创建附件目录、复制导图文件和设置文件
+        if(!fs.existsSync(attDir)){
+            fs.mkdirSync(attDir,{recursive:true});
+        }
+        fs.copyFileSync(fromMdPath, mdFullpath);
+        fs.copyFileSync(fromJsonPath, jsonFullpath);
+
+        // 附件目录中的内容复制一份
+        fs.readdirSync(fromAttDir, { withFileTypes: true }).filter(ent => ent.isFile()).forEach(ent => {
+            const fromAttItem=path.join(fromAttDir, ent.name);
+            const toAttItem=path.join(attDir, ent.name);
+            fs.copyFileSync(fromAttItem, toAttItem);
+        });
+        if(!fs.existsSync(placeHolderFilePath)){
+            fs.closeSync(fs.openSync(placeHolderFilePath, 'w'));
+        }
+        return {
+            txt: fs.readFileSync(mdFullpath, 'utf-8'),
+            tags: JSON.parse(fs.readFileSync(jsonFullpath, 'utf-8')).tags,
+        };
+    }catch(e){
+        return {
+            succ: false,
+            msg: "创建导图文件失败，请稍后重试"
+        };
+    }
+};
+
+const loadMapBundle=(bundleFullpath)=>{
+    try{
+        const mdFullpath=path.join(bundleFullpath, 'text.md');
+        const jsonFullpath=path.join(bundleFullpath, 'info.json');
+        return {
+            txt: fs.readFileSync(mdFullpath, 'utf-8'),
+            tags: JSON.parse(fs.readFileSync(jsonFullpath, 'utf-8')).tags,
+        };
+    }catch(e){
+        return {
+            succ: false,
+            msg: "创建导图文件失败，请稍后重试"
         };
     }
 };
 
 
 const selPicFile = () => {
-    return dialog.showOpenDialogSync(mainWindow, { 
+    return dialog.showOpenDialogSync(mainWindow, {
         properties: ['openFile'],
         filters: [
             { name: '图片', extensions: 'bmp,jpg,jpeg,png,gif,svg,webp'.split(',') },
@@ -1731,6 +1793,8 @@ const ipcHandlers={
     readFile,
     saveFile,
     createMapBundle,
+    copyMapBundle,
+    loadMapBundle,
     listFiles,
     existsFullpath,
     isUrlFormat,

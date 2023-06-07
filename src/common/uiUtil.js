@@ -55,6 +55,6 @@ const createId=(prefix='')=>{
     return `${prefix}${uuid}`;
 };
 
-console.log("createId", createId("3"));
+
 
 export { focusRef, bindRef, unbindEvent, createId};

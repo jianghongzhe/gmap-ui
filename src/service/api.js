@@ -315,6 +315,10 @@ class Api{
         });
     }
 
+    loadMapBundle=(bundlePath)=>{
+        return ipcRenderer.invoke('loadMapBundle', bundlePath);
+    };
+
     /**
      * 保存文件
      */
@@ -331,6 +335,13 @@ class Api{
     createMapBundle=(fullpath,content)=>{
         return ipcRenderer.invoke('createMapBundle', fullpath, content.replace(/\r/g,'').trim());
     }
+
+    copyMapBundle=(fullpath,sourceFullPath)=>{
+        return ipcRenderer.invoke('copyMapBundle', fullpath, sourceFullPath);
+    }
+
+
+
 
     /**
      * 列出所有文件

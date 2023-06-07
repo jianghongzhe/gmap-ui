@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {Modal, Input,Button,TreeSelect } from 'antd';
+import {Modal, Input, Button, TreeSelect, Checkbox} from 'antd';
 import {ReloadOutlined } from '@ant-design/icons';
 import {useGetAndLoadAllDirs} from '../../../hooks';
-import {useMemoizedFn} from "ahooks";
+import {useBoolean, useMemoizedFn} from "ahooks";
 import styles from './NewGraphDlg.module.scss';
+import {useRecoilValue} from "recoil";
+import {tabHasPane} from "../../../store/tabs";
 
 
 /**
@@ -11,24 +13,31 @@ import styles from './NewGraphDlg.module.scss';
  */
 const NewGraphDlg=(props)=>{
     const [allDirs, loadAllDirs]=useGetAndLoadAllDirs();
-
+    const hasTabs=useRecoilValue(tabHasPane);
     
 
     const [name, setName]=useState('');
     const [dir, setDir]=useState('');
+    const [shouldClone,{set: setShouldClone}]=useBoolean(false);
     const nameEle=useRef();
+
+    const onCloneChange=useMemoizedFn((e)=>{
+        setShouldClone(e.target.checked);
+    });
+
 
     //每次显示时把输入框设置焦点
     useEffect(()=>{
         if(props.visible){
             setName('');
+            setShouldClone(false);
             setTimeout(() => {
                 if(nameEle.current){
                     nameEle.current.focus();
                 }
             }, 300);
         }
-    },[props.visible]);
+    },[props.visible, nameEle, setName, setShouldClone]);
 
     
 
@@ -47,15 +56,13 @@ const NewGraphDlg=(props)=>{
      * 确定事件
      * @param {*} e 
      */
-    const onOk=(e)=>{
+    const onOk=useMemoizedFn((e)=>{
         e.stopPropagation();
         e.preventDefault();
-        props.onOk({dir:dir.trim(), name:name.trim()});
-    }
+        props.onOk({dir:dir.trim(), name:name.trim(), cloneFromCurr:shouldClone});
+    });
 
-    const dlgTitle=useMemo(()=>(
-        `新建图表 - ${dir ? dir+"/":""}${name?name:"<空>"}`
-    ),[dir, name]);
+    const dlgTitle=useMemo(()=> `新建图表 - ${dir ? dir+"/":""}${name?name:"<空>"}`,[dir, name]);
 
     
     return (
@@ -64,7 +71,7 @@ const NewGraphDlg=(props)=>{
                 onOk={onOk}
                 onCancel={props.onCancel}
                 width={700}>
-            
+            <div>
             <table className={styles.container}>
                 <tbody>
                     <tr>
@@ -105,9 +112,23 @@ const NewGraphDlg=(props)=>{
                         </td>
                         <td></td>
                     </tr>
+                    {
+                        hasTabs && (
+                            <tr>
+                                <td>
+
+                                </td>
+                                <td>
+                                    <Checkbox className='clone' onChange={onCloneChange} checked={shouldClone}>从当前导图文件克隆</Checkbox>
+                                </td>
+                                <td></td>
+                            </tr>
+                        )
+                    }
                 </tbody>
             </table>
-            
+
+            </div>
             
         </Modal>
     );

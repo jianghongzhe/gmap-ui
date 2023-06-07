@@ -227,10 +227,10 @@ const MapsViewer=(props)=>{
     });
 
 
-    const onNewMapDlgOK =useMemoizedFn(({dir,name}) => {
+    const onNewMapDlgOK =useMemoizedFn(({dir, name, cloneFromCurr}) => {
         (async()=>{
             try {
-                await createNewMapPromise({dir,name});
+                await createNewMapPromise({dir, name, cloneFromCurr});
                 setNewMapDlgVisible(false);
                 reloadFileList();
             } catch (error) {

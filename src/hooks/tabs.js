@@ -13,11 +13,10 @@ export const useSelectFileListItem=()=>{
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
 
     return useMemoizedFn((item)=>{
-        console.log("item item", item);
-
         if (!item || !item.isfile) {
             return;
         }
+
 
         const mdFullpath=item.mdFullpath;
 
@@ -29,12 +28,15 @@ export const useSelectFileListItem=()=>{
 
         //加载文件内容并计算导图表格的数据
         (async()=>{
-            let origintxts =await api.load(mdFullpath);
-            if (origintxts && false === origintxts.succ) {
-                message.error(origintxts.msg);
+            const loadResult= await api.loadMapBundle(item.fullpath);
+            if(false === loadResult?.succ) {
+                message.error(loadResult.msg);
                 return;
             }
-    
+
+            const origintxts =loadResult.txt.replace(/\r/g,'').trim();
+            const tags=loadResult.tags??[];
+
             //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
             let rootNd=mindmapSvc.parseRootNode(origintxts, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
             // console.log("rootnd",rootNd);
@@ -51,7 +53,7 @@ export const useSelectFileListItem=()=>{
                     mapTxts: origintxts,
                     //mapCells: cells,
                     ds: ndsSet,
-                    tags: item.tags,
+                    tags,
                 }
             ]);
             setTabActiveKey(mdFullpath);
@@ -328,11 +330,14 @@ export const useCopyCurrMapLink=()=>{
 
 
 export const useCreateNewMapPromise=()=>{
-    const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
+
+    const [tabActiveKey, setTabActiveKey]= useRecoilState(tabActiveKeyState);
     const setTabPanes= useSetRecoilState(tabPanesState);
 
-    return useMemoizedFn(({dir,name})=>{
+    return useMemoizedFn(({dir,name,cloneFromCurr})=>{
         return new Promise((res, rej)=>{
+
+
             //验证名称为空和文件是否存在
             if (!name || '' === name) {
                 message.warning('请输入图表名称');
@@ -356,18 +361,36 @@ export const useCreateNewMapPromise=()=>{
                 }
                 let [fn, themeName, fullpath, mdFullpath] = fnAndFullpath;
 
+
                 //保存文件
-                let defMapTxt = getDefMapTxt(themeName);
-                let ret = await api.createMapBundle(fullpath, defMapTxt);
-                if (ret && false === ret.succ) {
-                    message.error(ret.msg);
-                    rej();
-                    return;
+                let mapTxt = '';
+                let tags=[];
+
+                if(!cloneFromCurr){
+                    mapTxt=getDefMapTxt(themeName);
+                    let ret = await api.createMapBundle(fullpath, mapTxt);
+                    if (false === ret?.succ) {
+                        message.error(ret.msg);
+                        rej();
+                        return;
+                    }
+                }else{
+                    const fromBundle=tabActiveKey.substring(0, Math.max(tabActiveKey.lastIndexOf("/"), tabActiveKey.lastIndexOf("\\")));
+                    let ret=await api.copyMapBundle(fullpath, fromBundle);
+                    if (false === ret?.succ) {
+                        message.error(ret.msg);
+                        rej();
+                        return;
+                    }
+                    mapTxt=ret.txt;
+                    tags=ret.tags;
                 }
+
+
 
                 //计算导图表格信息并加入新tab      
                 // let cells = mindmapSvc.parseMindMapData(defMapTxt, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-                let rootNd=mindmapSvc.parseRootNode(defMapTxt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
+                let rootNd=mindmapSvc.parseRootNode(mapTxt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
                 let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
 
                 setTabPanes((originPanes)=>([
@@ -375,9 +398,9 @@ export const useCreateNewMapPromise=()=>{
                     {
                         title: fn,
                         key: mdFullpath,
-                        mapTxts: defMapTxt,
+                        mapTxts: mapTxt,
                         ds: ndsSet,
-                        tags: [],
+                        tags,
                     }
                 ]));
                 setTabActiveKey(mdFullpath);
@@ -424,6 +447,7 @@ export const useSaveMapPromise=()=>{
                     ...currPane,
                     mapTxts: txt,
                     ds:ndsSet,
+                    tags: tags??[],
                 });
                 res();
             })();
