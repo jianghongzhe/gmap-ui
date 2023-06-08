@@ -1106,7 +1106,7 @@ const copyMapBundle=(bundleFullpath, fromBundleFullpath)=>{
         }
         return {
             txt: fs.readFileSync(mdFullpath, 'utf-8'),
-            tags: JSON.parse(fs.readFileSync(jsonFullpath, 'utf-8')).tags,
+            tags: JSON.parse(fs.readFileSync(jsonFullpath, 'utf-8')).tags??[],
         };
     }catch(e){
         return {
@@ -1122,7 +1122,7 @@ const loadMapBundle=(bundleFullpath)=>{
         const jsonFullpath=path.join(bundleFullpath, 'info.json');
         return {
             txt: fs.readFileSync(mdFullpath, 'utf-8'),
-            tags: JSON.parse(fs.readFileSync(jsonFullpath, 'utf-8')).tags,
+            tags: JSON.parse(fs.readFileSync(jsonFullpath, 'utf-8')).tags??[],
         };
     }catch(e){
         return {

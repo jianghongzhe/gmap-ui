@@ -383,7 +383,7 @@ export const useCreateNewMapPromise=()=>{
                         return;
                     }
                     mapTxt=ret.txt;
-                    tags=ret.tags;
+                    tags=ret.tags??[];
                 }
 
 
