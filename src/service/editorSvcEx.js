@@ -1454,8 +1454,7 @@ const editorSvcExInstWrapper=(function(){
     };
 
     const wrapperOrTrimMark=(cm, mark)=>{
-        if(isWrappWith(cm, mark)){
-            trimWrapperMark(cm, mark);
+        if(trimWrapperMark(cm, mark)){
             return;
         }
         setWrapperMark(cm,mark, mark, 0-mark.length);
@@ -1497,39 +1496,64 @@ const editorSvcExInstWrapper=(function(){
         return 'multi'===getSelectionType(cm).type;
     };
 
+
+    /**
+     * 去掉选中部分左右的包裹，无论选中部分在包裹的内侧还是外侧，都可去掉包裹
+     * 符号说明： |表示光标选中位置，**表示包裹
+     * 情况1：选中部分在包裹内侧
+     * mmm**|abc|**nnn -> mmmabc|nnn
+     *
+     * 情况2：选中部分在包裹外侧
+     * mmm|**abc**|nnn -> mmmabc|nnn
+     *
+     * 情况3：选中部分在包裹字符之间
+     * mmm*|*abc*|*nnn -> mmmabc|nnn
+     *
+     * 情况4：前后选中部分情况可以各不相同，本示例为前面在包裹之间后面在包裹之内
+     * mmm*|*abc|**nnn -> mmmabc|nnn
+     * @param cm
+     * @param mark
+     */
     const trimWrapperMark=(cm, mark)=>{
-        let pos=cm.doc.getCursor();// { ch: 3  line: 0}
-        let pos2=pos;
-        const selections=cm.doc.listSelections();
-        if(0<selections.length){
-            [pos, pos2]=sortCursor(selections[0].anchor, selections[0].head);
-        }
-        const selContent=cm.doc.getRange(pos, pos2);
-        if(selContent.length>=2*mark.length && selContent.startsWith(mark) && selContent.endsWith(mark)){
-            if(pos.line===pos2.line){
-                const replContent=selContent.substring(mark.length, selContent.length-mark.length).trim();
-                cm.doc.replaceRange(replContent, pos , pos2);
-                cm.focus();
-                cm.doc.setCursor({line:pos.line, ch:pos.ch+replContent.length,});
-            }else{
-                cm.doc.replaceRange("", pos , {line:pos.line, ch:pos.ch+mark.length});
-                cm.doc.replaceRange("", {line:pos2.line, ch:pos2.ch-mark.length}, pos2);
-                cm.focus();
-                cm.doc.setCursor({line:pos2.line, ch:pos2.ch-mark.length,});
+        const {pos, pos2}= getSelectionType(cm);
+        const lineLen=cm.doc.getLine(pos2.line).length;
+
+        let flag=false;
+        let startPos=null;
+        let endPos=null;
+        let selContent=null;
+        for(let ind1=pos.ch; ind1>=Math.max(pos.ch-mark.length,0); --ind1){
+            for(let ind2=pos2.ch; ind2<=Math.min(lineLen, pos2.ch+mark.length); ++ind2){
+                const tmpContent=cm.doc.getRange({line:pos.line,ch:ind1}, {line:pos2.line,ch:ind2})??'';
+                if(tmpContent.length>=2*mark.length && tmpContent.startsWith(mark) && tmpContent.endsWith(mark)){
+                    flag=true;
+                    startPos={line:pos.line,ch:ind1};
+                    endPos={line:pos2.line,ch:ind2};
+                    selContent=tmpContent;
+                    break;
+                }
             }
         }
+
+        if(!flag){
+            return false;
+        }
+
+        if(pos.line===pos2.line){
+            const replContent=selContent.substring(mark.length, selContent.length-mark.length).trim();
+            cm.doc.replaceRange(replContent, startPos , endPos);
+            cm.focus();
+            cm.doc.setCursor({line:startPos.line, ch:startPos.ch+replContent.length,});
+        }else{
+            cm.doc.replaceRange("", startPos , {line:startPos.line, ch:startPos.ch+mark.length});
+            cm.doc.replaceRange("", {line:endPos.line, ch:endPos.ch-mark.length}, endPos);
+            cm.focus();
+            cm.doc.setCursor({line:endPos.line, ch:endPos.ch-mark.length,});
+        }
+        return true;
     };
 
-    const isWrappWith=(cm, mark)=>{
-        let pos=cm.doc.getCursor();// { ch: 3  line: 0}
-        let pos2=pos;
-        const selections=cm.doc.listSelections();
-        if(0<selections.length){
-            [pos, pos2]=sortCursor(selections[0].anchor, selections[0].head);
-        }
-        const selContent=cm.doc.getRange(pos, pos2);
-        return (selContent.startsWith(mark) && selContent.endsWith(mark));
-    };
+
 
     /**
      *
