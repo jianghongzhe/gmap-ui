@@ -354,13 +354,14 @@ const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null, pos=null, pos2=null, f
     if(!pos){
         pos=cm.doc.getCursor();// { ch: 3  line: 0}
     }
-    cm.doc.replaceRange(fill+txt, pos, (pos2 ? pos2 : pos));
+    const replTxt=fill+txt;
+    cm.doc.replaceRange(replTxt, pos, (pos2 ? pos2 : pos));
 
     let line=pos.line;
     let ch=pos.ch+txt.length;
 
     if('number'===typeof(cursorOffset)){
-        ch=pos.ch+cursorOffset+fill.length;
+        ch=pos.ch+(cursorOffset>=0 ? cursorOffset+fill.length : replTxt.length+cursorOffset);
     }else if(Array.isArray(cursorOffset) && 2===cursorOffset.length && 'number'===typeof(cursorOffset[0]) && 'number'===typeof(cursorOffset[1])){
         line=pos.line+cursorOffset[0];
         ch=pos.ch+cursorOffset[1];

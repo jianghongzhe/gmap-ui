@@ -188,6 +188,8 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
         const data= currMenu?.option?.data;
         closeHintMenu();
 
+        console.log("hint menu item data: ", data);
+
         if(actionTypes.editTable===type){
             onEditTable();
             return;

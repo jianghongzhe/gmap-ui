@@ -6,6 +6,15 @@ import globalStyleConfig from "../common/globalStyleConfig";
 import api from '../service/api';
 
 
+const cates={
+    metadata: Symbol(),
+    node_operate: Symbol(),
+    shortcut_alias_frag: Symbol(),
+    link_and_color: Symbol(),
+    clipboard: Symbol(),
+    date_and_time: Symbol(),
+};
+
 export const useHintMenu=()=>{
 
     const [{hintMenus,hintMenuPos}, dispatch]=useReducer(reducer, {
@@ -286,7 +295,7 @@ const menuConfig=[
     // 图片元数据
     ...(["#left", "#center", "#right", "#float-left", "#float-right", "#inline",].map(item=>{
         return {
-            cate:'metadata',
+            cate: cates.metadata,
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=>parseResult.cursorScope.inImgNamePart,
             label: `图片属性　${item}`,
@@ -303,7 +312,7 @@ const menuConfig=[
     // 链接元数据
     ...(["#confirm", "#confirm{txt aa}"].map(item=>{
         return {
-            cate:'metadata',
+            cate: cates.metadata,
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=>parseResult.cursorScope.inLinkNamePart,
             label: `链接属性　${item}`,
@@ -320,7 +329,7 @@ const menuConfig=[
     // 表格第一行第一列元数据
     ...(["#bar", "#line", "#stack", "#pie", "#bar-line"].map(item=>{
         return {
-            cate:'metadata',
+            cate: cates.metadata,
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=> parseResult.cursorScope.inTablePart?.titleLineFirstCol,
             label: `表格属性　${item}`,
@@ -337,7 +346,7 @@ const menuConfig=[
     // 表格数据行第一列元数据： 当表头第一列中有#bar-line元数据时才有效
     ...(["#bar", "#line", "#stack:xx"].map(item=>{
         return {
-            cate:'metadata',
+            cate: cates.metadata,
             selectionTypes: ['cursor'],
             matcher: (cm, parseResult)=>{
                 if(parseResult.cursorScope.inTablePart?.dataLineFirstCol){
@@ -359,7 +368,7 @@ const menuConfig=[
 
     // 表格编辑：该菜单项已对应工具栏上的按钮功能以及快捷键功能，此处不再放在自动提示菜单中
     // {
-    //     cate:'metadata',
+    //     cate: cates.metadata,
     //     selectionTypes: ['cursor'],
     //     matcher: (cm, parseResult)=>{
     //         return parseResult.cursorScope.inTablePart;
@@ -378,7 +387,7 @@ const menuConfig=[
         {lab:'下上结构　up:', val:'up:'},
     ].map(({lab,val})=>{
         return {
-            cate:'node_operate',
+            cate: cates.node_operate,
             selectionTypes: ['cursor', 'line'],
             matcher: (cm, parseResult)=> {
                 if(parseResult.cursorLineScope.inNodePart?.inRoot){
@@ -432,7 +441,7 @@ const menuConfig=[
         },
     ].map(item=>({
         ...item,
-        cate:'node_operate',
+        cate: cates.node_operate,
         selectionTypes: ['cursor', 'line'],
         matcher: (cm, parseResult)=> {
             if(parseResult.cursorLineScope.inNodePart){
@@ -447,7 +456,7 @@ const menuConfig=[
     // 当未选中或单行选中时有效，且行为空或行中只有空字符
     // 生成shortcut段需要整个引用部分中没有shortcut段，alias段同理
     {
-        cate:'shortcut_alias_frag',
+        cate: cates.shortcut_alias_frag,
         selectionTypes: ['cursor', 'line'],
         matcher: (cm, parseResult)=>{
             if(parseResult.cursorLineMultiScope.inRefPart &&
@@ -471,7 +480,7 @@ const menuConfig=[
         }
     },
     {
-        cate:'shortcut_alias_frag',
+        cate: cates.shortcut_alias_frag,
         selectionTypes: ['cursor', 'line'],
         matcher: (cm, parseResult)=>{
             if(parseResult.cursorLineMultiScope.inRefPart &&
@@ -496,6 +505,9 @@ const menuConfig=[
     },
 
     // 插入链接
+    // 分两种情况处理：
+    // 1、选中了节点，且选中类型为cursor：直接在节点末尾插入空标记
+    // 2、选中了节点且选中类型为line 或是 选中了引用部分：使用前后标记包裹
     ...([
         {
             label: '插入图片　![]()',
@@ -541,21 +553,54 @@ const menuConfig=[
                 }
             }
         },
-    ].map(item=>({
-        ...item,
-        cate:'link_color',
-        selectionTypes: ['cursor','line'],
-        matcher: (cm, parseResult)=>{
-            if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
-                return false;
+    ].flatMap(item=>{
+        return [
+            {
+                ...item,
+                option: {
+                    ...item.option,
+                    data: {
+                        ...item.option.data,
+                        wrap: false,
+                        txt: item.option.data.txt[0]+item.option.data.txt[1],
+                    },
+                },
+                cate: cates.link_and_color,
+                selectionTypes: ['cursor'],
+                matcher: (cm, parseResult)=>{
+                    if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
+                        return false;
+                    }
+                    if(parseResult.cursorLineScope.inNodePart){
+                        return {
+                            pos: parseResult.cursorLineScope.inNodePart.pos,
+                            pos2: parseResult.cursorLineScope.inNodePart.pos2,
+                            fill: parseResult.cursorLineScope.inNodePart.fill,
+                        };
+                    }
+                    return false;
+                },
+            },
+            {
+                ...item,
+                cate: cates.link_and_color,
+                selectionTypes: ['cursor','line'],
+                matcher: (cm, parseResult)=>{
+                    if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
+                        return false;
+                    }
+                    if(parseResult.cursorLineMultiScope.inRefPart || (parseResult.cursorLineScope.inNodePart && 'line'===parseResult.selectionType.type)){
+                        return {};
+                    }
+                    return false;
+                },
             }
-            return (parseResult.cursorLineScope.inNodePart || parseResult.cursorLineMultiScope.inRefPart) ? {} : false;
-        },
-    }))),
+        ];
+    })),
 
     // 文字颜色
     {
-        cate:'link_color',
+        cate: cates.link_and_color,
         selectionTypes: ['cursor','line','multi'],
         matcher: (cm, parseResult)=>{
             if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
@@ -563,8 +608,9 @@ const menuConfig=[
             }
             if(parseResult.cursorLineScope.inNodePart){
                 return {
-                    pos: parseResult.cursorLineScope.inNodePart.pos,
-                    fill: parseResult.cursorLineScope.inNodePart.fill,
+                    // pos: parseResult.cursorLineScope.inNodePart.pos,
+                    // pos2: parseResult.cursorLineScope.inNodePart.pos2,
+                    // fill: parseResult.cursorLineScope.inNodePart.fill,
                 };
             }
             if(parseResult.cursorLineMultiScope.inRefPart){
@@ -637,7 +683,7 @@ const menuConfig=[
         },
     ].map(item=>({
         ...item,
-        cate:'clipboard',
+        cate: cates.clipboard,
         selectionTypes: ['cursor'],
         // 在图片元数据、链接元数据位置，或剪切板为空，则不显示菜单项
         matcher: (cm, parseResult)=>{
@@ -755,7 +801,7 @@ const menuConfig=[
         },
     ].map(item=>({
         ...item,
-        cate:'date',
+        cate: cates.date_and_time,
         selectionTypes: ['cursor'],
         matcher: (cm, parseResult)=> {
             if (parseResult.cursorLineScope.inNodePart) {
