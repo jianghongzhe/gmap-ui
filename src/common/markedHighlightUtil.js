@@ -134,6 +134,14 @@ class MarkedHighlightUtil {
             return newTxt;
         };
 
+        /**
+         * 标题：自定义id与class，id用于与导航栏关联，class用于查找元素
+         */
+        renderer.heading=function(text, level, raw, slugger) {
+            const id=createId(`h${level}_`);
+            return `<h${level} class="markdown_head" id="${id}">${text}</h${level}>\n`;
+        };
+
         if (codeConfig) {
             renderer.code = function (code, infostring, escaped) {
                 //高亮处理

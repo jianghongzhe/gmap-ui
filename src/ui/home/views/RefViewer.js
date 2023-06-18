@@ -1,6 +1,14 @@
 import React, {  useEffect, useRef, useState } from 'react';
-import {  Modal,Button,BackTop,Tooltip } from 'antd';
-import { FileMarkdownOutlined,FileImageOutlined,FilePdfOutlined,Html5Outlined,FileWordOutlined,CameraOutlined } from '@ant-design/icons';
+import {  Modal,Button,BackTop,Tooltip,Anchor  } from 'antd';
+import {
+    FileMarkdownOutlined,
+    FileImageOutlined,
+    FilePdfOutlined,
+    Html5Outlined,
+    FileWordOutlined,
+    CameraOutlined,
+    MenuUnfoldOutlined, MenuFoldOutlined
+} from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
 import api from '../../../service/api';
@@ -22,7 +30,7 @@ import screenShot from '../../../service/screenShot';
 //import lod from 'lodash';
 // import snap from 'snapsvg';
 import webfontloader from 'webfontloader';
-import {useEventListener, useMemoizedFn} from 'ahooks';
+import {useBoolean, useEventListener, useMemoizedFn} from 'ahooks';
 import { useMemo } from 'react';
 import { tabActiveKey } from '../../../store/tabs';
 import { useRecoilValue } from 'recoil';
@@ -30,6 +38,7 @@ import { useBindAndGetRef } from '../../../common/commonHooks';
 import styles from './RefViewer.module.scss';
 import classnames from "classnames";
 import {createId, unbindEvent} from '../../../common/uiUtil';
+import {transform} from "lodash";
 // import seqDiagram from '../../../common/sequence-diagram';
 //import seqDiagram from 'js-sequence-diagram';
 
@@ -44,22 +53,31 @@ window.WebFont=webfontloader;
 
 // const Snap = require(`imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js`);
 
+const { Link } = Anchor;
+
 const EnhDlg=withEnh(Modal);
 const codeBg = 'rgba(40,44,52,1)'; //40 44 52  #282c34
 const markedHighlightUtil = new MarkedHighlightUtil();
 
+
+// 此组件在应用内只有一个实例，因此一些不变的值定义在组件外面
+const wrapperId=createId("refviewercontainer_");
+const bodyId=createId("refviewerbody_");
+const backtopId=createId("backtop_");
+
+const getScrollContainer= ()=>document.querySelector(`#${wrapperId}`);
+
 /**
  * 引用查看器
- * @param {*} props 
+ * @param {*} props
  */
 const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     const activeKey= useRecoilValue(tabActiveKey);
-    const wrapperId=useCreatedId("refviewercontainer_");
-    const bodyId=useCreatedId("refviewerbody_");
-    const backtopId=useCreatedId("backtop_");
     const [,bindScrollTarget, getScrollTarget]= useBindAndGetRef();
     const lastRefCondRef=useRef('');
-    
+    const [navOpen, {setFalse:closeNav, toggle: toggleNav}] = useBoolean(false);
+    const [navItems, setNavItems]=useState([]);
+
 
     useEffect(()=>{
         markedHighlightUtil.init(marked, hljs, {
@@ -101,7 +119,11 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
         });
     },[activeKey]);
 
-
+    useEffect(()=>{
+        if(visible){
+            setTimeout(resizeEchartGraphs, 500);
+        }
+    },[visible, navOpen])
 
     /**
      * 当窗口大小改变时，使echart图自适应，仅当引用窗口显示时有效
@@ -228,8 +250,6 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                         ele.setAttribute("handled",'true');//置标识，表示已处理过，下次渲染不再重复绘制
 
                         cleanupFuncs.current.push(()=>{
-                            console.log("chartObj", chartObj);
-                            console.log("chartObj.dispose", chartObj.dispose);
                             chartObj?.dispose?.();
                         });
                     }catch(e){
@@ -269,6 +289,33 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                     ele.setAttribute("handled",'true');
                 });
 
+                // 加载标题以生成导航栏内容
+                const tmpNavItems=[];
+                let lastItem=null;
+                document.querySelectorAll(`#${wrapperId} .markdown-body .markdown_head`).forEach(titleEle=>{
+                    const item={
+                        id: titleEle.getAttribute("id").trim(),
+                        txt: titleEle.innerText.trim(),
+                        lev: parseInt(titleEle.tagName.toLowerCase().substring(1)),
+                        par: null,
+                        childs: [],
+                    };
+                    while(null!==lastItem && item.lev<=lastItem.lev){
+                        lastItem=lastItem.par;
+                    }
+                    if(null===lastItem){
+                        tmpNavItems.push(item);
+                        lastItem=item;
+                        return;
+                    }
+                    lastItem.childs.push(item);
+                    item.par=lastItem;
+                    lastItem=item;
+                });
+                setNavItems(tmpNavItems);
+                if(0===tmpNavItems.length){
+                    closeNav();
+                }
             }, 500);
         }
         return ()=>{
@@ -276,16 +323,8 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
             //     cleanupFuncs.current.forEach(unbindFunc=>unbindFunc());
             // }
         };
-    },[visible, onOpenLink, cleanupFuncs, refCont]);
+    },[visible, onOpenLink, cleanupFuncs, refCont, setNavItems, closeNav]);
     
-    
-    
-
-    
-
-
-
-
     
 
     
@@ -363,14 +402,17 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     return (<React.Fragment>
         <EnhDlg noFooter
                 title={
-                    <div>
+                    <div className={styles.toolbar_container}>
                         {"查看引用 - " + refname}
-                        <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, 'shot')} isFirst={true}/>
-                        <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, 'img')} isFirst={false}/>
-                        <ToolbarItem title='导出pdf' icon={<FilePdfOutlined />} onClick={onExpImage.bind(this, 'pdf')} isFirst={false}/>
-                        <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={onExpImage.bind(this, 'word')} isFirst={false}/>
-                        <ToolbarItem title='导出markdown' icon={<FileMarkdownOutlined />} onClick={onExpMarkdown} isFirst={false}/>
-                        <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={onExpHtml} isFirst={false}/>
+                        {
+                            navItems?.length>0 && <ToolbarItem title={navOpen?'关闭导航栏':'开启导航栏'} icon={navOpen ? <MenuFoldOutlined style={{transform: 'rotate(180deg)',}}/> : <MenuUnfoldOutlined style={{transform: 'rotate(180deg)',}}/>} onClick={toggleNav}/>
+                        }
+                        <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, 'shot')}/>
+                        <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, 'img')}/>
+                        <ToolbarItem title='导出pdf' icon={<FilePdfOutlined />} onClick={onExpImage.bind(this, 'pdf')}/>
+                        <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={onExpImage.bind(this, 'word')}/>
+                        <ToolbarItem title='导出markdown' icon={<FileMarkdownOutlined />} onClick={onExpMarkdown}/>
+                        <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={onExpHtml}/>
                     </div>
                 }
                 size={{w:'calc(100vw - 200px)', h:'calc(100vh - 300px)', fixh:true, wrapperId, wrapperRef:bindScrollTarget}}
@@ -378,14 +420,33 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                 maskClosable={true}               
                 onCancel={onCancel}>
             <div id={bodyId}
-                 className={classnames('markdown-body', styles.markdown_body)}
+                 className={classnames('markdown-body', navOpen ? styles.markdown_body_with_nav: styles.markdown_body)}
                  dangerouslySetInnerHTML={{__html:refCont}}>
             </div>
+            {
+                (navOpen && navItems?.length>0) && (
+                    <Anchor affix={false} showInkInFixed={true} className={styles.navbar} getContainer={getScrollContainer}>
+                        {
+                            navItems.map(item=><NavLink key={`navitem_${item.id}`} item={item}/>)
+                        }
+                    </Anchor>
+                )
+            }
             <BackTop id={backtopId} target={getScrollTarget} className={styles.backtop}/>
         </EnhDlg>
     </React.Fragment>);
     
 }
+
+const NavLink=({item})=>{
+    return (<Link href={`#${item.id}`} title={item.txt} >
+        {
+            0<item?.childs?.length && (
+                item.childs.map(subItem=>(<NavLink key={`navitem_${subItem.id}`} item={subItem}/>))
+            )
+        }
+    </Link>);
+};
 
 
 
@@ -395,11 +456,11 @@ const copyTxt=(txt)=>{
 };
 
 
-const ToolbarItem=({title, icon, onClick, isFirst=false})=>(
+const ToolbarItem=({title, icon, onClick})=>(
     <Tooltip color='cyan' placement="top" title={title}>
         <Button shape='circle'
                 icon={icon}
-                className={isFirst ? styles.toolbar_first: styles.toolbar_not_first}
+                className='toolbar'
                 type='default'
                 size='default'
                 onClick={onClick}/>
@@ -440,10 +501,6 @@ const ToolbarItem=({title, icon, onClick, isFirst=false})=>(
     });
 };
 
-
-const useCreatedId=(prefix=null)=>{
-    return useState(()=>createId(prefix ? `${prefix}` : "wild"))[0];
-};
 
 
 export default React.memo(RefViewer);

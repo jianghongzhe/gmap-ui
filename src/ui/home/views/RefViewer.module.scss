@@ -1,13 +1,32 @@
 $table_color_title: #409EFF;
 $table_color_border: #d0d7de;
 
+
+// 导航栏的宽度、边距与主体区域的宽度
+$nav_width: 20%;
+$nav_right: 40px;
+$body_width_with_nav: calc(79% - 40px);
+
+
+.markdown_body {
+  margin: 0 auto;
+  width: 98%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.markdown_body_with_nav {
+  margin-top: 0;
+  margin-bottom: 0;
+  width: $body_width_with_nav;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 :global {
-  .markdown_body {
-    margin: 0 auto;
-    width: 98%;
-    overflow-x: hidden;
-    overflow-y: hidden;
-  }
+
+
+
 
   .markdown-body blockquote {
     border-left: .25em solid lightgreen !important;
@@ -71,10 +90,24 @@ $table_color_border: #d0d7de;
   }
 }
 
-.toolbar_first{
-  margin-left: 20px;
+.toolbar_container{
+  :global{
+    .toolbar{
+      margin-left: 20px;
+    }
+    .toolbar + .toolbar{
+      margin-left: 8px;
+    }
+  }
 }
 
-.toolbar_not_first{
-  margin-left: 8px;
+.navbar{
+  right: $nav_right;
+  top: 74px;
+  position: absolute;
+  width: $nav_width;
+  max-height: calc(100vh - 300px) !important;
+  &::-webkit-scrollbar{
+    display: none;
+  }
 }
