@@ -405,7 +405,14 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                     <div className={styles.toolbar_container}>
                         {"查看引用 - " + refname}
                         {
-                            navItems?.length>0 && <ToolbarItem title={navOpen?'关闭导航栏':'开启导航栏'} icon={navOpen ? <MenuFoldOutlined style={{transform: 'rotate(180deg)',}}/> : <MenuUnfoldOutlined style={{transform: 'rotate(180deg)',}}/>} onClick={toggleNav}/>
+                            navItems?.length>0 &&
+                            <ToolbarItem title={navOpen?'关闭导航栏':'开启导航栏'}
+                                         icon={navOpen ?
+                                            <MenuFoldOutlined className='reverse_icon'/> :
+                                            <MenuUnfoldOutlined className='reverse_icon'/>
+                                         }
+                                         onClick={toggleNav}
+                            />
                         }
                         <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, 'shot')}/>
                         <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, 'img')}/>

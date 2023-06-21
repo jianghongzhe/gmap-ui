@@ -148,7 +148,15 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
         {
             (nd && nd.refs && 0<nd.refs.length) && (
                 nd.refs.map((refItem,refInd)=>(                
-                    <Tooltip key={refInd} color='cyan' placement="top" title={'查看引用 - '+refItem.showname} mouseEnterDelay={0.4}>
+                    <Tooltip key={refInd} color='cyan' placement="top" title={
+                        <div className={styles.themeTxtTooltip}>
+                            <div>引用 - {refItem.showname}</div>
+                            <div className='btnContainer'>
+                                <TooltipBtn value="查看引用" onClick={onOpenRef.bind(this,refItem)}/>
+                                <TooltipBtn value="编辑引用" onClick={onNodeOp.bind(this,nd,{type:'editRef', cont:refItem,})}/>
+                            </div>
+                        </div>
+                    } mouseEnterDelay={0.4}>
                         <span className={classnames('node_part', styles.themeBtnWrapper)}>
                             <Button 
                                 type="link" 

@@ -46,6 +46,18 @@ export const useNodeOp=(mapTxts)=>{
                 insertLineAndJoin(getLines(), lineInd, newLine),
                 {line:lineInd,  ch:newLine.length}
             ];
+        }else if("editRef"===action?.type && action?.cont){
+            const targetTxt=`# ${action.cont.name}`.trim();
+            let found=false;
+            getLines().forEach((line,ind)=>{
+                if(found){
+                    return;
+                }
+                if(line.trim()===targetTxt){
+                    found=true;
+                    cursorPos={line:ind+1, ch:0,};
+                }
+            });
         }
 
         // 没有有效的参数，则内容不变，光标为首行首列位置

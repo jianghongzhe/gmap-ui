@@ -5,6 +5,7 @@ $table_color_border: #d0d7de;
 // 导航栏的宽度、边距与主体区域的宽度
 $nav_width: 20%;
 $nav_right: 40px;
+$nav_top: 84px;
 $body_width_with_nav: calc(79% - 40px);
 
 
@@ -98,12 +99,15 @@ $body_width_with_nav: calc(79% - 40px);
     .toolbar + .toolbar{
       margin-left: 8px;
     }
+    .reverse_icon {
+      transform: rotate(180deg);
+    }
   }
 }
 
 .navbar{
   right: $nav_right;
-  top: 74px;
+  top: $nav_top;
   position: absolute;
   width: $nav_width;
   max-height: calc(100vh - 300px) !important;

@@ -177,3 +177,16 @@
     }
   }
 }
+
+.refTooltip{
+  :global{
+    .btnContainer{
+      margin-top: 10px;
+
+      .btn{
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+    }
+  }
+}
