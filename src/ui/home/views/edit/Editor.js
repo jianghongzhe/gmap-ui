@@ -304,7 +304,7 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
         const cm=codeMirrorInstRef.current;
         cm.focus();
         cm.setCursor(action.payload);
-        cm.scrollIntoView(action.payload, 100);
+        cm.scrollIntoView(action.payload, 200);
     });
     useBus(editorEvents.putCursor, (action)=> handlePutCursorEvent(action), [handlePutCursorEvent]);
 

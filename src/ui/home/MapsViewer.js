@@ -435,6 +435,11 @@ const MapsViewer=(props)=>{
     const onNodeOp=useMemoizedFn((nd, action)=>{
         const[newMapTxts, newCursor]= calcNewTxtAndCursor(nd, action);
         api.closeFindInPageDlg();
+
+        // 如果是编辑引用功能，且是从引用窗口调用，则先关闭引用窗口
+        if('editRef'===action?.type && true===action?.extra?.byRef){
+            setRefViewerDlgState(state=>({...state, refViewerDlgVisible:false}));
+        }
         showEditorDlg(currPane.title, newMapTxts);
         setTags(currPane.tags);
         setTagVal("");
@@ -573,6 +578,7 @@ const MapsViewer=(props)=>{
                 currRefObj={currRefObj}
                 visible={refViewerDlgVisible}
                 onCancel={closeAllDlg}
+                onNodeOp={onNodeOp}
             />
 
             <TimelineViewer

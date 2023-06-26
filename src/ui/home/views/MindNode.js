@@ -150,11 +150,15 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                 nd.refs.map((refItem,refInd)=>(                
                     <Tooltip key={refInd} color='cyan' placement="top" title={
                         <div className={styles.themeTxtTooltip}>
-                            <div>引用 - {refItem.showname}</div>
-                            <div className='btnContainer'>
-                                <TooltipBtn value="查看引用" onClick={onOpenRef.bind(this,refItem)}/>
-                                <TooltipBtn value="编辑引用" onClick={onNodeOp.bind(this,nd,{type:'editRef', cont:refItem,})}/>
-                            </div>
+                            <div>{true===refItem.combined ? '查看全部引用' : `引用 - ${refItem.showname}`}</div>
+                            {
+                                true!==refItem?.combined && (
+                                    <div className='btnContainer'>
+                                        <TooltipBtn value="查看引用" onClick={onOpenRef.bind(this,refItem)}/>
+                                        <TooltipBtn value="编辑引用" onClick={onNodeOp.bind(this,nd,{type:'editRef', cont:refItem,})}/>
+                                    </div>
+                                )
+                            }
                         </div>
                     } mouseEnterDelay={0.4}>
                         <span className={classnames('node_part', styles.themeBtnWrapper)}>

@@ -7,7 +7,7 @@ import {
     Html5Outlined,
     FileWordOutlined,
     CameraOutlined,
-    MenuUnfoldOutlined, MenuFoldOutlined
+    MenuUnfoldOutlined, MenuFoldOutlined, EditOutlined
 } from '@ant-design/icons';
 import {withEnh} from '../../common/specialDlg';
 import MarkedHighlightUtil from '../../../common/markedHighlightUtil';
@@ -71,7 +71,7 @@ const getScrollContainer= ()=>document.querySelector(`#${wrapperId}`);
  * 引用查看器
  * @param {*} props
  */
-const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
+const RefViewer=({visible, onOpenLink, onNodeOp, currRefObj, onCancel})=>{
     const activeKey= useRecoilValue(tabActiveKey);
     const [,bindScrollTarget, getScrollTarget]= useBindAndGetRef();
     const lastRefCondRef=useRef('');
@@ -389,7 +389,15 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
     });
 
 
-
+    const onEditRef=useMemoizedFn(()=>{
+        onNodeOp(null, {
+            type:'editRef',
+            cont:currRefObj,
+            extra:{
+                byRef:true
+            },
+        })
+    });
 
 
     
@@ -413,6 +421,10 @@ const RefViewer=({visible, onOpenLink, currRefObj, onCancel})=>{
                                          }
                                          onClick={toggleNav}
                             />
+                        }
+                        {
+                            true!==currRefObj?.combined &&
+                            <ToolbarItem title='编辑引用' icon={<EditOutlined />} onClick={onEditRef}/>
                         }
                         <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, 'shot')}/>
                         <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, 'img')}/>

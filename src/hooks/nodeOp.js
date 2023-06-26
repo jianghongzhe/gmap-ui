@@ -47,6 +47,8 @@ export const useNodeOp=(mapTxts)=>{
                 {line:lineInd,  ch:newLine.length}
             ];
         }else if("editRef"===action?.type && action?.cont){
+            console.log("ref cont", action?.cont);
+
             const targetTxt=`# ${action.cont.name}`.trim();
             let found=false;
             getLines().forEach((line,ind)=>{
