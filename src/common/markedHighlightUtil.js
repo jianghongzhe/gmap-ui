@@ -166,7 +166,17 @@ class MarkedHighlightUtil {
                     cls=`hljs ${this.options.langPrefix + doEscape(lang, true)}`;
                 }
                 // latex公式不支持复制代码，其它类型支持
-                const copyBtn=('latex'===lang ? '' : `<div class="copy_btn">复制代码</div>`);
+                let copyBtn=''; // ('latex'===lang ? '' : `<div class="copy_btn">复制代码</div>`);
+                if('latex'!==lang){
+                    copyBtn+=`<div class="btn_group">`;
+                    if('cmd'===lang || 'bat'===lang){
+                        copyBtn+=`<div class="btn_item cmd_btn">运行</div>`;
+                        copyBtn+=`<div class="btn_item cmdp_btn">运行并停住</div>`;
+                    }
+                    copyBtn+=`<div class="btn_item copy_btn">复制代码</div>`;
+                    copyBtn+=`</div>`;
+                }
+
                 return `<div class="code_wrapper">
                     ${copyBtn}
                     <pre ${bgStyle}><code class="${cls}" handled='false'>${finalCodeHtml}</code></pre>

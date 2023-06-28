@@ -267,15 +267,33 @@ const RefViewer=({visible, onOpenLink, onNodeOp, currRefObj, onCancel})=>{
                 });
                 resizeEchartGraphs();
 
-                // 对代码片段增加点击复制代码按钮进行复制的功能
+                // 对代码片段的复制代码按钮、运行按钮、运行并暂停按钮绑定处理函数
                 // 要考虑其中没有复制按钮的情况，比如latex公式
                 document.querySelectorAll(".markdown-body code.hljs[handled='false']").forEach(ele=>{
-                    const btn=ele.parentNode.parentNode.querySelector(".copy_btn");
+                    const codeWrappeEle=ele.parentNode.parentNode;
+                    const codeTxt= (ele.innerText??'');
+                    const codeTxtNoWrap=codeTxt.trim().replace(/\r/g,'').replace(/\n/g,' \\');
+
+                    const btn=codeWrappeEle.querySelector(".copy_btn");
                     if(btn){
-                        const ctxMenuHandler=copyTxt.bind(this, ele.innerText);
+                        const ctxMenuHandler=copyTxt.bind(this, codeTxt);
                         btn.addEventListener("click", ctxMenuHandler);
                         // console.log("bind click event", btn);
                         cleanupFuncs.current.push(unbindEvent.bind(this, btn, "click", ctxMenuHandler));
+                    }
+
+                    const cmdBtn= codeWrappeEle.querySelector(".cmd_btn");
+                    if(cmdBtn){
+                        const handler=api.openUrl.bind(this, `cmd://${codeTxtNoWrap}`);
+                        cmdBtn.addEventListener("click", handler);
+                        cleanupFuncs.current.push(unbindEvent.bind(this, cmdBtn, "click", handler));
+                    }
+
+                    const cmdpBtn=codeWrappeEle.querySelector(".cmdp_btn");
+                    if(cmdpBtn){
+                        const handler=api.openUrl.bind(this,`cmdp://${codeTxtNoWrap}`);
+                        cmdpBtn.addEventListener("click", handler);
+                        cleanupFuncs.current.push(unbindEvent.bind(this, cmdpBtn, "click", handler));
                     }
                     ele.setAttribute("handled",'true');
                 });

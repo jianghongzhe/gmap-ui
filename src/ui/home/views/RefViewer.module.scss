@@ -55,16 +55,24 @@ $body_width_with_nav: calc(79% - 40px);
   .markdown-body .code_wrapper {
     position: relative;
 
-    .copy_btn{
+    .btn_group{
       position: absolute;
       top:5px;
       right:10px;
       display: none;
-      color:rgba(255,255,255,0.75);
-      cursor: pointer;
+
+      .btn_item{
+        display: inline-block;
+        color:rgba(255,255,255,0.75);
+        cursor: pointer;
+      }
+
+      .btn_item + .btn_item{
+        margin-left: 10px;
+      }
     }
 
-    &:hover .copy_btn{
+    &:hover .btn_group{
       display: inline-block;
     }
   }
