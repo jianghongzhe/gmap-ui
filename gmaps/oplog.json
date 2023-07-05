@@ -1,0 +1,14 @@
+{
+    "access_history": [
+        {
+            "bundle_path": "a/b/c/fff",
+            "access_time": 1688579445008,
+            "access_time_str": "23.07.06 四 01:50:45"
+        },
+        {
+            "bundle_path": "a/aademo",
+            "access_time": 1688579415761,
+            "access_time_str": "23.07.06 四 01:50:15"
+        }
+    ]
+}
