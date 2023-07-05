@@ -1,3 +1,5 @@
+import editorSvcEx from "./editorSvcEx";
+
 const { ipcRenderer } = window.require('electron');
 
 
@@ -555,10 +557,44 @@ class Api{
     saveEditorTheme=(theme)=>{
         this.saveSettingValue(settingConst.editor_theme, theme);
     };
+
+    /**
+     *
+     * @return promise
+     * {
+     *  show_cnt: 5,
+     *  threshold_days: 365,
+     * }
+     */
+    getAccHisSetting=()=>{
+        return this.getSettingValue(settingConst.access_history);
+    };
+
+
+    /**
+     * 获取访问历史列表
+     * @return {*}
+     */
+    getAccHisList=()=>{
+        return ipcRenderer.invoke('getAccHis');
+    };
+
+
+    /**
+     * 保存访问历史项
+     * @param bundlePath
+     * @param accessTime
+     * @param accessTimeStr
+     * @return {*}
+     */
+    saveAccHisItem=(bundlePath, accessTime, accessTimeStr)=>{
+        return ipcRenderer.invoke('saveAccHis', bundlePath, accessTime, accessTimeStr);
+    };
 }
 
 const settingConst={
     editor_theme: "editor_theme",
+    access_history: "access_history",
 };
 
 

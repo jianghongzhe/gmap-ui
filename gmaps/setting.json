@@ -9,7 +9,11 @@
             "theme": "default",
             "url_opener": "C:\\Program Files (x86)\\Google\\Chrome Dev\\Application\\chrome.exe",
             "img_opener": "default",
-            "search_engine": "https://cn.bing.com/search?q=##kw##"
+            "search_engine": "https://cn.bing.com/search?q=##kw##",
+            "access_history": {
+                "show_cnt": 5,
+                "threshold_days": 365
+            }
         }
     },
     {
@@ -22,7 +26,11 @@
             "theme": "default",
             "url_opener": "default",
             "img_opener": "default",
-            "search_engine": "default"
+            "search_engine": "default",
+            "access_history": {
+                "show_cnt": 5,
+                "threshold_days": 365
+            }
         }
     }
 ]

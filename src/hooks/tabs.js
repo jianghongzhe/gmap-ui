@@ -7,6 +7,7 @@ import newMindmapSvc from '../service/newMindmapSvc';
 import mindMapValidateSvc from "../service/mindMapValidateSvc";
 import globalStyleConfig from "../common/globalStyleConfig";
 import {useMemoizedFn} from "ahooks";
+import editorSvcEx from "../service/editorSvcEx";
 
 export const useSelectFileListItem=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
@@ -33,6 +34,11 @@ export const useSelectFileListItem=()=>{
                 message.error(loadResult.msg);
                 return;
             }
+
+            // 保存访问历史记录
+            const now=new Date();
+            api.saveAccHisItem(item.itemsName, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
+
 
             const origintxts =loadResult.txt.replace(/\r/g,'').trim();
             const tags=loadResult.tags??[];
@@ -386,6 +392,10 @@ export const useCreateNewMapPromise=()=>{
                     tags=ret.tags??[];
                 }
 
+
+                // 保存访问历史记录
+                const now=new Date();
+                api.saveAccHisItem(fn, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
 
 
                 //计算导图表格信息并加入新tab      

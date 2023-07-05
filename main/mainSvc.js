@@ -21,6 +21,7 @@ const autoUpdaterPath=path.join(__dirname, '../../../', 'app_update', 'app_updat
 const htmlTmplDir=path.join(__dirname, '../', 'externals', 'tmpl_html'); 
 const mapsPath=path.join(__dirname, '../', 'gmaps');
 const settingFilePath=path.join(__dirname, '../', 'gmaps','setting.json');
+const opLogFilePath=path.join(__dirname, '../', 'gmaps','oplog.json');
 const imgsPath=path.join(__dirname, '../', 'gmaps','imgs');
 const attsPath=path.join(__dirname, '../', 'gmaps','atts');
 const workPath=path.join(__dirname, '../', 'work');
@@ -1469,6 +1470,8 @@ const baseFillSettingItems=(item)=>{
     if('undefined'===typeof(item.settings)){
         item.settings={};
     }
+
+    // 单个值的项
     if('undefined'===typeof(item.settings.editor_theme)){
         item.settings.editor_theme='default';
     }
@@ -1484,7 +1487,37 @@ const baseFillSettingItems=(item)=>{
     if('undefined'===typeof(item.settings.search_engine)){
         item.settings.search_engine='default';
     }
+
+    // 多个值的项
+    // 访问历史记录的设置
+    if('undefined'===typeof(item.settings.access_history)){
+        item.settings.access_history={
+            show_cnt: 5,
+            threshold_days: 365,
+        };
+    }else{
+        if('undefined'===typeof(item.settings.access_history.show_cnt)){
+            item.settings.access_history.show_cnt=5;
+        }
+        if('undefined'===typeof(item.settings.access_history.threshold_days)){
+            item.settings.access_history.threshold_days=365;
+        }
+    }
+}
+
+
+const baseFillOpLog=(item)=>{
+    if('undefined'===typeof(item.access_history)){
+        item.access_history=[];
+    }else{
+        if(!Array.isArray(item.access_history)){
+            item.access_history=[];
+        }
+    }
 };
+
+
+
 
 /**
  * 获得新的系统设置对象，其中值都为默认值
@@ -1495,6 +1528,22 @@ const getDefaultSettings=()=>{
     baseFillSettingItems(item);
     return [item];
 };
+
+
+/**
+ * // {
+ *                 //     bundle_path: "/dev/java",
+ *                 //     access_time: 1688494282618,
+ *                 //     access_time_str: "23.07.05 三 02:10:55",
+ *                 // },
+ * @return {{access_history: *[]}}
+ */
+const getDefaultOpLog=()=>{
+    const item={};
+    baseFillOpLog(item);
+    return item;
+};
+
 
 const isMatchSettingItem=(osAndMacs, settingItem)=>(settingItem.os===osAndMacs.os && settingItem.macs.some(item=>osAndMacs.macs.includes(item)));
 
@@ -1540,6 +1589,27 @@ const saveSettingValue=(itemName, itemValue)=>{
 };
 
 
+const getAccHis=()=>{
+    const opLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
+    return opLog.access_history;
+};
+
+const saveAccHis=( bundlePath, accessTime, accessTimeStr)=>{
+    const opLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
+    const filteredItems=opLog.access_history.filter(item=> item.bundle_path!==bundlePath);
+    opLog.access_history=[
+        {
+            bundle_path: bundlePath,
+            access_time: accessTime,
+            access_time_str: accessTimeStr,
+        },
+        ...filteredItems,
+    ];
+    const newJsonStr = JSON.stringify(opLog, null, 4);
+    fs.writeFileSync(opLogFilePath, newJsonStr, 'utf-8');
+};
+
+
 /**
  * 初始化工作：
  * 1、持有主窗口对象
@@ -1569,6 +1639,21 @@ const init=(_mainWindow)=>{
             }
         }
 
+        // 操作记录初始化
+        if(!fs.existsSync(opLogFilePath)){
+            fs.writeFileSync(opLogFilePath, JSON.stringify(getDefaultOpLog(), null, 4), 'utf-8');
+        }else{
+            const oldOpLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
+            const oldJsonStr=JSON.stringify(oldOpLog, null, 4);
+            baseFillOpLog(oldOpLog);
+            const newJsonStr = JSON.stringify(oldOpLog, null, 4);
+            if(oldJsonStr!==newJsonStr){
+                fs.writeFileSync(opLogFilePath, newJsonStr, 'utf-8');
+            }
+        }
+
+
+
         const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
         if(assistProcess && assistProcess.stdout){
             const assistListener=(data)=>{
@@ -1584,6 +1669,12 @@ const init=(_mainWindow)=>{
             };
             assistProcess.stdout.on("data", assistListener);
         }
+
+
+        // // tmp....
+        // saveAccHis("/a/b/c", new Date().getTime(), "日期值。。。");
+        // console.log("his is ----------------")
+        // console.log(getAccHis());
     });
 }
 
@@ -1825,6 +1916,8 @@ const ipcHandlers={
     getClipboardHasContent,
     getSettingValue,
     saveSettingValue,
+    saveAccHis,
+    getAccHis,
 };
 
 /**
