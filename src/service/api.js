@@ -345,6 +345,7 @@ class Api{
 
 
 
+
     /**
      * 列出所有文件
      */
@@ -558,26 +559,26 @@ class Api{
         this.saveSettingValue(settingConst.editor_theme, theme);
     };
 
-    /**
-     *
-     * @return promise
-     * {
-     *  show_cnt: 5,
-     *  threshold_days: 365,
-     * }
-     */
-    getAccHisSetting=()=>{
-        return this.getSettingValue(settingConst.access_history);
-    };
+    // /**
+    //  *
+    //  * @return promise
+    //  * {
+    //  *  show_cnt: 5,
+    //  *  threshold_days: 365,
+    //  * }
+    //  */
+    // getAccHisSetting=()=>{
+    //     return this.getSettingValue(settingConst.access_history);
+    // };
 
 
-    /**
-     * 获取访问历史列表
-     * @return {*}
-     */
-    getAccHisList=()=>{
-        return ipcRenderer.invoke('getAccHis');
-    };
+    // /**
+    //  * 获取访问历史列表
+    //  * @return {*}
+    //  */
+    // getAccHisList=()=>{
+    //     return ipcRenderer.invoke('getAccHis');
+    // };
 
 
     /**
@@ -590,6 +591,43 @@ class Api{
     saveAccHisItem=(bundlePath, accessTime, accessTimeStr)=>{
         return ipcRenderer.invoke('saveAccHis', bundlePath, accessTime, accessTimeStr);
     };
+
+    saveAndGetAccHis=(bundlePath, accessTime, accessTimeStr)=>{
+        return ipcRenderer.invoke('saveAndGetAccHis', bundlePath, accessTime, accessTimeStr).then(list=>{
+            return list.map(item=>({
+                showname:       item.name,
+                itemsName:      item.itemsName,
+                fullpath:       item.fullpath,
+                isfile:         item.isfile,
+                size:           item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
+                pic:            item.pic,
+                mdFullpath:     item.mdFullpath,
+                attDir:         item.attDir,
+                tags:           item.tags,
+                accTime:        item.accTime,
+            }));
+        });
+    };
+
+    listRecentOpenFiles=()=>{
+        return ipcRenderer.invoke('listRecentOpenFiles').then(list=>{
+            return list.map(item=>({
+                showname:       item.name,
+                itemsName:      item.itemsName,
+                fullpath:       item.fullpath,
+                isfile:         item.isfile,
+                size:           item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
+                pic:            item.pic,
+                mdFullpath:     item.mdFullpath,
+                attDir:         item.attDir,
+                tags:           item.tags,
+                accTime:        item.accTime,
+            }));
+        });
+    };
+
+
+
 }
 
 const settingConst={

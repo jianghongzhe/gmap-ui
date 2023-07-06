@@ -1,6 +1,6 @@
 import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
 import {allDirs, installPathValid} from '../store/common';
-import {currFileListDir, filelist, fileListDirLevels} from '../store/filelist';
+import {currFileListDir, filelist, fileListDirLevels, recentFileList as recentFileListStore} from '../store/filelist';
 import api from '../service/api';
 import generalSvc from '../service/generalSvc';
 import {useMemoizedFn} from "ahooks";
@@ -85,6 +85,21 @@ export const useLoadAllDirs=()=>{
 };
 
 
+export const useLoadRecentFileList=()=>{
+    const setRecentFileList= useSetRecoilState(recentFileListStore);
+
+    const load= useMemoizedFn((dir=null)=>{
+        (async()=>{
+            const recentOpenFiles=await api.listRecentOpenFiles();
+            setRecentFileList(recentOpenFiles);
+        })();
+    });
+
+    return [load];
+};
+
+
+
 /**
  * 加载文件列表
  * @returns 
@@ -92,53 +107,50 @@ export const useLoadAllDirs=()=>{
 export const useLoadFileList=()=>{
     const setFileList= useSetRecoilState(filelist);
     const setFileListDirLevels= useSetRecoilState(fileListDirLevels);
+    const setRecentFileList= useSetRecoilState(recentFileListStore);
     const currDir=useRecoilValue(currFileListDir);
 
     const load= useMemoizedFn((dir=null)=>{
         (async()=>{
             const filelist=await (dir ? api.list(dir) : api.list());
             const dirs=await (dir ? api.getPathItems(dir) : api.getPathItems());
+            const recentOpenFiles=await api.listRecentOpenFiles();
             setFileList(filelist);
             setFileListDirLevels(dirs);
+            setRecentFileList(recentOpenFiles);
         })();        
     });
 
     const reload=useMemoizedFn(()=>{
-        (async()=>{
-            const filelist=await (currDir ? api.list(currDir) : api.list());
-            const dirs=await (currDir ? api.getPathItems(currDir) : api.getPathItems());
-            setFileList(filelist);
-            setFileListDirLevels(dirs);
-        })();        
+        load(currDir ? currDir : null);
     });
-
     return [load, reload];
 };
+
+
 
 
 export const useGetAndLoadFileList=()=>{
     const [files, setFileList]= useRecoilState(filelist);
     const [dirLevs, setFileListDirLevels]= useRecoilState(fileListDirLevels);
+    const [recentFileList, setRecentFileList]= useRecoilState(recentFileListStore);
     const currDir=useRecoilValue(currFileListDir);
 
     const load= useMemoizedFn((dir=null)=>{
         (async()=>{
             const filelist=await (dir ? api.list(dir) : api.list());
             const dirs=await (dir ? api.getPathItems(dir) : api.getPathItems());
+            const recentOpenFiles=await api.listRecentOpenFiles();
             setFileList(filelist);
             setFileListDirLevels(dirs);
+            setRecentFileList(recentOpenFiles);
         })();        
     });
 
     const reload=useMemoizedFn(()=>{
-        (async()=>{
-            const filelist=await (currDir ? api.list(currDir) : api.list());
-            const dirs=await (currDir ? api.getPathItems(currDir) : api.getPathItems());
-            setFileList(filelist);
-            setFileListDirLevels(dirs);
-        })();        
+        load(currDir ? currDir : null);
     });
 
-    return [files, dirLevs, load, reload];
+    return {files, dirLevs, recentFileList, load, reload};
 };
 

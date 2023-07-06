@@ -564,9 +564,98 @@ const listFiles = (assignedDir = null) => {
     }catch(e){
         console.error(e);
     }
-    //console.log(ret);
     return ret;
 };
+
+
+
+const listRecentOpenFiles=(assignedAccHis)=>{
+
+    const {show_cnt, threshold_days}=getSettingValue("access_history");
+    const mapExt=".textbundle";
+    const mapExtLen=mapExt.length;
+    const list=[];
+    const now=new Date().getTime();
+
+    const accHis=(Array.isArray(assignedAccHis) ? assignedAccHis : getAccHis());
+    accHis.forEach(({bundle_path, access_time, access_time_str})=>{
+        if(list.length>=show_cnt){
+            return;
+        }
+
+        // fullpath   - d:\gmap\gmaps\a\b\haha.textbundle
+        // mdFullpath - d:\gmap\gmaps\a\b\haha.textbundle\text.md
+        // attDir     - d:\gmap\gmaps\a\b\haha.textbundle\assets
+        // itemsName  - a/b/haha
+        // showName   - haha
+        const fullpath =getMapsPath(`${bundle_path.replace(/[/]/g,'\\')}${mapExt}`);
+        const mdFullpath=path.join(fullpath, 'text.md');
+        if(!fs.existsSync(mdFullpath)){
+            return;
+        }
+        const attDir=path.join(fullpath,'assets');
+        const showName= bundle_path.substring(Math.max(bundle_path.lastIndexOf("/"), bundle_path.lastIndexOf("\\"))+1);
+        const itemsName=bundle_path;
+        const tags= getTagsByMdFullPath(mdFullpath);
+
+        // 图片路径
+        let pic=null;
+        const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
+            const tmpFn=ent.name.toLowerCase().trim();
+            return ['.png','.jpg','.jpeg','.gif','.bmp'].some(eachExt=>tmpFn.endsWith(eachExt));
+        });
+        if(0<imgItems.length){
+            if(common.isDevMode()){
+                pic= common.getDevServerFaviconUrl();
+            }else{
+                pic=getFileProtocalUrl(path.join(attDir, imgItems[0].name));
+                pic=encodeURI(pic);
+            }
+        }
+
+        let lastAcc=null;
+        const msDist=Math.abs(now-access_time);
+        const distDays=Math.floor(msDist/86400_000);
+        if(distDays>threshold_days){
+            lastAcc=`${access_time_str}`;
+        }else{
+            if(distDays>=365){
+                lastAcc=`${parseInt(distDays/365)} 年前`;
+            }else if(distDays>=30){
+                lastAcc=`${parseInt(distDays/30)} 个月前`;
+            }else if(distDays>=1){
+                lastAcc=`${parseInt(distDays)} 天前`;
+                console.log("dayday", distDays)
+                console.log("dayday", msDist)
+            }else if(msDist>=3600_000){
+                lastAcc=`${parseInt(msDist/3600_000)} 个小时前`;
+            }else if(msDist>=60_000){
+                lastAcc=`${parseInt(msDist/60_000)} 分钟前`;
+            }else{
+                lastAcc=`刚刚`;
+            }
+        }
+
+
+        list.push({
+            name:       showName,
+            itemsName:  itemsName,//显示在选项卡上的名称：eg. front/css3
+            fullpath,
+            mdFullpath,
+            attDir,
+            isfile:     true,
+            emptyDir:   false,
+            size:       fs.statSync(mdFullpath).size,
+            pic:        pic,
+            tags,
+            accTime:    lastAcc,
+        });
+    });
+    return list;
+};
+
+
+
 
 const trimEndOnce=(str, suffix)=>{
     if(str.endsWith(suffix)){
@@ -1594,7 +1683,8 @@ const getAccHis=()=>{
     return opLog.access_history;
 };
 
-const saveAccHis=( bundlePath, accessTime, accessTimeStr)=>{
+
+const saveAndGetAccHis=( bundlePath, accessTime, accessTimeStr)=>{
     const opLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
     const filteredItems=opLog.access_history.filter(item=> item.bundle_path!==bundlePath);
     opLog.access_history=[
@@ -1607,6 +1697,12 @@ const saveAccHis=( bundlePath, accessTime, accessTimeStr)=>{
     ];
     const newJsonStr = JSON.stringify(opLog, null, 4);
     fs.writeFileSync(opLogFilePath, newJsonStr, 'utf-8');
+    return listRecentOpenFiles(opLog.access_history);
+};
+
+
+const saveAccHis=( bundlePath, accessTime, accessTimeStr)=>{
+    saveAndGetAccHis(bundlePath, accessTime, accessTimeStr);
 };
 
 
@@ -1917,7 +2013,9 @@ const ipcHandlers={
     getSettingValue,
     saveSettingValue,
     saveAccHis,
+    saveAndGetAccHis,
     getAccHis,
+    listRecentOpenFiles,
 };
 
 /**

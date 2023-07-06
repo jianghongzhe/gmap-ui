@@ -17,6 +17,10 @@
         background-color: #40a9ff;
       }
 
+      .avator_recent_file{
+        background-color: #52c41a; //#52c41a; #73d13d
+      }
+
       .avator_folder{
         background-color: orange;
       }
@@ -46,6 +50,11 @@
 
 .top_divider{
   margin-top: 10px !important;
+  margin-bottom: 0 !important;
+}
+
+.list_divider{
+  margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
 

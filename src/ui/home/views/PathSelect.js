@@ -1,6 +1,13 @@
 import React from 'react';
 import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
-import { FileMarkdownOutlined,ReloadOutlined,HomeOutlined,FolderOutlined } from '@ant-design/icons';
+import {
+    FileMarkdownOutlined,
+    ReloadOutlined,
+    HomeOutlined,
+    FolderOutlined,
+    FireOutlined,
+    UserOutlined
+} from '@ant-design/icons';
 import { useBindAndGetRef } from '../../../common/commonHooks';
 import TagItem from "../../common/TagItem";
 import {useMemoizedFn} from "ahooks";
@@ -10,7 +17,7 @@ import styles from './PathSelect.module.scss';
 /**
  * 路径选择
  */
-const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloadCurrDir, onSelectMapItem: onselectFileItem})=>{
+const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, recentFileList, dirs, onloadDir, onloadCurrDir, onSelectMapItem: onselectFileItem})=>{
     const [, bindListRef, getScrollTarget]=useBindAndGetRef();
 
     const onSelectMapItem=useMemoizedFn((item)=>{
@@ -20,6 +27,8 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
         }
         onselectFileItem(item);
     });
+
+    console.log("filelist", filelist);
 
     return (
         <React.Fragment>
@@ -43,15 +52,49 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
             
             {/* id={listWrapperId} */}
             <div  className={classnames(styles.list, {[styles.list_force_maxh]:forceMaxH})} style={{'--max-list-h': maxH,}}  ref={bindListRef}>
+                {/* 最近打开的文档 */}
+                {
+                    recentFileList?.length>0 && <React.Fragment>
+                        <List
+                            itemLayout="horizontal"
+                            split={false}
+                            dataSource={recentFileList}
+                            renderItem={item => (
+                                <List.Item className='listitem' onClick={onSelectMapItem.bind(this,item)} {...getListItemExtra(item)}>
+                                    <List.Item.Meta
+                                        avatar={
+                                            <Avatar icon={<FireOutlined />}
+                                                className='avator_recent_file'/>
+                                        }
+                                        title={((item?.itemsName)??'').replace(/[/]/g, " / ")}
+                                        description={<div>
+                                            <span style={{display:'inline-block', width:'70px'}}>{item.size}</span>
+                                            <TagItem tag={item.accTime} colored={true} icon={<UserOutlined />}/>
+                                            {
+                                                (item.isfile && item.tags && item.tags.length>0) && <span>
+                                                    {item.tags.map((tag,tagInd)=>
+                                                        <TagItem key={`filelist-tag-${tagInd}`} tag={tag} colored={false}/>
+                                                    )}
+                                                </span>
+                                            }
+                                        </div>}/>
+                                </List.Item>
+                            )}
+                        />
+                        <Divider className={styles.list_divider}/>
+                    </React.Fragment>
+                }
+                {/* 目录列表 */}
                 <List
                     itemLayout="horizontal"
+                    split={false}
                     dataSource={filelist}
                     renderItem={item => (
                         <List.Item className='listitem' onClick={onSelectMapItem.bind(this,item)} {...getListItemExtra(item)}>
-                            <List.Item.Meta 
+                            <List.Item.Meta
                                 avatar={
-                                    <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />} 
-                                        className={item.isfile ? 'avator_file' : 'avator_folder'} />
+                                    <Avatar icon={item.isfile ? <FileMarkdownOutlined /> : <FolderOutlined />}
+                                            className={item.isfile ? 'avator_file' : 'avator_folder'} />
                                 }
                                 title={item.showname}
                                 description={<div>
@@ -59,7 +102,7 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, dirs, onloadDir, onloa
                                     {
                                         (item.isfile && item.tags && item.tags.length>0) && <span>
                                             {item.tags.map((tag,tagInd)=>
-                                                <TagItem key={`filelist-tag-${tagInd}`} tag={tag} colored={true}/>
+                                                <TagItem key={`filelist-tag-${tagInd}`} tag={tag} colored={false}/>
                                             )}
                                         </span>
                                     }

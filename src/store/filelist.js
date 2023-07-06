@@ -8,7 +8,12 @@ export const filelist=atom({
 export const fileListDirLevels=atom({
     key:'fileListDirLevels',
     default:[],
-}); 
+});
+
+export const recentFileList=atom({
+    key:'recentFilelist',
+    default:[],
+});
 
 
 export const currFileListDir=selector({

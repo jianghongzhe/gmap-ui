@@ -8,10 +8,12 @@ import mindMapValidateSvc from "../service/mindMapValidateSvc";
 import globalStyleConfig from "../common/globalStyleConfig";
 import {useMemoizedFn} from "ahooks";
 import editorSvcEx from "../service/editorSvcEx";
+import {recentFileList as recentFileListStore} from "../store/filelist";
 
 export const useSelectFileListItem=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
     const [tabPanes, setTabPanes]= useRecoilState(tabPanesState);
+    const setRecentFileList= useSetRecoilState(recentFileListStore);
 
     return useMemoizedFn((item)=>{
         if (!item || !item.isfile) {
@@ -35,10 +37,10 @@ export const useSelectFileListItem=()=>{
                 return;
             }
 
-            // 保存访问历史记录
+            // 保存访问历史记录并更新状态中的数据
             const now=new Date();
-            api.saveAccHisItem(item.itemsName, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
-
+            const recentOpenFiles=await api.saveAndGetAccHis(item.itemsName, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
+            setRecentFileList(recentOpenFiles);
 
             const origintxts =loadResult.txt.replace(/\r/g,'').trim();
             const tags=loadResult.tags??[];
@@ -339,6 +341,7 @@ export const useCreateNewMapPromise=()=>{
 
     const [tabActiveKey, setTabActiveKey]= useRecoilState(tabActiveKeyState);
     const setTabPanes= useSetRecoilState(tabPanesState);
+    const setRecentFileList= useSetRecoilState(recentFileListStore);
 
     return useMemoizedFn(({dir,name,cloneFromCurr})=>{
         return new Promise((res, rej)=>{
@@ -395,7 +398,8 @@ export const useCreateNewMapPromise=()=>{
 
                 // 保存访问历史记录
                 const now=new Date();
-                api.saveAccHisItem(fn, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
+                const recentOpenFiles=await api.saveAndGetAccHis(fn, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
+                setRecentFileList(recentOpenFiles);
 
 
                 //计算导图表格信息并加入新tab      
