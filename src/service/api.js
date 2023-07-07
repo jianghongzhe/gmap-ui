@@ -559,38 +559,10 @@ class Api{
         this.saveSettingValue(settingConst.editor_theme, theme);
     };
 
-    // /**
-    //  *
-    //  * @return promise
-    //  * {
-    //  *  show_cnt: 5,
-    //  *  threshold_days: 365,
-    //  * }
-    //  */
-    // getAccHisSetting=()=>{
-    //     return this.getSettingValue(settingConst.access_history);
-    // };
 
 
-    // /**
-    //  * 获取访问历史列表
-    //  * @return {*}
-    //  */
-    // getAccHisList=()=>{
-    //     return ipcRenderer.invoke('getAccHis');
-    // };
 
 
-    /**
-     * 保存访问历史项
-     * @param bundlePath
-     * @param accessTime
-     * @param accessTimeStr
-     * @return {*}
-     */
-    saveAccHisItem=(bundlePath, accessTime, accessTimeStr)=>{
-        return ipcRenderer.invoke('saveAccHis', bundlePath, accessTime, accessTimeStr);
-    };
 
     saveAndGetAccHis=(bundlePath, accessTime, accessTimeStr)=>{
         return ipcRenderer.invoke('saveAndGetAccHis', bundlePath, accessTime, accessTimeStr).then(list=>{
@@ -599,7 +571,7 @@ class Api{
                 itemsName:      item.itemsName,
                 fullpath:       item.fullpath,
                 isfile:         item.isfile,
-                size:           item.isfile ? getSizeStr(item.size) :(item.emptyDir?"<空目录>":"<目录>"),
+                size:           getSizeStr(item.size),
                 pic:            item.pic,
                 mdFullpath:     item.mdFullpath,
                 attDir:         item.attDir,

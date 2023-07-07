@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 
 const mainSvc = require('./mainSvc');
+const settingSvc = require('./settingSvc');
+const oplogSvc = require('./oplogSvc');
 const findInPageSvc= require('./findInPageSvc');
 const common=require('./common');
 
@@ -111,6 +113,8 @@ app.on('ready', () => {
             app.setAppUserModelId("GMap");
         }
         createWindow();
+        await settingSvc.init(mainWindow);
+        await oplogSvc.init(mainWindow);
         await mainSvc.init(mainWindow);
         findInPageSvc.init(mainWindow);
         loadFirstPage();    

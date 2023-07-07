@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
+const { ipcMain   } = require('electron');
 
 const ws=require('./ws');
+const {BACK_SLASH, SLASH} = require("./consts");
 
 
 
@@ -222,6 +224,80 @@ const getDevServerFaviconUrl=()=>{
     return getDevServerUrl().trim()+"/favicon.ico"
 };
 
+const saveJsonToFile=(json, path)=>{
+    const str=('string'===typeof(json) ? json : JSON.stringify(json, null, 4));
+    fs.writeFileSync(path, str, 'utf-8');
+};
+
+const readJsonFromFile=(path)=>{
+    return JSON.parse(fs.readFileSync(path, 'utf-8'));
+};
+
+
+const toSlash=(path)=>(path.trim().replace(/\\/g,SLASH));
+
+const wrapFileProtocol=(fullpath, encode=false)=>{
+    let url="file:///"+toSlash((fullpath??'').trim());
+    if(true===encode){
+        url=encodeURI(url);
+    }
+    return url;
+};
+
+
+/**
+ * 异步方法的代理
+ * @param {*} handler
+ * @param {*} evt
+ * @param  {...any} args
+ * @returns
+ */
+const delegateHandler=async (handler, evt, ...args)=>{
+    const result = await handler(...args);
+    return result;
+};
+
+/**
+ * 同步方法的代理
+ * @param {*} handler
+ * @param {*} evt
+ * @param  {...any} args
+ */
+const delegateHandlerSync=(handler, evt, ...args)=>{
+    (async()=>{
+        const result=await handler(...args);
+        evt.returnValue=result;
+    })();
+};
+
+
+/**
+ * 注册异步ipc处理器
+ */
+const regIpcHandlers=(ipcHandlers)=>{
+    for(let key in ipcHandlers){
+        ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
+    }
+};
+
+
+/**
+ * 注册同步ipc处理器
+ */
+const regIpcHandlersSync=(ipcHandlers)=>{
+    for(let key in ipcHandlers){
+        ipcMain.on(key+"Sync", delegateHandlerSync.bind(this, ipcHandlers[key]));
+    }
+};
+
+
+
+
+
+
+
+
+
 
 module.exports={
     connWs,
@@ -232,4 +308,9 @@ module.exports={
     isDevMode,
     getDevServerUrl,
     getDevServerFaviconUrl,
+    saveJsonToFile,
+    readJsonFromFile,
+    wrapFileProtocol,
+    regIpcHandlers,
+    regIpcHandlersSync,
 };

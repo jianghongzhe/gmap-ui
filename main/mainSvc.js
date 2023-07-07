@@ -8,49 +8,31 @@ const nodeNet = require('net');
 
 const ws=require('./ws');
 const common=require('./common');
+const settingSvc=require('./settingSvc');
+
+const {
+    userPngImg,
+    appBasePath,
+    externalPath,
+    fileRunnerPath,
+    autoUpdaterDir,
+    autoUpdaterPath,
+    htmlTmplDir,
+    mapsPath,
+    imgsPath,
+    attsPath,
+    workPath,
+    cachePath,
+    packageJsonPath,
+    icons,
+    DEFAULT_SEARCH_URL,
+    ASSIST_STARTED_SYMBOL,
+    SLASH,
+    BACK_SLASH
+}=require("./consts");
 
 
 
-//常量：工作区目录、主配置文件位置
-const userPngImg=true;//默认是否
-const appBasePath=path.join(__dirname, '../');;
-const externalPath=path.join(__dirname, '../', 'externals');
-const fileRunnerPath=path.join(__dirname, '../', 'externals', 'file_runner.exe');
-const autoUpdaterDir=path.join(__dirname, '../../../', 'app_update');
-const autoUpdaterPath=path.join(__dirname, '../../../', 'app_update', 'app_update.exe');
-const htmlTmplDir=path.join(__dirname, '../', 'externals', 'tmpl_html'); 
-const mapsPath=path.join(__dirname, '../', 'gmaps');
-const settingFilePath=path.join(__dirname, '../', 'gmaps','setting.json');
-const opLogFilePath=path.join(__dirname, '../', 'gmaps','oplog.json');
-const imgsPath=path.join(__dirname, '../', 'gmaps','imgs');
-const attsPath=path.join(__dirname, '../', 'gmaps','atts');
-const workPath=path.join(__dirname, '../', 'work');
-const cachePath=path.join(__dirname, '../', 'cache');
-const packageJsonPath=path.join(__dirname, '../', 'package.json');
-
-const iconSuccPath=path.join(__dirname, 'imgs', 'succ.png');
-const iconFailPath=path.join(__dirname, 'imgs', 'fail.png');
-const iconWarnPath=path.join(__dirname, 'imgs', 'warn.png');
-const iconInfoPath=path.join(__dirname, 'imgs', 'info.png');
-const icons={
-    succ: iconSuccPath,
-    fail: iconFailPath,
-    err: iconFailPath,
-    info: iconInfoPath,
-    warn: iconWarnPath,
-};
-
-/**
- * 默认搜索引擎url字符串，其中关键词部分需要以 ##kw## 包裹
- * @type {string}
- */
-const DEFAULT_SEARCH_URL="https://www.baidu.com/s?wd=##kw##";
-
-const ASSIST_STARTED_SYMBOL="started";
-
-
-const SLASH='/';
-const BACK_SLASH='\\';
 
 const url_localicon_map={};
 
@@ -364,7 +346,7 @@ const calcPicUrl=(mdFullpath,picRelaPath)=>{
 
     const faviconUrl=common.getDevServerFaviconUrl();
     const attFullpath=path.join(path.dirname(mdFullpath), picRelaPath);
-    const factUrl=getFileProtocalUrl(attFullpath);
+    const factUrl=common.wrapFileProtocol(attFullpath);
 
     if(common.isDevMode()){
         return [faviconUrl, factUrl];
@@ -384,7 +366,7 @@ const calcAttUrl=(mdFullpath,picRelaPath)=>{
     }
 
     const attFullpath=path.join(path.dirname(mdFullpath), picRelaPath);
-    return getFileProtocalUrl(attFullpath);
+    return common.wrapFileProtocol(attFullpath);
 }
 
 
@@ -536,8 +518,7 @@ const listFiles = (assignedDir = null) => {
                     if(common.isDevMode()){
                         pic= common.getDevServerFaviconUrl();
                     }else{
-                        pic=getFileProtocalUrl(path.join(attDir, imgItems[0].name));
-                        pic=encodeURI(pic);
+                        pic=common.wrapFileProtocol(path.join(attDir, imgItems[0].name), true);
                     }
                 }
             }
@@ -569,90 +550,6 @@ const listFiles = (assignedDir = null) => {
 
 
 
-const listRecentOpenFiles=(assignedAccHis)=>{
-
-    const {show_cnt, threshold_days}=getSettingValue("access_history");
-    const mapExt=".textbundle";
-    const mapExtLen=mapExt.length;
-    const list=[];
-    const now=new Date().getTime();
-
-    const accHis=(Array.isArray(assignedAccHis) ? assignedAccHis : getAccHis());
-    accHis.forEach(({bundle_path, access_time, access_time_str})=>{
-        if(list.length>=show_cnt){
-            return;
-        }
-
-        // fullpath   - d:\gmap\gmaps\a\b\haha.textbundle
-        // mdFullpath - d:\gmap\gmaps\a\b\haha.textbundle\text.md
-        // attDir     - d:\gmap\gmaps\a\b\haha.textbundle\assets
-        // itemsName  - a/b/haha
-        // showName   - haha
-        const fullpath =getMapsPath(`${bundle_path.replace(/[/]/g,'\\')}${mapExt}`);
-        const mdFullpath=path.join(fullpath, 'text.md');
-        if(!fs.existsSync(mdFullpath)){
-            return;
-        }
-        const attDir=path.join(fullpath,'assets');
-        const showName= bundle_path.substring(Math.max(bundle_path.lastIndexOf("/"), bundle_path.lastIndexOf("\\"))+1);
-        const itemsName=bundle_path;
-        const tags= getTagsByMdFullPath(mdFullpath);
-
-        // 图片路径
-        let pic=null;
-        const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
-            const tmpFn=ent.name.toLowerCase().trim();
-            return ['.png','.jpg','.jpeg','.gif','.bmp'].some(eachExt=>tmpFn.endsWith(eachExt));
-        });
-        if(0<imgItems.length){
-            if(common.isDevMode()){
-                pic= common.getDevServerFaviconUrl();
-            }else{
-                pic=getFileProtocalUrl(path.join(attDir, imgItems[0].name));
-                pic=encodeURI(pic);
-            }
-        }
-
-        let lastAcc=null;
-        const msDist=Math.abs(now-access_time);
-        const distDays=Math.floor(msDist/86400_000);
-        if(distDays>threshold_days){
-            lastAcc=`${access_time_str}`;
-        }else{
-            if(distDays>=365){
-                lastAcc=`${parseInt(distDays/365)} 年前`;
-            }else if(distDays>=30){
-                lastAcc=`${parseInt(distDays/30)} 个月前`;
-            }else if(distDays>=1){
-                lastAcc=`${parseInt(distDays)} 天前`;
-                console.log("dayday", distDays)
-                console.log("dayday", msDist)
-            }else if(msDist>=3600_000){
-                lastAcc=`${parseInt(msDist/3600_000)} 个小时前`;
-            }else if(msDist>=60_000){
-                lastAcc=`${parseInt(msDist/60_000)} 分钟前`;
-            }else{
-                lastAcc=`刚刚`;
-            }
-        }
-
-
-        list.push({
-            name:       showName,
-            itemsName:  itemsName,//显示在选项卡上的名称：eg. front/css3
-            fullpath,
-            mdFullpath,
-            attDir,
-            isfile:     true,
-            emptyDir:   false,
-            size:       fs.statSync(mdFullpath).size,
-            pic:        pic,
-            tags,
-            accTime:    lastAcc,
-        });
-    });
-    return list;
-};
 
 
 
@@ -847,7 +744,7 @@ const screenShotCombine=(opt)=>{
  * @param kw
  */
 const searchKeyword=(kw)=>{
-    let searchUrl = getSettingValue("search_engine");
+    let searchUrl = settingSvc.getSettingValue("search_engine");
     if('default'===searchUrl){
         searchUrl=DEFAULT_SEARCH_URL;
     }else{
@@ -893,7 +790,7 @@ const openUrl=(url)=>{
     // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
     if(url.startsWith("file://")){
         if(isImgExt(url)){
-            const imgOpener=getSettingValue("img_opener");
+            const imgOpener=settingSvc.getSettingValue("img_opener");
             if('default'!==imgOpener){
                 const beginInd= (url.startsWith("file:///") ? "file:///".length : "file://".length);
                 return sendCmdToServer("openby", {url: `openby://${url.substring(beginInd)}@@${imgOpener}`,}).then(resp=>{
@@ -1005,7 +902,7 @@ const openUrl=(url)=>{
 
     // 打开网址：如果未指定打开方式，则使用系统默认的，否则使用指定打开方式打开，借助openby协议
     if(url.startsWith("http://") || url.startsWith("https://")){
-        const urlOpener=getSettingValue("url_opener");
+        const urlOpener=settingSvc.getSettingValue("url_opener");
         if('default'===urlOpener){
             shell.openExternal(url);
             return;
@@ -1061,12 +958,12 @@ const getClipboardHasContent=()=>{
 
 
 const openPicByName=(picName)=>{
-    let url=getFileProtocalUrl(getImgsPath(picName));
+    let url=common.wrapFileProtocol(getImgsPath(picName));
     openUrl(url);
 }
 
 const openAttByName=(attName)=>{
-    let url=getFileProtocalUrl(getAttsPath(attName));
+    let url=common.wrapFileProtocol(getAttsPath(attName));
     openUrl(url);
 }
 
@@ -1131,7 +1028,7 @@ const saveFile = (fullpath, content, tags=[]) => {
 
 const getTagsByMdFullPath=(mdFullpath)=>{
     const jsonFilePath= path.join(path.dirname(mdFullpath), "info.json");
-    const json=JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+    const json=common.readJsonFromFile(jsonFilePath);
     return json.tags || [];
 };
 
@@ -1456,7 +1353,7 @@ const selAttFile = (mainWindow) => {
  */
 const openMapsDir = () => {
     let mapsPath = getMapsPath();
-    let url =getFileProtocalUrl(mapsPath); //转换为file协议的url
+    let url =common.wrapFileProtocol(mapsPath); //转换为file协议的url
     openUrl(url);
 }
 
@@ -1500,7 +1397,7 @@ const loadAppInfo=()=>{
         return appInfoCache;
     }
     // dependencies react antd
-    let {name,showname,version,dependencies:{react,antd}}=JSON.parse(fs.readFileSync(packageJsonPath,'utf-8'));
+    let {name,showname,version,dependencies:{react,antd}}=common.readJsonFromFile(packageJsonPath);
     if(react.startsWith("^")){
         react=react.substring(1);
     }
@@ -1521,258 +1418,9 @@ const openDevTool=()=>{
 }
 
 
-/**
- * 获得本机相关信息，用于识别不同机器，以使不同机器有不同设置
- * @return {{os: string, macs: Set<unknown>}}
- */
-const getOsAndMacs=()=>{
-    const isZeroMac=(mac)=>(''===mac.replace(/(00)|([:])/g,''));
-    let nets=os.networkInterfaces();
-    let macs=new Set();
-    for(let key in nets){
-        nets[key].filter(item=>true!==item.internal)
-            .filter(item=>!isZeroMac(item.mac))
-            .filter(item=>'ipv4'===item.family.toLowerCase())
-            .map(item=>item.mac)
-            .forEach(mac=>macs.add(mac));	;
-    }
-    macs=[...macs];
-    return {
-        os: os.version()+" "+os.arch(),
-        macs
-    };
-};
-
-
-/**
- * 填充系统设置项：
- * {
- *      settings: {
- *          editor_theme: 'default',
- *          theme: 'default',
- *          url_opener: 'default',
- *      }
- * }
- * @param item
- */
-const baseFillSettingItems=(item)=>{
-    if('undefined'===typeof(item.settings)){
-        item.settings={};
-    }
-
-    // 单个值的项
-    if('undefined'===typeof(item.settings.editor_theme)){
-        item.settings.editor_theme='default';
-    }
-    if('undefined'===typeof(item.settings.theme)){
-        item.settings.theme='default';
-    }
-    if('undefined'===typeof(item.settings.url_opener)){
-        item.settings.url_opener='default';
-    }
-    if('undefined'===typeof(item.settings.img_opener)){
-        item.settings.img_opener='default';
-    }
-    if('undefined'===typeof(item.settings.search_engine)){
-        item.settings.search_engine='default';
-    }
-
-    // 多个值的项
-    // 访问历史记录的设置
-    if('undefined'===typeof(item.settings.access_history)){
-        item.settings.access_history={
-            show_cnt: 5,
-            threshold_days: 365,
-        };
-    }else{
-        if('undefined'===typeof(item.settings.access_history.show_cnt)){
-            item.settings.access_history.show_cnt=5;
-        }
-        if('undefined'===typeof(item.settings.access_history.threshold_days)){
-            item.settings.access_history.threshold_days=365;
-        }
-    }
-}
-
-
-const baseFillOpLog=(item)=>{
-    if('undefined'===typeof(item.access_history)){
-        item.access_history=[];
-    }else{
-        if(!Array.isArray(item.access_history)){
-            item.access_history=[];
-        }
-    }
-};
 
 
 
-
-/**
- * 获得新的系统设置对象，其中值都为默认值
- * @return {{theme: string}}
- */
-const getDefaultSettings=()=>{
-    const item=getOsAndMacs();
-    baseFillSettingItems(item);
-    return [item];
-};
-
-
-/**
- * // {
- *                 //     bundle_path: "/dev/java",
- *                 //     access_time: 1688494282618,
- *                 //     access_time_str: "23.07.05 三 02:10:55",
- *                 // },
- * @return {{access_history: *[]}}
- */
-const getDefaultOpLog=()=>{
-    const item={};
-    baseFillOpLog(item);
-    return item;
-};
-
-
-const isMatchSettingItem=(osAndMacs, settingItem)=>(settingItem.os===osAndMacs.os && settingItem.macs.some(item=>osAndMacs.macs.includes(item)));
-
-/**
- * 把给定的系统设置对象转换为新的格式，即补充新出现的设置项等
- * 判断本机的依据：操作系统名称相同且mac地址之间有交集
- * 如果为本机，则以当前获取到的mac地址与之前记录过的mac地址的交集为新的mac地址
- * 补充没有的设置项
- * @param oldJson
- */
-const fillNewSettingItems=(oldJson)=>{
-    const osAndMacs=getOsAndMacs();
-    let foundCurrMarchine=false;
-    oldJson.forEach(each=>{
-        const isCurrMachine=isMatchSettingItem(osAndMacs, each);
-        if(isCurrMachine){
-            foundCurrMarchine=true;
-            each.macs=each.macs.filter(item=>osAndMacs.macs.includes(item)); // [...new Set([...each.macs, ...osAndMacs.macs])];
-        }
-        baseFillSettingItems(each);
-    });
-    if(!foundCurrMarchine){
-        oldJson.push(getDefaultSettings()[0]);
-    }
-};
-
-const getSettingValue=(itemName)=>{
-    const osAndMacs=getOsAndMacs();
-    const oldSettings=JSON.parse(fs.readFileSync(settingFilePath,'utf-8'));
-    const val = oldSettings.filter(each=>isMatchSettingItem(osAndMacs, each))[0].settings[itemName];
-    return val;
-};
-
-const saveSettingValue=(itemName, itemValue)=>{
-    const osAndMacs=getOsAndMacs();
-    const oldSettings=JSON.parse(fs.readFileSync(settingFilePath,'utf-8'));
-    const oldJsonStr=JSON.stringify(oldSettings, null, 4);
-    oldSettings.filter(each=>isMatchSettingItem(osAndMacs, each))[0].settings[itemName]=itemValue;
-    const newJsonStr = JSON.stringify(oldSettings, null, 4);
-    if(oldJsonStr!==newJsonStr){
-        fs.writeFileSync(settingFilePath, newJsonStr, 'utf-8');
-    }
-};
-
-
-const getAccHis=()=>{
-    const opLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
-    return opLog.access_history;
-};
-
-
-const saveAndGetAccHis=( bundlePath, accessTime, accessTimeStr)=>{
-    const opLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
-    const filteredItems=opLog.access_history.filter(item=> item.bundle_path!==bundlePath);
-    opLog.access_history=[
-        {
-            bundle_path: bundlePath,
-            access_time: accessTime,
-            access_time_str: accessTimeStr,
-        },
-        ...filteredItems,
-    ];
-    const newJsonStr = JSON.stringify(opLog, null, 4);
-    fs.writeFileSync(opLogFilePath, newJsonStr, 'utf-8');
-    return listRecentOpenFiles(opLog.access_history);
-};
-
-
-const saveAccHis=( bundlePath, accessTime, accessTimeStr)=>{
-    saveAndGetAccHis(bundlePath, accessTime, accessTimeStr);
-};
-
-
-/**
- * 初始化工作：
- * 1、持有主窗口对象
- * 2、创建初始目录：导图目录、工作目录、缓存目录等
- * 3、启动后台监听服务，并监听其控制台输出，在得到启动完成标志后连接后台服务websocket，同时不再监听
- * @returns {*} promise 准备完成后调用promise的resolve
- */
-const init=(_mainWindow)=>{
-    return new Promise((res, rej)=>{
-        mainWindow=_mainWindow;
-        [mapsPath, workPath, cachePath].forEach(eachWorkdir=>{
-            if(!fs.existsSync(eachWorkdir)){
-                fs.mkdirSync(eachWorkdir,{recursive:true});
-            }
-        });
-
-        // 配置文件初始化：如果不存在，则创建并设置默认值；如果存在，则把新设置项加入（版本升级造成出现新设置项等）后重新保存
-        if(!fs.existsSync(settingFilePath)){
-            fs.writeFileSync(settingFilePath, JSON.stringify(getDefaultSettings(), null, 4), 'utf-8');
-        }else{
-            const oldSettings=JSON.parse(fs.readFileSync(settingFilePath,'utf-8'));
-            const oldJsonStr=JSON.stringify(oldSettings, null, 4);
-            fillNewSettingItems(oldSettings);
-            const newJsonStr = JSON.stringify(oldSettings, null, 4);
-            if(oldJsonStr!==newJsonStr){
-                fs.writeFileSync(settingFilePath, newJsonStr, 'utf-8');
-            }
-        }
-
-        // 操作记录初始化
-        if(!fs.existsSync(opLogFilePath)){
-            fs.writeFileSync(opLogFilePath, JSON.stringify(getDefaultOpLog(), null, 4), 'utf-8');
-        }else{
-            const oldOpLog=JSON.parse(fs.readFileSync(opLogFilePath,'utf-8'));
-            const oldJsonStr=JSON.stringify(oldOpLog, null, 4);
-            baseFillOpLog(oldOpLog);
-            const newJsonStr = JSON.stringify(oldOpLog, null, 4);
-            if(oldJsonStr!==newJsonStr){
-                fs.writeFileSync(opLogFilePath, newJsonStr, 'utf-8');
-            }
-        }
-
-
-
-        const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
-        if(assistProcess && assistProcess.stdout){
-            const assistListener=(data)=>{
-                if(!(data instanceof Buffer)){
-                    return;
-                }
-                if(ASSIST_STARTED_SYMBOL===data.toString("utf-8").trim()){
-                    assistProcess.stdout.removeListener("data", assistListener);
-                    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-                    common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
-                    common.connWs(server_info.connectUrl).then(res);
-                }
-            };
-            assistProcess.stdout.on("data", assistListener);
-        }
-
-
-        // // tmp....
-        // saveAccHis("/a/b/c", new Date().getTime(), "日期值。。。");
-        // console.log("his is ----------------")
-        // console.log(getAccHis());
-    });
-}
 
 
 const openUpdateApp=()=>{
@@ -1808,11 +1456,7 @@ const toSlash=(path)=>(path.trim().replace(/\\/g,SLASH));
  */
 const toBackSlash=(path)=>(path.trim().replace(/[/]/g,BACK_SLASH));
 
-/**
- * 把本地全路径转换成file协议的url
- * @param {*} fullpath 全路径
- */
-const getFileProtocalUrl=(fullpath)=>("file:///"+toSlash(fullpath.trim()));
+
 
 /**
  * 获取图形文件所在目录或文件全路径
@@ -2010,54 +1654,54 @@ const ipcHandlers={
     getUrlFromClipboard,
     getImgUrlFromClipboard,
     getClipboardHasContent,
-    getSettingValue,
-    saveSettingValue,
-    saveAccHis,
-    saveAndGetAccHis,
-    getAccHis,
-    listRecentOpenFiles,
+
+
 };
 
-/**
- * 异步方法的代理
- * @param {*} handler 
- * @param {*} evt 
- * @param  {...any} args 
- * @returns 
- */
-const delegateHandler=async (handler, evt, ...args)=>{
-    const result = await handler(...args);
-    return result;
-};
+
 
 /**
- * 同步方法的代理
- * @param {*} handler 
- * @param {*} evt 
- * @param  {...any} args 
+ * 初始化工作：
+ * 1、持有主窗口对象
+ * 2、创建初始目录：导图目录、工作目录、缓存目录等
+ * 3、启动后台监听服务，并监听其控制台输出，在得到启动完成标志后连接后台服务websocket，同时不再监听
+ * @returns {*} promise 准备完成后调用promise的resolve
  */
-const delegateHandlerSync=(handler, evt, ...args)=>{
-    (async()=>{
-        const result=await handler(...args);
-        evt.returnValue=result;
-    })();    
-};
+const init=(_mainWindow)=>{
+    return new Promise((res, rej)=>{
+        mainWindow=_mainWindow;
+        [mapsPath, workPath, cachePath].forEach(eachWorkdir=>{
+            if(!fs.existsSync(eachWorkdir)){
+                fs.mkdirSync(eachWorkdir,{recursive:true});
+            }
+        });
 
-/**
- * 接收异步调用并返回promise
- */
-for(let key in ipcHandlers){
-    ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
+        common.regIpcHandlers(ipcHandlers);
+        common.regIpcHandlersSync(ipcHandlers);
+
+        const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
+        if(assistProcess && assistProcess.stdout){
+            const assistListener=(data)=>{
+                if(!(data instanceof Buffer)){
+                    return;
+                }
+                if(ASSIST_STARTED_SYMBOL===data.toString("utf-8").trim()){
+                    assistProcess.stdout.removeListener("data", assistListener);
+                    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
+                    common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
+                    common.connWs(server_info.connectUrl).then(res);
+                }
+            };
+            assistProcess.stdout.on("data", assistListener);
+        }
+
+
+        // // tmp....
+        // saveAccHis("/a/b/c", new Date().getTime(), "日期值。。。");
+        // console.log("his is ----------------")
+        // console.log(getAccHis());
+    });
 }
-
-/**
- * 接收同步调用并返回实际结果
- */
-for(let key in ipcHandlers){
-    ipcMain.on(key+"Sync", delegateHandlerSync.bind(this, ipcHandlers[key]));
-}
-
-
 
 
 module.exports={
