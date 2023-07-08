@@ -160,8 +160,7 @@ const init=(_mainWindow)=>{
                 fs.writeFileSync(settingFilePath, newJsonStr, 'utf-8');
             }
         }
-        common.regIpcHandlers(ipcHandlers);
-        common.regIpcHandlersSync(ipcHandlers);
+        common.regSyncAndAsyncIpcHandlers(ipcHandlers);
         console.log("settingSvc init");
         res();
     });

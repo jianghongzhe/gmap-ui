@@ -291,7 +291,10 @@ const regIpcHandlersSync=(ipcHandlers)=>{
 };
 
 
-
+const regSyncAndAsyncIpcHandlers=(ipcHandlers)=>{
+    regIpcHandlers(ipcHandlers);
+    regIpcHandlersSync(ipcHandlers);
+};
 
 
 
@@ -311,6 +314,7 @@ module.exports={
     saveJsonToFile,
     readJsonFromFile,
     wrapFileProtocol,
-    regIpcHandlers,
-    regIpcHandlersSync,
+    // regIpcHandlers,
+    // regIpcHandlersSync,
+    regSyncAndAsyncIpcHandlers,
 };

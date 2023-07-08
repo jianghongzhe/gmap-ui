@@ -5,6 +5,7 @@ const fs = require('fs');
 const mainSvc = require('./mainSvc');
 const settingSvc = require('./settingSvc');
 const oplogSvc = require('./oplogSvc');
+const appSvc= require('./appSvc');
 const findInPageSvc= require('./findInPageSvc');
 const common=require('./common');
 
@@ -115,6 +116,7 @@ app.on('ready', () => {
         createWindow();
         await settingSvc.init(mainWindow);
         await oplogSvc.init(mainWindow);
+        await appSvc.init(mainWindow);
         await mainSvc.init(mainWindow);
         findInPageSvc.init(mainWindow);
         loadFirstPage();    

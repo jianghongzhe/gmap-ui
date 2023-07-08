@@ -165,8 +165,7 @@ const init=(_mainWindow)=>{
                 fs.writeFileSync(opLogFilePath, newJsonStr, 'utf-8');
             }
         }
-        common.regIpcHandlers(ipcHandlers);
-        common.regIpcHandlersSync(ipcHandlers);
+        common.regSyncAndAsyncIpcHandlers(ipcHandlers);
         console.log("oplogSvc init");
         res();
     });

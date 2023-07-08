@@ -9,6 +9,7 @@ const nodeNet = require('net');
 const ws=require('./ws');
 const common=require('./common');
 const settingSvc=require('./settingSvc');
+const appSvc =require("./appSvc");
 
 const {
     userPngImg,
@@ -64,7 +65,7 @@ let reqCallbackMap={};
 
 
 
-let appInfoCache=null;
+
 
 
 //===========暴露的接口================================================
@@ -730,7 +731,7 @@ const loadIcon=(url)=>{
 const screenShotCombine=(opt)=>{
     return sendCmdToServer("shotCombine", opt).then(resp=>{
         if(resp && resp.succ){
-            showNotification(resp.data.title, resp.data.body, 'succ');
+            appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
         }
         return resp;
     });
@@ -772,7 +773,7 @@ const openUrl=(url)=>{
     if(url.startsWith("start://")){
         return sendCmdToServer("start", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -781,7 +782,7 @@ const openUrl=(url)=>{
     if(url.startsWith("cmdopen://")){
         return sendCmdToServer("cmdopen", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -795,7 +796,7 @@ const openUrl=(url)=>{
                 const beginInd= (url.startsWith("file:///") ? "file:///".length : "file://".length);
                 return sendCmdToServer("openby", {url: `openby://${url.substring(beginInd)}@@${imgOpener}`,}).then(resp=>{
                     if(resp && false===resp.succ){
-                        showNotification("操作有误", resp.msg, 'err');
+                        appSvc.showNotification("操作有误", resp.msg, 'err');
                     }
                     return resp;
                 });
@@ -803,7 +804,7 @@ const openUrl=(url)=>{
         }
         return sendCmdToServer("file", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -812,7 +813,7 @@ const openUrl=(url)=>{
     if(url.startsWith("openas://")){
         return sendCmdToServer("openas", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -821,7 +822,7 @@ const openUrl=(url)=>{
     if(url.startsWith("openby://")){
         return sendCmdToServer("openby", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -830,7 +831,7 @@ const openUrl=(url)=>{
     if(url.startsWith("diropenby://")){
         return sendCmdToServer("diropenby", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -839,7 +840,7 @@ const openUrl=(url)=>{
     if(url.startsWith("openin://")){
         return sendCmdToServer("openin", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -848,7 +849,7 @@ const openUrl=(url)=>{
     if(url.startsWith("dir://")){
         return sendCmdToServer("dir", {url}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -857,7 +858,7 @@ const openUrl=(url)=>{
     if(url.startsWith("cp://")){
         return sendCmdToServer("cp", {url}).then(resp=>{
             if(resp && resp.succ){
-                showNotification(resp.data.title, resp.data.body, 'succ');
+                appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
             }          
             return resp;
         });
@@ -866,10 +867,10 @@ const openUrl=(url)=>{
     if(url.startsWith("cppath://")){
         return sendCmdToServer("cppath", {url}).then(resp=>{
             if(resp && resp.succ){
-                showNotification(resp.data.title, resp.data.body, 'succ');
+                appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
             }
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -894,7 +895,7 @@ const openUrl=(url)=>{
         }
         return sendCmdToServer("saveImgBase64", {url, savePath}).then(resp=>{
             if(resp && resp.succ){
-                showNotification(resp.data.title, resp.data.body, 'succ');
+                appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
             }
             return resp;
         });
@@ -909,7 +910,7 @@ const openUrl=(url)=>{
         }
         return sendCmdToServer("openby", {url: `openby://${url}@@${urlOpener}`,}).then(resp=>{
             if(resp && false===resp.succ){
-                showNotification("操作有误", resp.msg, 'err');
+                appSvc.showNotification("操作有误", resp.msg, 'err');
             }
             return resp;
         });
@@ -1179,10 +1180,10 @@ const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
     // 包目录打包生成结果文件
     sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath, containsRootDir:true,}).then(rs=>{
         if(rs.succ){
-            showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
+            appSvc.showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
             return;
         }
-        showNotification('markdown导出有误', rs.msg, 'err');
+        appSvc.showNotification('markdown导出有误', rs.msg, 'err');
     });
 };
 
@@ -1254,10 +1255,10 @@ const expHtml=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
     }
     sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath, containsRootDir:false,}).then(rs=>{
         if(rs.succ){
-            showNotification('html已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
+            appSvc.showNotification('html已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
             return;
         }
-        showNotification('html导出有误', rs.msg, 'err');
+        appSvc.showNotification('html导出有误', rs.msg, 'err');
     })
 };
 
@@ -1369,68 +1370,7 @@ const openCurrMapDir=(mdFullpath)=>{
 
 
 
-/**
- * 在图表目录打开bash，以方便git提交
- */
-const openGitBash = () => {
-    const now=new Date();
-    const m=now.getMonth()+1;
-    const d=now.getDate();
-    const ymd=`${now.getFullYear()}-${m<10 ? "0"+m : m}-${d<10 ? "0"+d : d}`;
 
-    spawn(
-        'cmd.exe',
-        ['/c', `start "GMap_${ymd}" cmd`],
-        {
-            shell: true,           //使用shell运行
-            cwd: getMapsPath()   //当前目录为图表文件目录
-        }
-    );
-}
-
-
-/**
- * 加载应用名称版本等信息
- */
-const loadAppInfo=()=>{
-    if(appInfoCache){
-        return appInfoCache;
-    }
-    // dependencies react antd
-    let {name,showname,version,dependencies:{react,antd}}=common.readJsonFromFile(packageJsonPath);
-    if(react.startsWith("^")){
-        react=react.substring(1);
-    }
-    if(antd.startsWith("^")){
-        antd=antd.substring(1);
-    }
-    appInfoCache={name,showname,version,react,antd};
-    return appInfoCache;
-}
-
-const reloadAppPage=()=>{
-    mainWindow.webContents.reloadIgnoringCache();
-}
-
-
-const openDevTool=()=>{
-    mainWindow.webContents.openDevTools({detach:true});
-}
-
-
-
-
-
-
-
-const openUpdateApp=()=>{
-    if(!existsFullpath(autoUpdaterPath)){
-        showNotification('未找到自动更新模块', '请安装该模块后再使用', 'err');
-        return;
-    }
-    execFile(autoUpdaterPath, [`${process.pid}`], {cwd: autoUpdaterDir});
-    return null;
-};
 
 
 
@@ -1532,42 +1472,7 @@ const downFile=(url,savePath)=>{
 }
 
 
-/**
- * 显示系统通知并在一会后自动关闭
- * @param  {...any} args 
- * 1个值：消息内容
- * 2个值：标题、内容
- * 3个值：标题、内容、图标类型（succ、err、info、warn）
- */
-const showNotification=(...args)=>{
-    if(!args || 0==args.length){
-        return;
-    }
 
-    let title="信息";
-    let body="";
-    let icon="info";
-    
-    if(1==args.length){
-        body=args[0];
-    }else if(2==args.length){
-        title=args[0];
-        body=args[1];
-    }else if(3<=args.length){
-        title=args[0];
-        body=args[1];
-        icon=args[2];
-        if(!icons[icon]){
-            icon="info";
-        }
-    }
-    // const n=new Notification({ title, body, icon: icons[icon] });
-    // n.show();
-    // setTimeout(() => {
-    //     n.close();
-    // }, 6*1000);
-    sendCmdToServer("notify", {pic:icons[icon], title, body }).then();
-};
 
 
 
@@ -1606,13 +1511,10 @@ const ipcHandlers={
     takeScreenShot,
     screenShotCombine,
     loadIcon,
-    showNotification,
     getInnerModuleVersions,
-    loadAppInfo,
-    openGitBash,
+
     openMapsDir,
-    reloadAppPage,
-    openDevTool,
+
     isMaximized,
     getBasePath,
     openUrl,
@@ -1645,7 +1547,6 @@ const ipcHandlers={
     expPdf,
     expMarkdown,
     expHtml,
-    openUpdateApp,
     copyTxtQuiet,
     isDevMode: common.isDevMode,
     searchInFile,
@@ -1676,8 +1577,7 @@ const init=(_mainWindow)=>{
             }
         });
 
-        common.regIpcHandlers(ipcHandlers);
-        common.regIpcHandlersSync(ipcHandlers);
+        common.regSyncAndAsyncIpcHandlers(ipcHandlers);
 
         const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
         if(assistProcess && assistProcess.stdout){
@@ -1694,12 +1594,6 @@ const init=(_mainWindow)=>{
             };
             assistProcess.stdout.on("data", assistListener);
         }
-
-
-        // // tmp....
-        // saveAccHis("/a/b/c", new Date().getTime(), "日期值。。。");
-        // console.log("his is ----------------")
-        // console.log(getAccHis());
     });
 }
 
