@@ -1,14 +1,15 @@
 import React from 'react';
-import { Breadcrumb,Button,Row, Col,List, Avatar,Divider,BackTop   } from 'antd';
+import {Avatar, BackTop, Breadcrumb, Button, Col, Divider, List, Row} from 'antd';
 import {
+    ClearOutlined,
     FileMarkdownOutlined,
-    ReloadOutlined,
-    HomeOutlined,
     FolderOutlined,
-    FireOutlined,
+    HistoryOutlined,
+    HomeOutlined,
+    ReloadOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import { useBindAndGetRef } from '../../../common/commonHooks';
+import {useBindAndGetRef} from '../../../common/commonHooks';
 import TagItem from "../../common/TagItem";
 import {useMemoizedFn} from "ahooks";
 import classnames from 'classnames';
@@ -17,7 +18,7 @@ import styles from './PathSelect.module.scss';
 /**
  * 路径选择
  */
-const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, recentFileList, dirs, onloadDir, onloadCurrDir, onSelectMapItem: onselectFileItem})=>{
+const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, recentFileList, dirs, onloadDir, onloadCurrDir,onClearAccHis, onSelectMapItem: onselectFileItem})=>{
     const [, bindListRef, getScrollTarget]=useBindAndGetRef();
 
     const onSelectMapItem=useMemoizedFn((item)=>{
@@ -28,12 +29,10 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, recentFileList, dirs, 
         onselectFileItem(item);
     });
 
-    console.log("filelist", filelist);
-
     return (
         <React.Fragment>
             <Row>
-                <Col span={22}>
+                <Col span={21}>
                     <Breadcrumb> 
                         {
                             dirs.map((dir,ind)=>(
@@ -44,8 +43,9 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, recentFileList, dirs, 
                         }    
                     </Breadcrumb>
                 </Col>
-                <Col span={2} className={styles.refresh_btn_container}>
-                    <Button title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} onClick={onloadCurrDir} />
+                <Col span={3} className={styles.refresh_btn_container}>
+                    {/*<Button className='btn' title='清空浏览记录' size='small' type="default" shape="circle" icon={<ClearOutlined />} onClick={onClearAccHis.bind(this, item)} />*/}
+                    <Button className='btn' title='刷新' size='small' type="default" shape="circle" icon={<ReloadOutlined />} onClick={onloadCurrDir} />
                 </Col>
             </Row>                          
             <Divider className={styles.top_divider}/>
@@ -60,10 +60,10 @@ const PathSelect=({maxH, forceMaxH, backtopLoc, filelist, recentFileList, dirs, 
                             split={false}
                             dataSource={recentFileList}
                             renderItem={item => (
-                                <List.Item className='listitem' onClick={onSelectMapItem.bind(this,item)} {...getListItemExtra(item)}>
+                                <List.Item className='listitem' onContextMenu={onClearAccHis.bind(this, item)} onClick={onSelectMapItem.bind(this,item)} {...getListItemExtra(item)}>
                                     <List.Item.Meta
                                         avatar={
-                                            <Avatar icon={<FireOutlined />}
+                                            <Avatar icon={<HistoryOutlined />}
                                                 className='avator_recent_file'/>
                                         }
                                         title={((item?.itemsName)??'').replace(/[/]/g, " / ")}

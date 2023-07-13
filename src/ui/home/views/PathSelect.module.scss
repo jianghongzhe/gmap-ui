@@ -46,6 +46,12 @@
 
 .refresh_btn_container{
   text-align: right;
+  background-color: transparent;
+  :global{
+    .btn + .btn {
+      margin-left: 10px;
+    }
+  }
 }
 
 .top_divider{

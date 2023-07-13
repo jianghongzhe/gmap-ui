@@ -598,6 +598,10 @@ class Api{
         });
     };
 
+    clearRecentOpenFiles=(itemsName=null)=>{
+        return ipcRenderer.invoke('clearAttHis', itemsName);
+    };
+
 
 
 }

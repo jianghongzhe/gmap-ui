@@ -147,10 +147,19 @@ export const useGetAndLoadFileList=()=>{
         })();        
     });
 
+
+
     const reload=useMemoizedFn(()=>{
         load(currDir ? currDir : null);
     });
 
-    return {files, dirLevs, recentFileList, load, reload};
+    const clearAccHisAndReload=useMemoizedFn((name=null)=>{
+        (async ()=>{
+            await api.clearRecentOpenFiles(name);
+            reload();
+        })();
+    });
+
+    return {files, dirLevs, recentFileList, load, clearAccHisAndReload, reload};
 };
 

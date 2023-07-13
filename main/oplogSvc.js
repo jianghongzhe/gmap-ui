@@ -129,6 +129,24 @@ const getAccHis=()=>{
 };
 
 
+/**
+ * 清空浏览记录
+ * @param name 若指定名称，则只删掉该名称的记录；否则删除全部记录
+ * @return {boolean}
+ */
+const clearAttHis=(name=null)=>{
+    const opLog=common.readJsonFromFile(opLogFilePath);
+    if('string'==typeof(name) && ''!==name.trim()){
+        const targetBundlePath=name.trim();
+        opLog.access_history=opLog.access_history.filter(his=> his.bundle_path!==targetBundlePath);
+    }else{
+        opLog.access_history=[];
+    }
+    common.saveJsonToFile(opLog, opLogFilePath);
+    return true;
+};
+
+
 const saveAndGetAccHis=( bundlePath, accessTime, accessTimeStr)=>{
     const opLog=common.readJsonFromFile(opLogFilePath);
     const filteredItems=opLog.access_history.filter(item=> item.bundle_path!==bundlePath);
@@ -149,6 +167,7 @@ const ipcHandlers={
     saveAndGetAccHis,
     getAccHis,
     listRecentOpenFiles,
+    clearAttHis,
 };
 
 

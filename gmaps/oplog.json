@@ -1,19 +1,9 @@
 {
     "access_history": [
         {
-            "bundle_path": "dddemo",
-            "access_time": 1688831762073,
-            "access_time_str": "23.07.08 六 23:56:02"
-        },
-        {
-            "bundle_path": "a/b/c/fff",
-            "access_time": 1688756364078,
-            "access_time_str": "23.07.08 六 02:59:24"
-        },
-        {
             "bundle_path": "a/aademo",
-            "access_time": 1688756104161,
-            "access_time_str": "23.07.08 六 02:55:04"
+            "access_time": 1689242378602,
+            "access_time_str": "23.07.13 四 17:59:38"
         }
     ]
 }
