@@ -1,10 +1,11 @@
-import {  escape as doEscape } from './helpers';
+import {escape as doEscape} from './helpers';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import tableEnh from './tableEnh';
-import loadMetaData from './metadataLoader';
+import loadMetaData, {parseMetadata} from './metadataLoader';
 import {createId, unbindEvent} from "./uiUtil";
+import api from "../service/api";
 
 /**
  * marked结合hljs实现语法高亮与点击事件处理等功能
@@ -114,6 +115,12 @@ class MarkedHighlightUtil {
                 }
             });
 
+            // 锚点
+            (txt.match(/[$]anchor[{].+?[}][$]/g)??[]).forEach(item=>{
+                const [, anchorId]=item.match(/^[$]anchor[{](.+?)[}][$]$/);
+                txt=txt.replace(item, `<span data-logicid="${anchorId.trim()}"></span>`);
+            });
+
             // 文字颜色
             (txt.match(/[$][\\]textcolor[{].+?[}][{].+?[}][$]/g)??[]).forEach(item=>{
                 const [, color, str]=item.match(/^[$][\\]textcolor[{](.+?)[}][{](.+?)[}][$]$/);
@@ -197,7 +204,21 @@ class MarkedHighlightUtil {
              * @returns 
              */
             renderer.link = function (href, title, text) {
-                if (href === null) {
+                href=(href??'').trim();
+                text=(text??'').trim();
+
+                // 提取toid元数据，用于点击后的导航操作
+                let isAnchorLink=false;
+                let toIdAttr='';
+                let anchorName='';
+                if(href.startsWith("#") && href.length>1){
+                    anchorName=href.substring(1).trim();
+                    isAnchorLink=true;
+                    toIdAttr=`data-toid="${anchorName}"`;
+                }
+
+                // 如果不是锚点链接，并且没有指定链接地址，则只输出链接名字文本
+                if(!isAnchorLink && ''===href){
                     return text;
                 }
 
@@ -205,8 +226,20 @@ class MarkedHighlightUtil {
                 if(linkConfig.convertUrl){
                     newHref=linkConfig.convertUrl(newHref);
                 }
-                const out = `<a class="${mdLinkCls}" href="javascript:void(0);" hrefex="${newHref}" title="${text}">${text}</a>`;
-                return out;
+
+                // 显示的文本：有链接名则使用，否则有链接地址则使用，否则为固定值【链接】
+                let showTxt=text;
+                if(''===text){
+                    if(isAnchorLink){
+                        showTxt=`跳转到 - ${anchorName}`;
+                    }else{
+                        showTxt=href;
+                        if(''===href){
+                            showTxt="链接";
+                        }
+                    }
+                }
+                return `<a class="${mdLinkCls}" href="javascript:void(0);" ${toIdAttr} hrefex="${newHref}" title="${showTxt}">${showTxt}</a>`;
             };
         }
 
@@ -327,9 +360,22 @@ class MarkedHighlightUtil {
      */
     bindLinkClickEvent=(cb, filter=null, cleanupFunsArray=null)=>{
         document.querySelectorAll("."+this.mdLinkCls).forEach(ele=>{
-            //如果已绑定过事件、链接地址不存在、过滤条件忽略，则不处理
+            //如果已绑定过事件，则不处理
             let hasBindEvent=ele.getAttribute("hasBindEvent");
             if(hasBindEvent){return;}
+
+            // 是跳转锚点的链接
+            if(ele?.dataset?.toid){
+                const handler=delegateGotoEleFunc.bind(this, ele.dataset.toid);
+                ele.addEventListener("click",handler);
+                ele.setAttribute("hasBindEvent","yes");
+                if(Array.isArray(cleanupFunsArray)){
+                    cleanupFunsArray.push(unbindEvent.bind(this, ele, "click", handler));
+                }
+                return;
+            }
+
+
             let addr=ele.getAttribute('hrefex');
             if(!addr){return;}
             if(filter && !filter(ele)){return;}
@@ -367,6 +413,16 @@ class MarkedHighlightUtil {
         });
     }
 }
+
+
+const delegateGotoEleFunc=(logicid)=>{
+    const targetELe=document.querySelector(`[data-logicid="${logicid}"]`);
+    if(targetELe){
+        targetELe.scrollIntoView(true);
+    }else{
+        api.showNotification('无法跳转到指定锚点', `未找到指定锚点：${logicid}`, 'warn');
+    }
+};
 
 const delegateOpenUrlFun=(fun, url)=>{
     if(fun && url){

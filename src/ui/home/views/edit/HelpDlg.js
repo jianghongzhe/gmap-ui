@@ -681,11 +681,16 @@ const refs=[
             '# ref:xxx',
             '### hello',
             '- blabla',
+            '$anchor{xxx}$',
+            '[跳转到](#xxx)',
+
         ],
         [
             '// 与节点中对应的名称一致',
             '// 支持 github markdown 及 latex',
             '',
+            '// 插入锚点',
+            '// 插入锚点链接，点击可跳转到锚点',
         ],
     ],
     [

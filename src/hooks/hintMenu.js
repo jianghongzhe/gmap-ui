@@ -553,6 +553,7 @@ const menuConfig=[
                 }
             }
         },
+
     ].flatMap(item=>{
         return [
             {
@@ -597,6 +598,47 @@ const menuConfig=[
             }
         ];
     })),
+
+
+    // 锚点链接和锚点
+    ...([
+        {
+            label: '锚点链接　[跳转到](#xxx)',
+            txt: ["[跳转到](#)"],
+            cursorOffset: "[跳转到](#".length,
+        },
+        {
+            label: '插入锚点　$anchor{xxx}$',
+            txt: ["$anchor{}$"],
+            cursorOffset: "$anchor{".length,
+        },
+    ].map(item=>({
+        cate: cates.link_and_color,
+        selectionTypes: ['cursor'],
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart){
+                return false;
+            }
+            if(parseResult.cursorLineScope.inNodePart){
+                return false;
+            }
+            if(parseResult.cursorLineMultiScope.inRefPart){
+                return {};
+            }
+            return false;
+        },
+        label: item.label,
+        option: {
+            type: actionTypes.literal,
+            data: {
+                wrap: false,
+                txt: item.txt,
+                cursorOffset: item.cursorOffset,
+            }
+        }
+    }))),
+
+
 
     // 文字颜色
     {

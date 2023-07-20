@@ -138,6 +138,8 @@ export const useAutoComplateFuncs=()=>{
             editorSvcEx.setWrapperMark(cm, beginMark, endMark, offset);
             return;
         }
+
+        console.log("here")
         insertTxtAndMoveCursor(
             cm,
             subActionType.txt,
@@ -354,6 +356,11 @@ const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null, pos=null, pos2=null, f
     if(!pos){
         pos=cm.doc.getCursor();// { ch: 3  line: 0}
     }
+
+
+
+    console.log("txt.length", txt)
+
     const replTxt=fill+txt;
     cm.doc.replaceRange(replTxt, pos, (pos2 ? pos2 : pos));
 
