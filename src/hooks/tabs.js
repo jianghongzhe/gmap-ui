@@ -42,11 +42,11 @@ export const useSelectFileListItem=()=>{
             const recentOpenFiles=await api.saveAndGetAccHis(item.itemsName, now.getTime(), `${editorSvcEx.toDateFmt(now)} ${editorSvcEx.toTimeFmt(now)}`);
             setRecentFileList(recentOpenFiles);
 
-            const origintxts =loadResult.txt.replace(/\r/g,'').trim();
+            const [origintxts, decodedTxt] = await preHandleDocBeforeParse(loadResult.txt);
             const tags=loadResult.tags??[];
 
             //let cells = mindmapSvc.parseMindMapData(origintxts, defaultLineColor, themeStyles, bordType, getBorderStyle, defaultDateColor);
-            let rootNd=mindmapSvc.parseRootNode(origintxts, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
+            let rootNd=mindmapSvc.parseRootNode(decodedTxt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor);
             // console.log("rootnd",rootNd);
             let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
             //console.log("节点数量", ndsSet.list.length);
@@ -454,12 +454,13 @@ export const useSaveMapPromise=()=>{
                     return;
                 }
 
-                let rootNd=mindmapSvc.parseRootNode(txt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor, false);
+                const [originTxt, decodedTxt]= await preHandleDocBeforeParse(txt);
+                let rootNd=mindmapSvc.parseRootNode(decodedTxt, globalStyleConfig.defaultLineColor, themeStyles, bordType, getBorderStyle, globalStyleConfig.defaultDateColor, false);
                 let ndsSet=newMindmapSvc.loadNdsSet(rootNd);
 
                 setCurrPane({
                     ...currPane,
-                    mapTxts: txt,
+                    mapTxts: originTxt,
                     ds:ndsSet,
                     tags: tags??[],
                 });
@@ -467,6 +468,24 @@ export const useSaveMapPromise=()=>{
             })();
         });
     });
+};
+
+
+/**
+ * 解析内容前预处理
+ * @param txt
+ * @return ['只处理换行符的', '处理换行符和解密文本的']
+ */
+const preHandleDocBeforeParse=async (txt)=>{
+    txt=(txt??'').replace(/\r/g,'').trim();
+    const originTxt=txt;
+    const matchedItems= (txt.match(/[$]gmap[_]enc[{][^{}$]+?[}][$]/g)??[]);
+    const txtEncs=matchedItems.map(item=>(item.substring(item.indexOf("{")+1, item.indexOf("}")).trim()));
+    const resp= await api.decryptTxtBatch(txtEncs);
+    matchedItems.forEach((matchItem, ind)=>{
+        txt=txt.replace(matchItem, true===resp?.succ ? resp.data[ind] : "文本解密失败");
+    });
+    return [originTxt, txt];
 };
 
 

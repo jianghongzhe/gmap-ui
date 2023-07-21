@@ -1336,6 +1336,9 @@ const editorSvcExInstWrapper=(function(){
         cm.doc.setCursor({line, ch:newData.length});
     };
 
+
+
+
     /**
      * aa
      * xxx ![qqq]() yyy
@@ -1383,6 +1386,44 @@ const editorSvcExInstWrapper=(function(){
         }
         return false;
     };
+
+
+    /**
+     * aa
+     * xxx ![qqq]() yyy
+     *        ^          -->> 光标位置
+     *
+     * @param cm
+     * @return {boolean}
+     */
+    const isInEncodeTxtPart=(cm)=>{
+        const {type, pos, pos2}=getSelectionType(cm);
+        if('cursor'!==type){
+            return false;
+        }
+
+        const line=cm.doc.getLine(pos.line);
+        const frontPart=line.substring(0, pos.ch);
+        const endPart=line.substring(pos.ch);
+        // $gmap_enc{  }
+        const flag= (/^.*[$]gmap[_]enc[{][^{$}]*$/.test(frontPart) && /^[^{$}]*[}][$].*$/.test(endPart));
+        if(!flag){
+            return false;
+        }
+        return {
+            pos: {
+                line: pos.line,
+                ch: frontPart.lastIndexOf("{")+1,
+            },
+            pos2: {
+                line: pos.line,
+                ch: frontPart.length+endPart.indexOf("}"),
+            },
+        };
+
+    };
+
+
 
     const isInTable=(cm)=>{
         const {type, pos, pos2}=getSelectionType(cm);
@@ -1948,6 +1989,7 @@ const editorSvcExInstWrapper=(function(){
         isInTable,
         isInNodePart,
         isInRefPart,
+        isInEncodeTxtPart,
     };
 })();
 

@@ -7,6 +7,50 @@ import editorSvcEx from "../service/editorSvcEx";
 
 export const useAutoComplateFuncs=()=>{
 
+
+    const doEncodeTxtAction=useMemoizedFn((opt, cm, currAssetsDir)=>{
+        const txt=cm.doc.getRange(opt.extra.pos, opt.extra.pos2).trim();
+        (async ()=>{
+            const resp=await api.encryptTxt(txt);
+            if(true===resp?.succ){
+                const txtEnc=`$gmap_enc{${resp.data}}$`;
+                insertTxtAndMoveCursor(
+                    cm,
+                    txtEnc,
+                    txtEnc.length,
+                    opt.extra.pos,
+                    opt.extra.pos2,
+                    ''
+                );
+                return;
+            }
+            api.showNotification("错误","无法加密指定文本","err");
+        })();
+    });
+
+    const doDecodeTxtAction=useMemoizedFn((opt, cm)=>{
+        const txtEnc=cm.doc.getRange(opt.extra.pos, opt.extra.pos2).trim();
+        const wrapStart={...opt.extra.pos, ch: opt.extra.pos.ch-'$gmap_enc{'.length};
+        const wrapEnd={...opt.extra.pos2, ch: opt.extra.pos2.ch+2};
+
+        (async ()=>{
+            const resp=await api.decryptTxt(txtEnc);
+            if(true===resp?.succ){
+                const txtOrigin=resp.data;
+                insertTxtAndMoveCursor(
+                    cm,
+                    txtOrigin,
+                    txtOrigin.length,
+                    wrapStart,
+                    wrapEnd,
+                    ''
+                );
+                return;
+            }
+            api.showNotification("错误","无法解密指定文本","err");
+        })();
+    });
+
     /**
      * 剪切板操作
      * @type {(function(*, *, *): void)|*}
@@ -121,7 +165,7 @@ export const useAutoComplateFuncs=()=>{
     });
 
     const doLiteralAction=useMemoizedFn((subActionType, cm)=>{
-        console.log("subActionType", subActionType);
+
 
         if(subActionType.appendNodePart){
             insertNodePart(cm, subActionType.txt);
@@ -278,7 +322,9 @@ export const useAutoComplateFuncs=()=>{
         doClipboardAction,
         doLiteralAction,
         doDateTimeAction,
-        doRefAction
+        doRefAction,
+        doEncodeTxtAction,
+        doDecodeTxtAction,
     };
 };
 
@@ -357,9 +403,6 @@ const insertTxtAndMoveCursor=(cm, txt, cursorOffset=null, pos=null, pos2=null, f
         pos=cm.doc.getCursor();// { ch: 3  line: 0}
     }
 
-
-
-    console.log("txt.length", txt)
 
     const replTxt=fill+txt;
     cm.doc.replaceRange(replTxt, pos, (pos2 ? pos2 : pos));

@@ -134,6 +134,8 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
         doLiteralAction,
         doDateTimeAction,
         doRefAction,
+        doEncodeTxtAction,
+        doDecodeTxtAction,
     }=useAutoComplateFuncs();
 
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
@@ -208,6 +210,14 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
         }
         if(actionTypes.refAction===type){
             doRefAction(data, cm);
+            return;
+        }
+        if(actionTypes.encodeTxt===type){
+            doEncodeTxtAction(data, cm);
+            return;
+        }
+        if(actionTypes.decodeTxt===type){
+            doDecodeTxtAction(data, cm);
             return;
         }
     });

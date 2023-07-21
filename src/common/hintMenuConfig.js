@@ -14,6 +14,7 @@ export const actionTypes={
     editTable: 'edit-table',
 
     literal:'literal',
-
+    encodeTxt: 'encodeTxt',
+    decodeTxt: 'decodeTxt',
     refAction: 'refAction',
 };

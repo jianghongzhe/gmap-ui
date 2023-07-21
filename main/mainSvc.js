@@ -1496,7 +1496,25 @@ const loadCtxMenu=(url)=>{
     return sendCmdToServer("loadCtxMenu",{url});
 };
 
+const encryptTxt=(txt='')=>{
+    return sendCmdToServer("enc",{
+        enc: true,
+        txt,
+    });
+};
+const decryptTxt=(txt='')=>{
+    return sendCmdToServer("enc",{
+        enc: false,
+        txt,
+    });
+};
 
+const decryptTxtBatch=(txts=[])=>{
+    return sendCmdToServer("enc",{
+        enc: false,
+        txts,
+    });
+};
 
 
 /**
@@ -1552,7 +1570,9 @@ const ipcHandlers={
     getImgUrlFromClipboard,
     getClipboardHasContent,
 
-
+    encryptTxt,
+    decryptTxt,
+    decryptTxtBatch,
 };
 
 

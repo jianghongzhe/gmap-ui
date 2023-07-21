@@ -7,12 +7,14 @@ import api from '../service/api';
 
 
 const cates={
+    enc: Symbol(),
     metadata: Symbol(),
     node_operate: Symbol(),
     shortcut_alias_frag: Symbol(),
     link_and_color: Symbol(),
     clipboard: Symbol(),
     date_and_time: Symbol(),
+
 };
 
 export const useHintMenu=()=>{
@@ -196,6 +198,7 @@ export const useHintMenu=()=>{
                     inImgNamePart: editorSvcEx.isInImgNamePart(cm),
                     inLinkNamePart: editorSvcEx.isInLinkNamePart(cm),
                     inTablePart: editorSvcEx.isInTable(cm),
+                    inEncTxtPart: editorSvcEx.isInEncodeTxtPart(cm),
                 },
                 cursorLineScope:{
                     inNodePart: editorSvcEx.isInNodePart(cm),
@@ -292,6 +295,42 @@ const aliasLastLineOffset=6
  * @type {}
  */
 const menuConfig=[
+
+    {
+        cate: cates.enc,
+        selectionTypes: ['line'],
+        matcher: (cm, parseResult)=> {
+            if(parseResult.cursorLineScope.inNodePart || parseResult.cursorLineMultiScope.inRefPart){
+                const {pos, pos2}=parseResult.selectionType;
+                return {pos, pos2};
+            }
+            return false;
+        },
+        label: '加密文本',
+        option: {
+            type: actionTypes.encodeTxt,
+            data: {
+            }
+        }
+    },
+    {
+        cate: cates.enc,
+        selectionTypes: ['cursor'],
+        matcher: (cm, parseResult)=> {
+            if(parseResult.cursorLineScope.inNodePart || parseResult.cursorLineMultiScope.inRefPart){
+                return parseResult.cursorScope.inEncTxtPart;
+            }
+            return false;
+        },
+        label: '解密文本',
+        option: {
+            type: actionTypes.decodeTxt,
+            data: {
+            }
+        }
+    },
+
+
     // 图片元数据
     ...(["#left", "#center", "#right", "#float-left", "#float-right", "#inline",].map(item=>{
         return {
@@ -378,6 +417,8 @@ const menuConfig=[
     //         type: actionTypes.editTable,
     //     }
     // },
+
+
 
 
     // 根节点功能

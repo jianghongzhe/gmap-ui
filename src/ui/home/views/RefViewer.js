@@ -168,6 +168,19 @@ const RefViewer=({visible, onOpenLink, onNodeOp, currRefObj, onCancel})=>{
      */
     useEffect(()=>{
         if(visible){
+
+            // // TODO 临时，一会删
+            // (async ()=>{
+            //     const resp= await api.encryptTxt("gigi1蒋宏喆98436");
+            //     console.log("resp", resp);
+            //
+            //     const origin=await api.decryptTxt("Up/kxj901VqWI42Yzrz0gpO+sl30B/C3FZTfcQMk954=");
+            //     console.log("origin", origin);
+            // })();
+
+
+
+
             // 当html内容有变化时移除之前绑定的事件，避免内存泄漏
             if(lastRefCondRef.current!==refCont){
                 if(cleanupFuncs.current && cleanupFuncs.current.length>0){

@@ -603,6 +603,20 @@ class Api{
     };
 
 
+    encryptTxt=(txt="")=>{
+        return ipcRenderer.invoke('encryptTxt', txt);
+    };
+
+    decryptTxt=(txt="")=>{
+        return ipcRenderer.invoke('decryptTxt', txt);
+    };
+
+    decryptTxtBatch=(txts=[])=>{
+        return ipcRenderer.invoke('decryptTxtBatch', txts);
+    };
+
+
+
 
 }
 
