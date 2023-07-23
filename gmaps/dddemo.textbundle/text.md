@@ -1,5 +1,5 @@
 - dddemo
-	- 带引用的分主题|ref:长段文字
+	- 带引用的分主题|ref:长段文字|[](file://f:\q\r\s.exe)|[](file://control)
 
 ***
 # ref:长段文字

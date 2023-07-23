@@ -6,7 +6,6 @@ const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
 const nodeNet = require('net');
 
-const ws=require('./ws');
 const common=require('./common');
 const settingSvc=require('./settingSvc');
 const appSvc =require("./appSvc");
