@@ -7,10 +7,17 @@ import {
     FileUnknownOutlined, FolderOutlined, LinkOutlined, TeamOutlined
 } from "@ant-design/icons";
 
+import {parseMetadata} from '../common/metadataLoader';
 import cmdopen_url from '../assets/node_icon_cmdopen.png';
 import browser_url from '../assets/node_icon_browser.png';
 
-export const useLoadIcon=({lindAddr})=>{
+export const useLoadIcon=({lindAddr, icon})=>{
+    console.log("lindAddr", lindAddr);
+    console.log("icon", icon);
+
+    lindAddr=(lindAddr??'').trim();
+    icon=(icon??'').trim();
+
     /**
      * 第一种：icon组件类型
      * {
@@ -31,7 +38,7 @@ export const useLoadIcon=({lindAddr})=>{
      * 异步加载指定协议url（file、http、https、dir）对应的图标，如果状态为已取消，则停止操作
      */
     useEffect(()=>{
-        if(!lindAddr){
+        if(!lindAddr && !icon){
             return;
         }
         if(!setLocalIcon){
@@ -41,7 +48,10 @@ export const useLoadIcon=({lindAddr})=>{
         if(canceled){
             return;
         }
-        setLocalIcon(getDefIcon(lindAddr));
+
+        // 优先使用指定的图标地址，如果没有，再使用链接地址
+        const factAddr=(null!==icon && ""!==icon.trim() ? icon : lindAddr);
+        setLocalIcon(getDefIcon(factAddr));
         if(canceled){
             return;
         }
@@ -57,13 +67,13 @@ export const useLoadIcon=({lindAddr})=>{
             "gmap://",
             "cppath://",
             "cmdopen://"
-        ].some(pref=>lindAddr.startsWith(pref))){
+        ].some(pref=>factAddr.startsWith(pref))){
             (async ()=>{
                 try{
                     if(canceled){
                         return;
                     }
-                    const resp= await api.loadIcon(lindAddr);
+                    const resp= await api.loadIcon(factAddr);
                     if(canceled){
                         return;
                     }
@@ -81,8 +91,7 @@ export const useLoadIcon=({lindAddr})=>{
         return ()=>{
             canceled=true;
         };
-    },[lindAddr, setLocalIcon]);
-
+    },[lindAddr, icon, setLocalIcon]);
     return [localIcon];
 };
 

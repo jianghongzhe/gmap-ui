@@ -349,7 +349,7 @@ const menuConfig=[
     })),
 
     // 链接元数据
-    ...(["#confirm", "#confirm{txt aa}"].map(item=>{
+    ...(["#confirm", "#confirm{txt aa}", "#icon{file:///xx}"].map((item,ind)=>{
         return {
             cate: cates.metadata,
             selectionTypes: ['cursor'],
@@ -359,7 +359,8 @@ const menuConfig=[
                 type: actionTypes.literal,
                 data: {
                     txt: item,
-                    cursorOffset: item.length,
+                    // 第一个光标在插入内容之后，后面的光标在}之前，所以减1
+                    cursorOffset: item.length+(ind>0 ? -1 : 0),
                 }
             }
         };

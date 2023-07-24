@@ -41,8 +41,10 @@ const filterShortCuts=(shortcuts)=>{
             }
             let shouldConfirm=false;
             let confirmTxt=[];
+            let iconPath=null;
             newArray.forEach(({name})=>{
-                const [, flag, txt]=loadConfirmMeta(name??'');
+                const [, flag, txt, icon]=loadMeta(name??'');
+                iconPath=icon;
                 // console.log("filterShortCuts", flag);
                 // console.log("filterShortCuts", txt);
                 if(flag){
@@ -63,20 +65,21 @@ const filterShortCuts=(shortcuts)=>{
                 url,
                 shouldConfirm,
                 confirmTxt: (1===newArray.length && confirmTxt.length>0 ? confirmTxt[0] : null),
+                icon: (1===newArray.length ? iconPath : null),
             };
         }
 
         // 是单个链接
         // 元数据从name中取
         const hasSubName=(shortcut.subNames && shortcut.subNames.length>0);
-        const [newName, flag, txt]= loadConfirmMeta(hasSubName ? shortcut.subNames[0] : shortcut.name);
+        const [newName, flag, txt, icon]= loadMeta(hasSubName ? shortcut.subNames[0] : shortcut.name);
         const tooltip=(hasSubName ? shortcut.name : newName)+"  "+shortcut.url;
         return {
             tooltip,
             url: shortcut.url,
             shouldConfirm: flag,
             confirmTxt: txt,
-
+            icon: icon,
         };
     }).filter(eachItem=>null!==eachItem);
 };
@@ -113,8 +116,10 @@ const filterGroupLinks=(grouplinks)=>{
 
     let shouldConfirm=false;
     let confirmTxt=[];
+    let iconPath=null;
     grouplinks=grouplinks.map(({name,addr})=>{
-        const [handledName, flag, txt]= loadConfirmMeta(name);
+        const [handledName, flag, txt, icon]= loadMeta(name);
+        iconPath=icon;
         if(flag){
             shouldConfirm=true;
             if(txt){
@@ -138,6 +143,7 @@ const filterGroupLinks=(grouplinks)=>{
         url,
         shouldConfirm,
         confirmTxt: (1===grouplinks.length && confirmTxt.length>0 ? confirmTxt[0] : null),
+        icon: (1===grouplinks.length ? iconPath : null),
     };
 };
 
@@ -151,17 +157,19 @@ const filterGroupLinks=(grouplinks)=>{
  *     tooltip,
  *     url,
  *     shouldConfirm,
- *     confirmTxt
+ *     confirmTxt,
+ *     icon
  * }
  */
 const filterSingleLink=(name, addr)=>{
-    const [handledLinkName, flag, txt]=loadConfirmMeta(name);
+    const [handledLinkName, flag, txt, icon]=loadMeta(name);
     const tooltip=(handledLinkName ? handledLinkName+"  "+addr : addr);
     return {
         tooltip,
         url: addr,
         shouldConfirm: flag,
         confirmTxt: txt,
+        icon,
     };
 };
 
@@ -173,13 +181,15 @@ const filterSingleLink=(name, addr)=>{
  * [
  *  'handled name',
  *  true/false,
- *  null/'是否要打开链接'
+ *  null/'是否要打开链接',
+ *  '指定要显示的图片地址',
  * ]
  */
-const loadConfirmMeta=(name)=>{
+const loadMeta=(name)=>{
     const [handledName, metas]=loadMetadata(name??'');
     let shouldConfirm=false;
     let confirmTxt=null;
+    let icon=null;
 
     metas.forEach(meta=>{
         const {type, opts} =parseMetadata(meta);
@@ -191,8 +201,13 @@ const loadConfirmMeta=(name)=>{
                 confirmTxt=optTxt.substring("txt ".length).trim();
             }
         }
+        if('icon'===type){
+            if(opts.length>0 && ''!==opts[0].trim()){
+                icon=opts[0].trim();
+            }
+        }
     });
-    return [handledName, shouldConfirm, confirmTxt];
+    return [handledName, shouldConfirm, confirmTxt, icon];
 };
 
 

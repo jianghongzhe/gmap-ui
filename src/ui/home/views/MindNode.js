@@ -208,17 +208,19 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
         url: factUrl,
         shouldConfirm,
         confirmTxt,
+        icon,
     }=useMemo(()=>filterSingleLink(link.name, link.addr), [link]);
 
     return <LinkItem key={'link-'+linkInd}
                      tooltip={tooltip}
                      addr={factUrl}
+                     icon={icon}
                      openLinkFunc={onOpenLink.bind(this, factUrl, shouldConfirm, confirmTxt)}/>;
 };
 
 
 
-const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
+const LinkItem=({tooltip, addr, icon, openLinkFunc, needConfirm=false})=> {
     /**
      * 右键菜单相关的数据项
      */
@@ -261,7 +263,7 @@ const LinkItem=({tooltip, addr, openLinkFunc, needConfirm=false})=> {
             </div>
         } >
             <span className={classnames('node_part', styles.themeBtnWrapper)}>
-                <NodeLinkIcon lindAddr={addr} onClick={openLinkFunc}/>
+                <NodeLinkIcon lindAddr={addr} icon={icon} onClick={openLinkFunc}/>
             </span>
         </Tooltip>
     );
@@ -284,7 +286,7 @@ const GroupLinkItem=({links, openLinkFunc})=>{
         return null;
     }
     if(!Array.isArray(val.url)){
-        return <LinkItem tooltip={val.tooltip} addr={val.url} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm, val.confirmTxt)}/>;
+        return <LinkItem tooltip={val.tooltip} addr={val.url} icon={val.icon} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm, val.confirmTxt)}/>;
     }
     return <Tooltip  color='cyan' placement="top" title={val.tooltip}>
         <span className={classnames('node_part', styles.themeBtnWrapper)}>

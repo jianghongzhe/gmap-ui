@@ -217,6 +217,21 @@ class MarkedHighlightUtil {
                     toIdAttr=`data-toid="${anchorName}"`;
                 }
 
+                const [handledTxt, metas]= loadMetaData(text);
+                text=handledTxt;
+
+                let needConfirmAttr='';
+                let confirmTxtAttr='';
+                const confirmMeta= metas.map(meta=>parseMetadata(meta)).find(({type})=>'confirm'===type);
+                if(confirmMeta){
+                    needConfirmAttr=`needconfirm="true"`;
+                    const tmp=confirmMeta.opts.find(opt=>opt.trim().startsWith("txt "));
+                    if(tmp){
+                        confirmTxtAttr=`confirmtxt="${tmp.substring("txt ".length).trim()}"`;
+                    }
+                }
+
+
                 // 如果不是锚点链接，并且没有指定链接地址，则只输出链接名字文本
                 if(!isAnchorLink && ''===href){
                     return text;
@@ -239,7 +254,7 @@ class MarkedHighlightUtil {
                         }
                     }
                 }
-                return `<a class="${mdLinkCls}" href="javascript:void(0);" ${toIdAttr} hrefex="${newHref}" title="${showTxt}">${showTxt}</a>`;
+                return `<a class="${mdLinkCls}" href="javascript:void(0);" ${toIdAttr} ${needConfirmAttr} ${confirmTxtAttr} hrefex="${newHref}" title="${showTxt}">${showTxt}</a>`;
             };
         }
 
@@ -364,7 +379,7 @@ class MarkedHighlightUtil {
             let hasBindEvent=ele.getAttribute("hasBindEvent");
             if(hasBindEvent){return;}
 
-            // 是跳转锚点的链接
+            // 是跳转锚点的链接，这时会忽略提示框的行为
             if(ele?.dataset?.toid){
                 const handler=delegateGotoEleFunc.bind(this, ele.dataset.toid);
                 ele.addEventListener("click",handler);
@@ -381,8 +396,19 @@ class MarkedHighlightUtil {
             if(filter && !filter(ele)){return;}
 
             //绑定事件
+            // needconfirm="true"`;
+            //         const tmp=confirmMeta.opts.find(opt=>opt.trim().startsWith("txt "));
+            //         if(tmp){
+            //             confirmTxtAttr=`confirmtxt
+
+            let needConfirm=false;
+            let confirmTxt=null;
+            if('true'===ele.getAttribute("needconfirm")){
+                needConfirm=true;
+                confirmTxt=ele.getAttribute("confirmtxt");
+            }
             ele.setAttribute("hasBindEvent","yes");
-            const handler=delegateOpenUrlFun.bind(this, cb, addr);
+            const handler=delegateOpenUrlFun.bind(this, cb, addr, needConfirm, confirmTxt);
             ele.addEventListener("click",handler);//增加点击事件，点击时使用外部浏览器打开
             if(Array.isArray(cleanupFunsArray)){
                 cleanupFunsArray.push(unbindEvent.bind(this, ele, "click", handler));
@@ -424,9 +450,9 @@ const delegateGotoEleFunc=(logicid)=>{
     }
 };
 
-const delegateOpenUrlFun=(fun, url)=>{
+const delegateOpenUrlFun=(fun, url, ...others)=>{
     if(fun && url){
-        fun(url);
+        fun(url, ...others);
     }
 };
 

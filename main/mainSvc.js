@@ -674,6 +674,7 @@ const existsGraph = (fn) => {
  * @returns 
  */
 const loadIcon=(url)=>{
+    console.log("loadicon for: "+url);
     if(common.isDevMode()){
         return new Promise((res,rej)=>{
            res({

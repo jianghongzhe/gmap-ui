@@ -115,6 +115,7 @@ const Toolbar=({
                             <ShortcutItem key={`shortcutbtn-${shortInd}`}
                                           tooltip={shortItem.tooltip}
                                           url={shortItem.url}
+                                          icon={shortItem.icon}
                                           confirmTxt={shortItem.confirmTxt}
                                           shouldConfirm={shortItem.shouldConfirm}
                                           onClick={onOpenLink}/>
@@ -128,8 +129,8 @@ const Toolbar=({
 
 
 
-const ShortcutItem=({tooltip, url, shouldConfirm, confirmTxt, onClick})=>{
-    const [localIcon] = useLoadIcon({lindAddr: Array.isArray(url) ? "group_links" : url});
+const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
+    const [localIcon] = useLoadIcon({lindAddr: (Array.isArray(url) ? "group_links" : url), icon});
 
     if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
         return null;

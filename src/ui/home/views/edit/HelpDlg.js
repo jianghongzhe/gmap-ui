@@ -590,11 +590,13 @@ const markdownExts=[
             '',
             '[#confirm](https://aa.bb.cc)',
             '[#confirm{txt 要打开吗}](https://xx.yy)',
+            '[#icon{file:///notepad}](https://ss.tt)',
         ],
         [
             '// 名称中以 # 开头的部分为元数据',
             '// 打开链接时弹出确认框',
             '// 指定确认框的标题',
+            '// 指定显示的图标，如果不指定，会从链接地址中获得',
         ]
     ],
     [

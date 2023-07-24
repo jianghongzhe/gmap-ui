@@ -4,9 +4,9 @@ import {useLoadIcon} from "../../../hooks/loadIcon";
 import styles from './NodeLinkIcon.module.scss';
 import classnames from "classnames";
 
-const NodeLinkIcon=({lindAddr,onClick,})=>{
+const NodeLinkIcon=({lindAddr, icon, onClick,})=>{
 
-    const [localIcon]= useLoadIcon({lindAddr});
+    const [localIcon]= useLoadIcon({lindAddr, icon});
 
     if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
         return null;
