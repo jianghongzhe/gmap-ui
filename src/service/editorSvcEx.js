@@ -1396,6 +1396,34 @@ const editorSvcExInstWrapper=(function(){
      * @param cm
      * @return {boolean}
      */
+    const isInNoLinkTxtPart=(cm)=>{
+        const {type, pos, pos2}=getSelectionType(cm);
+        if('cursor'!==type){
+            return false;
+        }
+
+        const line=cm.doc.getLine(pos.line);
+        const frontPart=line.substring(0, pos.ch);
+        const endPart=line.substring(pos.ch);
+        // $gmap_enc{  }
+        const flag= (/^.*[$]gmap[_]nolink[{][^{}]*$/.test(frontPart) && /^[^{}]*[}][$].*$/.test(endPart));
+        if(!flag){
+            return false;
+        }
+        return {
+            pos: {
+                line: pos.line,
+                ch: frontPart.lastIndexOf("{")+1,
+            },
+            pos2: {
+                line: pos.line,
+                ch: frontPart.length+endPart.indexOf("}"),
+            },
+        };
+
+    };
+
+
     const isInEncodeTxtPart=(cm)=>{
         const {type, pos, pos2}=getSelectionType(cm);
         if('cursor'!==type){
@@ -1422,6 +1450,8 @@ const editorSvcExInstWrapper=(function(){
         };
 
     };
+
+
 
 
 
@@ -1990,6 +2020,7 @@ const editorSvcExInstWrapper=(function(){
         isInNodePart,
         isInRefPart,
         isInEncodeTxtPart,
+        isInNoLinkTxtPart,
     };
 })();
 

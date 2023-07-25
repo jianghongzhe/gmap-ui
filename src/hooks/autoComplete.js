@@ -28,6 +28,10 @@ export const useAutoComplateFuncs=()=>{
         })();
     });
 
+    /**
+     *
+     * @param opt  opt.extra.pos - opt.extra.pos2 为大括号包裹的内容的位置，不是整个标记的位置
+     */
     const doDecodeTxtAction=useMemoizedFn((opt, cm)=>{
         const txtEnc=cm.doc.getRange(opt.extra.pos, opt.extra.pos2).trim();
         const wrapStart={...opt.extra.pos, ch: opt.extra.pos.ch-'$gmap_enc{'.length};
@@ -50,6 +54,27 @@ export const useAutoComplateFuncs=()=>{
             api.showNotification("错误","无法解密指定文本","err");
         })();
     });
+
+
+    /**
+     * 恢复链接
+     * $gmap_nolink{abc@163.com}$ -> abc@163.com
+     * @param opt  opt.extra.pos - opt.extra.pos2 为大括号包裹的内容的位置，不是整个标记的位置
+     */
+    const doRestoreLinkAction=useMemoizedFn((opt, cm)=>{
+        const txtNoLink=cm.doc.getRange(opt.extra.pos, opt.extra.pos2).trim();
+        const wrapStart={...opt.extra.pos, ch: opt.extra.pos.ch-'$gmap_nolink{'.length};
+        const wrapEnd={...opt.extra.pos2, ch: opt.extra.pos2.ch+2};
+        insertTxtAndMoveCursor(
+            cm,
+            txtNoLink,
+            txtNoLink.length,
+            wrapStart,
+            wrapEnd,
+            ''
+        );
+    });
+
 
     /**
      * 剪切板操作
@@ -325,6 +350,7 @@ export const useAutoComplateFuncs=()=>{
         doRefAction,
         doEncodeTxtAction,
         doDecodeTxtAction,
+        doRestoreLinkAction,
     };
 };
 

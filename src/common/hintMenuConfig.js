@@ -16,5 +16,6 @@ export const actionTypes={
     literal:'literal',
     encodeTxt: 'encodeTxt',
     decodeTxt: 'decodeTxt',
+    restoreLink: 'restoreLink',
     refAction: 'refAction',
 };

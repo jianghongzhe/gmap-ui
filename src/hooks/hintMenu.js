@@ -199,6 +199,7 @@ export const useHintMenu=()=>{
                     inLinkNamePart: editorSvcEx.isInLinkNamePart(cm),
                     inTablePart: editorSvcEx.isInTable(cm),
                     inEncTxtPart: editorSvcEx.isInEncodeTxtPart(cm),
+                    inNoLinkTxtPart: editorSvcEx.isInNoLinkTxtPart(cm),
                 },
                 cursorLineScope:{
                     inNodePart: editorSvcEx.isInNodePart(cm),
@@ -306,7 +307,7 @@ const menuConfig=[
             }
             return false;
         },
-        label: '加密文本',
+        label: '加密文本　',
         option: {
             type: actionTypes.encodeTxt,
             data: {
@@ -322,13 +323,55 @@ const menuConfig=[
             }
             return false;
         },
-        label: '解密文本',
+        label: '解密文本　',
         option: {
             type: actionTypes.decodeTxt,
             data: {
             }
         }
     },
+
+
+    {
+        cate: cates.enc,
+        selectionTypes: ['line'],
+        matcher: (cm, parseResult)=>{
+            if(parseResult.cursorLineScope.inNodePart || parseResult.cursorLineMultiScope.inRefPart){
+                const {pos, pos2}=parseResult.selectionType;
+                return {pos, pos2};
+            }
+            return false;
+        },
+        label: '禁止链接　',
+        option: {
+            type: actionTypes.literal,
+            data: {
+                wrap: true,
+                txt: ["$gmap_nolink{", "}$"],
+                cursorOffset: -2,
+            }
+        }
+    },
+    {
+        cate: cates.enc,
+        selectionTypes: ['cursor'],
+        matcher: (cm, parseResult)=> {
+            if(parseResult.cursorLineScope.inNodePart || parseResult.cursorLineMultiScope.inRefPart){
+                return parseResult.cursorScope.inNoLinkTxtPart;
+            }
+            return false;
+        },
+        label: '恢复链接',
+        option: {
+            type: actionTypes.restoreLink,
+            data: {
+            }
+        }
+    },
+
+
+
+
 
 
     // 图片元数据

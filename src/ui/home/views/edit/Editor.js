@@ -136,6 +136,7 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
         doRefAction,
         doEncodeTxtAction,
         doDecodeTxtAction,
+        doRestoreLinkAction,
     }=useAutoComplateFuncs();
 
     const currAssetsDir=useRecoilValue(tabActivePaneAssetsDir);
@@ -218,6 +219,10 @@ const Editor=({onSetInst, value, theme, onOnlySave, onOk, onShowHelpDlg, onChang
         }
         if(actionTypes.decodeTxt===type){
             doDecodeTxtAction(data, cm);
+            return;
+        }
+        if(actionTypes.restoreLink===type){
+            doRestoreLinkAction(data, cm);
             return;
         }
     });

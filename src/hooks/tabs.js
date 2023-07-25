@@ -479,12 +479,29 @@ export const useSaveMapPromise=()=>{
 const preHandleDocBeforeParse=async (txt)=>{
     txt=(txt??'').replace(/\r/g,'').trim();
     const originTxt=txt;
+
+    // 解密文本
     const matchedItems= (txt.match(/[$]gmap[_]enc[{][^{}$]+?[}][$]/g)??[]);
     const txtEncs=matchedItems.map(item=>(item.substring(item.indexOf("{")+1, item.indexOf("}")).trim()));
     const resp= await api.decryptTxtBatch(txtEncs);
     matchedItems.forEach((matchItem, ind)=>{
         txt=txt.replace(matchItem, true===resp?.succ ? resp.data[ind] : "文本解密失败");
     });
+
+    // 禁止生成链接的处理，通过增加干扰标记解决
+    // 默认情况下 abc@163.com 会生成链接，如果包裹起来表示不生成链接，即：$gmap_nolink{abc@163.com}$
+    // 会把链接中的特定字符旁边增加干扰标记（即空链接标记） `[]()` 来解决，特定字符有 :// . @ 等
+    (txt.match(/[$]gmap[_]nolink[{].+?[}][$]/g)??[]).forEach(item=>{
+        const [, addr]=item.match(/^[$]gmap[_]nolink[{](.+?)[}][$]$/);
+        let newAddr=addr.split("://").filter(s=>null!=s && ''!==s).map(part=>{
+            return part.split("@").filter(s=>null!=s && ''!==s).map(part2=>{
+                return part2.split(".").filter(s=>null!=s && ''!==s).join(".[]()");
+            }).join("@[]()");
+        }).join("://[]()");
+        txt=txt.replace(item, newAddr);
+    });
+
+
     return [originTxt, txt];
 };
 

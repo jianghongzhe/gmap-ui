@@ -580,6 +580,7 @@ const nodes=[
 const markdownExts=[
     ['行内Latex','$a_{1}^{2}+b_{1}=c$',''],
     ['文字颜色','$\\textcolor{red}{文字}$','// 可从自动完成菜单生成'],
+    ['禁止链接','$gmap_nolink{http://abc.def}$','// 禁止自动生成链接'],
     ['文字高亮','==高亮==',''],
     ['上标','a^2^=9',''],
     ['下标','H--2--O',''],
@@ -588,11 +589,13 @@ const markdownExts=[
         '链接元数据',
         [
             '',
+            '',
             '[#confirm](https://aa.bb.cc)',
             '[#confirm{txt 要打开吗}](https://xx.yy)',
             '[#icon{file:///notepad}](https://ss.tt)',
         ],
         [
+            '// 可在节点和引用部分使用，其中#icon只能在节点上使用',
             '// 名称中以 # 开头的部分为元数据',
             '// 打开链接时弹出确认框',
             '// 指定确认框的标题',
@@ -603,6 +606,7 @@ const markdownExts=[
         '图片元数据',
         [
             '',
+            '',
             '![图#left](aa.jpg)',
             '![图#float-right](aa.jpg)',
             '![图#inline](aa.jpg)',
@@ -611,6 +615,7 @@ const markdownExts=[
             '![图#200px#center](aa.jpg)',
         ],
         [
+            '// 可在节点和引用部分使用',
             '// 名称中以 # 开头的部分为元数据',
             '// 左中右对齐：left、center、right',
             '// 浮动左右对齐：float-left、float-right',
@@ -623,6 +628,7 @@ const markdownExts=[
     [
         '表格元数据',
         [
+            '',
             '',
             '|表格#bar|2015|2016|',
             '|表格#bar{w 50%,h 250px}|2015|2016|',
@@ -638,6 +644,7 @@ const markdownExts=[
 
         ],
         [
+            '// 只能在引用部分使用',
             '// 表格列头第一个单元格中可指定元数据，以 # 开头的部分为元数据',
             '// bar-柱状图、line-拆线图、stack-堆积图、pie-饼图',
             '// 增加配置选择，与 [Echart图] 中的配置一致，多个选项以逗号分隔',
