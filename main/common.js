@@ -154,7 +154,7 @@ const send=(action, data)=>{
             time:new Date().getTime(),
             reqData,
         };
-        wsClient.send(reqData);
+        wsClient.send(Buffer.from(reqData));
     });
 };
 
