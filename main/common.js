@@ -316,6 +316,7 @@ const delegateHandlerSync=(handler, evt, ...args)=>{
  */
 const regIpcHandlers=(ipcHandlers)=>{
     for(let key in ipcHandlers){
+        //console.log("ipc key", key);
         ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
     }
 };

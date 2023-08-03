@@ -11,9 +11,9 @@ export const useAutoComplateFuncs=()=>{
     const doEncodeTxtAction=useMemoizedFn((opt, cm, currAssetsDir)=>{
         const txt=cm.doc.getRange(opt.extra.pos, opt.extra.pos2).trim();
         (async ()=>{
-            const resp=await api.encryptTxt(txt);
-            if(true===resp?.succ){
-                const txtEnc=`$gmap_enc{${resp.data}}$`;
+            try{
+                const encodedTxt=await api.encryptTxt(txt);
+                const txtEnc=`$gmap_enc{${encodedTxt}}$`;
                 insertTxtAndMoveCursor(
                     cm,
                     txtEnc,
@@ -22,9 +22,9 @@ export const useAutoComplateFuncs=()=>{
                     opt.extra.pos2,
                     ''
                 );
-                return;
+            }catch (e){
+                api.showNotification("错误","无法加密指定文本","err");
             }
-            api.showNotification("错误","无法加密指定文本","err");
         })();
     });
 
@@ -38,9 +38,8 @@ export const useAutoComplateFuncs=()=>{
         const wrapEnd={...opt.extra.pos2, ch: opt.extra.pos2.ch+2};
 
         (async ()=>{
-            const resp=await api.decryptTxt(txtEnc);
-            if(true===resp?.succ){
-                const txtOrigin=resp.data;
+            try {
+                const txtOrigin = await api.decryptTxt(txtEnc);
                 insertTxtAndMoveCursor(
                     cm,
                     txtOrigin,
@@ -49,9 +48,9 @@ export const useAutoComplateFuncs=()=>{
                     wrapEnd,
                     ''
                 );
-                return;
+            }catch (e){
+                api.showNotification("错误", "无法解密指定文本", "err");
             }
-            api.showNotification("错误","无法解密指定文本","err");
         })();
     });
 

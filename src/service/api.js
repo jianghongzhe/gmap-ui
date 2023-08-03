@@ -604,15 +604,17 @@ class Api{
 
 
     encryptTxt=(txt="")=>{
-        return ipcRenderer.invoke('encryptTxt', txt);
+        return ipcRenderer.invoke('EncService_Encrypt', {Txt: txt}).then(resp=>resp.Txt);
     };
 
     decryptTxt=(txt="")=>{
-        return ipcRenderer.invoke('decryptTxt', txt);
+        return ipcRenderer.invoke('EncService_Decrypt', {Txt: txt}).then(resp=>resp.Txt);
     };
 
+
+
     decryptTxtBatch=(txts=[])=>{
-        return ipcRenderer.invoke('decryptTxtBatch', txts);
+        return ipcRenderer.invoke('EncService_DecryptBatch', {Txts: txts}).then(resp=>resp.Txts);
     };
 
 
@@ -628,6 +630,8 @@ const settingConst={
 
 
 
+
+
 const getSizeStr=(size=0)=>{
     if(0===size){
         return "<空>";
@@ -639,4 +643,7 @@ const getSizeStr=(size=0)=>{
 };
 
 const inst=new Api();
+
+
+
 export default inst;

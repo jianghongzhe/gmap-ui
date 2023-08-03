@@ -3,9 +3,10 @@ const path = require('path');
 
 //常量：工作区目录、主配置文件位置
 const userPngImg=true;//默认是否
-const appBasePath=path.join(__dirname, '../');;
+const appBasePath=path.join(__dirname, '../');
 const externalPath=path.join(__dirname, '../', 'externals');
 const fileRunnerPath=path.join(__dirname, '../', 'externals', 'file_runner.exe');
+const backendExePath=path.join(__dirname, '../', 'externals', 'gmap-backend.exe');
 const autoUpdaterDir=path.join(__dirname, '../../../', 'app_update');
 const autoUpdaterPath=path.join(__dirname, '../../../', 'app_update', 'app_update.exe');
 const htmlTmplDir=path.join(__dirname, '../', 'externals', 'tmpl_html');
@@ -17,6 +18,9 @@ const attsPath=path.join(__dirname, '../', 'gmaps','atts');
 const workPath=path.join(__dirname, '../', 'work');
 const cachePath=path.join(__dirname, '../', 'cache');
 const packageJsonPath=path.join(__dirname, '../', 'package.json');
+
+const protoPath=path.join(__dirname, 'proto');
+
 
 const iconSuccPath=path.join(__dirname, 'imgs', 'succ.png');
 const iconFailPath=path.join(__dirname, 'imgs', 'fail.png');
@@ -49,6 +53,7 @@ module.exports = {
     appBasePath,
     externalPath,
     fileRunnerPath,
+    backendExePath,
     autoUpdaterDir,
     autoUpdaterPath,
     htmlTmplDir,
@@ -60,6 +65,7 @@ module.exports = {
     workPath,
     cachePath,
     packageJsonPath,
+    protoPath,
     iconSuccPath,
     iconFailPath,
     iconWarnPath,

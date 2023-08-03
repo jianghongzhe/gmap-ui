@@ -483,10 +483,17 @@ const preHandleDocBeforeParse=async (txt)=>{
     // 解密文本
     const matchedItems= (txt.match(/[$]gmap[_]enc[{][^{}$]+?[}][$]/g)??[]);
     const txtEncs=matchedItems.map(item=>(item.substring(item.indexOf("{")+1, item.indexOf("}")).trim()));
-    const resp= await api.decryptTxtBatch(txtEncs);
-    matchedItems.forEach((matchItem, ind)=>{
-        txt=txt.replace(matchItem, true===resp?.succ ? resp.data[ind] : "文本解密失败");
-    });
+    try {
+        const txtsOrigin = await api.decryptTxtBatch(txtEncs);
+        matchedItems.forEach((matchItem, ind)=>{
+            txt=txt.replace(matchItem, txtsOrigin[ind]);
+        });
+    }catch (e){
+        matchedItems.forEach((matchItem, ind)=>{
+            txt=txt.replace(matchItem, "内容无法解密");
+        });
+    }
+
 
     // 禁止生成链接的处理，通过增加干扰标记解决
     // 默认情况下 abc@163.com 会生成链接，如果包裹起来表示不生成链接，即：$gmap_nolink{abc@163.com}$

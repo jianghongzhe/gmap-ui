@@ -6,6 +6,7 @@ const mainSvc = require('./mainSvc');
 const settingSvc = require('./settingSvc');
 const oplogSvc = require('./oplogSvc');
 const appSvc= require('./appSvc');
+const rpcSvc= require('./rpcSvc');
 const findInPageSvc= require('./findInPageSvc');
 const common=require('./common');
 
@@ -117,7 +118,10 @@ app.on('ready', () => {
         await settingSvc.init(mainWindow);
         await oplogSvc.init(mainWindow);
         await appSvc.init(mainWindow);
-        await mainSvc.init(mainWindow);
+        //await Promise.all([
+            await rpcSvc.init(mainWindow);
+            await mainSvc.init(mainWindow);
+        //]);
         findInPageSvc.init(mainWindow);
         loadFirstPage();    
         //splashWindow.close();

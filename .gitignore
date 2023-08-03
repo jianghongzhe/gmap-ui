@@ -13,6 +13,9 @@
 # production
 /build
 
+/externals/gmap-backend.exe
+/main/proto
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
