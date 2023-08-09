@@ -8,6 +8,7 @@ const oplogSvc = require('./oplogSvc');
 const appSvc= require('./appSvc');
 const rpcSvc= require('./rpcSvc');
 const findInPageSvc= require('./findInPageSvc');
+const toastSvc= require('./toastSvc');
 const common=require('./common');
 
 
@@ -79,9 +80,11 @@ const createWindow=()=>{
     });
 
     
-
+    // 由于toast窗口不是主窗口的子窗口，因此主窗口关闭不会自动触发toast窗口关闭，需要手动关闭所有toast窗口，进而触发 window-all-closed，以使应用退出
+    // 而findinpage窗口是主窗口的子窗口，会随主窗口关闭而自动关闭，不需要手动处理
     mainWindow.on('closed', function () {
         mainWindow = null;
+        toastSvc.closeAllNotifyWins();
     });
 }
 
@@ -115,16 +118,25 @@ app.on('ready', () => {
             app.setAppUserModelId("GMap");
         }
         createWindow();
-        await settingSvc.init(mainWindow);
-        await oplogSvc.init(mainWindow);
-        await appSvc.init(mainWindow);
-        //await Promise.all([
-            await rpcSvc.init(mainWindow);
-            await mainSvc.init(mainWindow);
-        //]);
-        findInPageSvc.init(mainWindow);
-        loadFirstPage();    
-        //splashWindow.close();
+
+        const allSvcs=[
+            settingSvc,
+            oplogSvc,
+            appSvc,
+            rpcSvc,
+            mainSvc,
+            findInPageSvc,
+            toastSvc,
+        ];
+        for (const eachSvc of allSvcs) {
+            await eachSvc.init(mainWindow);
+        }
+        for (const eachSvc of allSvcs) {
+            if(eachSvc.postInit){
+                await eachSvc.postInit();
+            }
+        }
+        loadFirstPage();
     })();
 });
 

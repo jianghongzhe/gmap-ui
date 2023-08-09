@@ -1,0 +1,27 @@
+body{
+    margin:0px;
+    padding:0px;
+    overflow: hidden;
+}
+
+#root {
+    background-color: #3C3C3C;
+    width:  366px;
+    height: 112px;
+    border-radius: 6px;
+    position: relative;
+}
+
+#btnClose{
+    position: absolute;
+    color: #B1B1B1;
+    cursor: pointer;
+    right: 12px;
+    top: 0px;
+    font-size: 28px;
+}
+
+#btnClose:hover{
+    color: white;
+}
+

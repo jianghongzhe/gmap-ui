@@ -17,6 +17,10 @@ class Api{
         ipcRenderer.invoke('initFindInPage', 300);
     }
 
+    initSysInfo=()=>{
+
+    };
+
     /**
      * 显示查找对话框
      */

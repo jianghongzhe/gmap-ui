@@ -311,13 +311,18 @@ const delegateHandlerSync=(handler, evt, ...args)=>{
 };
 
 
+const directCall={};
+const directCallSync={};
+
+
 /**
  * 注册异步ipc处理器
  */
 const regIpcHandlers=(ipcHandlers)=>{
     for(let key in ipcHandlers){
-        //console.log("ipc key", key);
-        ipcMain.handle(key, delegateHandler.bind(this, ipcHandlers[key]));
+        const bindedHandler=delegateHandler.bind(this, ipcHandlers[key]);
+        ipcMain.handle(key, bindedHandler);
+        directCall[key]=bindedHandler;
     }
 };
 
@@ -327,7 +332,9 @@ const regIpcHandlers=(ipcHandlers)=>{
  */
 const regIpcHandlersSync=(ipcHandlers)=>{
     for(let key in ipcHandlers){
-        ipcMain.on(key+"Sync", delegateHandlerSync.bind(this, ipcHandlers[key]));
+        const bindedHandler = delegateHandlerSync.bind(this, ipcHandlers[key]);
+        ipcMain.on(key+"Sync", bindedHandler);
+        directCallSync[key+"Sync"]=bindedHandler;
     }
 };
 
@@ -358,4 +365,6 @@ module.exports={
     // regIpcHandlers,
     // regIpcHandlersSync,
     regSyncAndAsyncIpcHandlers,
+    directCall,
+    directCallSync,
 };
