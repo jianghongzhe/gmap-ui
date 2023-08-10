@@ -1,6 +1,7 @@
 const { spawn, execFile } = require('child_process');
 const fs = require('fs');
 const common= require('./common');
+const toastSvc=require("./toastSvc")
 
 const {
     mapsPath,
@@ -93,7 +94,12 @@ const showNotification=(...args)=>{
             icon="info";
         }
     }
-    common.send("notify", {pic:icons[icon], title, body }).then();
+    toastSvc.showNotification({
+        title,
+        txt: body,
+        icon,
+    })
+    //common.send("notify", {pic:icons[icon], title, body }).then();
 };
 
 

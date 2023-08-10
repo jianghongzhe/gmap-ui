@@ -1,4 +1,4 @@
-const {BrowserWindow, ipcMain, screen } = require('electron');
+const {BrowserWindow,webContents , ipcMain, screen } = require('electron');
 const path = require("path");
 const crypto= require("crypto");
 const common=require("./common");
@@ -48,8 +48,26 @@ const commonWinAttrs={
 };
 
 
+const animConfig= {
+    fps: 60,
+    duration: 250,
+    fromPos: 0, // 待填充
+    toPos: 0, // 待填充,
+    ranges: [
+        [50, 1.2],
+        [70, 1.5],
+    ],
+};
+
+const animFrames={
+    interval: 0,
+    poses: [],
+};
+
+
 let mainWin=null;
 let workArea=null; //  { Left: 0, Right: 2560, Top: 0, Bottom: 1400 }
+let screenW=null;
 
 
 
@@ -63,17 +81,7 @@ let workArea=null; //  { Left: 0, Right: 2560, Top: 0, Bottom: 1400 }
 const noteWins={};
 
 
-/**
- * 加载工作区的位置，以便后面计算窗体位置时用
- * @return {Promise<null>}
- */
-const postInit=()=>{
-    return (async ()=>{
-        const resp=await common.directCall.SysinfoService_GetSysinfo({});
-        workArea=resp.workArea;
-        return null;
-    })();
-};
+
 
 
 /**
@@ -85,12 +93,78 @@ const postInit=()=>{
 const calcNewWinPos=()=>{
     const minY= Object.values(noteWins)
             .map(v=>v.win)
-            .reduce((accu, cur)=> Math.min(cur.getPosition()[1],accu), workArea.Bottom);
+            .reduce((accu, cur)=> Math.min(cur.getPosition()[1],accu), workArea.bottom);
     return {
-        x: workArea.Right-noteWinMargin-noteWinW,
+        x: workArea.right-noteWinMargin-noteWinW,
         y: minY-noteWinMargin-noteWinH,
     };
 };
+
+
+
+/**
+ *
+ * @param fps 每秒动画帧数
+ * @param duration 动画总时间
+ * @param fromPos 起始位置
+ * @param toPos 结束位置
+ * @param ranges 不同区间对应的移动速率（倍速）
+ * [
+ *      [30, 1.2], // [0]位置的百分比 [1]倍速
+ *      [70, 1.5],
+ * ]
+ */
+const initSlideAnimFrames=()=>{
+    animConfig.fromPos=workArea.right-noteWinMargin-noteWinW;
+    animConfig.toPos=screenW+30;
+    const {fps, duration, fromPos, toPos, ranges}= animConfig;
+
+    // 平均速度计算
+    // 30%*len/v + 40%*len/1.2v + 30%*len/1.5v = duration
+    // 30%*len + 40%*len/1.2 + 30%*len/1.5= v*duration
+    // v=(30%*len + 40%*len/1.2 + 30%*len/1.5)/duration
+
+    const sumLen=toPos-fromPos;
+    const newRanges=[];
+    const firstDist=sumLen*(ranges?.length>0 ? ranges[0][0] : 100)/100;
+    newRanges.push({
+        start: fromPos,
+        len: firstDist,
+        velocityTimes: 1,
+    });
+    let v= firstDist;
+    let start=fromPos+firstDist;
+
+    if(ranges?.length>0){
+        ranges.forEach((rg,rgInd)=>{
+            const perc=(rgInd<ranges.length-1 ? ranges[rgInd+1][0]-rg[0] : 100-rg[0]);
+            const dist=sumLen*perc/100;
+            newRanges.push({
+                start,
+                len: dist,
+                velocityTimes: rg[1],
+            });
+            v+=dist/rg[1];
+            start+=dist;
+        });
+    }
+
+    // 多长时间播放一帧动画 ms
+    const animInterval=(1000/fps);
+    // 在1倍速下，播放一帧动画移动的距离
+    v=animInterval*v/duration;
+
+
+    animFrames.interval=animInterval;
+    newRanges.forEach(rg=>{
+        for(let i=rg.start;i<rg.start+rg.len;i+=v*rg.velocityTimes){
+            animFrames.poses.push(parseInt(i));
+        }
+    });
+};
+
+
+
 
 
 /**
@@ -102,7 +176,33 @@ const beginSlideOutWin=(winId)=>{
         return;
     }
     const [x,y]=noteWins[winId].win.getPosition();
-    noteWins[winId].win.setPosition(x+100, y, false);
+    const animConfig= {
+        fps: 30,
+        duration: 2000,
+        fromPos: x-1000,
+        toPos: screenW+30-1000,
+        ranges: [
+            [30, 1.2],
+            [70, 1.5],
+        ],
+    };
+    const {interval, poses} = animFrames;
+    let framesCnt=poses.length;
+    let currInd=0;
+    const startPos=parseInt(workArea.right-noteWinMargin-noteWinW);
+
+    const func=()=>{
+        if(startPos!=poses[currInd]) {
+            noteWins[winId].win.setPosition(poses[currInd], y, false);
+        }
+        ++currInd;
+        if(currInd>=framesCnt){
+            handleCloseWin(winId);
+            return;
+        }
+        noteWins[winId].timer=setTimeout(func, interval);
+    };
+    func();
 };
 
 
@@ -124,12 +224,13 @@ const showNotification=({title, txt, icon})=>{
     // 通过事件发送要显示的内容并显示窗口
     // 记录窗口id和窗口对象以及计算器的对应关系，以便窗口滑动动画和应用关闭时使用
     findWin.loadFile(noteWinFullPath).then(()=>{
-        findWin.webContents.send("init-ele",{winId, title, txt, icon,});
-        findWin.show();
-        noteWins[findWin.id]={
+        const key=findWin.id;
+        findWin.webContents.send("init-ele",{title, txt, icon,});
+        noteWins[key]={
             win: findWin,
-            timer: setTimeout(beginSlideOutWin.bind(this, findWin.id), remainMsBeforeSlideout),
+            timer: setTimeout(beginSlideOutWin.bind(this, key), remainMsBeforeSlideout),
         };
+        findWin.show();
     });
 };
 
@@ -142,16 +243,21 @@ const showNotification=({title, txt, icon})=>{
  * @param winId
  */
 const handleCloseWin=(winId)=>{
+    console.log("will close id, "+(noteWins[winId] ? "exists " : "not exists "), winId);
     if(!noteWins[winId]){
         return;
     }
+
     if(noteWins[winId].timer){
-        clearTimeout(noteWins[winId].timer);
+        try{clearTimeout(noteWins[winId].timer);}catch (e){}
+        try{clearInterval(noteWins[winId].timer);}catch(e){}
         noteWins[winId].timer=null;
     }
     noteWins[winId].win.close();
     delete noteWins[winId];
 };
+
+
 
 
 /**
@@ -166,10 +272,18 @@ const closeAllNotifyWins=()=>{
 
 const init=(_mainWindow)=>{
     mainWin=_mainWindow;
+    const { x, y, width, height }=screen.getPrimaryDisplay().workArea;
+    workArea={ left: x, right: x+width, top: y, bottom: y+height };
+    screenW=screen.getPrimaryDisplay().size.width;
+    initSlideAnimFrames();
 
-
+    // 接收关闭事件
+    // evt.sender.id为webContents的id，并非BrowserWindow的id，需要转换一下
     ipcMain.on("will-close", (evt, args)=>{
-        handleCloseWin(evt.sender.id);
+        const winId=BrowserWindow.fromWebContents(webContents.fromId(evt.sender.id))?.id;
+        if(winId){
+            handleCloseWin(winId);
+        }
     });
 
     const ipcHandlers={
@@ -184,26 +298,9 @@ const init=(_mainWindow)=>{
 
 module.exports={
     init,
-    postInit,
     closeAllNotifyWins,
+    showNotification,
 };
 
 
 
-
-// test
- setTimeout(()=>{
-     showNotification({
-         txt: "fffffffsddddd"
-     });
- }, 5_000);
-setTimeout(()=>{
-    showNotification({
-        txt: "gogogo"
-    });
-}, 7_000);
-setTimeout(()=>{
-    showNotification({
-        txt: "gogogo"
-    });
-}, 9_000);

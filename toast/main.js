@@ -12,10 +12,27 @@ window.onload=()=>{
         ipcRenderer.send("will-close");
     });
 
+    //
+    ipcRenderer.on("init-ele", (evt, {title, txt, icon})=>{
+        title=(title??'信息').trim();
+        title=(''===title ? '信息' : title);
 
-    ipcRenderer.on("init-ele", (evt, {winId, title, txt, icon})=>{
-        document.querySelector("#txt").innerText=txt;
+        if(['err','error','fail','failure'].includes(icon)){
+            icon='err';
+        }else if(['info','infomation'].includes(icon)){
+            icon='info';
+        }else if(['succ','success','successful'].includes(icon)){
+            icon='succ';
+        }else if(['warn', 'warning'].includes(icon)){
+            icon='warn';
+        }else{
+            icon='info';
+        }
+
+        txt=(txt??'').trim().replace(/\r/g,'').replace(/\n/g,'<br/>');
+
+        document.querySelector("#title").innerText=title;
+        document.querySelector("#txt").innerHTML=txt;
+        document.querySelector("#icon").src=`./imgs/${icon??'info'}.png`;
     });
-
-
 };
