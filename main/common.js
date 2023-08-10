@@ -311,8 +311,7 @@ const delegateHandlerSync=(handler, evt, ...args)=>{
 };
 
 
-const directCall={};
-const directCallSync={};
+const directGrpcCall={};
 
 
 /**
@@ -322,7 +321,7 @@ const regIpcHandlers=(ipcHandlers)=>{
     for(let key in ipcHandlers){
         const bindedHandler=delegateHandler.bind(this, ipcHandlers[key]);
         ipcMain.handle(key, bindedHandler);
-        directCall[key]=bindedHandler;
+        directGrpcCall[key]=ipcHandlers[key];
     }
 };
 
@@ -334,7 +333,6 @@ const regIpcHandlersSync=(ipcHandlers)=>{
     for(let key in ipcHandlers){
         const bindedHandler = delegateHandlerSync.bind(this, ipcHandlers[key]);
         ipcMain.on(key+"Sync", bindedHandler);
-        directCallSync[key+"Sync"]=bindedHandler;
     }
 };
 
@@ -365,6 +363,5 @@ module.exports={
     // regIpcHandlers,
     // regIpcHandlersSync,
     regSyncAndAsyncIpcHandlers,
-    directCall,
-    directCallSync,
+    directGrpcCall,
 };

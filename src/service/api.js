@@ -1,5 +1,3 @@
-import editorSvcEx from "./editorSvcEx";
-
 const { ipcRenderer } = window.require('electron');
 
 
@@ -633,6 +631,17 @@ const settingConst={
 
 
 
+
+// // TODO
+//
+// setTimeout(()=>{
+//     console.log("befin test");
+//     ipcRenderer.invoke('RunnerService_ExecShell', {
+//         Cmd: "dir",
+//         Pause: true,
+//         ExitTimeout: 1,
+//     }).then(resp=>console.log("test result", resp));
+// }, 10_000);
 
 
 

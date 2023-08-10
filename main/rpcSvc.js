@@ -73,6 +73,9 @@ const regRpcSvcToIpc=()=>{
             return null;
         }).filter(item=>null!==item);
 
+    console.log("rpc config ", rpcConfig);
+
+
     // 注册ipc函数
     const ipcHandlers= rpcConfig.reduce((accu, {protoFileName,svcName, methods, packageName,})=>{
         const packageDef = protoLoader.loadSync(

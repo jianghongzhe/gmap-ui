@@ -33,6 +33,6 @@ window.onload=()=>{
 
         document.querySelector("#title").innerText=title;
         document.querySelector("#txt").innerHTML=txt;
-        document.querySelector("#icon").src=`./imgs/${icon??'info'}.png`;
+        document.querySelector("#icon").src=`./imgs/${icon}.png`;
     });
 };

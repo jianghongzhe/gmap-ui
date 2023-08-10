@@ -1,12 +1,28 @@
 - dddemo
-	- 带引用的分主题|ref:长段文字|[](file:///d:\xx\yy\zz\qq.txt)|[](cp://qqqrrr)
+	- 带引用的分主题|ref:长段文字|[](cmd://bio4_start)
 	
 
 ***
 
+# alias
+[bio4_start]: 
+```bat
+cd /D "D:\Software\games\bio4"
+start "win" "D:\Software\games\bio4\5项属性修改器.exe"
+timeout /t 6
+cd /D "D:\Software\games\bio4"
+start "win" "D:\Software\games\bio4\bio4_cn.exe"
+timeout /t 4
+```
+
+[yyy]:
+```bat
+cd /d %ProgramFiles%\Hyper-V\
+start "win" %windir%\System32\mmc.exe "%windir%\System32\virtmgmt.msc"
+```
 
 # ref:长段文字
-
+[aaa](assets/bbc.txt)
 
 
 

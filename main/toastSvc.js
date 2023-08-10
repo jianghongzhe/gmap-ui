@@ -1,5 +1,7 @@
 const {BrowserWindow,webContents , ipcMain, screen } = require('electron');
+const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require("path");
+const fs = require("fs");
 const crypto= require("crypto");
 const common=require("./common");
 
@@ -272,6 +274,8 @@ const closeAllNotifyWins=()=>{
 
 const init=(_mainWindow)=>{
     mainWin=_mainWindow;
+
+    // 加载屏幕和工作区相关信息，预计算窗口滑动动画相关数据
     const { x, y, width, height }=screen.getPrimaryDisplay().workArea;
     workArea={ left: x, right: x+width, top: y, bottom: y+height };
     screenW=screen.getPrimaryDisplay().size.width;
@@ -285,11 +289,6 @@ const init=(_mainWindow)=>{
             handleCloseWin(winId);
         }
     });
-
-    const ipcHandlers={
-        showNot: showNotification,
-    };
-    common.regSyncAndAsyncIpcHandlers(ipcHandlers);
 }
 
 
@@ -304,3 +303,32 @@ module.exports={
 
 
 
+
+
+// setTimeout(()=>{
+//     showNotification({
+//         title:'sfjg',
+//         txt:'xxxxxxxxxxx',
+//         icon:'succ',
+//     });
+// }, 5000);
+
+// setTimeout(()=>{
+//     mainWin.webContents.capturePage(/*{x: 0, y: 0, width: 2000, height: 1200,}*/).then((img) => {
+//         console.log("img", img);
+//
+//         mainWin.webContents.size
+//
+//         fs.writeFile(
+//             "C:\\Users\\Administrator\\Desktop\\test\\shot.png",
+//             img.toPNG(),
+//             {}, //            "base64",
+//             function (err) {
+//                 console.error("err", err);
+//             }
+//         );
+//         console.log("screen shot has take")
+//     });
+//
+//
+// }, 10_000);
