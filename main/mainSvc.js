@@ -9,6 +9,7 @@ const nodeNet = require('net');
 const common=require('./common');
 const settingSvc=require('./settingSvc');
 const appSvc =require("./appSvc");
+const ipcClient=require("./ipc_client");
 
 const {
     userPngImg,
@@ -761,20 +762,20 @@ const searchKeyword=(kw)=>{
 const openUrl=(url)=>{
     // 执行命令
     if(url.startsWith("cmd://")){
-        return common.directGrpcCall.RunnerService_ExecShell({
+        return ipcClient.sendReq({
+            Action: 'cmd_run',
             Cmd: url.startsWith("cmd:///") ? url.substring("cmd:///".length) : url.substring("cmd://".length),
             Pause: false,
             ExitTimeout: 1,
         });
-        //return sendCmdToServer("cmd", {url});
     }
     if(url.startsWith("cmdp://")){
-        return common.directGrpcCall.RunnerService_ExecShell({
+        return ipcClient.sendReq({
+            Action: 'cmd_run',
             Cmd: url.startsWith("cmdp:///") ? url.substring("cmdp:///".length) : url.substring("cmdp://".length),
             Pause: true,
             ExitTimeout: 0,
         });
-        // return sendCmdToServer("cmdp", {url});
     }
     if(url.startsWith("start://")){
         return sendCmdToServer("start", {url}).then(resp=>{

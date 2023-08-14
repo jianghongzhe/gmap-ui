@@ -194,7 +194,7 @@ const beginSlideOutWin=(winId)=>{
     const startPos=parseInt(workArea.right-noteWinMargin-noteWinW);
 
     const func=()=>{
-        if(startPos!=poses[currInd]) {
+        if(startPos!==poses[currInd]) {
             noteWins[winId].win.setPosition(poses[currInd], y, false);
         }
         ++currInd;

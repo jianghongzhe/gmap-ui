@@ -606,17 +606,17 @@ class Api{
 
 
     encryptTxt=(txt="")=>{
-        return ipcRenderer.invoke('EncService_Encrypt', {Txt: txt}).then(resp=>resp.Txt);
+        return ipcRenderer.invoke('ipc', {Action:'enc', Txt: txt}).then(resp=>resp.Txt);
     };
 
     decryptTxt=(txt="")=>{
-        return ipcRenderer.invoke('EncService_Decrypt', {Txt: txt}).then(resp=>resp.Txt);
+        return ipcRenderer.invoke('ipc', {Action:'dec', Txt: txt}).then(resp=>resp.Txt);
     };
 
 
 
     decryptTxtBatch=(txts=[])=>{
-        return ipcRenderer.invoke('EncService_DecryptBatch', {Txts: txts}).then(resp=>resp.Txts);
+        return ipcRenderer.invoke('ipc', {Action:'dec_batch', Txts: txts}).then(resp=>resp.Txts);
     };
 
 
@@ -632,16 +632,7 @@ const settingConst={
 
 
 
-// // TODO
-//
-// setTimeout(()=>{
-//     console.log("befin test");
-//     ipcRenderer.invoke('RunnerService_ExecShell', {
-//         Cmd: "dir",
-//         Pause: true,
-//         ExitTimeout: 1,
-//     }).then(resp=>console.log("test result", resp));
-// }, 10_000);
+
 
 
 

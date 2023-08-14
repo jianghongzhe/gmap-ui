@@ -78,7 +78,7 @@ const connWs=(url)=>{
             }
         });
         wsClient.on('pong', ()=>{
-            log("收到心跳");
+            log("收到websocket心跳");
         });
     });
 };
@@ -118,7 +118,7 @@ const beginHeartbeat=()=>{
     }
     // log("向服务端发送心跳");
     // wsClient.send("ping");
-    log("发送心跳");
+    log("发送websocket心跳");
     wsClient.ping();
     setTimeout(beginHeartbeat, wsHeartBeatIntervalMs);
 };
