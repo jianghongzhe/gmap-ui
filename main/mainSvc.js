@@ -778,11 +778,9 @@ const openUrl=(url)=>{
         });
     }
     if(url.startsWith("start://")){
-        return sendCmdToServer("start", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action: 'cmd_start',
+            Cmd: url.startsWith("start:///") ? url.substring("start:///".length) : url.substring("start://".length),
         });
     }
     // 命令打开目录
