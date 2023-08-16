@@ -1,5 +1,5 @@
 - dddemo
-	- 带引用的分主题|ref:长段文字|[](cmd://bio4_start)
+	- 带引用的分主题|ref:长段文字|[](cmdopen:///E:\dev\ws\rust\demo-rust)
 	- env|[](start://rundll32 sysdm.cpl,EditEnvironmentVariables)
 	
 

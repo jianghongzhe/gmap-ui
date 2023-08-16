@@ -785,12 +785,19 @@ const openUrl=(url)=>{
     }
     // 命令打开目录
     if(url.startsWith("cmdopen://")){
-        return sendCmdToServer("cmdopen", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action: 'cmd_open',
+            Txt: url.startsWith("cmdopen:///") ? url.substring("cmdopen:///".length) : url.substring("cmdopen://".length),
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
+
+        // return sendCmdToServer("cmdopen", {url}).then(resp=>{
+        //     if(resp && false===resp.succ){
+        //         appSvc.showNotification("操作有误", resp.msg, 'err');
+        //     }
+        //     return resp;
+        // });
     }
     // 执行文件或打开目录
     // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
