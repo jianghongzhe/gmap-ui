@@ -2,8 +2,6 @@ const net = require('net');
 const crypto=require("crypto");
 const zlib = require('node:zlib');
 
-const common=require("./common");
-
 
 // --------------------- 常量 -----------------------------------------------------
 // 向请求数据中增加的唯一标识，用来实现请求响应模型
@@ -30,7 +28,8 @@ const defaultConf={
     reqCompress:    false,
     reqCompressLev: 0,
     respCompress:   false,
-    hasErr:         (json)=>false
+    hasErr:         (json)=>false,
+    onPong:         ()=>{},
 };
 
 
@@ -100,7 +99,7 @@ const connectToIpcServer=(pipeFullPath, option=defaultConf)=>{
         const tmpClient = net.connect(pipeFullPath, ()=>{
             client=tmpClient;
             beginKeepAlive();
-            //beginCheckTimeout();
+            beginCheckTimeout();
             client.on('data', (data)=>{
                 handleData(data, option);
             });
@@ -120,14 +119,18 @@ const connectToIpcServer=(pipeFullPath, option=defaultConf)=>{
  * 连接保活
  */
 const beginKeepAlive=()=>{
-    const timer=setInterval(()=>{
+    const sendPing=()=>{
         if(client){
             try{client.write(PING_BUFFER);}catch(e){}
-            common.log("发送named pipe心跳");
-            return;
         }
-        clearInterval(timer);
+    };
+    const timer=setInterval(()=>{
+        sendPing();
+        if(!client) {
+            clearInterval(timer);
+        }
     },KEEPALIVE_INTERVAL_MS);
+    sendPing();
 };
 
 
@@ -231,7 +234,9 @@ const handleData=(data, option)=>{
                 accuData.payload.sumSize=accuData.head.buf.readUint32BE(0);
                 if(0===accuData.payload.sumSize){
                     accuData.head.readSize=0;
-                    common.log("接收named pipe心跳");
+                    if(option?.onPong){
+                        option.onPong();
+                    }
                     continue;
                 }
                 accuData.payload.buf=Buffer.allocUnsafe(accuData.payload.sumSize);

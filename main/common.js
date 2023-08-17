@@ -55,8 +55,9 @@ let reqIdCallbackMap={};
 /**
  * 连接后台websocket服务，定时发送心跳，定时清理超时的请求
  * @param {*} url 
+ * @param {*} option
  */
-const connWs=(url)=>{
+const connWs=(url, option)=>{
     return new Promise((res, rej)=>{
         wsClient = new ws(url);    
         wsClient.on('open', ()=>{
@@ -78,7 +79,9 @@ const connWs=(url)=>{
             }
         });
         wsClient.on('pong', ()=>{
-            log("收到websocket心跳");
+            if(option?.onPong){
+                option.onPong();
+            }
         });
     });
 };
@@ -116,9 +119,7 @@ const beginHeartbeat=()=>{
         log("尚未连接到websocket服务端，无法发送心跳消息");
         return;
     }
-    // log("向服务端发送心跳");
-    // wsClient.send("ping");
-    log("发送websocket心跳");
+    //log("发送websocket心跳");
     wsClient.ping();
     setTimeout(beginHeartbeat, wsHeartBeatIntervalMs);
 };

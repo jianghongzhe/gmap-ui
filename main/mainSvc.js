@@ -27,6 +27,7 @@ const {
     SLASH,
     BACK_SLASH
 }=require("./consts");
+const {createTimeoutDetector} = require("./timeout_detect");
 
 
 
@@ -754,6 +755,8 @@ const searchKeyword=(kw)=>{
     openUrl(url);
 };
 
+
+
 /**
  * 打开指定url
  * 对于 http://、https:// 协议及 file:/// 协议的图片文件，如果设置中指定了对应的打开方式，则使用之，否则再使用系统默认打开方式打开
@@ -764,7 +767,7 @@ const openUrl=(url)=>{
     if(url.startsWith("cmd://")){
         return ipcClient.sendReq({
             Action: 'cmd_run',
-            Cmd: url.startsWith("cmd:///") ? url.substring("cmd:///".length) : url.substring("cmd://".length),
+            Cmd: trimPrefs(url, ["cmd:///", "cmd://"]),
             Pause: false,
             ExitTimeout: 1,
         });
@@ -772,7 +775,7 @@ const openUrl=(url)=>{
     if(url.startsWith("cmdp://")){
         return ipcClient.sendReq({
             Action: 'cmd_run',
-            Cmd: url.startsWith("cmdp:///") ? url.substring("cmdp:///".length) : url.substring("cmdp://".length),
+            Cmd: trimPrefs(url, ["cmdp:///", "cmdp://"]),
             Pause: true,
             ExitTimeout: 0,
         });
@@ -780,33 +783,29 @@ const openUrl=(url)=>{
     if(url.startsWith("start://")){
         return ipcClient.sendReq({
             Action: 'cmd_start',
-            Cmd: url.startsWith("start:///") ? url.substring("start:///".length) : url.substring("start://".length),
+            Cmd: trimPrefs(url, ["start:///", "start://"]),
         });
     }
     // 命令打开目录
     if(url.startsWith("cmdopen://")){
         return ipcClient.sendReq({
             Action: 'cmd_open',
-            Txt: url.startsWith("cmdopen:///") ? url.substring("cmdopen:///".length) : url.substring("cmdopen://".length),
+            Txt: trimPrefs(url, ["cmdopen:///", "cmdopen://"]),
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-
-        // return sendCmdToServer("cmdopen", {url}).then(resp=>{
-        //     if(resp && false===resp.succ){
-        //         appSvc.showNotification("操作有误", resp.msg, 'err');
-        //     }
-        //     return resp;
-        // });
     }
     // 执行文件或打开目录
     // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
     if(url.startsWith("file://")){
+        // exec("F:\\合 并\\0001.中国网络电视台-[完整赛事]乒超联赛半决赛第二场 山东VS上海 1[高清版].mp4");
+        // //console.log("execFile", execFile)
+        // return;
+        const handledUrl = trimPrefs(url, ["file:///", "file://"]);
         if(isImgExt(url)){
             const imgOpener=settingSvc.getSettingValue("img_opener");
             if('default'!==imgOpener){
-                const beginInd= (url.startsWith("file:///") ? "file:///".length : "file://".length);
-                return sendCmdToServer("openby", {url: `openby://${url.substring(beginInd)}@@${imgOpener}`,}).then(resp=>{
+                return sendCmdToServer("openby", {url: `openby://${handledUrl}@@${imgOpener}`,}).then(resp=>{
                     if(resp && false===resp.succ){
                         appSvc.showNotification("操作有误", resp.msg, 'err');
                     }
@@ -814,20 +813,28 @@ const openUrl=(url)=>{
                 });
             }
         }
-        return sendCmdToServer("file", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action:"file_dir_run",
+            Path: handledUrl,
+            CtxDir: "",
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
+        // return sendCmdToServer("file", {url}).then(resp=>{
+        //     if(resp && false===resp.succ){
+        //         appSvc.showNotification("操作有误", resp.msg, 'err');
+        //     }
+        //     return resp;
+        // });
     }
     // 调用系统的打开方式来打开指定文件
     if(url.startsWith("openas://")){
-        return sendCmdToServer("openas", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action:"file_url_openas",
+            Path: trimPrefs(url, ["openas:///", "openas://"]),
+            CtxDir: "",
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
     // 调用指定的打开方式来打开指定文件
@@ -850,41 +857,50 @@ const openUrl=(url)=>{
     }
     // 调用指定的打开方式来打开指定文件
     if(url.startsWith("openin://")){
-        return sendCmdToServer("openin", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        const items = splitUrlParts(trimPrefs(url, ["openin:///", "openin://"]));
+        if(2!==items.length || ''===items[0] || ''===items[1]){
+            // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
+            appSvc.showNotification("url格式有误", "应为如下格式：\r\nopenin://a.exe@@d:/m/n", 'err');
+            return;
+        }
+        return ipcClient.sendReq({
+            Action:"file_openin",
+            Path: items[0],
+            CtxDir: items[1],
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
     // 打开目录并选择文件
     if(url.startsWith("dir://")){
-        return sendCmdToServer("dir", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action:"file_dir_select",
+            Path: trimPrefs(url, ["dir:///", "dir://"]),
+            CtxDir: "",
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
     // 复制内容
     if(url.startsWith("cp://")){
-        return sendCmdToServer("cp", {url}).then(resp=>{
-            if(resp && resp.succ){
-                appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
-            }          
-            return resp;
-        });
+        const handledTxt=trimPrefs(url, ["cp:///", "cp://"])
+            .replace(/ [\\]/g,'\n')
+            .replace(/\r/g,'')
+            .replace(/\n/g,'\r\n');
+        clipboard.writeText(handledTxt);
+        appSvc.showNotification('内容已复制', handledTxt, 'succ');
+        return;
     }
     // 复制路径
     if(url.startsWith("cppath://")){
-        return sendCmdToServer("cppath", {url}).then(resp=>{
-            if(resp && resp.succ){
-                appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
-            }
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action:"path_recognize",
+            Txt: trimPrefs(url, ["cppath:///","cppath://"]),
+        }).then(resp=>{
+            clipboard.writeText(resp.Path);
+            appSvc.showNotification(`${resp.IsFile ? "文件" : "目录"}路径已复制`, resp.Path, 'succ');
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
     // 保存base64内容到图片文件
@@ -1389,6 +1405,31 @@ const openCurrMapDir=(mdFullpath)=>{
 
 
 //===========工具方法  ================================================
+/**
+ * 把url拆分成多个部分
+ * abc.txt@@notepad.exe -> ['abc.txt', 'notepad.exe']
+ * @param url
+ * @return {string[]}
+ */
+const splitUrlParts=(url)=>{
+    return url = `${url ?? ''}`.trim().split("@@").map(item => item.trim());
+};
+
+/**
+ * 去掉指定前缀
+ * @param txt
+ * @param prefs
+ * @return {string}
+ */
+const trimPrefs=(txt="", prefs=[])=>{
+    return prefs.reduce((accu, pref)=>{
+        accu=accu.trim();
+        if(accu.startsWith(pref)){
+            accu=accu.substring(pref.length).trim();
+        }
+        return accu;
+    },txt.trim());
+};
 
 /**
  * 指定文本是否为url格式
@@ -1611,6 +1652,17 @@ const init=(_mainWindow)=>{
 
         common.regSyncAndAsyncIpcHandlers(ipcHandlers);
 
+        // 连接超时检测配置
+        const PONG_TIMEOUT_MS=3*60_000;
+        const CHECK_PONG_TIMEOUT_INTERVAL_MS=60_000;
+        const timeoutDetector=createTimeoutDetector(PONG_TIMEOUT_MS, CHECK_PONG_TIMEOUT_INTERVAL_MS, (distMs)=>{
+            common.log(`ws server connection exception, not receive pong over ${parseInt(distMs/1000)}sec`, true);
+            //appSvc.showNotification("错误", "后台服务连接失败", "err");
+        });
+        const option={
+            onPong: ()=> timeoutDetector.signal(),
+        };
+
         const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
         if(assistProcess && assistProcess.stdout){
             const assistListener=(data)=>{
@@ -1621,7 +1673,7 @@ const init=(_mainWindow)=>{
                     assistProcess.stdout.removeListener("data", assistListener);
                     server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
                     common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
-                    common.connWs(server_info.connectUrl).then(res);
+                    common.connWs(server_info.connectUrl, option).then(res);
                 }
             };
             assistProcess.stdout.on("data", assistListener);

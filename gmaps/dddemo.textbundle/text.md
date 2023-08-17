@@ -1,7 +1,15 @@
 - dddemo
-	- 带引用的分主题|ref:长段文字|[](cmdopen:///E:\dev\ws\rust\demo-rust)
+	- 带引用的分主题|ref:长段文字|[](start:///rundll32 sysdm.cpl,EditEnvironmentVariables)
 	- env|[](start://rundll32 sysdm.cpl,EditEnvironmentVariables)
-	
+	- file|[](file://F:\合 并\1.bat)
+	- cmdopen|[](cmdopen://F:\合 并\com.gameloft.android.ANMP.GloftM4HM)
+	- openas
+		- url|[](openas://https://mail.163.com)
+		- file|[](openas://F:\合 并\0001.中国网络电视台-[完整赛事]乒超联赛半决赛第二场 山东VS上海 5[高清版].mp4)
+		- not_exist_err|[](openas://f:\a\b\c)
+		- dir_err|[](openas://f:\download)
+	- openin
+		- aa|[](openin://cmddddd@@f:\hide\vv\qqqsss)
 
 ***
 

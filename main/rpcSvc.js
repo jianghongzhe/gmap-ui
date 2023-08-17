@@ -5,31 +5,46 @@ const fs = require("fs");
 
 const common = require('./common');
 const ipcClient= require("./ipc_client");
+const {createTimeoutDetector}= require("./timeout_detect");
 
 const {
     backendExePath,
     workPath,
 }=require("./consts");
+const appSvc = require("./appSvc");
 
 
+// 连续多长时间未收到pong响应，认为连接异常（超时）
+const PONG_TIMEOUT_MS=3*60_000;
 
-
+// 检查pong超时的时间间隔
+const CHECK_PONG_TIMEOUT_INTERVAL_MS=60_000;
 
 
 /**
  * 把rpc服务注册到electron ipc，以便被前端调用
+ * @param serverInfo
+ * {
+ *      "Pid":18728,
+ *      "PipeFullName":"\\\\.\\pipe\\gmap_1692297950985184800"
+ * }
+ * @param res
  */
-const regRpcSvcToIpc=(res)=>{
-    // {"Pid":17252, "PipeFullName":'xxx'}
-    let server_info=JSON.parse(fs.readFileSync(path.join(workPath, 'backend_info'), 'utf-8'));
+const regRpcSvcToIpc=(serverInfo, res)=>{
+    const timeoutDetector= createTimeoutDetector(PONG_TIMEOUT_MS, CHECK_PONG_TIMEOUT_INTERVAL_MS, (distMs)=>{
+        common.log(`pipe server connection exception, not receive pong over ${parseInt(distMs/1000)}sec`, true);
+        //appSvc.showNotification("错误", "后台服务连接失败", "err");
+    });
+
     const opt={
         reqCompress:     false,
         reqCompressLev:  0,
         respCompress:    false,
-        hasErr:          (json)=>0!==json.State
+        hasErr:          (json)=>0!==json.State,
+        onPong:          ()=> timeoutDetector.signal(),
     };
-    ipcClient.connectToIpcServer( server_info.PipeFullName, opt).then(()=>{
-        common.log(`connected to backend service on pipe: ${server_info.PipeFullName}`, true);
+    ipcClient.connectToIpcServer( serverInfo.PipeFullName, opt).then(()=>{
+        common.log(`connected to backend service on pipe: ${serverInfo.PipeFullName}`, true);
         common.regSyncAndAsyncIpcHandlers({
             ipc: ipcClient.sendReq,
         });
@@ -43,6 +58,7 @@ const init=(_mainWindow)=>{
     return new Promise((res,rej)=>{
         // 启动后台程序作为子进程，增加命令行参数以便启动完成后打印到控制台上
         const readySymbol= crypto.randomUUID().replace(/[-]/g,'');
+        const reg = new RegExp(`.*${readySymbol}(.+?)${readySymbol}.*`);
         const assistProcess= spawn(
             backendExePath,
             [
@@ -52,7 +68,7 @@ const init=(_mainWindow)=>{
 
 
         if(assistProcess && assistProcess.stdout){
-            const maxBufferCnt=5;
+            const maxBufferCnt=8;
             const stdoutBuffer=[];
 
             const appendBuf=(str)=>{
@@ -68,12 +84,16 @@ const init=(_mainWindow)=>{
                     return;
                 }
                 const strData = data.toString("utf-8");
-
-                // 控制台输出内容可能分多次回调：
-                // 因此除了判断当前回调结果中有无启动完成标识符，还要判断最近N次结果拼串后是否包含，以免标识符被拆到多次回调结果中（类似tcp半包的方式）
-                if(strData.includes(readySymbol) || appendBuf(strData).includes(readySymbol)){
+                const sumBugStr = appendBuf(strData);
+                const match = sumBugStr.match(reg);
+                // 找到readySymbol包裹的内容，按base64解码、JSON.parse，得到服务器信息对象
+                // {"Pid":18728,"PipeFullName":"\\\\.\\pipe\\gmap_1692297950985184800"}
+                // 原来方式为只判断readySymbol，再从指定文件中读取服务器信息，现在不经过文件，直接从控制台读取
+                if(match && match[1]){
                     assistProcess.stdout.removeListener("data", assistListener);
-                    regRpcSvcToIpc(res);
+                    const serverInfo=JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+                    console.log("serverInfo", Buffer.from(match[1], 'base64').toString('utf8'));
+                    regRpcSvcToIpc(serverInfo, res);
                 }
             };
             assistProcess.stdout.on("data", assistListener);
