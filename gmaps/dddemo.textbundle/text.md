@@ -1,7 +1,7 @@
 - dddemo
-	- 带引用的分主题|ref:长段文字|[](start:///rundll32 sysdm.cpl,EditEnvironmentVariables)
+	- 带引用的分主题|ref:长段文字|[](start:///rundll32 sysdm.cpl,EditEnvironmentVariables)|[](openby://txt://sysdm.cpl,EditEnvironmentVariables@@rundll32)
 	- env|[](start://rundll32 sysdm.cpl,EditEnvironmentVariables)
-	- file|[](file://F:\合 并\1.bat)
+	- file|[](dir://F:\合 并\1.bat)|[](dir:///F:\合 并\com.gameloft.android.ANMP.GloftM4HM)
 	- cmdopen|[](cmdopen://F:\合 并\com.gameloft.android.ANMP.GloftM4HM)
 	- openas
 		- url|[](openas://https://mail.163.com)
@@ -9,7 +9,12 @@
 		- not_exist_err|[](openas://f:\a\b\c)
 		- dir_err|[](openas://f:\download)
 	- openin
-		- aa|[](openin://cmddddd@@f:\hide\vv\qqqsss)
+		- aa|[](openin://cmd@@f:\hide\vv\)|[](cmdopen://f:\hide\vv\)
+	- openby
+		- aa|[](openby://https://img-blog.csdnimg.cn/img_convert/6c723a0892e3a41cd19cadd13c92f9a9.png@@photo)|[](openby://https://mail.163.com@@msedge)|[](openby://F:\hide\pp\DSC01095 - 副本.jpg@@photo)
+		- xx|[](openby://https://baidu.com@@chrome@@wrap)
+	- diropenby
+		- bb|[](diropenby://E:\dev\ws\front\ngdemo@@code)
 
 ***
 

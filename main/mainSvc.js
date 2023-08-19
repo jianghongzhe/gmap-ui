@@ -798,18 +798,17 @@ const openUrl=(url)=>{
     // 执行文件或打开目录
     // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
     if(url.startsWith("file://")){
-        // exec("F:\\合 并\\0001.中国网络电视台-[完整赛事]乒超联赛半决赛第二场 山东VS上海 1[高清版].mp4");
-        // //console.log("execFile", execFile)
-        // return;
         const handledUrl = trimPrefs(url, ["file:///", "file://"]);
         if(isImgExt(url)){
             const imgOpener=settingSvc.getSettingValue("img_opener");
             if('default'!==imgOpener){
-                return sendCmdToServer("openby", {url: `openby://${handledUrl}@@${imgOpener}`,}).then(resp=>{
-                    if(resp && false===resp.succ){
-                        appSvc.showNotification("操作有误", resp.msg, 'err');
-                    }
-                    return resp;
+                return ipcClient.sendReq({
+                    Action:"file_url_txt_openby",
+                    Path: handledUrl,
+                    Opener: imgOpener,
+                    Option: "",
+                }).catch(resp=>{
+                    appSvc.showNotification("操作有误", resp.Msg, 'err');
                 });
             }
         }
@@ -820,12 +819,6 @@ const openUrl=(url)=>{
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-        // return sendCmdToServer("file", {url}).then(resp=>{
-        //     if(resp && false===resp.succ){
-        //         appSvc.showNotification("操作有误", resp.msg, 'err');
-        //     }
-        //     return resp;
-        // });
     }
     // 调用系统的打开方式来打开指定文件
     if(url.startsWith("openas://")){
@@ -839,26 +832,43 @@ const openUrl=(url)=>{
     }
     // 调用指定的打开方式来打开指定文件
     if(url.startsWith("openby://")){
-        return sendCmdToServer("openby", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        const items = splitUrlParts(trimPrefs(url, ["openby:///", "openby://"]));
+        if(items.length<2 || ''===items[0] || ''===items[1]){
+            // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
+            appSvc.showNotification("url格式有误", "应为如下格式：\r\nopenby://a.txt@@b.exe", 'err');
+            return;
+        }
+        return ipcClient.sendReq({
+            Action:"file_url_txt_openby",
+            Path: items[0],
+            Opener: items[1],
+            Option: (items.length>=3 && ''!==items[2] ? items[2] : ""),
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
     // 调用指定的打开方式来打开指定目录
     if(url.startsWith("diropenby://")){
-        return sendCmdToServer("diropenby", {url}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        const items = splitUrlParts(trimPrefs(url, ["diropenby:///", "diropenby://"]));
+        if(items.length<2 || ''===items[0] || ''===items[1]){
+            // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
+            appSvc.showNotification("url格式有误", "应为如下格式：\r\ndiropenby://f:/a@@b.exe", 'err');
+            return;
+        }
+        return ipcClient.sendReq({
+            Action:"file_url_txt_openby",
+            Path: items[0],
+            Opener: items[1],
+            Option: (items.length>=3 && ''!==items[2] ? items[2] : ""),
+            UseDir: true,
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
     // 调用指定的打开方式来打开指定文件
     if(url.startsWith("openin://")){
         const items = splitUrlParts(trimPrefs(url, ["openin:///", "openin://"]));
-        if(2!==items.length || ''===items[0] || ''===items[1]){
+        if(items.length<2 || ''===items[0] || ''===items[1]){
             // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
             appSvc.showNotification("url格式有误", "应为如下格式：\r\nopenin://a.exe@@d:/m/n", 'err');
             return;
@@ -936,14 +946,15 @@ const openUrl=(url)=>{
             shell.openExternal(url);
             return;
         }
-        return sendCmdToServer("openby", {url: `openby://${url}@@${urlOpener}`,}).then(resp=>{
-            if(resp && false===resp.succ){
-                appSvc.showNotification("操作有误", resp.msg, 'err');
-            }
-            return resp;
+        return ipcClient.sendReq({
+            Action:"file_url_txt_openby",
+            Path: url,
+            Opener: urlOpener,
+            Option: "",
+        }).catch(resp=>{
+            appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
-
     // 其他情况，直接用shell执行
     shell.openExternal(url);
 }
