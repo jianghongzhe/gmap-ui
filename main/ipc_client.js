@@ -280,14 +280,15 @@ const handleResp=(buf, option)=>{
             res(originBuf);
         });
     }).then(originBuf=>{
-        const json = JSON.parse(originBuf.toString("utf8"));
+        const jsonStr=originBuf.toString("utf8");
+        const json = JSON.parse(jsonStr);
         const reqId=json[REQUEST_ID_KEY];
 
         if(reqIdPromiseMap[reqId]){
             // 如果配置项中有判断请求成功失败的函数，则根据结果调用res/rej，否则直接认为成功（res）
             if(option?.hasErr && 'function'===typeof(option.hasErr)){
-                const func= option.hasErr(json) ?  reqIdPromiseMap[reqId].rej : reqIdPromiseMap[reqId].res;
-                func(json);
+                const fun=option.hasErr(json) ? reqIdPromiseMap[reqId].rej : reqIdPromiseMap[reqId].res;
+                fun(json);
             }else{
                 reqIdPromiseMap[reqId].res(json);
             }

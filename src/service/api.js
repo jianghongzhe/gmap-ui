@@ -478,7 +478,7 @@ class Api{
     };
 
     getUrlFromClipboard=()=>{
-        return ipcRenderer.invoke('getUrlFromClipboard', {});
+        return ipcRenderer.invoke('ipc', {Action:'get_url_from_clip'});
     };
 
     getClipboardHasContent=()=>{
@@ -606,17 +606,17 @@ class Api{
 
 
     encryptTxt=(txt="")=>{
-        return ipcRenderer.invoke('ipc', {Action:'enc', Txt: txt}).then(resp=>resp.Txt);
+        return ipcRenderer.invoke('ipc', {Action:'enc', Txt: txt});
     };
 
     decryptTxt=(txt="")=>{
-        return ipcRenderer.invoke('ipc', {Action:'dec', Txt: txt}).then(resp=>resp.Txt);
+        return ipcRenderer.invoke('ipc', {Action:'dec', Txt: txt});
     };
 
 
 
     decryptTxtBatch=(txts=[])=>{
-        return ipcRenderer.invoke('ipc', {Action:'dec_batch', Txts: txts}).then(resp=>resp.Txts);
+        return ipcRenderer.invoke('ipc', {Action:'dec_batch', Txts: txts});
     };
 
 

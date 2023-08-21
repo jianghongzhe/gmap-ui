@@ -2,6 +2,7 @@ const crypto= require("crypto");
 const { spawn} = require('child_process');
 const path=require("path");
 const fs = require("fs");
+const {nativeImage, clipboard} = require("electron");
 
 const common = require('./common');
 const ipcClient= require("./ipc_client");
@@ -12,6 +13,7 @@ const {
     workPath,
 }=require("./consts");
 const appSvc = require("./appSvc");
+
 
 
 // 连续多长时间未收到pong响应，认为连接异常（超时）
@@ -46,12 +48,29 @@ const regRpcSvcToIpc=(serverInfo, res)=>{
     ipcClient.connectToIpcServer( serverInfo.PipeFullName, opt).then(()=>{
         common.log(`connected to backend service on pipe: ${serverInfo.PipeFullName}`, true);
         common.regSyncAndAsyncIpcHandlers({
-            ipc: ipcClient.sendReq,
+            ipc: decodeErrHandler.bind(this, ipcClient.sendReq),
         });
         res();
     });
 };
 
+/**
+ * 由于从ipcmain到ipcrenderer传递异常（reject）时会变形，即不能设置自定义属性，也不能设置自定义异常信息（信息前会加一些error invoking remote method...）,
+ * 因此在这里捕获异常，把返回结果设置成数组，[0]为异常信息，[1]为正常结果
+ * @param fun
+ * @param req
+ * @return {Promise<[null,*]|[*,null]|undefined>}
+ */
+const decodeErrHandler=(fun, req)=>{
+    return (async()=>{
+        try {
+            const resp = await fun(req);
+            return [null, resp];
+        }catch (e){
+            return [e, null];
+        }
+    })();
+};
 
 
 const init=(_mainWindow)=>{

@@ -913,30 +913,50 @@ const openUrl=(url)=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
     }
-    // 保存base64内容到图片文件
+    // 保存base64内容到图片文件，如果能成功保存，即为成功，不验证是否是有效图片
+    // data:image/png;base64,iVBORw0KG...
     if(url.startsWith("data:image/")){
+        const reg=/^data[:]image[/](.+?);base64,(.+?)$/;
+        const matches=url.trim().match(reg);
+        const flag=(matches && matches[1] && matches[2]);
+        if(!flag){
+            appSvc.showNotification("图片格式有误", "不是有效的base64 url", 'err');
+            return;
+        }
+        const imgType=matches[1];
+        const imgCont=matches[2];
+
+        const filters=[
+            { name: 'png', extensions: ['png'] },
+            { name: 'jpg', extensions: ['jpg'] },
+            { name: 'jpeg', extensions: ['jpeg'] },
+            { name: 'bmp', extensions: ['bmp'] },
+            { name: 'gif', extensions: ['gif'] },
+            { name: 'svg', extensions: ['svg'] },
+            { name: 'webp', extensions: ['webp'] },
+        ].filter(item=> item.name.toLowerCase().trim()!==imgType.toLowerCase().trim());
+
+
         const savePath=dialog.showSaveDialogSync(mainWindow, { 
             properties: ['showHiddenFiles'],
             filters: [
-                { name: 'png', extensions: ['png'] },
-                { name: 'jpg', extensions: ['jpg'] },
-                { name: 'jpeg', extensions: ['jpeg'] },
-                { name: 'bmp', extensions: ['bmp'] },
-                { name: 'gif', extensions: ['gif'] },
-                { name: 'svg', extensions: ['svg'] },
-                { name: 'webp', extensions: ['webp'] },
+                { name: imgType, extensions: [imgType] },
+                ...filters,
                 { name: '所有', extensions: ['*'] }
             ]
         });
+        // 用户已取消
         if(!savePath){
-            return new Promise((res, rej)=>rej(new Error("用户已取消")));
+            return;
         }
-        return sendCmdToServer("saveImgBase64", {url, savePath}).then(resp=>{
-            if(resp && resp.succ){
-                appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
-            }
-            return resp;
-        });
+        try {
+            const buffer = Buffer.from(imgCont, 'base64');
+            fs.writeFileSync(savePath, buffer);
+            appSvc.showNotification("操作成功", "图片已保存到\r\n"+savePath, 'succ');
+        }catch (e){
+            appSvc.showNotification("操作有误", "未能成功保存图片", 'err');
+        }
+        return;
     }
 
     // 打开网址：如果未指定打开方式，则使用系统默认的，否则使用指定打开方式打开，借助openby协议
@@ -1691,7 +1711,6 @@ const init=(_mainWindow)=>{
         }
     });
 }
-
 
 module.exports={
     //初始化

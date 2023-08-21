@@ -1,52 +1,11 @@
 - dddemo
-	- 带引用的分主题|ref:长段文字|[](start:///rundll32 sysdm.cpl,EditEnvironmentVariables)|[](openby://txt://sysdm.cpl,EditEnvironmentVariables@@rundll32)
-	- env|[](start://rundll32 sysdm.cpl,EditEnvironmentVariables)
-	- file|[](dir://F:\合 并\1.bat)|[](dir:///F:\合 并\com.gameloft.android.ANMP.GloftM4HM)
-	- cmdopen|[](cmdopen://F:\合 并\com.gameloft.android.ANMP.GloftM4HM)
-	- openas
-		- url|[](openas://https://mail.163.com)
-		- file|[](openas://F:\合 并\0001.中国网络电视台-[完整赛事]乒超联赛半决赛第二场 山东VS上海 5[高清版].mp4)
-		- not_exist_err|[](openas://f:\a\b\c)
-		- dir_err|[](openas://f:\download)
-	- openin
-		- aa|[](openin://cmd@@f:\hide\vv\)|[](cmdopen://f:\hide\vv\)
-	- openby
-		- aa|[](openby://https://img-blog.csdnimg.cn/img_convert/6c723a0892e3a41cd19cadd13c92f9a9.png@@photo)|[](openby://https://mail.163.com@@msedge)|[](openby://F:\hide\pp\DSC01095 - 副本.jpg@@photo)
-		- xx|[](openby://https://baidu.com@@chrome@@wrap)
-	- diropenby
-		- bb|[](diropenby://E:\dev\ws\front\ngdemo@@code)
-
+	- 带引用的分主题|ref:长段文字
 ***
 
-# alias
-[bio4_start]: 
-```bat
-cd /D "D:\Software\games\bio4"
-start "win" "D:\Software\games\bio4\5项属性修改器.exe"
-timeout /t 6
-cd /D "D:\Software\games\bio4"
-start "win" "D:\Software\games\bio4\bio4_cn.exe"
-timeout /t 4
-```
 
-[yyy]:
-```bat
-cd /d %ProgramFiles%\Hyper-V\
-start "win" %windir%\System32\mmc.exe "%windir%\System32\virtmgmt.msc"
-```
 
 # ref:长段文字
-[aaa](assets/bbc.txt)
+![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=)
 
 
-
-$gmap_nolink{aaa@163.com}$
-
-
-$gmap_enc{nblN1MqLm0WI+taOZCn+3pFYYbX76njuX15xO+pNm7U=}$
-
-$gmap_enc{DVQHffoT8TNL6a234WZOuswRh3bJyq1rFzOfxRDs/S0=}$
-
-$gmap_enc{t9yIGXWtUFupQ5wwqjEXYQ==}$
-
-22
+$gmap_enc{3MKqssw+hYK1/fMyoKHXow==}$

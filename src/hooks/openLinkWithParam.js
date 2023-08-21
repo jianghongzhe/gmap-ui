@@ -23,6 +23,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * 打开指定链接，打开前根据情况选择是否显示确认框
      * @param addr
      * @param needConfirm
+     * @param confirmTxt
      */
     const confirmOrNot=useMemoizedFn((addr, needConfirm=false, confirmTxt=null)=>{
         const openLink=()=>{
@@ -54,6 +55,9 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * @returns
      */
     const onClickLink=useMemoizedFn((url, needConfirm=false, confirmTxt=null)=>{
+        if('boolean'!==typeof(needConfirm)){
+            needConfirm=false;
+        }
         if('string'!==typeof(confirmTxt)){
             confirmTxt=null;
         }
@@ -64,6 +68,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
          * 不含插值表达式，直接根据情况判断是否要显示确认框
          * @param addr
          * @param needConfirm
+         * @param confirmTxt
          */
         const openOneLink=(addr, needConfirm, confirmTxt)=>{
             const replaceItems= strTmpl.parse(addr);
@@ -83,6 +88,7 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
          *
          * @param addrs
          * @param needConfirm
+         * @param confirmTxt
          */
         const openMultiLink=(addrs, needConfirm, confirmTxt)=>{
             confirmOrNot(addrs, needConfirm, confirmTxt);

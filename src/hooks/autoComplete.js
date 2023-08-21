@@ -11,20 +11,20 @@ export const useAutoComplateFuncs=()=>{
     const doEncodeTxtAction=useMemoizedFn((opt, cm, currAssetsDir)=>{
         const txt=cm.doc.getRange(opt.extra.pos, opt.extra.pos2).trim();
         (async ()=>{
-            try{
-                const encodedTxt=await api.encryptTxt(txt);
-                const txtEnc=`$gmap_enc{${encodedTxt}}$`;
-                insertTxtAndMoveCursor(
-                    cm,
-                    txtEnc,
-                    txtEnc.length,
-                    opt.extra.pos,
-                    opt.extra.pos2,
-                    ''
-                );
-            }catch (e){
+            const [e,resp]=await api.encryptTxt(txt);
+            if(e){
                 api.showNotification("错误","无法加密指定文本","err");
+                return;
             }
+            const txtEnc=`$gmap_enc{${resp.Txt}}$`;
+            insertTxtAndMoveCursor(
+                cm,
+                txtEnc,
+                txtEnc.length,
+                opt.extra.pos,
+                opt.extra.pos2,
+                ''
+            );
         })();
     });
 
@@ -38,19 +38,20 @@ export const useAutoComplateFuncs=()=>{
         const wrapEnd={...opt.extra.pos2, ch: opt.extra.pos2.ch+2};
 
         (async ()=>{
-            try {
-                const txtOrigin = await api.decryptTxt(txtEnc);
-                insertTxtAndMoveCursor(
-                    cm,
-                    txtOrigin,
-                    txtOrigin.length,
-                    wrapStart,
-                    wrapEnd,
-                    ''
-                );
-            }catch (e){
+            const [e, resp] = await api.decryptTxt(txtEnc);
+            if(e){
                 api.showNotification("错误", "无法解密指定文本", "err");
+                return;
             }
+            const txtOrigin=resp.Txt;
+            insertTxtAndMoveCursor(
+                cm,
+                txtOrigin,
+                txtOrigin.length,
+                wrapStart,
+                wrapEnd,
+                ''
+            );
         })();
     });
 
@@ -85,10 +86,10 @@ export const useAutoComplateFuncs=()=>{
 
         const actionHandlerMap={
             [actionTypes.getUrlFromClipboard]: ()=>{
-                respHandler(
+                respHandlerNew(
                     api.getUrlFromClipboard,
-                    resp=>{
-                        const txt=`[${resp.data.title}](${resp.data.url})`;
+                    ({Title,Url})=>{
+                        const txt=`[${Title}](${Url})`;
                         insertTxtAndMoveCursor(
                             cm,
                             txt,
@@ -97,9 +98,25 @@ export const useAutoComplateFuncs=()=>{
                             opt?.extra?.pos2??null,
                             opt?.extra?.fill??''
                         );
+                    },
+                );
 
-                    }
-                ).then();
+
+                // respHandler(
+                //     api.getUrlFromClipboard,
+                //     resp=>{
+                //         const txt=`[${resp.data.title}](${resp.data.url})`;
+                //         insertTxtAndMoveCursor(
+                //             cm,
+                //             txt,
+                //             txt.length,
+                //             opt?.extra?.pos??null,
+                //             opt?.extra?.pos2??null,
+                //             opt?.extra?.fill??''
+                //         );
+                //
+                //     }
+                // ).then();
             },
             [actionTypes.getImgUrlFromClipboard]: ()=>{
                 respHandler(
@@ -368,6 +385,15 @@ const respHandler=async (getRespFunc, respHandleFunc)=>{
     }else{
         api.showNotification("操作有误", "未知的操作结果","err");
     }
+};
+
+const respHandlerNew=async (func, respHandleFunc)=>{
+    let [e, resp]=await func();
+    if(e){
+        api.showNotification("操作有误",e.Msg,"err");
+        return;
+    }
+    respHandleFunc(resp);
 };
 
 
