@@ -10,6 +10,9 @@ import api from "../../../service/api";
 import styles from './MindNode.module.scss';
 import {filterGroupLinks, filterSingleLink} from "../../../service/linkFilter";
 import classnames from "classnames";
+import {useSelectFileListItem} from "../../../hooks/tabs";
+import {tabCurrPane} from "../../../store/tabs";
+import {useRecoilValue} from "recoil";
 
 
 
@@ -221,6 +224,9 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
 
 
 const LinkItem=({tooltip, addr, icon, openLinkFunc, needConfirm=false})=> {
+    const selectFileListItem= useSelectFileListItem();
+    const currPane= useRecoilValue(tabCurrPane);
+
     /**
      * 右键菜单相关的数据项
      */
@@ -245,8 +251,6 @@ const LinkItem=({tooltip, addr, icon, openLinkFunc, needConfirm=false})=> {
         })();
     });
 
-
-
     return (
         <Tooltip color='cyan' placement="top" mouseEnterDelay={0.4} onOpenChange={onOpenChange} title={
             <div className={styles.linkTooltip}>
@@ -255,7 +259,11 @@ const LinkItem=({tooltip, addr, icon, openLinkFunc, needConfirm=false})=> {
                     (ctxMenuItems && ctxMenuItems.length>0) && <div className='btnContainer'>
                         {
                             ctxMenuItems.map((ctxMenu,menuInd)=>(
-                                <TooltipBtn key={`menu-${menuInd}`} value={ctxMenu.name} onClick={api.openUrl.bind(this, ctxMenu.url)}/>
+                                <TooltipBtn key={`menu-${menuInd}`}
+                                            value={ctxMenu.name}
+                                            onClick={api.openUrl.bind(this, ctxMenu.url,
+                                                ctxMenu.url.startsWith("gmap://") ? selectFileListItem : currPane?.key??'')}
+                                />
                             ))
                         }
                     </div>
