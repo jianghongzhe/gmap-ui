@@ -118,7 +118,11 @@ const MapsViewer=(props)=>{
     });
 
     const openLinkWrapper= useMemoizedFn((url)=>{
-        api.openUrl(url, selectFileListItem);
+        if(url.startsWith("gmap://")){
+            api.openUrl(url, selectFileListItem);
+        }else{
+            api.openUrl(url, currPane?.key??'');
+        }
     });
 
 

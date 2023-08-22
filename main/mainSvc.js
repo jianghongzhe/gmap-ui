@@ -757,81 +757,95 @@ const searchKeyword=(kw)=>{
 
 
 
-/**
- * 打开指定url
- * 对于 http://、https:// 协议及 file:/// 协议的图片文件，如果设置中指定了对应的打开方式，则使用之，否则再使用系统默认打开方式打开
- * @param {*} url 
- */
-const openUrl=(url)=>{
-    // 执行命令
-    if(url.startsWith("cmd://")){
+
+
+const cmdUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("cmd://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action: 'cmd_run',
             Cmd: trimPrefs(url, ["cmd:///", "cmd://"]),
             Pause: false,
             ExitTimeout: 1,
         });
-    }
-    if(url.startsWith("cmdp://")){
+    },
+};
+
+const cmdpUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("cmdp://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action: 'cmd_run',
             Cmd: trimPrefs(url, ["cmdp:///", "cmdp://"]),
             Pause: true,
             ExitTimeout: 0,
         });
-    }
-    if(url.startsWith("start://")){
+    },
+};
+
+const startUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("start://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action: 'cmd_start',
             Cmd: trimPrefs(url, ["start:///", "start://"]),
         });
-    }
-    // 命令打开目录
-    if(url.startsWith("cmdopen://")){
+    },
+};
+
+const cmdOpenUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("cmdopen://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action: 'cmd_open',
-            Txt: trimPrefs(url, ["cmdopen:///", "cmdopen://"]),
+            Path: trimPrefs(url, ["cmdopen:///", "cmdopen://"]),
+            CtxDir: ctxDir,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 执行文件或打开目录
-    // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
-    if(url.startsWith("file://")){
+    },
+};
+
+// 执行文件或打开目录
+// 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
+const fileOpenUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("file://"),
+    handle:(url, ctxDir)=>{
         const handledUrl = trimPrefs(url, ["file:///", "file://"]);
         if(isImgExt(url)){
             const imgOpener=settingSvc.getSettingValue("img_opener");
             if('default'!==imgOpener){
-                return ipcClient.sendReq({
-                    Action:"file_url_txt_openby",
-                    Path: handledUrl,
-                    Opener: imgOpener,
-                    Option: "",
-                }).catch(resp=>{
-                    appSvc.showNotification("操作有误", resp.Msg, 'err');
-                });
+                return openByUrlHandler.handle(`openby://${handledUrl}@@${imgOpener}`, ctxDir)
             }
         }
         return ipcClient.sendReq({
             Action:"file_dir_run",
             Path: handledUrl,
-            CtxDir: "",
+            CtxDir: ctxDir,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 调用系统的打开方式来打开指定文件
-    if(url.startsWith("openas://")){
+    },
+};
+
+// 调用系统的打开方式来打开指定文件
+const openAsUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("openas://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action:"file_url_openas",
             Path: trimPrefs(url, ["openas:///", "openas://"]),
-            CtxDir: "",
+            CtxDir: ctxDir,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 调用指定的打开方式来打开指定文件
-    if(url.startsWith("openby://")){
+    },
+};
+
+// 调用指定的打开方式来打开指定文件
+const openByUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("openby://"),
+    handle:(url, ctxDir)=>{
         const items = splitUrlParts(trimPrefs(url, ["openby:///", "openby://"]));
         if(items.length<2 || ''===items[0] || ''===items[1]){
             // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
@@ -841,81 +855,111 @@ const openUrl=(url)=>{
         return ipcClient.sendReq({
             Action:"file_url_txt_openby",
             Path: items[0],
+            CtxDir: ctxDir,
             Opener: items[1],
             Option: (items.length>=3 && ''!==items[2] ? items[2] : ""),
+            UseDir: false,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 调用指定的打开方式来打开指定目录
-    if(url.startsWith("diropenby://")){
+    },
+};
+
+// 调用指定的打开方式来打开指定目录，比如vscode打开工程目录等
+const dirOpenByUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("diropenby://"),
+    handle:(url, ctxDir)=>{
         const items = splitUrlParts(trimPrefs(url, ["diropenby:///", "diropenby://"]));
         if(items.length<2 || ''===items[0] || ''===items[1]){
-            // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
-            appSvc.showNotification("url格式有误", "应为如下格式：\r\ndiropenby://f:/a@@b.exe", 'err');
+            appSvc.showNotification("url格式有误", "应为如下格式：\r\ndiropenby://f:/ws@@code", 'err');
             return;
         }
         return ipcClient.sendReq({
             Action:"file_url_txt_openby",
             Path: items[0],
+            CtxDir: ctxDir,
             Opener: items[1],
             Option: (items.length>=3 && ''!==items[2] ? items[2] : ""),
             UseDir: true,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 调用指定的打开方式来打开指定文件
-    if(url.startsWith("openin://")){
+    },
+};
+
+
+// 以指定路径为工作目录打开指定文件
+const openInUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("openin://"),
+    handle:(url, ctxDir)=>{
         const items = splitUrlParts(trimPrefs(url, ["openin:///", "openin://"]));
         if(items.length<2 || ''===items[0] || ''===items[1]){
             // throw new Exception("地址格式有误，无法打开：\r\n" + req.url);
             appSvc.showNotification("url格式有误", "应为如下格式：\r\nopenin://a.exe@@d:/m/n", 'err');
             return;
         }
+        // CtxDir用来配合Path获取文件路径，而Dir是指目录路径，没有相应的 CtxDir
         return ipcClient.sendReq({
             Action:"file_openin",
             Path: items[0],
-            CtxDir: items[1],
+            CtxDir: ctxDir,
+            Dir: items[1],
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 打开目录并选择文件
-    if(url.startsWith("dir://")){
+    },
+};
+
+// 打开目录并选择指定文件或目录
+const dirUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("dir://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action:"file_dir_select",
             Path: trimPrefs(url, ["dir:///", "dir://"]),
-            CtxDir: "",
+            CtxDir: ctxDir,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 复制内容
-    if(url.startsWith("cp://")){
+    },
+};
+
+// 复制内容
+const cpUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("cp://"),
+    handle:(url, ctxDir)=>{
         const handledTxt=trimPrefs(url, ["cp:///", "cp://"])
             .replace(/ [\\]/g,'\n')
             .replace(/\r/g,'')
             .replace(/\n/g,'\r\n');
         clipboard.writeText(handledTxt);
         appSvc.showNotification('内容已复制', handledTxt, 'succ');
-        return;
-    }
-    // 复制路径
-    if(url.startsWith("cppath://")){
+    },
+};
+
+// 复制路径，需要验证路径有效性
+const cppathUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("cppath://"),
+    handle:(url, ctxDir)=>{
         return ipcClient.sendReq({
             Action:"path_recognize",
-            Txt: trimPrefs(url, ["cppath:///","cppath://"]),
+            Path: trimPrefs(url, ["cppath:///","cppath://"]),
+            CtxDir: ctxDir,
         }).then(resp=>{
             clipboard.writeText(resp.Path);
             appSvc.showNotification(`${resp.IsFile ? "文件" : "目录"}路径已复制`, resp.Path, 'succ');
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
-    }
-    // 保存base64内容到图片文件，如果能成功保存，即为成功，不验证是否是有效图片
-    // data:image/png;base64,iVBORw0KG...
-    if(url.startsWith("data:image/")){
+    },
+};
+
+
+// 保存base64内容到图片文件，如果能成功保存，即为成功，不验证是否是有效图片
+// data:image/png;base64,iVBORw0KG...
+const base64ImgUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("data:image/"),
+    handle:(url, ctxDir)=>{
         const reg=/^data[:]image[/](.+?);base64,(.+?)$/;
         const matches=url.trim().match(reg);
         const flag=(matches && matches[1] && matches[2]);
@@ -936,8 +980,8 @@ const openUrl=(url)=>{
             { name: 'webp', extensions: ['webp'] },
         ].filter(item=> item.name.toLowerCase().trim()!==imgType.toLowerCase().trim());
 
-
-        const savePath=dialog.showSaveDialogSync(mainWindow, { 
+        // 把url中的图片类型当做第一个扩展名
+        const savePath=dialog.showSaveDialogSync(mainWindow, {
             properties: ['showHiddenFiles'],
             filters: [
                 { name: imgType, extensions: [imgType] },
@@ -956,27 +1000,64 @@ const openUrl=(url)=>{
         }catch (e){
             appSvc.showNotification("操作有误", "未能成功保存图片", 'err');
         }
-        return;
-    }
+    },
+};
 
-    // 打开网址：如果未指定打开方式，则使用系统默认的，否则使用指定打开方式打开，借助openby协议
-    if(url.startsWith("http://") || url.startsWith("https://")){
+// 打开网址：如果未指定打开方式，则使用系统默认的，否则使用指定打开方式打开，借助openby协议
+const webUrlHandler={
+    canHandle:(url, ctxDir)=>url.startsWith("http://") || url.startsWith("https://"),
+    handle:(url, ctxDir)=>{
         const urlOpener=settingSvc.getSettingValue("url_opener");
         if('default'===urlOpener){
             shell.openExternal(url);
             return;
         }
-        return ipcClient.sendReq({
-            Action:"file_url_txt_openby",
-            Path: url,
-            Opener: urlOpener,
-            Option: "",
-        }).catch(resp=>{
-            appSvc.showNotification("操作有误", resp.Msg, 'err');
-        });
+        return openByUrlHandler.handle(`openby://${url}@@${urlOpener}`, ctxDir)
+    },
+};
+
+
+
+// 默认处理器，用于保底，接受一切url，并使用操作系统默认方式打开url
+const defaultUrlHandler={
+    canHandle:(url, ctxDir)=>true,
+    handle:(url, ctxDir)=>shell.openExternal(url),
+};
+
+// 各种url处理器
+// 其中 canHandle 判断是否可处理
+// handle 进行处理
+const allUrlHandlers=[
+    cmdUrlHandler,
+    cmdpUrlHandler,
+    startUrlHandler,
+    cmdOpenUrlHandler,
+    fileOpenUrlHandler,
+    openAsUrlHandler,
+    openByUrlHandler,
+    dirOpenByUrlHandler,
+    openInUrlHandler,
+    dirUrlHandler,
+    cpUrlHandler,
+    cppathUrlHandler,
+    base64ImgUrlHandler,
+    webUrlHandler,
+    defaultUrlHandler,
+];
+
+
+
+/**
+ * 打开指定url
+ * 对于 http://、https:// 协议及 file:/// 协议的图片文件，如果设置中指定了对应的打开方式，则使用之，否则再使用系统默认打开方式打开
+ * @param {*} url 
+ */
+const openUrl=(url, option)=>{
+    let ctxDir='';
+    if('string'===typeof(option)){
+        ctxDir=option.trim();
     }
-    // 其他情况，直接用shell执行
-    shell.openExternal(url);
+    return allUrlHandlers.find(h=>h.canHandle(url, ctxDir)).handle(url, ctxDir);
 }
 
 

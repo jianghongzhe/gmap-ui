@@ -258,10 +258,12 @@ class Api{
     /**
      * 打开指定url
      * @param {*} url 
-     * @returns 
+     * @param {*} option
+     * @returns
      */
-    openUrl=(url, gpamOpener)=>{
+    openUrl=(url, option)=>{
         if(url.startsWith("gmap://")){
+            const gpamOpener=option;
             (async ()=>{
                 let fn=url.substring("gmap://".length);
                 let flag=await ipcRenderer.invoke('existsGraph', fn);
@@ -287,7 +289,7 @@ class Api{
             return;
         }
 
-        return ipcRenderer.invoke('openUrl', url);
+        return ipcRenderer.invoke('openUrl', url, option);
     }
 
     /**
