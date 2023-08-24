@@ -488,7 +488,7 @@ class Api{
     }
 
     getImgUrlFromClipboard=()=>{
-        return ipcRenderer.invoke('getImgUrlFromClipboard', {});
+        return ipcRenderer.invoke('ipc', {Action:'get_img_url_from_clip'});
     };
 
 

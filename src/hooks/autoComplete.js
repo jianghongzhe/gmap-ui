@@ -100,29 +100,12 @@ export const useAutoComplateFuncs=()=>{
                         );
                     },
                 );
-
-
-                // respHandler(
-                //     api.getUrlFromClipboard,
-                //     resp=>{
-                //         const txt=`[${resp.data.title}](${resp.data.url})`;
-                //         insertTxtAndMoveCursor(
-                //             cm,
-                //             txt,
-                //             txt.length,
-                //             opt?.extra?.pos??null,
-                //             opt?.extra?.pos2??null,
-                //             opt?.extra?.fill??''
-                //         );
-                //
-                //     }
-                // ).then();
             },
             [actionTypes.getImgUrlFromClipboard]: ()=>{
-                respHandler(
+                respHandlerNew(
                     api.getImgUrlFromClipboard,
-                    resp=>{
-                        const txt=`![${resp.data.title}](${resp.data.url})`;
+                    ({Title,Url})=>{
+                        const txt=`![${Title}](${Url})`;
                         insertTxtAndMoveCursor(
                             cm,
                             txt,
