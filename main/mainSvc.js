@@ -10,6 +10,7 @@ const common=require('./common');
 const settingSvc=require('./settingSvc');
 const appSvc =require("./appSvc");
 const ipcClient=require("./ipc_client");
+const devServer=require("./devServer");
 
 const {
     userPngImg,
@@ -667,36 +668,31 @@ const existsGraph = (fn) => {
 
 /**
  * 加载指定Url的图标：
- * 1、如果是开发模式，直接返回开发服务器url+/favicon.ico
- * 2、如果缓存中有，直接返回
- * 3、如果缓存没有，向后台查询。
- *      如果查询成功，则放入缓冲以备下次访问，同时返回结果；
- *      如果查找失败，直接返回结果
+ * 后端返回的是 file:///xxx 形式的url，在生产环境中可直接使用
+ * 但在开发环境中，由于在react dev server中显示网页，不支持 file:/// 形式的图片地址，需要启动一个服务转换为 http的地址
  * @param {*} url 
  * @returns 
  */
-const loadIcon=(url)=>{
-    console.log("loadicon for: "+url);
-    if(common.isDevMode()){
-        return new Promise((res,rej)=>{
-           res({
-                succ: true,
-                msg: "",
-                data: common.getDevServerFaviconUrl(),
-           }); 
-        });
-    }
-    if(url_localicon_map[url]){
-        return new Promise((res,rej)=>{
-            res(url_localicon_map[url]); 
-        });
-    }
-    return sendCmdToServer("loadIcon",{url}).then(resp=>{
-        if(resp.succ){
-            url_localicon_map[url]=resp;
+const loadIcon=(url, ctxDir)=>{
+    ctxDir= ('string'!==typeof(ctxDir) ? "" : ctxDir.trim());
+    let respEnhHandler=(r)=>{
+        if(!common.isDevMode()){
+            return r;
         }
-        return resp;
-    });
+        const resultEnh={...r,};
+        if(r.Url.startsWith("file://")){
+            resultEnh.Url=devServer.convertCacheUrlFileToHttp(r.Url);
+        }
+        if(r.Cascade && r.Url2.startsWith("file://")){
+            resultEnh.Url2=devServer.convertCacheUrlFileToHttp(r.Url2);
+        }
+        return resultEnh;
+    };
+    return ipcClient.sendReq({
+        Action:"load_icon",
+        Path: url,
+        CtxDir: ctxDir,
+    }).then(r=> respEnhHandler(r)).catch(e=>e);
 };
 
 

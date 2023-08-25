@@ -345,7 +345,15 @@ const regSyncAndAsyncIpcHandlers=(ipcHandlers)=>{
 
 
 
-
+const trimPrefs=(txt="", prefs=[])=>{
+    return prefs.reduce((accu, pref)=>{
+        accu=accu.trim();
+        if(accu.startsWith(pref)){
+            accu=accu.substring(pref.length).trim();
+        }
+        return accu;
+    },txt.trim());
+};
 
 
 
@@ -365,4 +373,5 @@ module.exports={
     // regIpcHandlersSync,
     regSyncAndAsyncIpcHandlers,
     directGrpcCall,
+    trimPrefs,
 };

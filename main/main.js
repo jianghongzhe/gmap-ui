@@ -7,6 +7,7 @@ const settingSvc = require('./settingSvc');
 const oplogSvc = require('./oplogSvc');
 const appSvc= require('./appSvc');
 const rpcSvc= require('./rpcSvc');
+const devServer= require('./devServer');
 const findInPageSvc= require('./findInPageSvc');
 const toastSvc= require('./toastSvc');
 const common=require('./common');
@@ -127,6 +128,7 @@ app.on('ready', () => {
             mainSvc,
             findInPageSvc,
             toastSvc,
+            devServer,
         ];
         for (const eachSvc of allSvcs) {
             await eachSvc.init(mainWindow);

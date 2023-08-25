@@ -80,5 +80,6 @@
     "devDependencies": {
       "@emotion/babel-plugin": "^11.10.5"
     }
-  }
+  },
+  "proxy": "http://localhost:56666"
 }

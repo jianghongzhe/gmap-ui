@@ -74,16 +74,25 @@ export const useLoadIcon=({lindAddr, icon})=>{
                         return;
                     }
                     const resp= await api.loadIcon(factAddr);
+                    console.log("load icon result:", resp);
                     if(canceled){
                         return;
                     }
-                    if(resp && resp.succ && resp.data){
+                    if(resp && 0===resp.State){
                         try{
-                            const assignedIcon = getAssignedIcon(resp.data);
+                            const assignedIcon = getAssignedIcon(resp.Url);
                             setLocalIcon(assignedIcon);
                         }catch(e){
                         }
                     }
+
+                    // if(resp && resp.succ && resp.data){
+                    //     try{
+                    //         const assignedIcon = getAssignedIcon(resp.data);
+                    //         setLocalIcon(assignedIcon);
+                    //     }catch(e){
+                    //     }
+                    // }
                 }catch(e){
                 }
             })();

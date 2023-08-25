@@ -245,11 +245,9 @@ const showNotification=({title, txt, icon})=>{
  * @param winId
  */
 const handleCloseWin=(winId)=>{
-    console.log("will close id, "+(noteWins[winId] ? "exists " : "not exists "), winId);
     if(!noteWins[winId]){
         return;
     }
-
     if(noteWins[winId].timer){
         try{clearTimeout(noteWins[winId].timer);}catch (e){}
         try{clearInterval(noteWins[winId].timer);}catch(e){}
