@@ -1,14 +1,15 @@
 import api from "../service/api";
 import {useEffect, useState, } from "react";
 import {
-    AppstoreOutlined,
+    AppstoreOutlined, CheckOutlined,
     CheckSquareOutlined, CodeOutlined, CopyOutlined,
     DeploymentUnitOutlined,
-    FileUnknownOutlined, FolderOutlined, LinkOutlined, TeamOutlined
+    FileUnknownOutlined, FolderFilled, FolderOutlined, LinkOutlined, TeamOutlined
 } from "@ant-design/icons";
 
 import {parseMetadata} from '../common/metadataLoader';
 import cmdopen_url from '../assets/node_icon_cmdopen.png';
+import cmd_url from '../assets/node_icon_cmd.png';
 import browser_url from '../assets/node_icon_browser.png';
 
 export const useLoadIcon=({lindAddr, icon})=>{
@@ -74,12 +75,23 @@ export const useLoadIcon=({lindAddr, icon})=>{
                         return;
                     }
                     const resp= await api.loadIcon(factAddr);
-                    console.log("load icon result:", resp);
+                    // console.log("load icon result:", resp);
                     if(canceled){
                         return;
                     }
                     if(resp && 0===resp.State){
                         try{
+                            //
+                            if(resp.Cascade){
+                                setLocalIcon({
+                                    type:'cascade',
+                                    items:[
+                                        getAssignedIcon(resp.Url, false),
+                                        getAssignedIcon(resp.Url2, false),
+                                    ]
+                                });
+                                return;
+                            }
                             const assignedIcon = getAssignedIcon(resp.Url);
                             setLocalIcon(assignedIcon);
                         }catch(e){
@@ -110,22 +122,29 @@ export const useLoadIcon=({lindAddr, icon})=>{
  * @param addr
  * @return
  */
-const getAssignedIcon=(addr)=>{
+const getAssignedIcon=(addr, fill=false)=>{
     // 找到匹配的图标
     // 特殊名称：folder
     if("folder"===addr){
         return {
             type: 'icon',
             color: colors.dir,
-            compType: FolderOutlined,
+            compType:  fill ? FolderFilled : FolderOutlined,
+        };
+    }
+    if("menu"===addr){
+        return {
+            type: 'icon',
+            color: colors.link,
+            compType:  AppstoreOutlined,
         };
     }
     // 特殊名称：dir
     if("dir"===addr){
         return {
             type: 'icon',
-            color: colors.link,
-            compType: CheckSquareOutlined,
+            color: colors.check,// colors.link,
+            compType: CheckSquareOutlined, //CheckOutlined,// CheckSquareOutlined,
         };
     }
     // 特殊名称：openas
@@ -166,6 +185,17 @@ const getAssignedIcon=(addr)=>{
             type: 'icon',
             color: colors.link,
             compType: CopyOutlined,
+        };
+    }
+    if("cmd"===addr){
+        // return {
+        //     type: 'image',
+        //     url: cmd_url,
+        // };
+        return {
+            type: 'icon',
+            color: colors.cmd,
+            compType: CodeOutlined,
         };
     }
     if("cmdopen"===addr){
@@ -320,6 +350,7 @@ const colors={
     ref: {color:'#faad14'},
     memo: {color:'#faad14'},
     link: {color:'#1890ff'},
+    check: {color:'darkgreen'},
     dir: {color:'orange'},
     cmd: {color:'gray'},
     copy: {color:'#1890ff'},
