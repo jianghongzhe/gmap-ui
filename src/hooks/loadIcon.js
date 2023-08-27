@@ -3,8 +3,8 @@ import {useEffect, useState, } from "react";
 import {
     AppstoreOutlined, CheckOutlined,
     CheckSquareOutlined, CodeOutlined, CopyOutlined,
-    DeploymentUnitOutlined,
-    FileUnknownOutlined, FolderFilled, FolderOutlined, LinkOutlined, TeamOutlined
+    DeploymentUnitOutlined, FileTextOutlined,
+    FileUnknownOutlined, FolderFilled, FolderOutlined, LinkOutlined, PictureOutlined, TeamOutlined
 } from "@ant-design/icons";
 
 import {parseMetadata} from '../common/metadataLoader';
@@ -87,7 +87,7 @@ export const useLoadIcon=({lindAddr, icon})=>{
                                     type:'cascade',
                                     items:[
                                         getAssignedIcon(resp.Url, false),
-                                        getAssignedIcon(resp.Url2, false),
+                                        getAssignedIcon(resp.Url2, true),
                                     ]
                                 });
                                 return;
@@ -123,13 +123,20 @@ export const useLoadIcon=({lindAddr, icon})=>{
  * @return
  */
 const getAssignedIcon=(addr, fill=false)=>{
+    if("browser"===addr){
+        return {
+            type: 'image',
+            url: browser_url,
+        };
+    }
+
     // 找到匹配的图标
     // 特殊名称：folder
     if("folder"===addr){
         return {
             type: 'icon',
             color: colors.dir,
-            compType:  fill ? FolderFilled : FolderOutlined,
+            compType:  /*fill ? FolderFilled :*/ FolderOutlined,
         };
     }
     if("menu"===addr){
@@ -137,6 +144,20 @@ const getAssignedIcon=(addr, fill=false)=>{
             type: 'icon',
             color: colors.link,
             compType:  AppstoreOutlined,
+        };
+    }
+    if("txt"===addr){
+        return {
+            type: 'icon',
+            color: {color:'#BBB',},//colors.link,
+            compType:  FileTextOutlined,
+        };
+    }
+    if("photo"===addr){
+        return {
+            type: 'icon',
+            color: colors.link,
+            compType:  PictureOutlined,
         };
     }
     // 特殊名称：dir
@@ -194,8 +215,8 @@ const getAssignedIcon=(addr, fill=false)=>{
         // };
         return {
             type: 'icon',
-            color: colors.cmd,
-            compType: CodeOutlined,
+            color: fill? colors.cmd_dark : colors.cmd,
+            compType:   CodeOutlined,
         };
     }
     if("cmdopen"===addr){
@@ -353,6 +374,7 @@ const colors={
     check: {color:'darkgreen'},
     dir: {color:'orange'},
     cmd: {color:'gray'},
+    cmd_dark: {color:'#333'},
     copy: {color:'#1890ff'},
     linkDark: {color:'#faad14'},
     disable: {color:'grey'},

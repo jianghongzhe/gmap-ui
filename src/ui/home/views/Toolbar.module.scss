@@ -1,3 +1,6 @@
+$shortcut_big_size: 28px !important;
+$shortcut_small_size: 14px !important;
+
 .toolbar{
 
   background-color:    #f0f2f5 !important;
@@ -20,6 +23,48 @@
       padding: 0;
       margin-left:10px;
       margin-right:0;
+    }
+
+    .shortcut_wrapper{
+      margin-left: 6px;
+      display: inline-block;
+      margin-bottom: -8px;
+      width: $shortcut_big_size;
+      height: $shortcut_big_size;
+      text-align: left;
+      background-color: transparent;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer !important;
+
+      .big{
+        position: absolute;
+        font-size: $shortcut_big_size;
+        line-height: $shortcut_big_size;
+        left:0;
+        top:0;
+      }
+
+      .small_wrapper{
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: $shortcut_small_size;
+        height:$shortcut_small_size;
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.9);
+
+        .small{
+          position: absolute;
+          left: 0;
+          top: 0;
+          font-size: $shortcut_small_size;
+          line-height: $shortcut_small_size;
+        }
+      }
+    }
+    .shortcut_wrapper ~ .shortcut_wrapper {
+      margin-left: 12px;
     }
   }
 }

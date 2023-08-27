@@ -82,6 +82,9 @@ const getUrlItem=(url, big=true)=>{
 };
 
 const getIconItem=(IconCls, color, big=true)=>{
+    if(!color || "default"===color){
+        return <IconCls className={classnames('themebtnicon',  big?"big":"small")}/>
+    }
     return <IconCls className={classnames('themebtnicon', styles.assignedColor, big?"big":"small")} style={{'--color':color}}/>
 };
 

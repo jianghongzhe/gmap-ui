@@ -132,8 +132,29 @@ const Toolbar=({
 const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
     const [localIcon] = useLoadIcon({lindAddr: (Array.isArray(url) ? "group_links" : url), icon});
 
-    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type)){
+    if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type  && 'cascade'!==localIcon.type)){
         return null;
+    }
+
+    if('cascade'===localIcon.type){
+        return (
+            <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
+                <div className="shortcut_wrapper" onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
+                    {
+                        'icon'===localIcon.items[0].type ?
+                            getShortcutIcon(localIcon.items[0].compType, localIcon.items[0].color.color, true) :
+                            getShortcutImg(localIcon.items[0].url, true)
+                    }
+                    <div className="small_wrapper">
+                        {
+                            'icon'===localIcon.items[1].type ?
+                                getShortcutIcon(localIcon.items[1].compType, localIcon.items[1].color.color, false) :
+                                getShortcutImg(localIcon.items[1].url, false)
+                        }
+                    </div>
+                </div>
+            </Tooltip>
+        )
     }
 
     /*
@@ -148,10 +169,17 @@ const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
         const IconComp=localIcon.compType;
         return (
             <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
-                <Button shape='circle'
-                        icon={<IconComp className='assignedColor' style={{'--color':localIcon.color.color}}/>}
+                {/*<Button shape='circle'
                         className='toolbtn'
-                        size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}/>
+                        size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>*/}
+
+                    <div className="shortcut_wrapper" onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
+                        {
+                            getShortcutIcon(localIcon.compType, localIcon.color.color, true)
+                        }
+                    </div>
+
+                {/*</Button>*/}
             </Tooltip>
         );
     }
@@ -166,14 +194,26 @@ const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
     if('image'===localIcon.type){
         return (
             <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
-                <Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
-                    <Avatar src={localIcon.url} size='small'/>
-                </Button>
+                {/*<Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>*/}
+
+                    <div className="shortcut_wrapper" onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
+                        {
+                            getShortcutImg(localIcon.url, true)
+                        }
+                    </div>
+
+                {/*</Button>*/}
             </Tooltip>
         );
     }
 };
 
+const getShortcutImg=(url, big=true)=>{
+    return <Avatar src={url} size={big?28:14} className={big?"big":"small"}/>
+};
+const getShortcutIcon=(IconComp, color, big=true)=>{
+    return <IconComp className={'assignedColor '+(big?"big":"small")}  style={{'--color':color}}/>
+};
 
 
 const ToolbarItem=({title, icon, disabled=false, className='toolbtn',type='default', onClick})=>{
