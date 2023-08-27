@@ -11,10 +11,12 @@ import {parseMetadata} from '../common/metadataLoader';
 import cmdopen_url from '../assets/node_icon_cmdopen.png';
 import cmd_url from '../assets/node_icon_cmd.png';
 import browser_url from '../assets/node_icon_browser.png';
+import {useSelectFileListItem} from "./tabs";
+import {useRecoilValue} from "_recoil@0.7.7@recoil";
+import {tabCurrPane} from "../store/tabs";
 
 export const useLoadIcon=({lindAddr, icon})=>{
-    console.log("lindAddr", lindAddr);
-    console.log("icon", icon);
+    const currPane= useRecoilValue(tabCurrPane);
 
     lindAddr=(lindAddr??'').trim();
     icon=(icon??'').trim();
@@ -74,7 +76,7 @@ export const useLoadIcon=({lindAddr, icon})=>{
                     if(canceled){
                         return;
                     }
-                    const resp= await api.loadIcon(factAddr);
+                    const resp= await api.loadIcon(factAddr, currPane?.key??'');
                     // console.log("load icon result:", resp);
                     if(canceled){
                         return;

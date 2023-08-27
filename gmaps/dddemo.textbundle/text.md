@@ -1,4 +1,4 @@
-- dddemo中文
+- dddemo中文|ref:dddemo中文
   [](file://D:\prog\tool\bilibili\哔哩哔哩.exe)
   [哔哩哔哩 (゜-゜)つロ 干杯~-bilibili](https://www.bilibili.com/)
   [download](file:///d:/download)
@@ -33,8 +33,16 @@
 	[](openin://emeditor@@d:\download)
 	- gmap|[跳转到导图 - a/aademo](gmap://a/aademo)
 	- group|[](grp://openin://emeditor@@d:\download)|[](grp://openby://https://mail.163.com@@msedge)
+	- relative_path|[](openby://assets/11.png@@photo)
 
 ***
+# ref:dddemo中文
+![](assets/11.png)
+aa
+[openby](openby://assets/11.png@@photo)
+
+
+
 # alias
 [vscode]: E:\dev\prog\VS_Code\Code.exe
 
@@ -45,3 +53,4 @@
 - [in](openin://emeditor@@d:\download)
 - [跳转到导图 - a/aademo](gmap://a/aademo)
 - [ddd](diropenby://E:\dev\ws\other\dest2@@vscode)
+- [openby](openby://assets/11.png@@photo)

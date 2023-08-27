@@ -116,8 +116,8 @@ class Api{
      * @param {*} url 
      * @returns 
      */
-    loadIcon=(url)=>{
-        return ipcRenderer.invoke('loadIcon', url);
+    loadIcon=(url, ctxDir)=>{
+        return ipcRenderer.invoke('loadIcon', url, 'string'===typeof(ctxDir)?ctxDir.trim():"");
     };
 
     expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
