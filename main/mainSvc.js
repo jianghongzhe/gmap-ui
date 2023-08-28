@@ -805,7 +805,7 @@ const cmdOpenUrlHandler={
 // 执行文件或打开目录
 // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
 const fileOpenUrlHandler={
-    canHandle:(url, ctxDir)=>url.startsWith("file://"),
+    canHandle:(url, ctxDir)=>url.startsWith("file://") || url.startsWith("assets/") || url.startsWith("./assets/"),
     handle:(url, ctxDir)=>{
         const handledUrl = trimPrefs(url, ["file:///", "file://"]);
         if(isImgExt(url)){

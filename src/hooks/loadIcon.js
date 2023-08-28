@@ -53,7 +53,13 @@ export const useLoadIcon=({lindAddr, icon})=>{
         }
 
         // 优先使用指定的图标地址，如果没有，再使用链接地址
-        const factAddr=(null!==icon && ""!==icon.trim() ? icon : lindAddr);
+        let factAddr=(null!==icon && ""!==icon.trim() ? icon : lindAddr).trim();
+        if(factAddr.startsWith("assets/")){
+            factAddr=`file:///${factAddr}`;
+        }else if(factAddr.startsWith("./assets/")){
+            factAddr=`file:///${factAddr.substring(2)}`;
+        }
+
         setLocalIcon(getDefIcon(factAddr));
         if(canceled){
             return;

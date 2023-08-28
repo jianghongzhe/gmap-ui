@@ -1,56 +1,21 @@
-- dddemo中文|ref:dddemo中文
-  [](file://D:\prog\tool\bilibili\哔哩哔哩.exe)
-  [哔哩哔哩 (゜-゜)つロ 干杯~-bilibili](https://www.bilibili.com/)
-  [download](file:///d:/download)
-  [](https://baidu.com)
-  [](https://mail.163.com)
-  [](https://mail.qq.com)
-  [CodeMirror](https://codemirror.net/)
-  [](file://d:/download)
-  [](dir://d:/download)
-  [](dir://d:/d.txt)
-  [](dir://d:/d____.txt)
-	- other
-	  [](cmdopen://d:\download)
-	  [](cmdopen://d:\d.txt)
-	  [](cppath://d:\download)
-	  [](cppath://d:\a\b\c\d)
-	  [](openby://aa@@bb)
-	- openas
-	  [](openas://https://mail.qq.com)
-	- openby
-      [](openby://d:\d.txt@@emeditor)
-      [](openby://F:\hide\pp\DSC01095 - 副本.jpg@@photo)
-	  [](openby://txt:////p@@dir %1)
-      [](openby://https://baidu.com@@msedge)
-      [](openby://https://mail.qq.com@@chrome)
-      [](openby://https://abdc.def.ss.cc.cc@@msedge)
-      [](https://mail.163.com)
-      [](https://mail.qq.com)
-	- diropenby
-	  [](diropenby://E:\dev\ws\other\dest2@@vscode)
-	- openin
-	[](openin://emeditor@@d:\download)
-	- gmap|[跳转到导图 - a/aademo](gmap://a/aademo)
-	- group|[](grp://openin://emeditor@@d:\download)|[](grp://openby://https://mail.163.com@@msedge)
-	- relative_path|[](openby://assets/11.png@@photo)
+- dddemo中文|[aa.bmp](assets/aa.bmp)|ref:dddemo中文
 
 ***
 # ref:dddemo中文
-![](assets/11.png)
-aa
-[openby](openby://assets/11.png@@photo)
+![aa_1693249163491423300.bmp](assets/aa_1693249163491423300.bmp)
+
+[bm - 副本.abc](http://39.105.27.161:50080/static/att/bm%20-%20%E5%89%AF%E6%9C%AC_49284178764231759.abc)
+
+![6c91876c8239400ba3bb0b96ae7cc6d3](http://39.105.27.161:50080/static/img/345rpGR9KTbQ0rBPKDeCTY_32_32)
+
+![rs3.png](http://39.105.27.161:50080/static/img/2yDKoxOaIKONoHTaH34t3P_32_32.png)
 
 
+![rs0.png](http://39.105.27.161:50080/static/img/3FXC249b1rLl9krUN4c7xK_32_32.png)
 
-# alias
-[vscode]: E:\dev\prog\VS_Code\Code.exe
+[ccc.msc](http://39.105.27.161:50080/static/att/ccc.msc)
 
-# shortcuts
-- [某网](openby://https://mail.qq.com@@msedge)
-- [某网](cmdopen://f:\hide\vv)
-- [haha](dir://d:\download)
-- [in](openin://emeditor@@d:\download)
-- [跳转到导图 - a/aademo](gmap://a/aademo)
-- [ddd](diropenby://E:\dev\ws\other\dest2@@vscode)
-- [openby](openby://assets/11.png@@photo)
+[ccc.msc](assets/ccc.msc)
+
+
+![d8fa04cc4a844eb299bee64d317e5310.bmp](assets/d8fa04cc4a844eb299bee64d317e5310.bmp)

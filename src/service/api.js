@@ -468,15 +468,12 @@ class Api{
 
     /**
      * 
-     * @param {*} param0 {
-     *  img:            true/false
-     *  saveDir:        "d:/a/b"
-     *  saveToPicHost:  true/false
-     * }
+     * @param {*} action
      * @returns 
      */
-    saveFileFromClipboard=({img, saveDir, saveToPicHost})=>{
-        return ipcRenderer.invoke('saveFileFromClipboard', {img, saveDir, saveToPicHost});
+    saveFileFromClipboard=(action)=>{
+        // return ipcRenderer.invoke('saveFileFromClipboard', {img, saveDir, saveToPicHost});
+        return ipcRenderer.invoke('ipc', action);
     };
 
     getUrlFromClipboard=()=>{

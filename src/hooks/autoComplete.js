@@ -86,7 +86,7 @@ export const useAutoComplateFuncs=()=>{
 
         const actionHandlerMap={
             [actionTypes.getUrlFromClipboard]: ()=>{
-                respHandlerNew(
+                respHandler(
                     api.getUrlFromClipboard,
                     ({Title,Url})=>{
                         const txt=`[${Title}](${Url})`;
@@ -102,7 +102,7 @@ export const useAutoComplateFuncs=()=>{
                 );
             },
             [actionTypes.getImgUrlFromClipboard]: ()=>{
-                respHandlerNew(
+                respHandler(
                     api.getImgUrlFromClipboard,
                     ({Title,Url})=>{
                         const txt=`![${Title}](${Url})`;
@@ -119,9 +119,10 @@ export const useAutoComplateFuncs=()=>{
             },
             [actionTypes.clipboardImgToLocal]: ()=>{
                 respHandler(
-                    api.saveFileFromClipboard.bind(this, {img:true, saveDir:currAssetsDir, saveToPicHost:false}),
-                    resp=>{
-                        const txt=`![](assets/${resp.data.filename})`;
+                    // api.saveFileFromClipboard.bind(this, {img:true, saveDir:currAssetsDir, saveToPicHost:false}),
+                    api.saveFileFromClipboard.bind(this, {Action:"clip_img_to_local", Path:currAssetsDir,}),
+                    ({Title,Url})=>{
+                        const txt=`![${Title}](${Url})`;
                         insertTxtAndMoveCursor(
                             cm,
                             txt,
@@ -135,9 +136,9 @@ export const useAutoComplateFuncs=()=>{
             },
             [actionTypes.clipboardFileToLocal]: ()=>{
                 respHandler(
-                    api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:false}),
-                    resp=>{
-                        const txt=`[${resp.data.title}](assets/${resp.data.filename})`;
+                    api.saveFileFromClipboard.bind(this,{Action:"clip_file_to_local", Path:currAssetsDir,}),
+                    ({Title,Url})=>{
+                        const txt=`[${Title}](${Url})`;
                         insertTxtAndMoveCursor(
                             cm,
                             txt,
@@ -151,10 +152,11 @@ export const useAutoComplateFuncs=()=>{
             },
             [actionTypes.clipboardImgToPicHost]: ()=>{
                 respHandler(
-                    api.saveFileFromClipboard.bind(this,{img:true, saveDir:currAssetsDir, saveToPicHost:true}),
-                    resp=>{
-                        const txt=`![](${resp.data.url})`;
-                        insertTxtAndMoveCursor(cm,
+                    api.saveFileFromClipboard.bind(this,{Action:"clip_img_to_remote", Path:"",}),
+                    ({Title,Url})=>{
+                        const txt=`![${Title}](${Url})`;
+                        insertTxtAndMoveCursor(
+                            cm,
                             txt,
                             txt.length,
                             opt?.extra?.pos??null,
@@ -166,10 +168,11 @@ export const useAutoComplateFuncs=()=>{
             },
             [actionTypes.clipboardFileToPicHost]: ()=>{
                 respHandler(
-                    api.saveFileFromClipboard.bind(this,{img:false, saveDir:currAssetsDir, saveToPicHost:true}),
-                    resp=>{
-                        const txt=`[${resp.data.title}](${resp.data.url})`;
+                    api.saveFileFromClipboard.bind(this,{Action:"clip_file_to_remote", Path:"",}),
+                    ({Title,Url})=>{
+                        const txt=`[${Title}](${Url})`
                         insertTxtAndMoveCursor(
+                            cm,
                             txt,
                             txt.length,
                             opt?.extra?.pos??null,
@@ -355,28 +358,17 @@ export const useAutoComplateFuncs=()=>{
 
 
 
-
-
-const respHandler=async (getRespFunc, respHandleFunc)=>{
-    let resp=await getRespFunc();
-    if(resp){
-        if(true===resp.succ){
-            respHandleFunc(resp);
-        }else{
-            api.showNotification("操作有误",resp.msg,"err");
+const respHandler=async (func, respHandleFunc)=>{
+    try {
+        let [e, resp] = await func();
+        if (e) {
+            api.showNotification("操作有误", e.Msg, "err");
+            return;
         }
-    }else{
-        api.showNotification("操作有误", "未知的操作结果","err");
+        respHandleFunc(resp);
+    }catch (e){
+        api.showNotification("操作有误", "程序内部出现错误", "err");
     }
-};
-
-const respHandlerNew=async (func, respHandleFunc)=>{
-    let [e, resp]=await func();
-    if(e){
-        api.showNotification("操作有误",e.Msg,"err");
-        return;
-    }
-    respHandleFunc(resp);
 };
 
 
