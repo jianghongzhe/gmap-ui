@@ -243,11 +243,15 @@ const LinkItem=({tooltip, addr, icon, openLinkFunc, needConfirm=false})=> {
 
         // 异步查询右键菜单
         (async ()=>{
-            const result= await api.loadCtxMenu(addr);
-            if(result && true===result.succ){
-                setCtxMenuItems(result.data);
+            const [e,result]= await api.loadCtxMenu({
+                Path:addr,
+                CtxDir: currPane?.key??'',
+            });
+            if(e){
+                return;
             }
-            // console.log('ctx menu result', result);
+            const items = result.Items.map(({Title,Url})=>({name:Title, url:Url,}));
+            setCtxMenuItems(items);
         })();
     });
 

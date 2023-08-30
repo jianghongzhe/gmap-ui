@@ -97,8 +97,8 @@ class Api{
         return ipcRenderer.invoke('searchAllTags');
     };
 
-    loadCtxMenu=(url)=>{
-        return  ipcRenderer.invoke('loadCtxMenu', url);
+    loadCtxMenu=(action)=>{
+        return ipcRenderer.invoke('ipc', {...action, Action:'load_ctx_menu'});
     };
 
 
@@ -481,7 +481,7 @@ class Api{
     };
 
     getClipboardHasContent=()=>{
-        return ipcRenderer.invoke('getClipboardHasContent', {});
+        return ipcRenderer.invoke('ipc', {Action:'clip_possible_op'});
     }
 
     getImgUrlFromClipboard=()=>{

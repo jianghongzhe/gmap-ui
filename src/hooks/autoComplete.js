@@ -210,7 +210,6 @@ export const useAutoComplateFuncs=()=>{
             return;
         }
 
-        console.log("here")
         insertTxtAndMoveCursor(
             cm,
             subActionType.txt,

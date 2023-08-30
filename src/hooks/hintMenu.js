@@ -179,8 +179,8 @@ export const useHintMenu=()=>{
      */
     const showMenu=useMemoizedFn((cm)=>{
         (async ()=>{
-            const resp=await api.getClipboardHasContent();
-            if(!resp || true!==resp.succ){
+            const [e,resp]=await api.getClipboardHasContent();
+            if(e){
                 return;
             }
 
@@ -191,7 +191,7 @@ export const useHintMenu=()=>{
                 lines.push(cm.doc.getLine(i));
             }
             const parseResult={
-                clipboardHasContent: resp.data,
+                clipboardHasContent: resp,
                 selectionType,
                 lines,
                 cursorScope: {
@@ -766,7 +766,8 @@ const menuConfig=[
             option: {
                 type: actionTypes.clipboardAction,
                 data: {subActionType: actionTypes.getUrlFromClipboard},
-            }
+            },
+            extraOpt: "GetUrl",
         },
         {
 
@@ -774,7 +775,8 @@ const menuConfig=[
             option: {
                 type: actionTypes.clipboardAction,
                 data: {subActionType: actionTypes.getImgUrlFromClipboard},
-            }
+            },
+            extraOpt: "GetImgUrl",
         },
         {
 
@@ -782,7 +784,8 @@ const menuConfig=[
             option: {
                 type: actionTypes.clipboardAction,
                 data: {subActionType: actionTypes.clipboardImgToLocal},
-            }
+            },
+            extraOpt: "ImgToLocal",
         },
         {
 
@@ -790,7 +793,8 @@ const menuConfig=[
             option: {
                 type: actionTypes.clipboardAction,
                 data: {subActionType: actionTypes.clipboardImgToPicHost},
-            }
+            },
+            extraOpt: "ImgToRemote",
         },
         {
 
@@ -798,7 +802,8 @@ const menuConfig=[
             option: {
                 type: actionTypes.clipboardAction,
                 data: {subActionType: actionTypes.clipboardFileToLocal},
-            }
+            },
+            extraOpt: "FileToLocal",
         },
         {
 
@@ -806,7 +811,8 @@ const menuConfig=[
             option: {
                 type: actionTypes.clipboardAction,
                 data: {subActionType: actionTypes.clipboardFileToPicHost},
-            }
+            },
+            extraOpt: "FileToRemote",
         },
     ].map(item=>({
         ...item,
@@ -815,6 +821,9 @@ const menuConfig=[
         // 在图片元数据、链接元数据位置，或剪切板为空，则不显示菜单项
         matcher: (cm, parseResult)=>{
             if(parseResult.cursorScope.inImgNamePart || parseResult.cursorScope.inLinkNamePart || !parseResult.clipboardHasContent){
+                return false;
+            }
+            if(false===parseResult.clipboardHasContent[item.extraOpt]){
                 return false;
             }
             if(parseResult.cursorLineScope.inNodePart){

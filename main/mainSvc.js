@@ -1314,12 +1314,15 @@ const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
     }
     
     // 包目录打包生成结果文件
-    sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath, containsRootDir:true,}).then(rs=>{
-        if(rs.succ){
-            appSvc.showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
-            return;
-        }
-        appSvc.showNotification('markdown导出有误', rs.msg, 'err');
+    ipcClient.sendReq({
+        Action:"zip_dir",
+        SrcDir: tmpDir,
+        DestZipFullpath: expZipFilePath,
+        ContainsRootDir: true,
+    }).then(resp=>{
+        appSvc.showNotification('markdown已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
+    }).catch(resp=>{
+        appSvc.showNotification('markdown导出有误', resp.Msg, 'err');
     });
 };
 
@@ -1389,13 +1392,17 @@ const expHtml=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
             recursive: true,
         });
     }
-    sendCmdToServer("zip", {srcDir: tmpDir , destZipFullpath:expZipFilePath, containsRootDir:false,}).then(rs=>{
-        if(rs.succ){
-            appSvc.showNotification('html已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
-            return;
-        }
-        appSvc.showNotification('html导出有误', rs.msg, 'err');
-    })
+
+    ipcClient.sendReq({
+        Action:"zip_dir",
+        SrcDir: tmpDir,
+        DestZipFullpath: expZipFilePath,
+        ContainsRootDir: false,
+    }).then(resp=>{
+        appSvc.showNotification('html已导出', `保存在如下路径：\r\n${expZipFilePath}`, 'succ');
+    }).catch(resp=>{
+        appSvc.showNotification('html导出有误', resp.Msg, 'err');
+    });
 };
 
 

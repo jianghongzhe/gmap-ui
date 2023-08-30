@@ -1,4 +1,4 @@
-- dddemo中文|[aa.bmp](assets/aa.bmp)|ref:dddemo中文
+- dddemo中文|[aa.bmp](assets/)|ref:dddemo中文
 
 ***
 # ref:dddemo中文
