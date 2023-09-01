@@ -37,9 +37,9 @@ const FindInFileDlg=({visible, onCancel})=>{
         if(visible){
             focusRef(expRef, true);
             (async () => {
-                const result=await api.searchAllTags()
-                if(result && true===result.succ){
-                    setAllTags(result.data);
+                const [e,result]=await api.searchAllTags()
+                if(!e){
+                    setAllTags(result.Txts);
                 }
             })();
         }
@@ -57,11 +57,12 @@ const FindInFileDlg=({visible, onCancel})=>{
             return;
         }
         (async () => {
-            const result=await api.searchInFile(exp);
-            if(result && true===result.succ){
-                setSearchResults(result?.data?.items??[]);
-                setExpTags(result?.data?.extra?.preciseTags??[]);
-                setHasUnclosedQuot(true===result?.data?.extra?.hasUnclosedQuot);
+            const [e,result]=await api.searchInFile(exp);
+            if(!e){
+                console.log("search resp", result);
+                setSearchResults(result.Items??[]);
+                setExpTags(result.Extra?.PreciseTags??[]);
+                setHasUnclosedQuot(true===result.Extra?.HasUnclosedQuot);
             }
         })();
     },[exp, setSearchResults, setExpTags, visible],{wait: 500,});
@@ -90,12 +91,12 @@ const FindInFileDlg=({visible, onCancel})=>{
                 let tmp=oldExp.trim();
                 matchedItems.forEach(matchedItem=>{
                     let repl=null;
-                    if(1===matchedItem.quotCnt){
-                        repl=`tag:"${matchedItem.tag}`;
-                    }else if(2===matchedItem.quotCnt){
-                        repl=`tag:"${matchedItem.tag}"`;
+                    if(1===matchedItem.QuotCnt){
+                        repl=`tag:"${matchedItem.Tag}`;
+                    }else if(2===matchedItem.QuotCnt){
+                        repl=`tag:"${matchedItem.Tag}"`;
                     }else{
-                        repl=`tag:${matchedItem.tag}`;
+                        repl=`tag:${matchedItem.Tag}`;
                     }
                     tmp=tmp.replace(repl, '').trim();
                 });
@@ -123,8 +124,8 @@ const FindInFileDlg=({visible, onCancel})=>{
      * ]
      */
     const isTagInExp= useMemoizedFn((tag)=>{
-        const matchedItems=expTags.filter(expTag=>tag===expTag.tag)
-            .sort((e1,e2)=>e2.quotCnt-e1.quotCnt);
+        const matchedItems=expTags.filter(expTag=>tag===expTag.Tag)
+            .sort((e1,e2)=>e2.QuotCnt-e1.QuotCnt);
         if(0===matchedItems.length){
             return null;
         }
@@ -165,21 +166,21 @@ const FindInFileDlg=({visible, onCancel})=>{
             <div className='resultContainer' style={{'--h': searchResultHeight}}>
                 {
                     searchResults.map((searchItem, ind)=><div key={`resultitem-${ind}`} className='item' >
-                        <div className='txtpart' onClick={openMap.bind(this, searchItem.fullTitle)}>
+                        <div className='txtpart' onClick={openMap.bind(this, searchItem.FullTitle)}>
                             <Title level={5} className='title'>
-                                { searchItem.titleParts.map((item,ind)=><ResultItem key={"title-"+ind} data={item}/>) }
+                                { searchItem.TitleParts.map((item,ind)=><ResultItem key={"title-"+ind} data={item}/>) }
                             </Title>
                             <Paragraph className='desc'>
                                 <div>
-                                { searchItem.contParts.map((item,ind)=><ResultItem key={"cont-"+ind} data={item} bold={true}/>) }
+                                { searchItem.ContParts.map((item,ind)=><ResultItem key={"cont-"+ind} data={item} bold={true}/>) }
                                 </div>
                             </Paragraph>
                         </div>
                         {
-                            null!=searchItem.tags && searchItem.tags.length>0 &&
+                            null!=searchItem.Tags && searchItem.Tags.length>0 &&
                             <div style={{marginTop:'6px'}}>
                                 {
-                                    searchItem.tags.map((tag,ind)=>
+                                    searchItem.Tags.map((tag,ind)=>
                                         <TagItem key={`tag-${ind}`}
                                                  tag={tag}
                                                  colored={null!==isTagInExp(tag)}
@@ -210,10 +211,10 @@ const ResultItem=({data, bold})=>{
 
     return <React.Fragment>
         {
-            true===data.keyword ? 
-                <span style={highlightStyle}>{data.txt}</span>
+            true===data.Keyword ?
+                <span style={highlightStyle}>{data.Txt}</span>
                     :
-                <span>{data}</span>
+                <span>{data.Txt}</span>
         }
     </React.Fragment>;
 };

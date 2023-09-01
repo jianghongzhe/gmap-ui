@@ -90,11 +90,11 @@ class Api{
      * }
      */
     searchInFile=(exp)=>{
-        return ipcRenderer.invoke('searchInFile', {exp});
+        return ipcRenderer.invoke('ipc', {Action:'fulltext_search', Txt:exp});
     };
 
     searchAllTags=()=>{
-        return ipcRenderer.invoke('searchAllTags');
+        return ipcRenderer.invoke('ipc', {Action:'fulltext_search_tags'});
     };
 
     loadCtxMenu=(action)=>{
