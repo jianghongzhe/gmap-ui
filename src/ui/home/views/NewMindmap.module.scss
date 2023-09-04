@@ -3,6 +3,12 @@
 }
 
 
+:global{
+  .no_scrollbar_container::-webkit-scrollbar{
+    display: none;
+  }
+}
+
 .defaultWrapperStyle {
   overflow: hidden;
   border: 0px solid red;
@@ -79,4 +85,4 @@
       background-color: #EEEEEE00;
     }
   }
-};
+}

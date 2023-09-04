@@ -1,3 +1,5 @@
+import api from "./api";
+
 class ScreenShotSvc{
     constructor(){
         this.doing=false;
@@ -38,6 +40,11 @@ class ScreenShotSvc{
      * @param {*} _excludeId        排除的元素的id，截图前先隐藏，完成后恢复显示
      */
     doScreenShot=(selFileFun, takeScrenShotFun, combineScreenShotFun, eleContainer, eleContent, offsetX=0, offsetY=0, hasBrowserMenu=true, _excludeId, _maxWH)=>{       
+
+
+
+
+
         //当前截屏任务未完成时不允许进行操作
         if(this.doing){
             return;
@@ -111,11 +118,13 @@ class ScreenShotSvc{
             colPos.forEach((col,colInd)=>{
                 line.push({
                     scrollLeft: col.scroll,
-                    scrollTop:  row.scroll,
                     cutLeft:    col.pos,
-                    cutTop:     row.pos,
                     width:      col.len,
+
+                    scrollTop:  row.scroll,
+                    cutTop:     row.pos,
                     height:     row.len,
+
                     filename:   lineInd+"_"+colInd+".jpg",
                 });
             });
@@ -181,6 +190,17 @@ class ScreenShotSvc{
                 //截取当前索引处的图片
                 let startTop=(this.hasBrowserMenu ? startTopWithTitleAndMenu : startTopWithOnlyTitle);//浏览器有菜单栏和无菜单栏所占的高度不同
                 //await this.takeScrenShotFun(`shot://${window.screenLeft+startLeft+this.offsetX},${window.screenTop+startTop+this.offsetY},${allPos[y][x].width},${allPos[y][x].height},${allPos[y][x].filename}`);    
+
+
+                // // takeScrshot
+                // api.takeScrshot({
+                //     x: parseInt(this.offsetX+allPos[y][x].cutLeft),
+                //     y: parseInt(this.offsetY+allPos[y][x].cutTop),
+                //     width: parseInt(allPos[y][x].width-allPos[y][x].cutLeft),
+                //     height: parseInt(allPos[y][x].height-allPos[y][x].cutTop),
+                // });
+
+
                 await this.takeScrenShotFun({
                     left:window.screenLeft+startLeft+this.offsetX,
                     top:window.screenTop+startTop+this.offsetY,
@@ -188,6 +208,8 @@ class ScreenShotSvc{
                     height:allPos[y][x].height,
                     fileName:allPos[y][x].filename
                 });
+
+                console.log("each shot", allPos);
                 
                 //未到一行最后，移到下一个图片继续截取
                 if(x<maxX){
@@ -253,31 +275,51 @@ class ScreenShotSvc{
  * ]
  */
 const splitPos=(viewPortWidth, contentWidth)=>{
-    let currPos=0;
-
-
-    //计算一行中的位置
-    let result=[];
+    // 内容未超出容器大小，不需要滚动，只返回一个结果，即整个容器的区域
     if(contentWidth<=viewPortWidth){
-        result.push({
+        return {
             scroll:0,
+            from: 0,
+            to: viewPortWidth,
             pos:0,
             len: viewPortWidth,
-        });
-    }else{
-        while(true){
-            result.push({
-                scroll: (currPos+viewPortWidth>contentWidth ? contentWidth-viewPortWidth : currPos),
-                pos: (currPos+viewPortWidth>contentWidth ? (viewPortWidth-(contentWidth-currPos)) : 0),
-                len: viewPortWidth,
-            });
-            if(currPos+viewPortWidth>=contentWidth){
-                break;
-            }
-            currPos+=viewPortWidth;
-        }
+        };
     }
 
+    // 内容超出容器大小，依次计算滚动位置和要截取的位置
+    const result=[];
+    const newResult=[];
+    for (let i = 0; i < contentWidth; i+=viewPortWidth) {
+        if(i+viewPortWidth<=contentWidth){
+            newResult.push({
+                scroll:i,
+                from: 0,
+                to: viewPortWidth,
+            });
+            continue;
+        }
+        newResult.push({
+            scroll: contentWidth-viewPortWidth,
+            from: viewPortWidth-(contentWidth-i),
+            to: viewPortWidth,
+        });
+        break;
+    }
+
+    let currPos=0;
+    while(true){
+
+
+        result.push({
+            scroll: (currPos+viewPortWidth>contentWidth ? contentWidth-viewPortWidth : currPos),
+            pos: (currPos+viewPortWidth>contentWidth ? (viewPortWidth-(contentWidth-currPos)) : 0),
+            len: viewPortWidth,
+        });
+        if(currPos+viewPortWidth>=contentWidth){
+            break;
+        }
+        currPos+=viewPortWidth;
+    }
     return result;
 };
 
@@ -286,5 +328,154 @@ const startLeft=0;//标题和菜单部分占用的高度
 const startTopWithTitleAndMenu=43;//标题和菜单部分占用的高度
 const startTopWithOnlyTitle=23;//标题部分占用的高度
 const scrollbarThick=17;//滚动条的宽度
+
+
+const splitPosNew=(viewPortWidth, contentWidth)=>{
+    // 内容未超出容器大小，不需要滚动，只返回一个结果，即整个容器的区域
+    if(contentWidth<=viewPortWidth){
+        return [
+            {
+                scroll:0,
+                from: 0,
+                to: viewPortWidth,
+            },
+        ];
+    }
+
+    // 内容超出容器大小，依次计算滚动位置和要截取的位置
+    const newResult=[];
+    for (let i = 0; i < contentWidth; i+=viewPortWidth) {
+        if(i+viewPortWidth<=contentWidth){
+            newResult.push({
+                scroll:i,
+                from: 0,
+                to: viewPortWidth,
+            });
+            continue;
+        }
+        newResult.push({
+            scroll: contentWidth-viewPortWidth,
+            from: viewPortWidth-(contentWidth-i),
+            to: viewPortWidth,
+        });
+        break;
+    }
+
+
+    return newResult;
+};
+
+
+const takeScrshot=({
+                        eleContainer,
+                        eleContent,
+                        preHandle,
+                        postHandle,
+                   })=>{
+
+    // 开始截屏前的预处理，比如隐藏悬浮的组件，隐藏滚动条，设置利于截屏的样式等，记录原来滚动位置
+    const originScroll=[eleContainer.scrollTop, eleContainer.scrollLeft];
+    if(preHandle){
+        preHandle();
+    }
+
+    const eleContainerRect=eleContainer.getBoundingClientRect();
+    const eleContentRect=eleContent.getBoundingClientRect();
+    const offsetX=Math.floor(eleContainerRect.left);
+    const offsetY=Math.floor(eleContainerRect.top);
+    const containerW= Math.floor(eleContainerRect.width);
+    const containerH= Math.floor(eleContainerRect.height);
+    const contentW=Math.floor(eleContentRect.width);
+    const contentH=Math.floor(eleContentRect.height);
+
+    // 计算要截取的位置
+    let colPos=splitPosNew(containerW,contentW);    //计算一行中的位置
+    let rowPos=splitPosNew(containerH,contentH);    //计算一列中的位置
+    const sumW=colPos.reduce((accu,{from,to})=>(accu+(to-from)),0);
+    const sumH=rowPos.reduce((accu,{from,to})=>(accu+(to-from)),0);
+
+    // scrollX x1 x2 scrollY y1 y2 为截屏时相关的参数，位置中增加容器dom元素相对于视口的偏移量
+    // pos{x1, x2, y1, y2} 为图片合并时的相关参数，即当前片段在最终大图中的位置
+    const result=[];
+    let accY=0;
+    rowPos.forEach((row,lineInd)=>{
+        let accX=0;
+        colPos.forEach((col,colInd)=>{
+            result.push({
+                scrollX: col.scroll,
+                x1:      offsetX+col.from,
+                x2:      offsetX+col.to,
+
+                scrollY: row.scroll,
+                y1:      offsetY+row.from,
+                y2:      offsetY+row.to,
+
+                pos: {
+                    x1: accX,
+                    x2: accX+(col.to-col.from),
+                    y1: accY,
+                    y2: accY+(row.to-row.from),
+                },
+            });
+            accX+=(col.to-col.from);
+        });
+        accY+=(row.to-row.from);
+    });
+
+    // 开始截屏处理，每次截取完成使用setTimeout调用下一次，都截取完成后调用doEnd进行合并
+    // 设置完滚动位置后要等待一会再截屏，否则截取位置不准
+    let currInt=0;
+    const eachShot=()=>{
+        eleContainer.scrollLeft= result[currInt].scrollX;
+        eleContainer.scrollTop= result[currInt].scrollY;
+
+        setTimeout(()=>{
+            api.takeScrshot({
+                x: parseInt(result[currInt].x1),
+                y: parseInt(result[currInt].y1),
+                width: parseInt(result[currInt].x2-result[currInt].x1),
+                height: parseInt(result[currInt].y2-result[currInt].y1),
+            }).then(savePath=>{
+                result[currInt].pos.fragPath=savePath;
+                if(currInt<result.length-1){
+                    ++currInt;
+                    setTimeout(eachShot, 100);
+                    return;
+                }
+                setTimeout(doEnd, 100);
+            });
+        }, 50);
+    };
+    setTimeout(eachShot, 100);
+
+
+
+
+    // 合并与收尾处理
+    const doEnd=()=>{
+        // 恢复原来的滚动位置
+        // 解除截屏前的预处理，即预处理的反向操作
+        eleContainer.scrollTop=originScroll[0];
+        eleContainer.scrollLeft=originScroll[1];
+        if(postHandle){
+            postHandle();
+        }
+
+        //
+        const combineConfig={
+            sumW,
+            sumH,
+            items: result.map(({pos})=>pos),
+        };
+        console.log("final result ", combineConfig);
+    };
+
+    // takeScrshot
+};
+
+export {
+    takeScrshot,
+};
+
 
 export default new ScreenShotSvc().doScreenShot;

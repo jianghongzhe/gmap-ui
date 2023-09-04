@@ -214,6 +214,11 @@ class Api{
         return ipcRenderer.invoke('takeScreenShot', opt);
     };
 
+    takeScrshot=(rect)=>{
+        return ipcRenderer.invoke('takeScrshot', rect);
+    };
+    //
+
     /**
      * 图片合并
      * @param {*} opt 

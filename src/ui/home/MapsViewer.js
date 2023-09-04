@@ -14,6 +14,7 @@ import StrParamReplaceDlg from './views/StrParamReplaceDlg';
 import {useBoolean, useMemoizedFn, useMount} from 'ahooks';
 
 import api from '../../service/api';
+import {takeScrshot} from "../../service/screenShot";
 import screenShot from '../../service/screenShot';
 import keyDetector from 'key-detector';
 import FindInFileDlg from './views/FindInFileDlg';
@@ -401,18 +402,30 @@ const MapsViewer=(props)=>{
                 return;
             }
             const devMode=await api.isDevMode();
-            screenShot(
-                typeFuncs[type],    //保存文件对话框函数
-                api.takeScreenShot,     //openUrl,            //执行截屏的函数
-                api.screenShotCombine,  //openUrl,
-                containerEle,           //容器元素
-                ele,                    //内容元素
-                Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
-                Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-                devMode,                //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
-                null,                   // 排除id为空
-                [maxW, maxH]            // 有效部分最大的宽和高
-            );
+            // screenShot(
+            //     typeFuncs[type],    //保存文件对话框函数
+            //     api.takeScreenShot,     //openUrl,            //执行截屏的函数
+            //     api.screenShotCombine,  //openUrl,
+            //     containerEle,           //容器元素
+            //     ele,                    //内容元素
+            //     Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
+            //     Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
+            //     devMode,                //是否考虑菜单栏的高度：开发模式显示菜单栏，运行模式不显示
+            //     null,                   // 排除id为空
+            //     [maxW, maxH]            // 有效部分最大的宽和高
+            // );
+
+            // TODO
+            takeScrshot({
+                eleContainer: containerEle,
+                eleContent: ele,
+                preHandle: ()=>{
+                    containerEle.className+=" no_scrollbar_container";
+                },
+                postHandle: ()=>{
+                    containerEle.className=containerEle.className.replace("no_scrollbar_container", "");
+                },
+            });
         })();
     });
 

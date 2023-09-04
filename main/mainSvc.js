@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, shell,dialog,clipboard,nativeImage,net, ipcMai
 const fs = require('fs');
 const os = require('os');
 const Url = require('url');
+const crypto= require("crypto");
 const { exec, spawn, execFile,execFileSync } = require('child_process');
 const path = require('path');
 const nodeNet = require('net');
@@ -1327,6 +1328,14 @@ const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
 };
 
 
+const takeScrshot=(rect)=>{
+    const savePath=path.join(workPath, `${crypto.randomUUID().replace(/-/g, '').toLowerCase()}.jpg`);
+    return mainWindow.webContents.capturePage(rect).then(img=>{
+        fs.writeFileSync(savePath, img.toJPEG(100));
+        return savePath;
+    });
+}
+
 
 /**
  * 导出html
@@ -1745,6 +1754,7 @@ const ipcHandlers={
     encryptTxt,
     decryptTxt,
     decryptTxtBatch,
+    takeScrshot,
 };
 
 
