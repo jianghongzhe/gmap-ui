@@ -435,8 +435,8 @@ const takeScrshot=({
                 y: parseInt(result[currInt].y1),
                 width: parseInt(result[currInt].x2-result[currInt].x1),
                 height: parseInt(result[currInt].y2-result[currInt].y1),
-            }).then(savePath=>{
-                result[currInt].pos.fragPath=savePath;
+            }).then(shotId=>{
+                result[currInt].pos.shotId=shotId;
                 if(currInt<result.length-1){
                     ++currInt;
                     setTimeout(eachShot, 100);
@@ -463,11 +463,21 @@ const takeScrshot=({
 
         //
         const combineConfig={
-            sumW,
-            sumH,
-            items: result.map(({pos})=>pos),
+            Action: "combine_scrshot",
+            SumSize: {
+                Width: sumW,
+                Height: sumH,
+            },
+            Items:result.map(({pos})=>({X1:pos.x1, X2:pos.x2, Y1:pos.y1, Y2:pos.y2})),
+            ResultType: 0,
+            ResultPath: "",
+            ForceValidSize: false,
+            ValidSize: null,
+            // 由ipcMain处理，把实际的buffer传递到go后端
+            shotIds: result.map(({pos})=>pos.shotId),
         };
         console.log("final result ", combineConfig);
+        api.combineScrshot(combineConfig);
     };
 
     // takeScrshot

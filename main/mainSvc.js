@@ -1327,14 +1327,30 @@ const expMarkdown=(mdFullpath,assignedTitle=null, assignedMdTxt=null)=>{
     });
 };
 
+const scrshotBufMap={
+
+};
 
 const takeScrshot=(rect)=>{
-    const savePath=path.join(workPath, `${crypto.randomUUID().replace(/-/g, '').toLowerCase()}.jpg`);
+    const shotId=crypto.randomUUID().replace(/-/g, '').toLowerCase();
     return mainWindow.webContents.capturePage(rect).then(img=>{
-        fs.writeFileSync(savePath, img.toJPEG(100));
-        return savePath;
+        scrshotBufMap[shotId]=img.toJPEG(100);
+        return shotId;
     });
 }
+
+const combineScrshot=(json)=>{
+    const {shotIds, ...extra}=json;
+    return ipcClient.sendReqWithBins(extra, shotIds.map(shotId=>scrshotBufMap[shotId])).then(resp=>{
+        appSvc.showNotification(`succcccccccccc`, resp.Path, 'succ');
+    }).catch(resp=>{
+        appSvc.showNotification("操作有误", resp.Msg, 'err');
+    }).finally(()=>{
+        shotIds.forEach(shotId=>{
+           delete scrshotBufMap[shotId];
+        });
+    });
+};
 
 
 /**
@@ -1755,6 +1771,7 @@ const ipcHandlers={
     decryptTxt,
     decryptTxtBatch,
     takeScrshot,
+    combineScrshot,
 };
 
 

@@ -217,6 +217,11 @@ class Api{
     takeScrshot=(rect)=>{
         return ipcRenderer.invoke('takeScrshot', rect);
     };
+
+    combineScrshot=(json)=>{
+        return ipcRenderer.invoke('combineScrshot', json);
+    };
+
     //
 
     /**

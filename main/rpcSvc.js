@@ -62,12 +62,21 @@ const regRpcSvcToIpc=(serverInfo, res)=>{
  * @return {Promise<[null,*]|[*,null]|undefined>}
  */
 const decodeErrHandler=(fun, req)=>{
+    // 处理二进制数据，把二进制部分转换为base64字符串，以防止从ipcMain-ipcRender传输时不支持
+    const handleBinarys=(data)=>{
+        const binCnt = data[ipcClient.binDatasKey]?.length ?? 0;
+        for (let i = 0; i < binCnt; ++i) {
+            data[ipcClient.binDatasKey][i]=data[ipcClient.binDatasKey][i].toString("base64");
+        }
+        return data;
+    };
+
     return (async()=>{
         try {
             const resp = await fun(req);
-            return [null, resp];
+            return [null, handleBinarys(resp)];
         }catch (e){
-            return [e, null];
+            return [handleBinarys(e), null];
         }
     })();
 };
