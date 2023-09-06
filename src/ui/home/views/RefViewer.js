@@ -21,7 +21,9 @@ import mermaid from 'mermaid';
 import flowchart from 'flowchart.js';
 import * as echarts from 'echarts';
 import echartParser from '../../../common/echartParser';
-import screenShot from '../../../service/screenShot';
+import {takeScrshot, CombineShotResultMem, CombineShotResultImg, CombineShotResultPdf, CombineShotResultDoc} from '../../../service/screenShot';
+
+
 
 // import lodash from 'lodash';
 //import snap from 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js'
@@ -365,44 +367,78 @@ const RefViewer=({visible, onOpenLink, onNodeOp, currRefObj, onCancel})=>{
      * 导出图片或pdf
      * @param {*} expImg  true-导出图片  false-导出pdf
      */
-    const onExpImage=useMemoizedFn((type='img')=>{
+    const onExpImage=useMemoizedFn((type=CombineShotResultMem)=>{
         (async()=>{
-            const typeNames={
-                shot: '滚动截屏',
-                img: '导出图片',
-                pdf: '导出PDF',
-                word: '导出word文档',
-            };
-            const typeFuncs={
-                shot: ()=>new Promise((res, rej)=>res("memory")),
-                img: api.openSaveFileDlg,
-                pdf: api.openSaveFileDlg.bind(this, 'pdf'),
-                word: api.openSaveFileDlg.bind(this, 'word'),
-            };
-
             try{
+                const typeNames={
+                    [CombineShotResultMem]: '滚动截屏',
+                    [CombineShotResultImg]: '导出图片',
+                    [CombineShotResultPdf]: '导出PDF',
+                    [CombineShotResultDoc]: '导出word文档',
+                };
                 const maximized=await api.isMaximized();
                 if(!maximized){
                     api.showNotification("警告",`窗口只有在最大化时才能${typeNames[type]}`,"warn");
                     return;
                 }
-                const devMode=await api.isDevMode();
+                if(navOpen && navItems?.length>0){
+                    api.showNotification("警告",`在右侧导航栏展开时不允许${typeNames[type]}`,"warn");
+                    return;
+                }
+
+
+
+
+
+                // const devMode=await api.isDevMode();
                 const containerEle=document.querySelector(`#${wrapperId}`);
                 const bodyEle=document.querySelector(`#${bodyId}`);
-                let {x,y}=containerEle.getBoundingClientRect();
-                screenShot(
-                    typeFuncs[type],    //保存文件对话框函数
-                    api.takeScreenShot,     //openUrl,            //执行截屏的函数
-                    api.screenShotCombine,  //openUrl,
-                    containerEle,           //容器元素
-                    bodyEle,                //内容元素
-                    Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
-                    Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-                    devMode,                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
-                    backtopId
-                );
-            }catch(e){
+                // let {x,y}=containerEle.getBoundingClientRect();
+                // screenShot(
+                //     typeFuncs[type],    //保存文件对话框函数
+                //     api.takeScreenShot,     //openUrl,            //执行截屏的函数
+                //     api.screenShotCombine,  //openUrl,
+                //     containerEle,           //容器元素
+                //     bodyEle,                //内容元素
+                //     Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
+                //     Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
+                //     devMode,                 //是否考虑菜单栏的高度：开始模式显示菜单栏，运行模式不显示
+                //     backtopId
+                // );
 
+                const typeFuncs={
+                    [CombineShotResultImg]: api.openSaveFileDlg,
+                    [CombineShotResultPdf]: api.openSaveFileDlg.bind(this, 'pdf'),
+                    [CombineShotResultDoc]: api.openSaveFileDlg.bind(this, 'word'),
+                };
+                let resultPath="";
+                if(CombineShotResultMem!==type){
+                    try {
+                        resultPath = await typeFuncs[type]();
+                    }catch (e){
+                        // 用户取消
+                        return;
+                    }
+                }
+
+                let originStyle=null;
+                takeScrshot({
+                    eleContainer: containerEle,
+                    eleContent: bodyEle,
+                    preHandle: ()=>{
+                        containerEle.className+=" no_scrollbar_container";
+                        // this.excludePrevState=ele.style.display;
+                        originStyle=document.querySelector(`#${backtopId}`).style.display;
+                        document.querySelector(`#${backtopId}`).style.display="none";
+                    },
+                    postHandle: ()=>{
+                        containerEle.className=containerEle.className.replace("no_scrollbar_container", "");
+                        document.querySelector(`#${backtopId}`).style.display=originStyle;
+                    },
+                    resultType: type,
+                    resultPath: resultPath,
+                });
+            }catch(e){
             }
         })();
     });
@@ -445,10 +481,10 @@ const RefViewer=({visible, onOpenLink, onNodeOp, currRefObj, onCancel})=>{
                             true!==currRefObj?.combined &&
                             <ToolbarItem title='编辑引用' icon={<EditOutlined />} onClick={onEditRef}/>
                         }
-                        <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, 'shot')}/>
-                        <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, 'img')}/>
-                        <ToolbarItem title='导出pdf' icon={<FilePdfOutlined />} onClick={onExpImage.bind(this, 'pdf')}/>
-                        <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={onExpImage.bind(this, 'word')}/>
+                        <ToolbarItem title='滚动截屏' icon={<CameraOutlined />} onClick={onExpImage.bind(this, CombineShotResultMem)}/>
+                        <ToolbarItem title='导出图片' icon={<FileImageOutlined />} onClick={onExpImage.bind(this, CombineShotResultImg)}/>
+                        <ToolbarItem title='导出pdf' icon={<FilePdfOutlined />} onClick={onExpImage.bind(this, CombineShotResultPdf)}/>
+                        <ToolbarItem title='导出word' icon={<FileWordOutlined />} onClick={onExpImage.bind(this, CombineShotResultDoc)}/>
                         <ToolbarItem title='导出markdown' icon={<FileMarkdownOutlined />} onClick={onExpMarkdown}/>
                         <ToolbarItem title='导出html' icon={<Html5Outlined />} onClick={onExpHtml}/>
                     </div>

@@ -977,26 +977,26 @@ const base64ImgUrlHandler={
             { name: 'webp', extensions: ['webp'] },
         ].filter(item=> item.name.toLowerCase().trim()!==imgType.toLowerCase().trim());
 
-        // 把url中的图片类型当做第一个扩展名
-        const savePath=dialog.showSaveDialogSync(mainWindow, {
+
+        dialog.showSaveDialog(mainWindow, {
             properties: ['showHiddenFiles'],
             filters: [
                 { name: imgType, extensions: [imgType] },
                 ...filters,
                 { name: '所有', extensions: ['*'] }
             ]
-        });
-        // 用户已取消
-        if(!savePath){
-            return;
-        }
-        try {
-            const buffer = Buffer.from(imgCont, 'base64');
-            fs.writeFileSync(savePath, buffer);
-            appSvc.showNotification("操作成功", "图片已保存到\r\n"+savePath, 'succ');
-        }catch (e){
-            appSvc.showNotification("操作有误", "未能成功保存图片", 'err');
-        }
+        }).then(({canceled,filePath})=>{
+            if(canceled){
+                return;
+            }
+            try {
+                const buffer = Buffer.from(imgCont, 'base64');
+                fs.writeFileSync(filePath, buffer);
+                appSvc.showNotification("操作成功", "图片已保存到\r\n"+filePath, 'succ');
+            }catch (e){
+                appSvc.showNotification("操作有误", "未能成功保存图片", 'err');
+            }
+        }).catch(e=>{});
     },
 };
 
@@ -1331,6 +1331,13 @@ const scrshotBufMap={
 
 };
 
+
+/**
+ * 截图：
+ * 截图后会把图片内容buffer存到内存，并把对应的id返回
+ * @param rect
+ * @return {Promise<string>}
+ */
 const takeScrshot=(rect)=>{
     const shotId=crypto.randomUUID().replace(/-/g, '').toLowerCase();
     return mainWindow.webContents.capturePage(rect).then(img=>{
@@ -1339,10 +1346,33 @@ const takeScrshot=(rect)=>{
     });
 }
 
+
+/**
+ * 截图合并：
+ * 取出截图id对应的图片内容buffer发送给后端，在最后进行清理
+ * （二进制内容不借助文件，而是直接把内容发到协议的二进制段中，后端直接从管道中即可得到二进制数据）
+ * @param json
+ * @return {Promise<unknown>}
+ */
 const combineScrshot=(json)=>{
     const {shotIds, ...extra}=json;
     return ipcClient.sendReqWithBins(extra, shotIds.map(shotId=>scrshotBufMap[shotId])).then(resp=>{
-        appSvc.showNotification(`succcccccccccc`, resp.Path, 'succ');
+        if(0===extra.ResultType){
+            appSvc.showNotification(`已生成截图`, "截图已保存在剪切板", 'succ');
+            return;
+        }
+        if(1===extra.ResultType){
+            appSvc.showNotification(`已导出图片`, `${extra.ResultPath}`, 'succ');
+            return;
+        }
+        if(2===extra.ResultType){
+            appSvc.showNotification(`已导出pdf`, `${extra.ResultPath}`, 'succ');
+            return;
+        }
+        if(3===extra.ResultType){
+            appSvc.showNotification(`已导出word文档`, `${extra.ResultPath}`, 'succ');
+            return;
+        }
     }).catch(resp=>{
         appSvc.showNotification("操作有误", resp.Msg, 'err');
     }).finally(()=>{
@@ -1476,15 +1506,18 @@ const openSaveFileDlg = (ext) => {
                 { name: '所有', extensions: ['*'] },
             ];
         }
-        const result=dialog.showSaveDialogSync(mainWindow, { 
+        dialog.showSaveDialog(mainWindow, {
             properties: [/*'saveFile'*/],
             filters
+        }).then(({canceled,filePath})=>{
+            if(canceled){
+                rej("用户已取消");
+                return;
+            }
+            res(filePath);
+        }).catch(e=>{
+            rej("用户已取消");
         });
-        if(result){
-            res(result);
-            return;
-        }
-        rej("用户已取消");
     });
 }
 

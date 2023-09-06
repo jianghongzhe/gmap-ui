@@ -14,8 +14,7 @@ import StrParamReplaceDlg from './views/StrParamReplaceDlg';
 import {useBoolean, useMemoizedFn, useMount} from 'ahooks';
 
 import api from '../../service/api';
-import {takeScrshot} from "../../service/screenShot";
-import screenShot from '../../service/screenShot';
+
 import keyDetector from 'key-detector';
 import FindInFileDlg from './views/FindInFileDlg';
 import expSvc from '../../service/expSvc';
@@ -31,8 +30,12 @@ import {useOpenLinkWithParam} from "../../hooks/openLinkWithParam";
 import {dispatch} from 'use-bus';
 import {editorEvents} from "../../common/events";
 import {useEditorDlg} from "../../hooks/editorDlg";
+import {takeScrshot, CombineShotResultMem, CombineShotResultImg, CombineShotResultPdf, CombineShotResultDoc} from "../../service/screenShot";
 
 const { Content } = Layout;
+
+
+
 
 
 /**
@@ -346,31 +349,32 @@ const MapsViewer=(props)=>{
      * 导出图片或pdf  
      * @param {*} expImg  true-导出图片  false-导出pdf
      */
-    const onExpImage=useMemoizedFn((type='img')=>{
+    const onExpImage=useMemoizedFn((type=CombineShotResultMem)=>{
         (async()=>{
+            // 校验，只有最大化时才能截图；以及指定的容器元素必须存在
             if(null===currTabInd){
                 return;
             }
-
             const typeNames={
-                shot: '滚动截屏',
-                img: '导出图片',
-                pdf: '导出PDF',
-                word: '导出word文档',
+                [CombineShotResultMem]: '滚动截屏',
+                [CombineShotResultImg]: '导出图片',
+                [CombineShotResultPdf]: '导出PDF',
+                [CombineShotResultDoc]: '导出word文档',
             };
-            const typeFuncs={
-                shot: ()=>new Promise((res, rej)=>res("memory")),
-                img: api.openSaveFileDlg,
-                pdf: api.openSaveFileDlg.bind(this, 'pdf'),
-                word: api.openSaveFileDlg.bind(this, 'word'),
-            };            
-            
+            const maximized=await api.isMaximized();
+            if(!maximized){
+                api.showNotification("警告",`窗口只有在最大化时才能${typeNames[type]}`,"warn");
+                return;
+            }
             // 取当前div的父元素作为其容器，并计算容器的位置等信息作为截图的依据
-            let ele=document.querySelector(`#graphwrapper_${currTabInd}`);
+            const ele=document.querySelector(`#graphwrapper_${currTabInd}`);
             if(!ele){
                 api.showNotification('错误','图表状态异常，无法导出','err');
                 return;
             }
+            const containerEle=ele.parentNode;
+
+            // 根据离边缘最近的元素决定去除的空白大小，进而得到最终要保留的图片的大小
             let {width:maxW, height:maxH}= ele.getBoundingClientRect();
             maxW=parseInt(maxW);
             maxH=parseInt(maxH);
@@ -394,28 +398,23 @@ const MapsViewer=(props)=>{
                 maxH=maxB+30;
             }
 
-            let containerEle=ele.parentNode;
-            let {x,y}=containerEle.getBoundingClientRect();
-            const maximized=await api.isMaximized();
-            if(!maximized){
-                api.showNotification("警告",`窗口只有在最大化时才能${typeNames[type]}`,"warn");
-                return;
+            // 除了保存到剪切板外，其它都需要打开文件对话框
+            const typeFuncs={
+                [CombineShotResultImg]: api.openSaveFileDlg,
+                [CombineShotResultPdf]: api.openSaveFileDlg.bind(this, 'pdf'),
+                [CombineShotResultDoc]: api.openSaveFileDlg.bind(this, 'word'),
+            };
+            let resultPath="";
+            if(CombineShotResultMem!==type){
+                try {
+                    resultPath = await typeFuncs[type]();
+                }catch (e){
+                    // 用户取消
+                    return;
+                }
             }
-            const devMode=await api.isDevMode();
-            // screenShot(
-            //     typeFuncs[type],    //保存文件对话框函数
-            //     api.takeScreenShot,     //openUrl,            //执行截屏的函数
-            //     api.screenShotCombine,  //openUrl,
-            //     containerEle,           //容器元素
-            //     ele,                    //内容元素
-            //     Math.floor(x),          //开始截取的位置相对于浏览器主体内容区域左边的距离
-            //     Math.floor(y),          //开始截取的位置相对于浏览器主体内容区域上边的距离
-            //     devMode,                //是否考虑菜单栏的高度：开发模式显示菜单栏，运行模式不显示
-            //     null,                   // 排除id为空
-            //     [maxW, maxH]            // 有效部分最大的宽和高
-            // );
 
-            // TODO
+            // 开始截屏
             takeScrshot({
                 eleContainer: containerEle,
                 eleContent: ele,
@@ -425,6 +424,9 @@ const MapsViewer=(props)=>{
                 postHandle: ()=>{
                     containerEle.className=containerEle.className.replace("no_scrollbar_container", "");
                 },
+                finalSize: [maxW, maxH],
+                resultType: type,
+                resultPath: resultPath,
             });
         })();
     });
@@ -514,10 +516,10 @@ const MapsViewer=(props)=>{
                                 onShowCmd={api.openBash}
                                 onShowDevTool={api.showDevTool}
                                 onReloadApp={api.reloadAppPage}
-                                onScreenShot={onExpImage.bind(this, 'shot')}
-                                onExpImage={onExpImage.bind(this, 'img')}
-                                onExpPdf={onExpImage.bind(this, 'pdf')}
-                                onExpWord={onExpImage.bind(this, 'word')}
+                                onScreenShot={onExpImage.bind(this, CombineShotResultMem)}
+                                onExpImage={onExpImage.bind(this, CombineShotResultImg)}
+                                onExpPdf={onExpImage.bind(this, CombineShotResultPdf)}
+                                onExpWord={onExpImage.bind(this, CombineShotResultDoc)}
                                 onExpMarkdown={onExpMarkdown}
                                 onExpHtml={onExpHtml}
                                 onCheckUpdate={api.openUpdateApp}
