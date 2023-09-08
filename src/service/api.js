@@ -482,7 +482,6 @@ class Api{
      * @returns 
      */
     saveFileFromClipboard=(action)=>{
-        // return ipcRenderer.invoke('saveFileFromClipboard', {img, saveDir, saveToPicHost});
         return ipcRenderer.invoke('ipc', action);
     };
 

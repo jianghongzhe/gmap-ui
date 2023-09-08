@@ -2,162 +2,12 @@ const path = require('path');
 const fs = require('fs');
 const { ipcMain   } = require('electron');
 
-const ws=require('./node_modules/ws');
+
 const {BACK_SLASH, SLASH} = require("./consts");
 
 
 
-/**
- * 从连接websocket服务后指定毫秒数开始发送心跳
- */
-const wsHeartBeatDelayMs=5000;
 
-/**
- * 发送心跳的间隔毫秒数
- */
-const wsHeartBeatIntervalMs=30_000;
-
-/**
- * 检测超时请求的时间间隔
- */
-const clearCallbackIntervalMs=3*60_000;
-
-/**
- * 请求超时时间，超过该时间的请求对应的回调会被清理
- */
-const requestTimeoutMs=6*60_000;
-
-/**
- * 是否已连接websocket服务
- */
-let wsConnected=false;
-
-/**
- * websocket客户端对象
- */
-let wsClient=null;
-
-/**
- * 生成请求Id的计数器
- */
-let reqIdCounter=0;
-
-/**
- * 请求Id与promise是resolve的对应关系：用于把分离的请求发送和响应接收关联到一起
- * {
- *     1: {res, rej, time}
- * }
- */
-let reqIdCallbackMap={};
-
-
-
-/**
- * 连接后台websocket服务，定时发送心跳，定时清理超时的请求
- * @param {*} url 
- * @param {*} option
- */
-const connWs=(url, option)=>{
-    return new Promise((res, rej)=>{
-        wsClient = new ws(url);    
-        wsClient.on('open', ()=>{
-            log(`后台websocket服务已连接：${url}`);
-            wsConnected=true;
-            setTimeout(beginHeartbeat, wsHeartBeatDelayMs);
-            setTimeout(beginClearCallback, wsHeartBeatDelayMs);
-            res();
-        });
-        wsClient.on('message', function incoming(message) {
-            if(message instanceof Buffer){
-                const str=message.toString('utf-8');
-                const resp=JSON.parse(str);
-                if(reqIdCallbackMap[resp.reqId]){
-                    const func=reqIdCallbackMap[resp.reqId].res;
-                    func(resp);
-                    delete reqIdCallbackMap[resp.reqId];
-                }
-            }
-        });
-        wsClient.on('pong', ()=>{
-            if(option?.onPong){
-                option.onPong();
-            }
-        });
-    });
-};
-
-
-/**
- * 定期清理超时的请求
- */
-const beginClearCallback=()=>{
-    const timeoutKeys=[];
-    const now = new Date().getTime();
-    for(let reqId in reqIdCallbackMap){
-        if(now-reqIdCallbackMap[reqId].time>requestTimeoutMs){
-            timeoutKeys.push(reqId);
-        }
-    }
-    timeoutKeys.forEach(reqId=>{
-        log("clear timeout request callback: " + reqIdCallbackMap[reqId].reqData);
-        reqIdCallbackMap[reqId].rej("请求超时");
-        delete reqIdCallbackMap[reqId]
-    });
-    setTimeout(beginClearCallback, clearCallbackIntervalMs);
-};
-
-/**
- * 定时发送心跳
- * @returns 
- */
-const beginHeartbeat=()=>{
-    if(null==wsClient){
-        log("还未初始化websocket client，无法发送心跳消息");
-        return;
-    }
-    if(!wsConnected){
-        log("尚未连接到websocket服务端，无法发送心跳消息");
-        return;
-    }
-    //log("发送websocket心跳");
-    wsClient.ping();
-    setTimeout(beginHeartbeat, wsHeartBeatIntervalMs);
-};
-
-
-/**
- * 向后台服务发送信息并得到异步结果（promise）
- * @param {*} action 操作类型
- * @param {*} data 操作数据的json对象
- * @returns 
- */
-const send=(action, data)=>{
-    if(null==wsClient){
-        log("还未初始化websocket client，无法发送消息");
-        return;
-    }
-    if(!wsConnected){
-        log("尚未连接到websocket服务端，无法发送消息");
-        return;
-    }
-
-    const reqId = ++reqIdCounter;
-    return new Promise((res, rej)=>{
-        const reqData=JSON.stringify({
-            reqId,
-            action,
-            data: "string"===typeof(data) ? data.trim() : JSON.stringify(data)
-        });
-        // 建立请求id与回调的对应关系，以便收到响应后能调用对应的回调，或者请求超时后能清理对应关系
-        reqIdCallbackMap[reqId]={
-            res,
-            rej,
-            time:new Date().getTime(),
-            reqData,
-        };
-        wsClient.send(Buffer.from(reqData));
-    });
-};
 
 
 /**
@@ -358,8 +208,6 @@ const trimPrefs=(txt="", prefs=[])=>{
 
 
 module.exports={
-    connWs,
-    send,
     log,
     getYmdhms,
     dirCopy,

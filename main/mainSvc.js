@@ -698,39 +698,9 @@ const loadIcon=(url, ctxDir)=>{
 
 
 
-/**
- * 进行屏幕截图
- * @param {*} opt  {left,top,width,height,fileName}
- */
- const takeScreenShot=(opt)=>{
-    return sendCmdToServer("shot", opt);
-};
 
-/**
- * 屏幕截图的合并
- * @param {*} opt {
- *  itemWidth: 1000,
-    itemHeight: 1000,
-    resultFullPath: 'd:/aaa.jpg',
-    lines: [
-        [
-            {
-                picName:    '01.jpg',
-                cutLeft:    20,
-                cutTop:     30
-            }
-        ]
-    ]
- * }
- */
-const screenShotCombine=(opt)=>{
-    return sendCmdToServer("shotCombine", opt).then(resp=>{
-        if(resp && resp.succ){
-            appSvc.showNotification(resp.data.title, resp.data.body, 'succ');
-        }
-        return resp;
-    });
-};
+
+
 
 
 /**
@@ -1058,41 +1028,12 @@ const openUrl=(url, option)=>{
 }
 
 
-const searchInFile=({exp})=>{
-    return sendCmdToServer("search", {exp});
-};
-
-const searchAllTags=()=>{
-    return sendCmdToServer("search", {onlyTags:true});
-};
-
-
-/**
- * 
- * @param {*} param0 {
- *  img:            true/false
- *  saveDir:        "d:/a/b"
- *  saveToPicHost:  true/false
- * }
- * @returns 
- */
-const saveFileFromClipboard=({img, saveDir, saveToPicHost})=>{
-    return sendCmdToServer("saveFileFromClipboard", {img, saveDir, saveToPicHost});
-};
 
 
 
-const getUrlFromClipboard=(paramsObj)=>{
-    return sendCmdToServer("getUrlFromClipboard", paramsObj);
-};
 
-const getImgUrlFromClipboard=(paramsObj)=>{
-    return sendCmdToServer("getImgUrlFromClipboard", paramsObj);
-};
 
-const getClipboardHasContent=()=>{
-    return sendCmdToServer("clipboardHasContent", {});
-};
+
 
 
 const openPicByName=(picName)=>{
@@ -1711,49 +1652,16 @@ const getInnerModuleVersions=()=>(process.versions);
 
 
 
-/**
- * 向助手程序发送内容并得到结果
- * @param {*} action 
- * @param {*} data 
- * @returns 
- */
-const sendCmdToServer=(action, data)=>{
-    return common.send(action, data);
-};
 
 
-const loadCtxMenu=(url)=>{
-    return sendCmdToServer("loadCtxMenu",{url});
-};
 
-const encryptTxt=(txt='')=>{
-    return sendCmdToServer("enc",{
-        enc: true,
-        txt,
-    });
-};
-const decryptTxt=(txt='')=>{
-    return sendCmdToServer("enc",{
-        enc: false,
-        txt,
-    });
-};
 
-const decryptTxtBatch=(txts=[])=>{
-    return sendCmdToServer("enc",{
-        enc: false,
-        txts,
-    });
-};
 
 
 /**
  * 进程通信暴露的方法
  */
 const ipcHandlers={
-    loadCtxMenu,
-    takeScreenShot,
-    screenShotCombine,
     loadIcon,
     getInnerModuleVersions,
 
@@ -1793,16 +1701,7 @@ const ipcHandlers={
     expHtml,
     copyTxtQuiet,
     isDevMode: common.isDevMode,
-    searchInFile,
-    searchAllTags,
-    saveFileFromClipboard,
-    getUrlFromClipboard,
-    getImgUrlFromClipboard,
-    getClipboardHasContent,
 
-    encryptTxt,
-    decryptTxt,
-    decryptTxtBatch,
     takeScrshot,
     combineScrshot,
 };
@@ -1824,35 +1723,36 @@ const init=(_mainWindow)=>{
                 fs.mkdirSync(eachWorkdir,{recursive:true});
             }
         });
-
         common.regSyncAndAsyncIpcHandlers(ipcHandlers);
+        res();
 
-        // 连接超时检测配置
-        const PONG_TIMEOUT_MS=3*60_000;
-        const CHECK_PONG_TIMEOUT_INTERVAL_MS=60_000;
-        const timeoutDetector=createTimeoutDetector(PONG_TIMEOUT_MS, CHECK_PONG_TIMEOUT_INTERVAL_MS, (distMs)=>{
-            common.log(`ws server connection exception, not receive pong over ${parseInt(distMs/1000)}sec`, true);
-            //appSvc.showNotification("错误", "后台服务连接失败", "err");
-        });
-        const option={
-            onPong: ()=> timeoutDetector.signal(),
-        };
+        // // 连接超时检测配置
+        // const PONG_TIMEOUT_MS=3*60_000;
+        // const CHECK_PONG_TIMEOUT_INTERVAL_MS=60_000;
+        // const timeoutDetector=createTimeoutDetector(PONG_TIMEOUT_MS, CHECK_PONG_TIMEOUT_INTERVAL_MS, (distMs)=>{
+        //     common.log(`ws server connection exception, not receive pong over ${parseInt(distMs/1000)}sec`, true);
+        //     //appSvc.showNotification("错误", "后台服务连接失败", "err");
+        // });
+        // const option={
+        //     onPong: ()=> timeoutDetector.signal(),
+        // };
 
-        const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
-        if(assistProcess && assistProcess.stdout){
-            const assistListener=(data)=>{
-                if(!(data instanceof Buffer)){
-                    return;
-                }
-                if(ASSIST_STARTED_SYMBOL===data.toString("utf-8").trim()){
-                    assistProcess.stdout.removeListener("data", assistListener);
-                    server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
-                    common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
-                    common.connWs(server_info.connectUrl, option).then(res);
-                }
-            };
-            assistProcess.stdout.on("data", assistListener);
-        }
+
+        // const assistProcess= spawn(fileRunnerPath, [`${process.pid}`], {cwd: externalPath});
+        // if(assistProcess && assistProcess.stdout){
+        //     const assistListener=(data)=>{
+        //         if(!(data instanceof Buffer)){
+        //             return;
+        //         }
+        //         if(ASSIST_STARTED_SYMBOL===data.toString("utf-8").trim()){
+        //             assistProcess.stdout.removeListener("data", assistListener);
+        //             server_info=JSON.parse(fs.readFileSync(path.join(workPath,'server_info'),'utf-8'));
+        //             common.log(`listener started, pid is ${server_info.pid}, url is ${server_info.connectUrl}`, true);
+        //             common.connWs(server_info.connectUrl, option).then(res);
+        //         }
+        //     };
+        //     assistProcess.stdout.on("data", assistListener);
+        // }
     });
 }
 

@@ -4,10 +4,8 @@ const zlib = require('node:zlib');
 
 
 // --------------------- 常量 -----------------------------------------------------
-// 向请求数据中增加的唯一标识，用来实现请求响应模型
-const REQUEST_ID_KEY="REQ_ID___";
-const BINARY_DATA_KEY="binaryDatas";
-
+// 响应结果中二进制内容的key
+const BINARY_DATA_KEY="binaryDatas___";
 
 // 心跳包发送频率
 const KEEPALIVE_INTERVAL_MS=30_000;
@@ -65,6 +63,11 @@ const prepareReadHead=()=>{
     accuData.currStateHandler = readHead;
 }
 
+const prepareReadUniqueId=()=>{
+    accuData.uniqueId.readSize=0;
+    accuData.currStateHandler=readUniqueId;
+};
+
 const prepareReadPayload=(size)=>{
     accuData.payload.buf = Buffer.allocUnsafe(size);
     accuData.payload.readSize = 0;
@@ -105,8 +108,8 @@ const readHead=(buf, offset, dataLen, option)=>{
     accuData.head.readSize += readCnt;
 
     // 读取完头帧已经有完整4个字节，从中获取体帧长度：
-    // 长度为0，则认为是ping帧，回应pong帧，头帧读取长度重新初始化为0；
-    // 否则状态改为读取payload
+    // 长度为0，则认为是pong帧，调用回调，状态重置为读取头桢
+    // 否则状态改为读取uniqueId
     if(4 === accuData.head.readSize){
         const sumSize=accuData.head.buf.readUint32BE(0);
         if(0 === sumSize) {
@@ -116,10 +119,24 @@ const readHead=(buf, offset, dataLen, option)=>{
             prepareReadHead();
             return offset;
         }
-        prepareReadPayload(sumSize);
+        prepareReadUniqueId();
     }
     return offset;
 }
+
+const readUniqueId=(buf, offset, dataLen, option)=>{
+    const readCnt = Math.min(16-accuData.uniqueId.readSize, dataLen-offset);
+    buf.copy(accuData.uniqueId.buf, accuData.uniqueId.readSize, offset, offset+readCnt);
+    offset += readCnt;
+    accuData.uniqueId.readSize += readCnt;
+
+    // uniqueId已经有完整16个字节，状态改为读取payload
+    if(16 === accuData.uniqueId.readSize){
+        const sumSize=accuData.head.buf.readUint32BE(0);
+        prepareReadPayload(sumSize);
+    }
+    return offset;
+};
 
 const readPayload=(buf, offset, dataLen, option)=>{
     // 读取payload帧
@@ -148,7 +165,7 @@ const readBinHead=(buf, offset, dataLen, option)=>{
         const binaryCnt=accuData.binHead.buf.readUint32BE(0);
         if(0 === binaryCnt) {
             prepareReadHead();
-            handleResp(accuData.payload.buf, accuData.binCont.buf, option);
+            handleResp(accuData.uniqueId.buf, accuData.payload.buf, accuData.binCont.buf, option);
             return offset;
         }
         prepareReadBinCont(binaryCnt);
@@ -182,7 +199,7 @@ const readBinItemCont=(buf, offset, dataLen, option)=>{
             prepareReadBinItemHead();
             return offset;
         }
-        handleResp(accuData.payload.buf, accuData.binCont.buf, option);
+        handleResp(accuData.uniqueId.buf, accuData.payload.buf, accuData.binCont.buf, option);
         prepareReadHead();
     }
     return offset;
@@ -200,6 +217,10 @@ const readBinItemCont=(buf, offset, dataLen, option)=>{
 const accuData={
     head: {
         buf: Buffer.allocUnsafe(4),
+        readSize: 0,
+    },
+    uniqueId: {
+        buf: Buffer.allocUnsafe(16),
         readSize: 0,
     },
     payload: {
@@ -333,20 +354,17 @@ const sendReqWithBins=(json, bins=[])=>{
         });
     };
 
-    // 对请求json增强，增加请求id
+    // 请求id
     const reqId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
-    const enhJson={
-        ...json,
-        [REQUEST_ID_KEY]: reqId,
-    };
+    const uniqueIdBuf = Buffer.from(reqId, "hex");
 
     // 压缩后发送请求，并注册请求id和promise关系，以便接收结果后回调
     return new Promise((res, rej)=>{
         (async ()=>{
             // 先计算大小，以便分配空间
-            const payload = await withCompress(Buffer.from(JSON.stringify(enhJson), 'utf8'));
+            const payload = await withCompress(Buffer.from(JSON.stringify(json), 'utf8'));
             const payloadSize=payload.length;
-            let sumSize=4+payloadSize+4;
+            let sumSize=4+16+payloadSize+4;
             const binCnt=(bins?.length??0);
             const newBins=[];
             for (let i = 0; i < binCnt; ++i) {
@@ -357,9 +375,10 @@ const sendReqWithBins=(json, bins=[])=>{
 
             // 填充数据并发送
             sendDataBuf.writeUInt32BE(payloadSize, 0);
-            payload.copy(sendDataBuf, 4, 0, payloadSize);
-            sendDataBuf.writeUInt32BE(binCnt, 4+payloadSize);
-            let currOffset=4+payloadSize+4;
+            uniqueIdBuf.copy(sendDataBuf,4,0,16);
+            payload.copy(sendDataBuf, 20, 0, payloadSize);
+            sendDataBuf.writeUInt32BE(binCnt, 20+payloadSize);
+            let currOffset=20+payloadSize+4;
             for (let i = 0; i < binCnt; ++i) {
                 sendDataBuf.writeUInt32BE(newBins[i].length, currOffset);
                 newBins[i].copy(sendDataBuf, currOffset+4, 0, newBins[i].length);
@@ -374,34 +393,6 @@ const sendReqWithBins=(json, bins=[])=>{
                 requestTime: new Date().getTime(),
             };
         })();
-
-        // new Promise((resSub, rejSub)=>{
-        //     const jsonStr = JSON.stringify(enhJson);
-        //     if(true!==globalOption?.reqCompress){
-        //         resSub(Buffer.from(jsonStr, 'utf8'));
-        //         return;
-        //     }
-        //     zlib.gzip(jsonStr, {level: globalOption?.reqCompressLev}, (err, buf)=>{
-        //         if(err){
-        //             console.error(err);
-        //             rejSub(err);
-        //             return;
-        //         }
-        //         resSub(buf);
-        //     });
-        // }).then(buf=>{
-        //     const payloadSize=buf.length;
-        //     const sendDataBuf = Buffer.allocUnsafe(payloadSize+4);
-        //     sendDataBuf.writeUInt32BE(payloadSize, 0);
-        //     buf.copy(sendDataBuf, 4, 0, payloadSize);
-        //     client.write(sendDataBuf);
-        //
-        //     reqIdPromiseMap[reqId]={
-        //         res,
-        //         rej,
-        //         requestTime: new Date().getTime(),
-        //     };
-        // }).catch(e=>{});
     });
 };
 
@@ -427,43 +418,6 @@ const handleData=(data, option)=>{
             break;
         }
         offset=accuData.currStateHandler(data, offset, dataLen, option);
-
-        // // 还未读够长度帧的4个字节
-        // if(accuData.head.readSize<4){
-        //     const readCnt=Math.min(4-accuData.head.readSize, data.length-offset);
-        //     data.copy(accuData.head.buf, accuData.head.readSize, offset, offset+readCnt);
-        //     offset+=readCnt;
-        //     accuData.head.readSize+=readCnt;
-        //
-        //     // 读取完头帧已经有完整4个字节，从中获取体帧长度：
-        //     // 长度为0，则认为是pong帧，头帧读取长度重新初始化为0；
-        //     // 否则初始化体帧的buffer
-        //     if(4===accuData.head.readSize){
-        //         accuData.payload.sumSize=accuData.head.buf.readUint32BE(0);
-        //         if(0===accuData.payload.sumSize){
-        //             accuData.head.readSize=0;
-        //             if(option?.onPong){
-        //                 option.onPong();
-        //             }
-        //             continue;
-        //         }
-        //         accuData.payload.buf=Buffer.allocUnsafe(accuData.payload.sumSize);
-        //         accuData.payload.readSize=0;
-        //     }
-        //     continue;
-        // }
-        //
-        // // 读取payload帧
-        // const readCnt=Math.min(accuData.payload.sumSize-accuData.payload.readSize, data.length-offset);
-        // data.copy(accuData.payload.buf, accuData.payload.readSize, offset, offset+readCnt);
-        // accuData.payload.readSize+=readCnt;
-        // offset+=readCnt;
-        //
-        // // 如果体帧读取完成，则把头帧状态改为未读，并处理体帧结果
-        // if(accuData.payload.readSize===accuData.payload.sumSize){
-        //     accuData.head.readSize=0;
-        //     handleResp(accuData.payload.buf, option);
-        // }
     }
 };
 
@@ -473,7 +427,7 @@ const handleData=(data, option)=>{
  * 解压数据(如果需要)后，找到原请求id关联的promise信息（res/rej）并调用，删除相应的关联关系
  * @param buf
  */
-const handleResp=(buf, binBufs, option)=>{
+const handleResp=(uniqueIdBuf, buf, binBufs, option)=>{
     const withDecompress=(buf)=>{
         return new Promise((res, rej)=>{
             if(true!==globalOption?.respCompress){
@@ -491,12 +445,14 @@ const handleResp=(buf, binBufs, option)=>{
         });
     };
 
+    const reqId=uniqueIdBuf.toString("hex").toLowerCase();
+
     (async ()=>{
         const originBuf = await withDecompress(buf);
         const json = JSON.parse(originBuf.toString("utf8"));
-        const reqId=json[REQUEST_ID_KEY];
 
         if(reqIdPromiseMap[reqId]){
+            // 二进制数据也放入响应json中
             const binCnt = binBufs?.length ?? 0;
             const newBins=[];
             for (let i = 0; i < binCnt; ++i) {
@@ -514,37 +470,6 @@ const handleResp=(buf, binBufs, option)=>{
             delete reqIdPromiseMap[reqId];
         }
     })();
-
-
-    // new Promise((res,rej)=> {
-    //     if(true!==option?.respCompress){
-    //         res(buf);
-    //         return;
-    //     }
-    //     zlib.unzip(buf, {}, (err, originBuf)=>{
-    //         if(err){
-    //             rej(err);
-    //             console.error(err);
-    //             return;
-    //         }
-    //         res(originBuf);
-    //     });
-    // }).then(originBuf=>{
-    //     const jsonStr=originBuf.toString("utf8");
-    //     const json = JSON.parse(jsonStr);
-    //     const reqId=json[REQUEST_ID_KEY];
-    //
-    //     if(reqIdPromiseMap[reqId]){
-    //         // 如果配置项中有判断请求成功失败的函数，则根据结果调用res/rej，否则直接认为成功（res）
-    //         if(option?.hasErr && 'function'===typeof(option.hasErr)){
-    //             const fun=option.hasErr(json) ? reqIdPromiseMap[reqId].rej : reqIdPromiseMap[reqId].res;
-    //             fun(json);
-    //         }else{
-    //             reqIdPromiseMap[reqId].res(json);
-    //         }
-    //         delete reqIdPromiseMap[reqId];
-    //     }
-    // }).catch(e=>{});
 };
 
 
@@ -552,6 +477,5 @@ module.exports={
     connectToIpcServer,
     sendReq,
     sendReqWithBins,
-    reqIdKey: REQUEST_ID_KEY,
     binDatasKey: BINARY_DATA_KEY,
 };
