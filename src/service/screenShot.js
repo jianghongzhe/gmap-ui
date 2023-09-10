@@ -43,6 +43,7 @@ const takeScrshot=({
                         finalSize,
                         resultType,
                         resultPath,
+                        resultMultiPage=false,
                    })=>{
 
     // 开始截屏前的预处理，比如隐藏悬浮的组件，隐藏滚动条，设置利于截屏的样式等，记录原来滚动位置
@@ -143,6 +144,7 @@ const takeScrshot=({
             Items:result.map(({pos})=>({X1:pos.x1, X2:pos.x2, Y1:pos.y1, Y2:pos.y2})),
             ResultType: resultType,
             ResultPath: resultPath,
+            ResultMultiPage: resultMultiPage,
             ForceValidSize: forceSize,
             ValidSize: forceSize ? {Width:finalSize[0], Height:finalSize[1],} : null,
             // 由ipcMain处理，把实际的buffer传递到go后端

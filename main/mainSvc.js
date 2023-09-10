@@ -1431,7 +1431,7 @@ const openSaveFileDlg = (ext) => {
         }
         if('word'===ext){
             filters= [
-                { name: 'doc', extensions: ['doc'] },
+                // { name: 'doc', extensions: ['doc'] },
                 { name: 'docx', extensions: ['docx'] },
             ];
         }

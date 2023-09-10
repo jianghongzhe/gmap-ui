@@ -2,7 +2,7 @@ const crypto= require("crypto");
 const { spawn} = require('child_process');
 const path=require("path");
 const fs = require("fs");
-const {nativeImage, clipboard} = require("electron");
+const {nativeImage, clipboard,screen} = require("electron");
 
 const common = require('./common');
 const ipcClient= require("./ipc_client");

@@ -437,6 +437,7 @@ const RefViewer=({visible, onOpenLink, onNodeOp, currRefObj, onCancel})=>{
                     },
                     resultType: type,
                     resultPath: resultPath,
+                    resultMultiPage: false,//true,
                 });
             }catch(e){
             }

@@ -427,6 +427,7 @@ const MapsViewer=(props)=>{
                 finalSize: [maxW, maxH],
                 resultType: type,
                 resultPath: resultPath,
+                resultMultiPage: false,
             });
         })();
     });
