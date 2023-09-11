@@ -37,6 +37,10 @@ $shortcut_small_size: 14px !important;
       overflow: hidden;
       cursor: pointer !important;
 
+      .noRadius {
+        border-radius: 0 !important;
+      }
+
       .big{
         position: absolute;
         font-size: $shortcut_big_size;

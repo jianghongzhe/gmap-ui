@@ -512,7 +512,7 @@ const listFiles = (assignedDir = null) => {
                 attDir=path.join(fullpath,'assets');
                 const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
                     const tmpFn=ent.name.toLowerCase().trim();
-                    return ['.png','.jpg','.jpeg','.gif','.bmp'].some(eachExt=>tmpFn.endsWith(eachExt));
+                    return ['.png','.jpg','.jpeg','.gif','.bmp',".webp"].some(eachExt=>tmpFn.endsWith(eachExt));
                 });
                 if(0<imgItems.length){
                     if(common.isDevMode()){

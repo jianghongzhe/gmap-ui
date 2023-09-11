@@ -209,7 +209,7 @@ const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
 };
 
 const getShortcutImg=(url, big=true)=>{
-    return <Avatar src={url} size={big?28:14} className={big?"big":"small"}/>
+    return <Avatar src={url} size={big?28:14} className={classnames("noRadius", big?"big":"small")}/>
 };
 const getShortcutIcon=(IconComp, color, big=true)=>{
     return <IconComp className={'assignedColor '+(big?"big":"small")}  style={{'--color':color}}/>
