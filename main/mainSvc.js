@@ -777,7 +777,7 @@ const cmdOpenUrlHandler={
 // 如果是图片文件且设置中指定了默认值以外的图片打开方式，则以该打开方式打开；否则默认方式打开
 const fileOpenUrlHandler={
     canHandle:(url, ctxDir)=>url.startsWith("file://") || url.startsWith("assets/") || url.startsWith("./assets/"),
-    handle:(url, ctxDir)=>{
+    handle:(url, ctxDir, extraOpts)=>{
         const handledUrl = trimPrefs(url, ["file:///", "file://"]);
         if(isImgExt(url)){
             const imgOpener=settingSvc.getSettingValue("img_opener");
@@ -785,10 +785,19 @@ const fileOpenUrlHandler={
                 return openByUrlHandler.handle(`openby://${handledUrl}@@${imgOpener}`, ctxDir)
             }
         }
+
+        const extraJson={};
+        if(extraOpts?.cmd){
+            extraJson.ForceCmdMode=true;
+            if(extraOpts?.codePage){
+                extraJson.CodePage=extraOpts.codePage;
+            }
+        }
         return ipcClient.sendReq({
             Action:"file_dir_run",
             Path: handledUrl,
             CtxDir: ctxDir,
+            ...extraJson,
         }).catch(resp=>{
             appSvc.showNotification("操作有误", resp.Msg, 'err');
         });
@@ -1021,10 +1030,20 @@ const allUrlHandlers=[
  */
 const openUrl=(url, option)=>{
     let ctxDir='';
+    let extraOpts={};
     if('string'===typeof(option)){
         ctxDir=option.trim();
     }
-    return allUrlHandlers.find(h=>h.canHandle(url, ctxDir)).handle(url, ctxDir);
+    if('object'===typeof(option)){
+        if(option.ctxDir){
+            ctxDir=option.ctxDir;
+            const {ctxDir:_nouse, ...others}=option;
+            extraOpts=others;
+        }else{
+            extraOpts=option;
+        }
+    }
+    return allUrlHandlers.find(h=>h.canHandle(url, ctxDir)).handle(url, ctxDir, extraOpts??{});
 }
 
 

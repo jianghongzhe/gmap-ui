@@ -593,6 +593,8 @@ const markdownExts=[
             '[#confirm](https://aa.bb.cc)',
             '[#confirm{txt 要打开吗}](https://xx.yy)',
             '[#icon{file:///notepad}](https://ss.tt)',
+            '[#cmd](file://d:/xx.exe)',
+            '[#cmd{cp936}](file://d:/yy.exe)',
         ],
         [
             '// 可在节点和引用部分使用，其中#icon只能在节点上使用',
@@ -600,6 +602,8 @@ const markdownExts=[
             '// 打开链接时弹出确认框',
             '// 指定确认框的标题',
             '// 指定显示的图标，如果不指定，会从链接地址中获得',
+            '// 在命令行窗口中执行，代码页为65001',
+            '// 在命令行窗口中执行，使用指定代码页',
         ]
     ],
     [

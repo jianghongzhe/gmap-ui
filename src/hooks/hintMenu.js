@@ -392,7 +392,7 @@ const menuConfig=[
     })),
 
     // 链接元数据
-    ...(["#confirm", "#confirm{txt aa}", "#icon{file:///xx}"].map((item,ind)=>{
+    ...(["#confirm", "#confirm{txt aa}", "#icon{file:///xx}", "#cmd", "#cmd{cp936}"].map((item,ind)=>{
         return {
             cate: cates.metadata,
             selectionTypes: ['cursor'],

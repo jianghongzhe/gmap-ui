@@ -2,22 +2,27 @@ import React,{useState} from "react";
 import {useBoolean, useMemoizedFn} from "ahooks";
 import {Modal} from "antd";
 import strTmpl from "../common/strTmpl";
+import {parseValidJson} from "../common/jsonUtil";
 
 
 const {confirm} = Modal;
 
+
+
+
 /**
  * 链接插值参数相关hook
+ * 插值表达式和提示框是两个维度，可同时存在；
+ * 有两个或以上链接时，只保留不带插值表达式的项，即打开多个链接时不会出现插值表达式对话框
  * @param openUrlFunc (url)=>{}
  */
 export const useOpenLinkWithParam=(openUrlFunc)=>{
+    const [linkOpts, setLinkOpts]=useState({});
     const [dlgVisible, {setTrue: showDlg, setFalse:onDlgCancel}]=useBoolean(false);
     const [currLinkUrl, setCurrLinkUrl]=useState(null);
     const [paramReplItems, setParamReplItems]=useState([]);
     const [shouldConfirm, setShouldConfirm]= useState(false);
     const [confirmMsg, setConfirmMsg]= useState(null);
-
-
 
     /**
      * 打开指定链接，打开前根据情况选择是否显示确认框
@@ -25,13 +30,13 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * @param needConfirm
      * @param confirmTxt
      */
-    const confirmOrNot=useMemoizedFn((addr, needConfirm=false, confirmTxt=null)=>{
+    const confirmOrNot=useMemoizedFn((addr, needConfirm=false, confirmTxt=null, extraOpts)=>{
         const openLink=()=>{
             if(Array.isArray(addr)){
-                addr.forEach(eachAddr=>openUrlFunc(eachAddr));
+                addr.forEach((eachAddr,ind)=>openUrlFunc(eachAddr, extraOpts[ind]));
                 return;
             }
-            openUrlFunc(addr);
+            openUrlFunc(addr, extraOpts);
         };
 
         if(needConfirm){
@@ -54,13 +59,14 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      * @param {*} url
      * @returns
      */
-    const onClickLink=useMemoizedFn((url, needConfirm=false, confirmTxt=null)=>{
+    const onClickLink=useMemoizedFn((url, needConfirm=false, confirmTxt=null, extraOpts={})=>{
         if('boolean'!==typeof(needConfirm)){
             needConfirm=false;
         }
         if('string'!==typeof(confirmTxt)){
             confirmTxt=null;
         }
+        extraOpts=parseValidJson(extraOpts);
 
         /**
          * 打开一个链接：
@@ -69,17 +75,19 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
          * @param addr
          * @param needConfirm
          * @param confirmTxt
+         * @param extraOpts
          */
-        const openOneLink=(addr, needConfirm, confirmTxt)=>{
+        const openOneLink=(addr, needConfirm, confirmTxt, extraOpts)=>{
             const replaceItems= strTmpl.parse(addr);
             if(null===replaceItems){
-                confirmOrNot(addr, needConfirm, confirmTxt);
+                confirmOrNot(addr, needConfirm, confirmTxt, extraOpts);
                 return;
             }
             setCurrLinkUrl(addr);
             setConfirmMsg(confirmTxt);
             setShouldConfirm(!!needConfirm);
             setParamReplItems(replaceItems);
+            setLinkOpts(extraOpts);
             showDlg();
         };
 
@@ -89,34 +97,24 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
          * @param addrs
          * @param needConfirm
          * @param confirmTxt
+         * @param filteredExtraOpts
          */
-        const openMultiLink=(addrs, needConfirm, confirmTxt)=>{
-            confirmOrNot(addrs, needConfirm, confirmTxt);
+        const openMultiLink=(addrs, needConfirm, confirmTxt, filteredExtraOpts)=>{
+            confirmOrNot(addrs, needConfirm, confirmTxt, filteredExtraOpts);
         };
 
 
         if(Array.isArray(url)){
-            if(0===url.length){
-                return;
-            }
-            else if(1===url.length){
-                openOneLink(url[0], needConfirm, confirmTxt);
-                return;
-            }
-            else{
-                const validUrls= url.filter(eachUrl=>!strTmpl.containsParam(eachUrl));
-                if(0===validUrls){
-                    return;
-                }else if(1===validUrls){
-                    openOneLink(validUrls[0], needConfirm, confirmTxt);
-                    return;
-                }else{
-                    openMultiLink(validUrls, needConfirm, confirmTxt);
-                    return;
-                }
-            }
+            const validUrls=[];
+            const filteredExtraOpts=[];
+            url.forEach((eachUrl,ind)=>{
+                validUrls.push(eachUrl);
+                filteredExtraOpts.push(getExtraOptByIndex(extraOpts, ind));
+            });
+            openMultiLink(validUrls, needConfirm, confirmTxt, filteredExtraOpts);
+            return;
         }
-        openOneLink(url, needConfirm, confirmTxt);
+        openOneLink(url, needConfirm, confirmTxt, extraOpts);
     });
 
 
@@ -128,11 +126,11 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
      */
     const onDlgOk=useMemoizedFn((url)=>{
         if(shouldConfirm){
-            confirmOrNot(url, true, confirmMsg);
+            confirmOrNot(url, true, confirmMsg, linkOpts);
             return;
         }
         onDlgCancel();
-        confirmOrNot(url, false, confirmMsg);
+        confirmOrNot(url, false, confirmMsg, linkOpts);
     });
 
 
@@ -145,4 +143,33 @@ export const useOpenLinkWithParam=(openUrlFunc)=>{
         onDlgOk,
     };
 
+};
+
+
+
+/**
+ * 按索引获取json对象中的值
+ * eg. ind=1
+ * 原值
+ * {
+ *     a: [1,2,3],
+ *     b: ["aa","bb","cc"],
+ * }
+ * 结果
+ * {
+ *     a: 2,
+ *     b: "bb",
+ * }
+ * @param extraOpts
+ * @param ind
+ * @return {{}}
+ */
+const getExtraOptByIndex=(extraOpts, ind)=>{
+    const result={};
+    for (const key in extraOpts) {
+        if(Array.isArray(extraOpts[key]) && ind<extraOpts[key].length){
+            result[key]=extraOpts[key][ind];
+        }
+    }
+    return result;
 };

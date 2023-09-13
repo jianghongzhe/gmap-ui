@@ -299,7 +299,7 @@ class Api{
             return;
         }
 
-        return ipcRenderer.invoke('openUrl', url,'string'===typeof(option)? option.trim() : "");
+        return ipcRenderer.invoke('openUrl', url,'string'===typeof(option)? option.trim() : option);
     }
 
     /**

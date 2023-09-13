@@ -29,6 +29,7 @@ import {useLoadIcon} from "../../../hooks/loadIcon";
 import {filterShortCuts} from "../../../service/linkFilter";
 import styles from './Toolbar.module.scss';
 import classnames from "classnames";
+import {useMemoizedFn} from "ahooks";
 
 
 const { Header } = Layout;
@@ -71,6 +72,19 @@ const Toolbar=({
      * @type {unknown}
      */
     const validShortCuts=useMemo(()=>filterShortCuts(currPane?.ds?.tree?.shortcuts),[currPane]);
+
+    const getShortcutItemExtras= useMemoizedFn((shortcutItem)=>{
+        const {
+            tooltip,
+            url,
+            icon,
+            confirmTxt,
+            shouldConfirm,
+            ...extras
+        }=shortcutItem;
+        return extras;
+    });
+
 
     return (
         <Header className={styles.toolbar}>
@@ -118,7 +132,9 @@ const Toolbar=({
                                           icon={shortItem.icon}
                                           confirmTxt={shortItem.confirmTxt}
                                           shouldConfirm={shortItem.shouldConfirm}
-                                          onClick={onOpenLink}/>
+                                          onClick={onOpenLink}
+                                          extraOpts={getShortcutItemExtras(shortItem)}
+                            />
                         ))
                     }
                 </React.Fragment>
@@ -129,17 +145,24 @@ const Toolbar=({
 
 
 
-const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
+const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick, extraOpts})=>{
     const [localIcon] = useLoadIcon({lindAddr: (Array.isArray(url) ? "group_links" : url), icon});
+
+    const clickHandler = useMemoizedFn(()=>{
+        onClick(url, shouldConfirm, confirmTxt, extraOpts);
+    });
 
     if(!localIcon || !localIcon.type || ('icon'!==localIcon.type && 'image'!==localIcon.type  && 'cascade'!==localIcon.type)){
         return null;
     }
 
+
+
+
     if('cascade'===localIcon.type){
         return (
             <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
-                <div className="shortcut_wrapper" onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
+                <div className="shortcut_wrapper" onClick={clickHandler}>
                     {
                         'icon'===localIcon.items[0].type ?
                             getShortcutIcon(localIcon.items[0].compType, localIcon.items[0].color.color, true) :
@@ -173,7 +196,7 @@ const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
                         className='toolbtn'
                         size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>*/}
 
-                    <div className="shortcut_wrapper" onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
+                    <div className="shortcut_wrapper" onClick={clickHandler}>
                         {
                             getShortcutIcon(localIcon.compType, localIcon.color.color, true)
                         }
@@ -196,7 +219,7 @@ const ShortcutItem=({tooltip, url,icon, shouldConfirm, confirmTxt, onClick})=>{
             <Tooltip color='cyan' placement="bottomLeft" mouseEnterDelay={0.4} title={tooltip}>
                 {/*<Button shape='circle' className='toolbtn'  size='large' onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>*/}
 
-                    <div className="shortcut_wrapper" onClick={onClick.bind(this, url, shouldConfirm, confirmTxt)}>
+                    <div className="shortcut_wrapper" onClick={clickHandler}>
                         {
                             getShortcutImg(localIcon.url, true)
                         }

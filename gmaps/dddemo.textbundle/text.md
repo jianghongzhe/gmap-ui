@@ -1,9 +1,14 @@
-- dddemo中文|ref:dddemo中文
+- dddemo中文|ref:dddemo中文|
+
+
 
 ***
 # shortcuts
-- [cmd](file:///cmd)
-- [dir](file:///f:/hide/)
+- 多个链接
+	- [](file:///notepad)
+	- [add#cmd{cp936}](file:///D:\mnt\中 文\txt_encode_convert.exe)
+	
+	
 
 
 # ref:dddemo中文

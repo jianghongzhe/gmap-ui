@@ -31,6 +31,7 @@ import {dispatch} from 'use-bus';
 import {editorEvents} from "../../common/events";
 import {useEditorDlg} from "../../hooks/editorDlg";
 import {takeScrshot, CombineShotResultMem, CombineShotResultImg, CombineShotResultPdf, CombineShotResultDoc} from "../../service/screenShot";
+import {parseValidJsonWith} from "../../common/jsonUtil";
 
 const { Content } = Layout;
 
@@ -121,11 +122,11 @@ const MapsViewer=(props)=>{
             progsObj: [],
     });
 
-    const openLinkWrapper= useMemoizedFn((url)=>{
+    const openLinkWrapper= useMemoizedFn((url, opts)=>{
         if(url.startsWith("gmap://")){
             api.openUrl(url, selectFileListItem);
         }else{
-            api.openUrl(url, currPane?.key??'');
+            api.openUrl(url, parseValidJsonWith(opts, {ctxDir:currPane?.key??''}));
         }
     });
 

@@ -212,13 +212,14 @@ const LinkComplexItem=({link, linkInd, onOpenLink})=>{
         shouldConfirm,
         confirmTxt,
         icon,
+        ...extraOpts
     }=useMemo(()=>filterSingleLink(link.name, link.addr), [link]);
 
     return <LinkItem key={'link-'+linkInd}
                      tooltip={tooltip}
                      addr={factUrl}
                      icon={icon}
-                     openLinkFunc={onOpenLink.bind(this, factUrl, shouldConfirm, confirmTxt)}/>;
+                     openLinkFunc={onOpenLink.bind(this, factUrl, shouldConfirm, confirmTxt, extraOpts)}/>;
 };
 
 
@@ -297,12 +298,22 @@ const GroupLinkItem=({links, openLinkFunc})=>{
     if(null===val){
         return null;
     }
+
+    const {
+        tooltip,
+        url,
+        shouldConfirm,
+        confirmTxt,
+        icon,
+        ...extraOpts
+    }=val;
+
     if(!Array.isArray(val.url)){
-        return <LinkItem tooltip={val.tooltip} addr={val.url} icon={val.icon} openLinkFunc={openLinkFunc.bind(this, val.url, val.shouldConfirm, val.confirmTxt)}/>;
+        return <LinkItem tooltip={tooltip} addr={url} icon={icon} openLinkFunc={openLinkFunc.bind(this, url, shouldConfirm, confirmTxt, extraOpts)}/>;
     }
-    return <Tooltip  color='cyan' placement="top" title={val.tooltip}>
+    return <Tooltip  color='cyan' placement="top" title={tooltip}>
         <span className={classnames('node_part', styles.themeBtnWrapper)}>
-            <NodeLinkIcon lindAddr="group_links" onClick={openLinkFunc.bind(this, val.url, val.shouldConfirm, val.confirmTxt)}/>
+            <NodeLinkIcon lindAddr="group_links" onClick={openLinkFunc.bind(this, url, shouldConfirm, confirmTxt, extraOpts)}/>
         </span>
     </Tooltip>
 };
