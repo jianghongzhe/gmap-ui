@@ -3,7 +3,7 @@ const fs = require('fs');
 const common=require('./common');
 const settingSvc=require("./settingSvc");
 
-const {mapsPath, opLogFilePath}=require("./consts");
+const {mapsPath, opLogFilePath, IMG_EXTS}=require("./consts");
 
 
 
@@ -72,13 +72,14 @@ const listRecentOpenFiles=(assignedAccHis)=>{
         let pic=null;
         const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
             const tmpFn=ent.name.toLowerCase().trim();
-            return ['.png','.jpg','.jpeg','.gif','.bmp'].some(eachExt=>tmpFn.endsWith(eachExt));
+            return IMG_EXTS.some(eachExt=>tmpFn.endsWith(eachExt));
         });
+
         if(0<imgItems.length){
             if(common.isDevMode()){
                 pic= common.getDevServerFaviconUrl();
             }else{
-                pic=common.wrapFileProtocol(path.join(attDir, imgItems[0].name));
+                pic=common.wrapFileProtocol(path.join(attDir, imgItems[0].name),true);
             }
         }
 

@@ -46,6 +46,15 @@ const ASSIST_STARTED_SYMBOL="started";
 const SLASH='/';
 const BACK_SLASH='\\';
 
+const IMG_EXTS=[
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.gif',
+    '.bmp',
+    '.webp',
+    '.svg',
+];
 
 
 module.exports = {
@@ -74,5 +83,6 @@ module.exports = {
     DEFAULT_SEARCH_URL,
     ASSIST_STARTED_SYMBOL,
     SLASH,
-    BACK_SLASH
+    BACK_SLASH,
+    IMG_EXTS,
 };

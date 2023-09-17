@@ -27,7 +27,8 @@ const {
     DEFAULT_SEARCH_URL,
     ASSIST_STARTED_SYMBOL,
     SLASH,
-    BACK_SLASH
+    BACK_SLASH,
+    IMG_EXTS,
 }=require("./consts");
 const {createTimeoutDetector} = require("./timeout_detect");
 
@@ -512,7 +513,7 @@ const listFiles = (assignedDir = null) => {
                 attDir=path.join(fullpath,'assets');
                 const imgItems=fs.readdirSync(attDir, { withFileTypes: true }).filter(ent=>{
                     const tmpFn=ent.name.toLowerCase().trim();
-                    return ['.png','.jpg','.jpeg','.gif','.bmp',".webp"].some(eachExt=>tmpFn.endsWith(eachExt));
+                    return IMG_EXTS.some(eachExt=>tmpFn.endsWith(eachExt));
                 });
                 if(0<imgItems.length){
                     if(common.isDevMode()){
