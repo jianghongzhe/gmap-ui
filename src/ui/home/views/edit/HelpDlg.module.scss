@@ -81,9 +81,27 @@
                             > div.chartItem {
                                 width: 200px;
                                 color: grey;
+                                position: relative;
 
                                 .spaceTab{
                                     margin-left: 20px;
+                                }
+
+                                .btn_copychart{
+                                    border: 1px solid gray;
+                                    border-radius: 5px;
+                                    padding: 2px 4px;
+                                    position: absolute;
+                                    right:5px;
+                                    top: 5px;
+                                    cursor: pointer;
+                                    display: none;
+                                }
+                            }
+
+                            > div.chartItem:hover {
+                                .btn_copychart{
+                                    display: inline-block;
                                 }
                             }
                         }

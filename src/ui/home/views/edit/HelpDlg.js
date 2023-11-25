@@ -12,6 +12,7 @@ import imgUrlRela from '../../../../assets/graph_rela.png';
 import imgUrlEchart from '../../../../assets/graph_echart.png';
 import globalStyleConfig from '../../../../common/globalStyleConfig';
 import styles from './HelpDlg.module.scss';
+import {useMemoizedFn} from "ahooks";
 
 const EnhDlg=withEnh(Modal);
 
@@ -22,6 +23,15 @@ const blankObj={};
  * @param {*} props 
  */
 const HelpDlg=(props)=>{
+
+    const onCopyEchart= useMemoizedFn((e)=>{
+        let txt= e.target.parentNode.innerText.trim();
+        if (txt.endsWith("复制")) {
+            txt=txt.substring(0, txt.length-2).trim();
+        }
+        api.openUrl(`cp://${txt}`, {});
+    });
+
     return (
         <EnhDlg noFooter
                 title="帮助"
@@ -227,6 +237,7 @@ const HelpDlg=(props)=>{
                                                         "娱乐": 600<br/>
                                                         "医疗": 500<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -253,6 +264,7 @@ const HelpDlg=(props)=>{
                                                         娱乐,600,400,600<br/>
                                                         医疗,500,200,300<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -279,6 +291,7 @@ const HelpDlg=(props)=>{
                                                         娱乐,600,400,600<br/>
                                                         医疗,500,200,300<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -305,6 +318,7 @@ const HelpDlg=(props)=>{
                                                         娱乐,600,400,600<br/>
                                                         医疗,500,200,300<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -333,6 +347,7 @@ const HelpDlg=(props)=>{
                                                         bar,娱乐,600,400,600<br/>
                                                         line,参考值,500,200,300<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -357,6 +372,7 @@ const HelpDlg=(props)=>{
                                                         第一类, 15.0 8.04, 8.07 7.97, 13.0 7.58<br/>
                                                         第二类, 9.05 8.81, 11.0 8.33, 14.0 7.96<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -382,6 +398,7 @@ const HelpDlg=(props)=>{
                                                         张三,小明<br/>
                                                         张三,小华<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -403,6 +420,7 @@ const HelpDlg=(props)=>{
                                                         <div className="spaceTab">{'//'} echart官方配置项</div>
                                                         {'}'}<br/>
                                                         ```
+                                                        <div className="btn_copychart" onClick={onCopyEchart}>复制</div>
                                                     </div>
                                                 </div>
                                             </div>
