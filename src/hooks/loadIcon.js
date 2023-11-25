@@ -12,7 +12,7 @@ import cmdopen_url from '../assets/node_icon_cmdopen.png';
 import cmd_url from '../assets/node_icon_cmd.png';
 import browser_url from '../assets/node_icon_browser.png';
 import {useSelectFileListItem} from "./tabs";
-import {useRecoilValue} from "_recoil@0.7.7@recoil";
+import {useRecoilValue} from "recoil";
 import {tabCurrPane} from "../store/tabs";
 
 export const useLoadIcon=({lindAddr, icon})=>{
