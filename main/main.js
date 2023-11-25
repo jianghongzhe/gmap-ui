@@ -12,12 +12,6 @@ const findInPageSvc= require('./findInPageSvc');
 const toastSvc= require('./toastSvc');
 const common=require('./common');
 
-
-/**
- * 启动窗口
- */
-let splashWindow=null;
-
 /**
  * 主窗口
  */
@@ -31,33 +25,6 @@ app.commandLine.appendSwitch("--disable-http-cache");
  */
 const mainPageIndexPath=path.join(__dirname, "../", "build", "index.html");
 
-/**
- * 启动页的地址
- */
-const splashPageIndexPath=path.join(__dirname, "../", "splash", "index.html");
-
-
-// /**
-//  * 创建启动页窗口并加载内容
-//  */
-// const createSplashWindow=()=>{
-//     splashWindow = new BrowserWindow({
-//         width: 800,
-//         height: 600,
-//         frame: false,
-//         center: true,
-//         movable: false,
-//         resizable: false,
-//         show: true,
-//         skipTaskbar: true,
-//         webPreferences: {
-//             nodeIntegration: true,
-//             enableRemoteModule: true,
-//             contextIsolation: false,
-//         }
-//     });
-//     splashWindow.loadFile(splashPageIndexPath);
-// };
 
 /**
  * 创建主窗口但不加载首页

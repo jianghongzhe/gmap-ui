@@ -15,6 +15,8 @@ import styles from './HelpDlg.module.scss';
 
 const EnhDlg=withEnh(Modal);
 
+const blankObj={};
+
 /**
  * 帮助对话框
  * @param {*} props 
@@ -115,19 +117,19 @@ const HelpDlg=(props)=>{
                                 </table>
                                 <div className="linkItemContainer">
                                     <div>
-                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/')}>Markdown 语法说明</Button>
+                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://guides.github.com/features/mastering-markdown/',blankObj)}>Markdown 语法说明</Button>
                                     </div>
                                     <div>
-                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html')}>Latex 语法说明（```latex```）</Button>
+                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://katex.org/docs/supported.html',blankObj)}>Latex 语法说明（```latex```）</Button>
                                     </div>
                                     <div>
-                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart')}>基于mermaid的图表（```mermaid```）</Button>
+                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://mermaid-js.github.io/mermaid/#/flowchart',blankObj)}>基于mermaid的图表（```mermaid```）</Button>
                                     </div>
                                     <div>
-                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://flowchart.js.org/')}>流程图（```flow```）</Button>
+                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://flowchart.js.org/',blankObj)}>流程图（```flow```）</Button>
                                     </div>
                                     <div>
-                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/')}>时序图（```sequence```）</Button>
+                                        <Button type='link' className="btn" onClick={api.openUrl.bind(this,'https://bramp.github.io/js-sequence-diagrams/',{})}>时序图（```sequence```）</Button>
                                     </div>
                                 </div>
                             </div>
