@@ -9,6 +9,22 @@
   }
 }
 
+.zoomStyle{
+  position: absolute;
+  right: 14px;
+  top: 0;
+  display: inline-block;
+
+  :global{
+    .icon {
+      margin-right: 2px;
+    }
+    .txt{
+      margin-right: 6px;
+    }
+  }
+}
+
 .defaultWrapperStyle {
   overflow: hidden;
   border: 0px solid red;
@@ -18,6 +34,7 @@
   margin-right: auto;
   width: var(--width, 800px);
   height: var(--height, 600px);
+  transform: scale(var(--scale, 1), var(--scale, 1));
 
   :global{
     .item {

@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo} from 'react';
-import {Alert, Col, Row} from 'antd';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Alert, Button, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
-import {useRafState} from 'ahooks';
+import {useMemoizedFn, useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
-import {useMemoizedFn} from "ahooks";
 import styles from './NewMindmap.module.scss';
-
+import {ZoomInOutlined, ZoomOutOutlined} from "@ant-design/icons";
 
 
 /**
@@ -21,6 +20,8 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         wrapperStyle:{},
         relaLineStyles: {},
     });
+
+    let [zoomRate, setZoomRate] = useState(1);
 
 
     /**
@@ -38,10 +39,12 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                     wrapperStyle:   styles.wrapperStyle,
                     relaLineStyles,
                 });
+
+                console.log("calc pos", styles.ndStyles);
             };
-            setTimeout(func, 20);
+            setTimeout(func, 2000);
         }
-    },[ds, setAllStyles]);
+    },[ds, setAllStyles, zoomRate]);
 
 
     const getExpBtnStyle=useMemoizedFn((nd)=>(
@@ -129,6 +132,25 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         return extraStyle;
     },[wrapperStyle]);
 
+    const onZoom = useMemoizedFn((e) => {
+        if(e.ctrlKey && !e.shiftKey && !e.altKey && 0!==e.deltaY){
+            if(e.deltaY<0){
+                let rate=zoomRate-e.deltaY/1000;
+                rate=(rate>3 ? 3 : rate);
+                setZoomRate(rate);
+                return;
+            }
+
+            let rate=zoomRate-e.deltaY/1000;
+            rate=(rate<0.5 ? 0.5 : rate);
+            setZoomRate(rate);
+        }
+    });
+
+    const onRestoreZoom=useMemoizedFn(()=>{
+        setZoomRate(1);
+    });
+
     
     // 非正常状态时的渲染
     if(!ds){
@@ -161,65 +183,73 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
 
 
+
     // 正常渲染
     return (
-        <div className={styles.defaultWrapperStyle} style={{
-            '--node_zIndex': globalStyleConfig.nodeZIndex,
-            '--expbtn_zIndex': globalStyleConfig.expBtnZIndex,
-            '--relaLine_zIndex': globalStyleConfig.relaLineZIndex,
-            ...extraContainerStyle,
-        }} id={`graphwrapper_${tabInd}`}>
+        <React.Fragment>
+            <div className={styles.defaultWrapperStyle} style={{
+                '--node_zIndex': globalStyleConfig.nodeZIndex,
+                '--expbtn_zIndex': globalStyleConfig.expBtnZIndex,
+                '--relaLine_zIndex': globalStyleConfig.relaLineZIndex,
+                '--scale': zoomRate,
+                ...extraContainerStyle,
+            }} id={`graphwrapper_${tabInd}`} onWheel={onZoom}>
+                {
+                    ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
+                        {/* 节点内容  */}
+                        <div className='item'  id={nd.id} style={getNdStyle(nd)}>
+                            {actNdRenderer(nd, ds.tree)}
+                        </div>
+
+                        {/* 节点到父节点的连接线 */}
+                        {
+                            (nd.parid) && (<>
+                                <div className='linewrapper' id={`line_${nd.id}`} style={getLineStyle(nd,'line')}>
+                                    <div className='lineExp' id={`lineExp_${nd.id}`} style={getLineStyle(nd,'lineExp')}></div>
+                                    <div className='linefrom' id={`linefrom_${nd.id}`} style={getLineStyle(nd, 'lineFrom')}></div>
+                                    <div className='lineto' id={`lineto_${nd.id}`} style={getLineStyle(nd, 'lineTo')}></div>
+                                </div>
+                            </>)
+                        }
+
+                        {/* 节点的展开按钮 */}
+                        {
+                            (nd.childs && 0<nd.childs.length) &&
+                                <div id={`expbtn_${nd.id}`} className='expBtn' style={getExpBtnStyle(nd)}>
+                                    {actExpBtnRenderer(nd, ds.expands)}
+                                </div>
+                        }
+
+                        {/* 关联线 */}
+                        {
+                            nd.isRelaLineFrom && nd.toids.map((toid, ind)=>(
+                                <svg key={`toid_${toid}`} className="relaLine" fromid={nd.id} toid={toid} xmlns="http://www.w3.org/2000/svg" version="1.1" style={getRelaLineWrapperStyle(nd.id, toid)}>
+                                    <defs>
+                                        <marker id={`${nd.id}_${toid}_arrow`} markerUnits="strokeWidth" markerWidth="12" markerHeight="12" viewBox="0 0 12 12" refX="6" refY="6" orient="auto">
+                                            <path d="M2,2 L10,6 L2,10 L2,2" style={{fill:nd.relaLineColors[ind]}} />
+                                        </marker>
+                                    </defs>
+                                    <line {...getRelaLinePos(nd.id, toid)} style={{stroke:nd.relaLineColors[ind], strokeWidth:1, strokeDasharray:"5px"}} markerEnd={`url(#${nd.id}_${toid}_arrow)`}/>
+                                </svg>
+                            ))
+                        }
+                    </React.Fragment>))
+                }
+            </div>
             {
-                ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
-                    {/* 节点内容  */}
-                    <div className='item'  id={nd.id} style={getNdStyle(nd)}>
-                        {actNdRenderer(nd, ds.tree)}
-                    </div>
-
-                    {/* 节点到父节点的连接线 */}
-                    {
-                        (nd.parid) && (<>
-                            <div className='linewrapper' id={`line_${nd.id}`} style={getLineStyle(nd,'line')}>
-                                <div className='lineExp' id={`lineExp_${nd.id}`} style={getLineStyle(nd,'lineExp')}></div>
-                                <div className='linefrom' id={`linefrom_${nd.id}`} style={getLineStyle(nd, 'lineFrom')}></div>
-                                <div className='lineto' id={`lineto_${nd.id}`} style={getLineStyle(nd, 'lineTo')}></div>
-                            </div>
-                        </>)
-                    }
-
-                    {/* 节点的展开按钮 */}
-                    {
-                        (nd.childs && 0<nd.childs.length) && 
-                            <div id={`expbtn_${nd.id}`} className='expBtn' style={getExpBtnStyle(nd)}>
-                                {actExpBtnRenderer(nd, ds.expands)}
-                            </div>
-                    }
-
-                    {/* 关联线 */}
-                    {
-                        nd.isRelaLineFrom && nd.toids.map((toid, ind)=>(
-                            <svg key={`toid_${toid}`} className="relaLine" fromid={nd.id} toid={toid} xmlns="http://www.w3.org/2000/svg" version="1.1" style={getRelaLineWrapperStyle(nd.id, toid)}>
-                                <defs>
-                                    <marker id={`${nd.id}_${toid}_arrow`} markerUnits="strokeWidth" markerWidth="12" markerHeight="12" viewBox="0 0 12 12" refX="6" refY="6" orient="auto">
-                                        <path d="M2,2 L10,6 L2,10 L2,2" style={{fill:nd.relaLineColors[ind]}} />
-                                    </marker>
-                                </defs>
-                                <line {...getRelaLinePos(nd.id, toid)} style={{stroke:nd.relaLineColors[ind], strokeWidth:1, strokeDasharray:"5px"}} markerEnd={`url(#${nd.id}_${toid}_arrow)`}/>
-                            </svg>
-                        ))
-                    }
-                </React.Fragment>))
+                1 !== zoomRate && <div className={styles.zoomStyle}>
+                    <span className="icon">{zoomRate>1 ? <ZoomInOutlined/>: <ZoomOutOutlined/>}</span>
+                    <span className="txt">{parseInt(zoomRate*100)}%</span>
+                    <Button size="small" onClick={onRestoreZoom}>重置</Button>
+                </div>
             }
-        </div>
+        </React.Fragment>
     );
 }
 
 
-
-
-
-const getNdBorderStyle=(nd, rootNd)=>{
-    if(!nd){
+const getNdBorderStyle = (nd, rootNd) => {
+    if (!nd) {
         return {};
     }
 
