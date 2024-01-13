@@ -34,7 +34,7 @@
   margin-right: auto;
   width: var(--width, 800px);
   height: var(--height, 600px);
-  transform: scale(var(--scale, 1), var(--scale, 1));
+  //transform: scale(var(--scale, 1), var(--scale, 1));
 
   :global{
     .item {

@@ -78,7 +78,7 @@ const NodeLinkIcon=({lindAddr, icon, onClick,})=>{
 
 
 const getUrlItem=(url, big=true)=>{
-    return <Avatar size={big?20:10} src={url} className={[styles.avatarStyle, big?"big":"small"]} />;
+    return <Avatar src={url} className={[styles.avatarStyle, big?"big":"small"]} />;
 };
 
 const getIconItem=(IconCls, color, big=true)=>{

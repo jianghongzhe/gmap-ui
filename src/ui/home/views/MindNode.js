@@ -21,7 +21,7 @@ import {useRecoilValue} from "recoil";
  * 导图的节点
  * @param {*} props 
  */
-const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNodeOp,})=>{
+const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNodeOp, zoomRate,})=>{
 
     //根主题的样式，根据是否有文本之外的内容显示不同样式
     //有额外内容：显示一个边框
@@ -65,7 +65,8 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
 
     
     if(!nd){return null;}
-    return (<span className={classnames(themeCls, styles.root)}>
+
+    return (<span className={classnames(themeCls, styles.root)} style={{'--zoomRate':`${zoomRate}`,}}>
         {/* 日期部分 */}
         {
             (nd && nd.dateItem) && (

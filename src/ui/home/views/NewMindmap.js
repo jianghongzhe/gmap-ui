@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Alert, Button, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
-import {useMemoizedFn, useRafState} from 'ahooks';
+import {useDebounce, useMemoizedFn, useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
 import styles from './NewMindmap.module.scss';
 import {ZoomInOutlined, ZoomOutOutlined} from "@ant-design/icons";
@@ -23,6 +23,8 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
     let [zoomRate, setZoomRate] = useState(1);
 
+    const debouncedZoomRate = useDebounce(zoomRate, { wait: 500 });
+
 
     /**
      * 在节点数据变化后，计算节点和连接线的css样式，再设置样式值触发新一次渲染
@@ -39,12 +41,10 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                     wrapperStyle:   styles.wrapperStyle,
                     relaLineStyles,
                 });
-
-                console.log("calc pos", styles.ndStyles);
             };
-            setTimeout(func, 2000);
+            setTimeout(func, 20);
         }
-    },[ds, setAllStyles, zoomRate]);
+    },[ds, setAllStyles, debouncedZoomRate]);
 
 
     const getExpBtnStyle=useMemoizedFn((nd)=>(
@@ -191,14 +191,14 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                 '--node_zIndex': globalStyleConfig.nodeZIndex,
                 '--expbtn_zIndex': globalStyleConfig.expBtnZIndex,
                 '--relaLine_zIndex': globalStyleConfig.relaLineZIndex,
-                '--scale': zoomRate,
+                //'--scale': zoomRate,
                 ...extraContainerStyle,
             }} id={`graphwrapper_${tabInd}`} onWheel={onZoom}>
                 {
                     ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                         {/* 节点内容  */}
                         <div className='item'  id={nd.id} style={getNdStyle(nd)}>
-                            {actNdRenderer(nd, ds.tree)}
+                            {actNdRenderer(nd, ds.tree, debouncedZoomRate)}
                         </div>
 
                         {/* 节点到父节点的连接线 */}

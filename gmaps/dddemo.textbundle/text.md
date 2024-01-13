@@ -1,8 +1,12 @@
 - dddemo中文
-	- aaa
-	- bbb
+	- aaa|[](file:///notepad)
+	- bbb|[](cp://abcc)
 		- xx
-		- yy
+		- yy|ref:yy
 		- zz
-	- ccc
+	- ccc|[](openby://https://abc.def.qqq.com@@chrome)
 	- ddd
+
+***
+# ref:yy
+qq

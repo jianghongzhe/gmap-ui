@@ -35,15 +35,17 @@ const GraphTabs=(props)=>{
     /**
      * 节点内容的render props
      */
-    const ndContentRenderer=(nd, rootNd)=>{
-        return <MindNode key={nd.id} nd={nd}
-            onOpenLink={props.onOpenLink} 
-            onOpenRef={props.onOpenRef}
-            onShowTimeline={props.onShowTimeline}
-            onShowProgs={props.onShowProgs}
-            onShowGant={props.onShowGant}
-            onShowGraph={props.onShowGraph}
-            onNodeOp={props.onNodeOp}
+    const ndContentRenderer=(nd, rootNd, zoomRate)=>{
+        return <MindNode key={nd.id}
+                         nd={nd}
+                         zoomRate={zoomRate}
+                         onOpenLink={props.onOpenLink}
+                         onOpenRef={props.onOpenRef}
+                         onShowTimeline={props.onShowTimeline}
+                         onShowProgs={props.onShowProgs}
+                         onShowGant={props.onShowGant}
+                         onShowGraph={props.onShowGraph}
+                         onNodeOp={props.onNodeOp}
         />;
     }
 
