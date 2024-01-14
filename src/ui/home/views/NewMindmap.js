@@ -191,7 +191,6 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                 '--node_zIndex': globalStyleConfig.nodeZIndex,
                 '--expbtn_zIndex': globalStyleConfig.expBtnZIndex,
                 '--relaLine_zIndex': globalStyleConfig.relaLineZIndex,
-                //'--scale': zoomRate,
                 ...extraContainerStyle,
             }} id={`graphwrapper_${tabInd}`} onWheel={onZoom}>
                 {

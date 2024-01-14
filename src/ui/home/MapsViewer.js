@@ -367,6 +367,10 @@ const MapsViewer=(props)=>{
                 api.showNotification("警告",`窗口只有在最大化时才能${typeNames[type]}`,"warn");
                 return;
             }
+
+            // TODO 只有缩放比例为 100% 时才能截屏
+
+
             // 取当前div的父元素作为其容器，并计算容器的位置等信息作为截图的依据
             const ele=document.querySelector(`#graphwrapper_${currTabInd}`);
             if(!ele){
