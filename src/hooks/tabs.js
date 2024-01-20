@@ -60,7 +60,10 @@ export const useSelectFileListItem=()=>{
                     key: mdFullpath,
                     mapTxts: origintxts,
                     //mapCells: cells,
-                    ds: ndsSet,
+                    ds: {
+                        ...ndsSet,
+                        zoomRate: 1,
+                    },
                     tags,
                 }
             ]);
@@ -139,6 +142,23 @@ export const useRestoreDefaultExpandState=()=>{
     });
 };
 
+export const useSetZoomRate=()=>{
+    const[currPane, setCurrPane]= useCurrPaneState();
+
+    return useMemoizedFn((zoomRate)=>{
+        setCurrPane({
+            ...currPane,
+            ds: {
+                ...currPane.ds,
+                expands: {
+                    ...currPane.ds.expands,
+                    ...newMindmapSvc.restore(currPane.ds)
+                },
+                zoomRate,
+            }
+        });
+    });
+};
 
 export const useSetAssignedTabKey=()=>{
     const setTabActiveKey= useSetRecoilState(tabActiveKeyState);
@@ -146,6 +166,8 @@ export const useSetAssignedTabKey=()=>{
         setTabActiveKey(key);
     });
 };
+
+
 
 
 export const useTogglePreTab=()=>{
@@ -413,7 +435,10 @@ export const useCreateNewMapPromise=()=>{
                         title: fn,
                         key: mdFullpath,
                         mapTxts: mapTxt,
-                        ds: ndsSet,
+                        ds: {
+                            ...ndsSet,
+                            zoomRate: 1,
+                        },
                         tags,
                     }
                 ]));

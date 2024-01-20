@@ -1,10 +1,11 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Alert, Button, Col, Row} from 'antd';
 import mindLayoutSvcFacade from '../../../service/mindLayoutSvcFacade';
-import {useDebounce, useMemoizedFn, useRafState} from 'ahooks';
+import {useDebounce, useDebounceEffect, useDebounceFn, useMemoizedFn, useRafState} from 'ahooks';
 import globalStyleConfig from '../../../common/globalStyleConfig';
 import styles from './NewMindmap.module.scss';
 import {ZoomInOutlined, ZoomOutOutlined} from "@ant-design/icons";
+import {useSetZoomRate} from "../../../hooks/tabs";
 
 
 /**
@@ -23,7 +24,12 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
 
     let [zoomRate, setZoomRate] = useState(1);
 
-    const debouncedZoomRate = useDebounce(zoomRate, { wait: 500 });
+    const setCurrZoomRate= useSetZoomRate();
+
+    useDebounceEffect(()=>{
+        setCurrZoomRate(zoomRate);
+    }, [zoomRate, setCurrZoomRate], { wait: 500 });
+
 
 
     /**
@@ -44,7 +50,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
             };
             setTimeout(func, 20);
         }
-    },[ds, setAllStyles, debouncedZoomRate]);
+    },[ds, setAllStyles]);
 
 
     const getExpBtnStyle=useMemoizedFn((nd)=>(
@@ -132,6 +138,12 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
         return extraStyle;
     },[wrapperStyle]);
 
+
+
+
+
+
+
     const onZoom = useMemoizedFn((e) => {
         if(e.ctrlKey && !e.shiftKey && !e.altKey && 0!==e.deltaY){
             if(e.deltaY<0){
@@ -197,7 +209,7 @@ const NewMindmap=({ds, ndContentRenderer, ndExpBtnRenderer, ind: tabInd})=>{
                     ds.list.map((nd,ind)=>(<React.Fragment key={'nd-'+ind}>
                         {/* 节点内容  */}
                         <div className='item'  id={nd.id} style={getNdStyle(nd)}>
-                            {actNdRenderer(nd, ds.tree, debouncedZoomRate)}
+                            {actNdRenderer(nd, ds.tree, ds.zoomRate??1)}
                         </div>
 
                         {/* 节点到父节点的连接线 */}
