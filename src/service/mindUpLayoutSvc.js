@@ -208,7 +208,7 @@ class MindUpLayoutSvc{
 
 
         // 子节点的样式，高度的起始位置为父节点的下面加上空白的距离
-        const subBeginTop= beginTop-ndXDist;
+        const subBeginTop= beginTop-parseInt(ndXDist*(ndsSet.zoomRate??1));
 
 
         if (nd.childs && 0 < nd.childs.length && ndsSet.expands[nd.id]) {
@@ -218,7 +218,7 @@ class MindUpLayoutSvc{
             let childSumW=0;
             let maxSubH=0;
             for(let i=0;i<nd.childs.length;++i){
-                childSumW+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+(i>0 ? ndXDist : 0);
+                childSumW+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+(i>0 ? parseInt(ndXDist*(ndsSet.zoomRate??1)) : 0);
                 maxSubH=Math.max(maxSubH, resultWrapper.rects[nd.childs[i].id].height);
             }
             if(childSumW<selfW){
@@ -228,7 +228,7 @@ class MindUpLayoutSvc{
             for(let i=0;i<nd.childs.length;++i){
                 const eachBeginTop= subBeginTop-resultWrapper.rects[nd.childs[i].id].height
                 this.putNdsRecursively(nd.childs[i], ndsSet, resultWrapper, accuBeginLeft, eachBeginTop);
-                accuBeginLeft+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+ndXDist;
+                accuBeginLeft+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+parseInt(ndXDist*(ndsSet.zoomRate??1));
             }
         }
     }
@@ -247,7 +247,7 @@ class MindUpLayoutSvc{
         //有子节点，取所有子节点的高度和，中间加上空白的距离
         let sumChildrenH = 0;
         nd.childs.forEach((child,ind) => {
-            sumChildrenH +=(0<ind?ndXDist:0)+ this.getNdWidth(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
+            sumChildrenH +=(0<ind?parseInt(ndXDist*(ndsSet.zoomRate??1)):0)+ this.getNdWidth(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
         });
         return parseInt(Math.max(resultWrapper.rects[nd.id].width, sumChildrenH));
     }

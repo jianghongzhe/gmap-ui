@@ -62,7 +62,7 @@ class MindHLayoutSvc {
         }
         let sumChildrenH = 0;
         nd.childs.forEach((child,ind) => {
-            sumChildrenH +=(0<ind?globalStyleConfig.hlayout.nodePaddingTop:0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
+            sumChildrenH +=(0<ind? parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) : 0) + this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
         });
         return sumChildrenH;
     }
@@ -81,7 +81,7 @@ class MindHLayoutSvc {
         //有子节点，取所有子节点的高度和，中间加上空白的距离
         let sumChildrenH = 0;
         nd.childs.forEach((child,ind) => {
-            sumChildrenH +=(0<ind?globalStyleConfig.hlayout.nodePaddingTop:0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
+            sumChildrenH +=(0<ind? parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) :0)+ this.getNdHeight(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
         });
         return parseInt(Math.max(resultWrapper.rects[nd.id].height, sumChildrenH));
     }
@@ -104,7 +104,7 @@ class MindHLayoutSvc {
         ndsSet.tree.childs.forEach((child,ind) => {
             //child.left = false;//default right
             resultWrapper.directions[child.id]=false;
-            rightH +=(0<ind?globalStyleConfig.hlayout.nodePaddingTop:0)+ this.getNdHeight(child, ndsSet, resultWrapper);
+            rightH +=(0<ind? parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) :0)+ this.getNdHeight(child, ndsSet, resultWrapper);
             ++sumNdCnt;
         });
         let dist = rightH;
@@ -128,8 +128,8 @@ class MindHLayoutSvc {
                 return;
             }
             let h = this.getNdHeight(child,ndsSet, resultWrapper);
-            let newLeftH = leftH +(0<leftH?globalStyleConfig.hlayout.nodePaddingTop:0)+ h;//
-            let newRightH = rightH - h- (1<sumNdCnt-leftNdCnt?globalStyleConfig.hlayout.nodePaddingTop:0);
+            let newLeftH = leftH +(0<leftH? parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) :0)+ h;//
+            let newRightH = rightH - h- (1<sumNdCnt-leftNdCnt? parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) :0);
             let newDist = Math.abs(newRightH - newLeftH);
 
             if (newDist < dist) {
@@ -220,7 +220,7 @@ class MindHLayoutSvc {
 
                 const subXDist =this.calcXDist(nd, ndsSet, resultWrapper);
                 this.putSubNds(currLeftTop, l - subXDist, nd, ndsSet, true, resultWrapper);
-                currLeftTop += allHeight+globalStyleConfig.hlayout.nodePaddingTop;//
+                currLeftTop += allHeight+ parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) ;//
             });
 
             //右
@@ -234,7 +234,7 @@ class MindHLayoutSvc {
 
                 const subXDist = this.calcXDist(nd, ndsSet, resultWrapper);
                 this.putSubNds(currRightTop, l + resultWrapper.rects[nd.id].width + subXDist, nd, ndsSet, false, resultWrapper);
-                currRightTop += allHeight+globalStyleConfig.hlayout.nodePaddingTop;//
+                currRightTop += allHeight+parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) ;//
             });
         }
 
@@ -298,7 +298,7 @@ class MindHLayoutSvc {
             }
 
             const calcXDist=parseInt(hDist*Math.tan(globalStyleConfig.hlayout.dynDdXDistAngleDegree*Math.PI/180));
-            return parseInt(Math.max(globalStyleConfig.hlayout.ndXDistRoot, calcXDist));
+            return parseInt(Math.max(globalStyleConfig.hlayout.ndXDistRoot*(ndsSet.zoomRate??1), calcXDist));
         }
 
 
@@ -322,7 +322,7 @@ class MindHLayoutSvc {
 
         // 取按夹角计算的水平距离与指定最小距离中的较大者
         const calcXDist=parseInt(hDist*Math.tan(globalStyleConfig.hlayout.dynDdXDistAngleDegree*Math.PI/180));
-        return parseInt(Math.max(globalStyleConfig.hlayout.ndXDist, calcXDist));
+        return parseInt(Math.max(globalStyleConfig.hlayout.ndXDist*(ndsSet.zoomRate??1), calcXDist));
     }
 
     /**
@@ -360,7 +360,7 @@ class MindHLayoutSvc {
         const parHeight= parseInt(resultWrapper.rects[parNd.id].height);
         let childAllHeight=0;
         parNd.childs.forEach((nd, childInd) => {
-            childAllHeight+=this.getNdHeight(nd,ndsSet,resultWrapper)+(0<childInd ? globalStyleConfig.hlayout.nodePaddingTop : 0);
+            childAllHeight+=this.getNdHeight(nd,ndsSet,resultWrapper)+(0<childInd ? parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1)) : 0);
         });
         if(childAllHeight<parHeight){
             startT=parseInt(startT+(parHeight-childAllHeight)/2);
@@ -384,7 +384,7 @@ class MindHLayoutSvc {
 
                 this.putExpBtn(ndsSet,nd,startL,t,left, resultWrapper);
                 this.putSubNds(startT, startL + resultWrapper.rects[nd.id].width + xDist, nd, ndsSet, left, resultWrapper);//右边节点的位置是当前节点
-                startT += allHeight+globalStyleConfig.hlayout.nodePaddingTop;
+                startT += allHeight+ parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1));
                 return;
             }
 
@@ -398,7 +398,7 @@ class MindHLayoutSvc {
             };
             this.putExpBtn(ndsSet,nd,l,t,left, resultWrapper);
             this.putSubNds(startT, l - xDist, nd, ndsSet, left, resultWrapper);
-            startT += allHeight+globalStyleConfig.hlayout.nodePaddingTop;
+            startT += allHeight+parseInt(globalStyleConfig.hlayout.nodePaddingTop*(ndsSet.zoomRate??1));
             return;
         });
     }
@@ -580,15 +580,15 @@ class MindHLayoutSvc {
 
         //根节点->二级节点，连接线的纵向位置应该是中间->中间
         if(0===fromNd.lev){
-            r1.height=parseInt(r1.height/2);//+(globalStyleConfig.hlayout.nodePaddingTop/2);
+            r1.height=parseInt(r1.height/2);
             r1.bottom=r1.top+r1.height;
 
-            r2.height=parseInt(r2.height/2);//+(globalStyleConfig.hlayout.nodePaddingTop/2);
+            r2.height=parseInt(r2.height/2);
             r2.bottom=r2.top+r2.height;
         }
         //二级节点->三级节点，连接线的纵向位置应该是中间->下边
         if(1===fromNd.lev){
-            r1.height=parseInt(r1.height/2);//+(globalStyleConfig.hlayout.nodePaddingTop/2);
+            r1.height=parseInt(r1.height/2);
             r1.bottom=r1.top+r1.height;
         }
 

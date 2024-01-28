@@ -211,7 +211,7 @@ class MindDownLayoutSvc{
 
 
         // 子节点的样式，高度的起始位置为父节点的下面加上空白的距离
-        const subBeginTop= beginTop+resultWrapper.rects[nd.id].height+ndXDist;
+        const subBeginTop= beginTop+resultWrapper.rects[nd.id].height+parseInt(ndXDist*(ndsSet.zoomRate??1));
 
 
         if (nd.childs && 0 < nd.childs.length && ndsSet.expands[nd.id]) {
@@ -220,7 +220,7 @@ class MindDownLayoutSvc{
             // 如果子节点所占用的全部宽度比父节点本身宽度还小，则增加一些偏移量（宽度差的一半）
             let childSumW=0;
             for(let i=0;i<nd.childs.length;++i){
-                childSumW+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+(i>0 ? ndXDist : 0);
+                childSumW+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+(i>0 ? parseInt(ndXDist*(ndsSet.zoomRate??1)) : 0);
             }
             if(childSumW<selfW){
                 accuBeginLeft+=parseInt((selfW-childSumW)/2);
@@ -228,7 +228,7 @@ class MindDownLayoutSvc{
 
             for(let i=0;i<nd.childs.length;++i){
                 this.putNdsRecursively(nd.childs[i], ndsSet, resultWrapper, accuBeginLeft, subBeginTop);
-                accuBeginLeft+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+ndXDist;
+                accuBeginLeft+=this.getNdWidth(nd.childs[i], ndsSet, resultWrapper)+parseInt(ndXDist*(ndsSet.zoomRate??1));
             }
         }
     }
@@ -247,7 +247,7 @@ class MindDownLayoutSvc{
         //有子节点，取所有子节点的高度和，中间加上空白的距离
         let sumChildrenH = 0;
         nd.childs.forEach((child,ind) => {
-            sumChildrenH +=(0<ind?ndXDist:0)+ this.getNdWidth(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
+            sumChildrenH +=(0<ind?parseInt(ndXDist*(ndsSet.zoomRate??1)):0)+ this.getNdWidth(child,ndsSet,resultWrapper);//从第二个子节点开始，要加上空白的距离
         });
         return parseInt(Math.max(resultWrapper.rects[nd.id].width, sumChildrenH));
     }
