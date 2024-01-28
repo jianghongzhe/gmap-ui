@@ -462,6 +462,9 @@ export const useSaveMapPromise=()=>{
                 rej();
                 return;
             }
+
+            const originZoomRate= currPane.ds.zoomRate??1;
+
             //校验
             let valiResult = mindMapValidateSvc.validate(txt);
             if (true !== valiResult) {
@@ -486,7 +489,10 @@ export const useSaveMapPromise=()=>{
                 setCurrPane({
                     ...currPane,
                     mapTxts: originTxt,
-                    ds:ndsSet,
+                    ds:{
+                        ...ndsSet,
+                        zoomRate: originZoomRate,
+                    },
                     tags: tags??[],
                 });
                 res();
