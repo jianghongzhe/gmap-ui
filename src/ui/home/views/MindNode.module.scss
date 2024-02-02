@@ -30,15 +30,15 @@
     }
 
     .memoStyle {
-      font-size: 16px;
-      line-height: 16px;
+      font-size: calc(16px * var(--zoomRate,1));
+      line-height: calc(16px * var(--zoomRate,1));
       color: #faad14;
     }
 
     .progStyle {
       cursor: pointer;
       .progTxtStyle{
-        font-size: 12px;
+        font-size: calc(12px * var(--zoomRate,1));
       }
     }
 
@@ -67,15 +67,15 @@
 .themeBtnWrapper{
   :global{
     .themebtn {
-      width: 16px !important;
-      height: 16px !important;
+      width: calc(16px * var(--zoomRate,1)) !important;
+      height: calc(16px * var(--zoomRate,1)) !important;
       vertical-align: bottom;
       padding: 0 !important;
-      line-height: 16px;
+      line-height: calc(16px * var(--zoomRate,1));
 
       .themebtnicon{
-        font-size: 16px;
-        line-height: 16px;
+        font-size: calc(16px * var(--zoomRate,1));
+        line-height: calc(16px * var(--zoomRate,1));
         margin: 0;
         padding: 0;
         color: var(--color);

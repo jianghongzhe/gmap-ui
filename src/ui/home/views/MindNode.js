@@ -124,7 +124,7 @@ const MindNode=({nd,  onShowTimeline, onShowProgs, onOpenRef, onOpenLink, onNode
                     format={progressFormater.bind(this,nd.prog.st)}
                     className='progStyle node_part'
                     percent={nd.prog.err ? 100 : nd.prog.num} 
-                    width={progStyle.size} 
+                    width={parseInt(progStyle.size*zoomRate)}
                     status={nd.prog.st}
                     onClick={onShowProgs.bind(this,nd.prog.allProgs)}
                 />
